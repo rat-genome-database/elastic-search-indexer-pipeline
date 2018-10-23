@@ -1,0 +1,1044 @@
+package edu.mcw.rgd.indexer.dao;
+
+import edu.mcw.rgd.dao.DataSourceFactory;
+import edu.mcw.rgd.dao.impl.*;
+import edu.mcw.rgd.dao.spring.StringMapQuery;
+import edu.mcw.rgd.datamodel.*;
+
+import edu.mcw.rgd.datamodel.ontology.Annotation;
+import edu.mcw.rgd.datamodel.ontologyx.Term;
+import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
+import edu.mcw.rgd.datamodel.ontologyx.TermWithStats;
+import edu.mcw.rgd.indexer.AnnotationFormatter;
+import edu.mcw.rgd.indexer.model.*;
+import edu.mcw.rgd.indexer.model.genomeInfo.AssemblyInfo;
+import edu.mcw.rgd.indexer.model.genomeInfo.GeneCounts;
+import edu.mcw.rgd.indexer.model.genomeInfo.GenomeIndexObject;
+import edu.mcw.rgd.process.Utils;
+import org.apache.log4j.Logger;
+import org.jsoup.Jsoup;
+
+import java.sql.ResultSet;
+import java.util.*;
+import java.util.Map;
+
+/**
+ * Created by jthota on 3/23/2017.
+ */
+public class IndexDAO {
+
+    private GeneDAO geneDAO = new GeneDAO();
+    private StrainDAO strainDAO = new StrainDAO();
+    private QTLDAO qtlDAO = new QTLDAO();
+    private SSLPDAO sslpdao = new SSLPDAO();
+    private AnnotationDAO annotationDAO = new AnnotationDAO();
+    private XdbIdDAO xdbDAO = new XdbIdDAO();
+    private PhenominerDAO phenominerDAO = new PhenominerDAO();
+    private AliasDAO aliasDAO = new AliasDAO();
+    private MapDAO mapDAO = new MapDAO();
+    private TranscriptDAO transcriptDAO = new TranscriptDAO();
+    private AssociationDAO adao = new AssociationDAO();
+    private VariantInfoDAO vdao= new VariantInfoDAO();
+    private VariantDAO variantDAO= new VariantDAO();
+    private OntologyXDAO ontologyXDAO= new OntologyXDAO();
+    private ReferenceDAO referenceDAO=new ReferenceDAO();
+    private GenomeDAO genomeDAO=new GenomeDAO();
+
+    private GenomicElementDAO gedao= new GenomicElementDAO();
+    Logger log= Logger.getLogger("main");
+    public List<GenomeIndexObject> getGenomeInfo() throws Exception {
+        List<GenomeIndexObject> objects= new ArrayList<>();
+        for(int key : SpeciesType.getSpeciesTypeKeys()) {
+            //  int key=3;
+            if (key != 0) {
+             //   System.out.println("SPECIES TYPE KEY: " + key);
+                String species = SpeciesType.getCommonName(key);
+                List<edu.mcw.rgd.datamodel.Map> maps = mapDAO.getMaps(key);
+                for (edu.mcw.rgd.datamodel.Map m : maps) {
+
+                    GenomeIndexObject obj = new GenomeIndexObject();
+                    obj.setSpecies(species);
+                    AssemblyInfo info = new AssemblyInfo();
+                    info = genomeDAO.getAssemblyInfo(key, m.getKey());
+                    //    info=genomeDAO.getAssemblyInfo(3, 70);
+                    obj.setBasePairs(info.getBasePairs());
+                    obj.setTotalLength(info.getTotalLength());
+                    obj.setGapLength(info.getGapLength());
+                    obj.setGapBetweenScaffolds(info.getGapBetweenScaffolds());
+                    obj.setScaffolds(info.getScaffolds());
+                    obj.setScaffoldN50(info.getScaffoldN50());
+                    obj.setScaffoldL50(info.getScaffoldL50());
+                    obj.setContigs(info.getContigs());
+                    obj.setContigN50(info.getContigN50());
+                    obj.setContigL50(info.getContigL50());
+                    obj.setChromosomes(info.getChromosome());
+                    obj.setNcbiLink(info.getNcbiLink());
+                    obj.setRefSeqAssemblyAccession(info.getRefSeqAssemblyAccession());
+                    obj.setMapKey(m.getKey());
+                    //      obj.setMapKey(70);
+
+                    GeneCounts geneCounts = new GeneCounts();
+                    geneCounts = genomeDAO.getGeneCounts(m.getKey(), key, null);
+                    // geneCounts= genomeDAO.getGeneCounts(70);
+                    obj.setTotalGenes(geneCounts.getTotalGenes());
+                    obj.setProteinCoding(geneCounts.getProteinCoding());
+                    obj.setNcrna(geneCounts.getNcrna());
+                    obj.settRna(geneCounts.gettRna());
+                    obj.setSnRna(geneCounts.getSnRna());
+                    obj.setrRna(geneCounts.getrRna());
+                    obj.setPseudo(geneCounts.getPseudo());
+                    obj.setTranscripts(geneCounts.getTranscripts());
+
+                    Map<String, Integer> mirnaTargets = geneCounts.getMirnaTargets();
+                    for (Map.Entry entry : mirnaTargets.entrySet()) {
+                        String targetType = (String) entry.getKey();
+                        int value = (int) entry.getValue();
+                        if (targetType.equalsIgnoreCase("confirmed")) {
+                            obj.setMirnaTargetsConfirmed(value);
+                        }
+                        if (targetType.equalsIgnoreCase("predicted")) {
+                            obj.setMirnaTargetsPredicted(value);
+                        }
+                    }
+                    objects.add(obj);
+                }
+
+            }
+        }
+     //   System.out.println("GENOMEINFO OBJECTS SIZE: "+ objects.size());
+
+        return objects;
+    }
+
+
+    public List<IndexObject> getGenes() throws Exception {
+
+        List<IndexObject> objList = new ArrayList<>();
+        List<Gene> genes= geneDAO.getAllActiveGenes();
+
+      for(Gene gene: genes) {
+         //  Gene gene= geneDAO.getGene(2004);
+
+           IndexObject obj = new IndexObject();
+            int rgdId=gene.getRgdId();
+            String symbol=gene.getSymbol();
+            String name=gene.getName();
+            String htmlStrippedSymbol= Jsoup.parse(symbol).text();
+            String description= Utils.getGeneDescription(gene);
+          int speciesKey=gene.getSpeciesTypeKey();
+            String species=SpeciesType.getCommonName(speciesKey);
+          String type=gene.getType();
+
+            obj.setTerm_acc(String.valueOf(rgdId));
+            obj.setSymbol(symbol);
+            obj.setHtmlStrippedSymbol(htmlStrippedSymbol);
+            obj.setDescription(description);
+            obj.setSpecies(species);
+            obj.setType(type);
+            obj.setCategory("Gene");
+            obj.setName(name);
+
+            List<AliasData> aliases = this.getAliases(gene.getRgdId());
+            List<String> synonyms = new ArrayList<>();
+            for (AliasData a : aliases) {
+                synonyms.add(a.getAlias_name());
+            }
+            obj.setSynonyms(synonyms);
+            obj.setXdbIdentifiers(this.getExternalIdentifiers(rgdId));
+            obj.setPromoters(this.getPromotersByGeneRgdId(rgdId));
+            obj.setMapDataList(this.getMapData(rgdId));
+            obj.setTranscriptIds(this.getTranscriptIds(rgdId));
+            obj.setProtein_acc_ids(this.getTranscriptProteinIds(rgdId));
+            obj.setAnnotationsCount(this.getAnnotsCount(rgdId));
+            obj.setSuggest(this.getSuggest(symbol, null, "gene"));
+            objList.add(obj);
+
+     }
+
+        return objList;
+    }
+    public int getAnnotsCount(int rgdId) throws Exception {
+       List<Annotation> annots= annotationDAO.getAnnotations(rgdId);
+        return annots.size();
+    }
+    public boolean containsId(List<Annotation> annots, String term_acc){
+        for(Annotation a:annots){
+            if(a.getTermAcc().equals(term_acc)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public List<String> getTranscriptIds(int rgdId) throws Exception {
+        List<Transcript> transcripts = transcriptDAO.getTranscriptsForGene(rgdId);
+        List<String> tlist= new ArrayList<>();
+        for(Transcript tr: transcripts){
+           tlist.add(tr.getAccId());
+
+        }
+        return tlist;
+    }
+    public List<String> getTranscriptProteinIds(int rgdId) throws Exception {
+        List<Transcript> transcripts = transcriptDAO.getTranscriptsForGene(rgdId);
+        List<String> tlist= new ArrayList<>();
+        for(Transcript tr: transcripts){
+            tlist.add(tr.getProteinAccId());
+
+        }
+        return tlist;
+    }
+    public List<TranscriptData> getTranscripts(int rgdId) throws Exception {
+        List<Transcript> transcripts = transcriptDAO.getTranscriptsForGene(rgdId);
+        List<TranscriptData> tlist= new ArrayList<>();
+        for(Transcript tr: transcripts){
+            TranscriptData t= new TranscriptData();
+            t.setTranscript_id(tr.getRgdId());
+            t.setProtein_acc_id(tr.getProteinAccId());
+            t.setTr_acc_id(tr.getAccId());
+            tlist.add(t);
+        }
+
+        return tlist;
+    }
+    public List<String> getAnnotations(java.util.Map<String, List<Annotation>> annotMap, String annotType, String object) throws Exception {
+        List<String> annotations= new ArrayList<>();
+        switch(annotType.toLowerCase()){
+            case "disease":
+
+                for(java.util.Map.Entry e:  annotMap.entrySet()){
+                    String key= (String) e.getKey();
+                    List<Annotation> annots= (List<Annotation>) e.getValue();
+
+                    if(key.equalsIgnoreCase("ClinVar")||key.equalsIgnoreCase("CTD")||key.equalsIgnoreCase("OMIM")
+                            ||key.equalsIgnoreCase("GAD")||key.equalsIgnoreCase("ManualDisease")){
+
+                        annotations.addAll(this.getAnnotatedObjects(annots, "Disease",object));
+                    }
+
+                }
+
+                break;
+
+            case "gene_chem":
+
+                for(java.util.Map.Entry e:  annotMap.entrySet()){
+                    String key= (String) e.getKey();
+                    if(key.equalsIgnoreCase("gene_chem")){
+                        List<Annotation> annots= (List<Annotation>) e.getValue();
+                        annotations.addAll(this.getAnnotatedObjects(annots, "Gene Chem", object));
+                    }
+                }
+                break;
+            case "bp":
+                for(java.util.Map.Entry e:  annotMap.entrySet()){
+                    String key= (String) e.getKey();
+                    if(key.equalsIgnoreCase("bp")){
+                        List<Annotation> annots= (List<Annotation>) e.getValue();
+                        annotations.addAll(this.getAnnotatedObjects(annots, "Biological Process", object));
+                    }
+                }
+                break;
+            case "cc":
+                for(java.util.Map.Entry e:  annotMap.entrySet()){
+                    String key= (String) e.getKey();
+                    if(key.equalsIgnoreCase("cc")){
+                        List<Annotation> annots= (List<Annotation>) e.getValue();
+                        annotations.addAll(this.getAnnotatedObjects(annots, "Cellular Component",object));
+                    }
+                }
+                break;
+            case "mf":
+                for(java.util.Map.Entry e:  annotMap.entrySet()){
+                    String key= (String) e.getKey();
+                    if(key.equalsIgnoreCase("mf")){
+                        List<Annotation> annots= (List<Annotation>) e.getValue();
+                        annotations.addAll(this.getAnnotatedObjects(annots, "Molecular Function", object));
+                    }
+                }
+                break;
+            case "pw":
+                for(java.util.Map.Entry e:  annotMap.entrySet()){
+                    String key= (String) e.getKey();
+                    if(key.equalsIgnoreCase("rgd")||key.equalsIgnoreCase("smpdb")||key.equalsIgnoreCase("kegg")||key.equalsIgnoreCase("pid")||key.equalsIgnoreCase("otherPW")){
+                        List<Annotation> annots= (List<Annotation>) e.getValue();
+                        annotations.addAll(this.getAnnotatedObjects(annots, "Pathway",object));
+                    }
+                }
+                break;
+            case "phenotype":
+                for(java.util.Map.Entry e:  annotMap.entrySet()){
+                    String key= (String) e.getKey();
+                    if(key.equalsIgnoreCase("mammalian phenotype")||key.equalsIgnoreCase("hp")){
+                        List<Annotation> annots= (List<Annotation>) e.getValue();
+                        annotations.addAll(this.getAnnotatedObjects(annots, "Phenotype",object));
+                    }
+                }
+                break;
+            case "xdata":
+
+                for(java.util.Map.Entry e:  annotMap.entrySet()){
+                    String key= (String) e.getKey();
+
+                    if(key.equalsIgnoreCase("co")||key.equalsIgnoreCase("cmo")||key.equalsIgnoreCase("xco")||key.equalsIgnoreCase("mmo")||key.equalsIgnoreCase("ma")||key.equalsIgnoreCase("rs")||key.equalsIgnoreCase("vt")){
+
+                        List<Annotation> annots= (List<Annotation>) e.getValue();
+                        annotations.addAll(this.getAnnotatedObjects(annots, "Experiemntal Data", object));
+                    }
+
+                }
+                break;
+
+        }
+
+        return annotations;
+    }
+    public List<String> getAnnotatedObjects(List<Annotation> annots, String annotType, String object) throws Exception {
+        List<String> annotations= new ArrayList<>();
+        for(Annotation a:annots){
+               annotations.add(a.getTerm());
+
+            List<TermSynonym> term_synms=ontologyXDAO.getTermSynonyms(a.getTermAcc());
+
+            for(TermSynonym s:term_synms){
+                annotations.add(s.getName());
+            }
+
+    } return annotations;}
+
+
+    public List<IndexObject> getStrains() throws Exception{
+
+        List<IndexObject> objList= new ArrayList<>();
+        //  Strain strain=strainDAO.getStrain(7248453);
+        List<Strain> strains= strainDAO.getActiveStrains();
+        for(Strain strain: strains){
+            IndexObject s= new IndexObject();
+            String symbol=strain.getSymbol();
+            String source= strain.getSource();
+            String origin= strain.getOrigin();
+            String strainTypeName= strain.getStrainTypeName();
+            String name= strain.getName();
+
+            int rgdId= strain.getRgdId();
+            int speciesTypeKey= strain.getSpeciesTypeKey();
+
+            String species=SpeciesType.getCommonName(speciesTypeKey);
+            s.setSpecies(species);
+            if(rgdId==60985){
+            System.out.println(species + "||" +speciesTypeKey);
+            }
+            s.setTerm_acc(String.valueOf(rgdId));
+            s.setSymbol(symbol);
+            s.setSource(source);
+            s.setOrigin(origin);
+            s.setType(strainTypeName);
+            s.setName(name);
+
+            String htmlStrippedSymbol= Jsoup.parse(symbol).text();
+            s.setHtmlStrippedSymbol(htmlStrippedSymbol);
+            s.setSuggest(this.getSuggest(symbol, null, "strain"));
+
+
+            List<AliasData> aliases=this.getAliases(rgdId);
+            List<String> synonyms = new ArrayList<>();
+            for (AliasData a : aliases) {
+                synonyms.add(a.getAlias_name());
+            }
+
+            s.setSynonyms(synonyms);
+            s.setXdbIdentifiers(this.getExternalIdentifiers(rgdId));
+            s.setCategory("Strain");
+
+
+            s.setExperimentRecordCount(this.getExperimentRecordCount(rgdId, "S"));
+            s.setSampleExists(this.sampleExists(rgdId, 600));
+            s.setMapDataList(this.getMapData(rgdId));
+            s.setAnnotationsCount(this.getAnnotsCount(rgdId));
+            objList.add(s);
+
+        }
+        return objList;
+    }
+
+    public Suggest getSuggest(String symbol, String name, String category ){
+        List<String> input= new ArrayList<>();
+
+        Suggest sugg= new Suggest();
+        if(symbol!=null)
+            input.add(symbol);
+        if(name!=null)
+            input.add(name);
+        sugg.setInput(input);
+
+        Contexts contexts= new Contexts();
+        contexts.setCategory(new ArrayList<String>(Arrays.asList(category)));
+
+        sugg.setContexts(contexts);
+        return sugg;
+    }
+    public List<Annotation> getFilteredAnnotations(int rgdid) throws Exception {
+        java.util.Map<String, List<Annotation>> annotMap= this.getAnnotations(rgdid);
+        List<Annotation> distinctAnnots= new ArrayList<>();
+        for(Map.Entry e: annotMap.entrySet()){
+            List<Annotation> annots= (List<Annotation>) e.getValue();
+            for(Annotation a:annots){
+                if(!containsId(distinctAnnots, a.getTermAcc())){
+                    distinctAnnots.add(a);
+                }
+            }
+
+        }
+        return distinctAnnots;
+    }
+    public int sampleExists(int strainRgdid, int patient_id) throws Exception {
+        SampleDAO sampleDAO= new SampleDAO();
+        sampleDAO.setDataSource(DataSourceFactory.getInstance().getCarpeNovoDataSource());
+      Sample s=  sampleDAO.getSampleByStrainRgdId(strainRgdid, patient_id);
+        if(s!=null){
+
+            return 1;
+        }else{
+            return 0;
+        }
+    }
+    public int getExperimentRecordCount(int rgdid, String aspect) throws Exception {
+        AnnotationDAO annotationDAO=new AnnotationDAO();
+        PhenominerDAO phenominerDAO=new PhenominerDAO();
+        List<Annotation> annotations=annotationDAO.getAnnotationsByAspect(rgdid, aspect);
+        int recordCount=0;
+        for(Annotation a:annotations){
+
+            String term_acc= a.getTermAcc();
+            recordCount=recordCount+phenominerDAO.getRecordCountForTerm(term_acc);
+
+
+        }
+        return recordCount;
+    }
+
+    public List<IndexObject> getQtls() throws Exception{
+        List<IndexObject> objList= new ArrayList<>();
+
+        for(QTL qtl: qtlDAO.getActiveQTLs()){
+            // QTL qtl= qtlDAO.getQTL(61368);
+           IndexObject q= new IndexObject();
+            String symbol=qtl.getSymbol();
+            String name= qtl.getName();
+            int rgdId=qtl.getRgdId();
+            int key=qtl.getSpeciesTypeKey();
+            String species=SpeciesType.getCommonName(key);
+            String htmlStrippedSymbol= Jsoup.parse(symbol).text();
+
+            q.setTerm_acc(String.valueOf(rgdId));
+            q.setSymbol(symbol);
+            q.setTrait(this.getTraitSubTrait(qtl.getRgdId(),"V" ));
+            q.setSubTrait(this.getTraitSubTrait(qtl.getRgdId(), "L"));
+            q.setSymbol(htmlStrippedSymbol);
+            q.setName(name);
+            q.setSpecies(species);
+            q.setSuggest(this.getSuggest(symbol, null, "qtl"));
+
+
+            List<AliasData> aliases= this.getAliases(rgdId);
+            List<String> synonyms= new ArrayList<>();
+            for(AliasData a: aliases){
+                synonyms.add(a.getAlias_name());
+            }
+            Map<String, List<Annotation>> annotMap= this.getAnnotations(rgdId);
+            q.setXdata(this.getAnnotations(annotMap, "xdata", "qtl"));
+            q.setSynonyms(synonyms);
+            q.setXdbIdentifiers(this.getExternalIdentifiers(rgdId));
+            q.setCategory("QTL");
+            q.setMapDataList(this.getMapData(rgdId));
+            q.setAnnotationsCount(this.getAnnotsCount(rgdId));
+            objList.add(q);
+
+        }
+        Collections.sort(objList, new Comparator<IndexObject>() {
+            @Override
+            public int compare(IndexObject o1, IndexObject o2) {
+                Utils.stringsCompareToIgnoreCase(o1.getSymbol(), o2.getSymbol());
+                return 0;
+            }
+        });
+        return objList;
+
+    }
+    public String getTraitSubTrait(int rgdid, String aspect) throws Exception {
+        NotesDAO notesDAO = new NotesDAO();
+        String notesString=new String();
+        if(aspect.equalsIgnoreCase("v")){
+            notesString="qtl_trait";
+        }
+        if(aspect.equalsIgnoreCase("l")){
+            notesString="qtl_subtrait";
+        }
+        String traitTerm = null;
+        for( StringMapQuery.MapPair pair: annotationDAO.getAnnotationTermAccIds(rgdid, aspect) ) {
+            traitTerm = pair.stringValue+" ("+pair.keyValue+")";
+        }
+
+        if( traitTerm==null ) {
+            List<Note> notes = notesDAO.getNotes(rgdid, notesString);
+            if( !notes.isEmpty() ) {
+                traitTerm = notes.get(0).getNotes();
+            }
+        }
+
+
+        return traitTerm;
+    }
+    public List<IndexObject> getSslps() throws Exception{
+        List<IndexObject> objList= new ArrayList<>();
+
+        for(SSLP sslp: sslpdao.getActiveSSLPs()){
+            //  SSLP sslp= sslpdao.getSSLP(37320);
+
+
+            IndexObject slp= new IndexObject();
+            int rgdId= sslp.getRgdId();
+            String name= sslp.getName();
+            slp.setTerm_acc(String.valueOf(rgdId));
+            slp.setSymbol(sslp.getName());
+            slp.setSuggest(this.getSuggest(name, null, "sslp"));
+
+
+            List<AliasData> aliases= this.getAliases(rgdId);
+            List<String> synonyms= new ArrayList<>();
+            for(AliasData a: aliases){
+                synonyms.add(a.getAlias_name());
+            }
+            slp.setSynonyms(synonyms);
+            slp.setXdbIdentifiers(this.getExternalIdentifiers(rgdId));
+            slp.setCategory("SSLP");
+            int speciesTypeKey= sslp.getSpeciesTypeKey();
+            String species=SpeciesType.getCommonName(speciesTypeKey);
+            slp.setSpecies(species);
+            slp.setMapDataList(this.getMapData(rgdId));
+            slp.setAnnotationsCount(this.getAnnotsCount(rgdId));
+            objList.add(slp);
+
+        }
+
+        return objList;
+
+    }
+
+    public List<IndexObject> getGenomicElements() throws Exception{
+        List<IndexObject> objList= new ArrayList<>();
+        System.out.println("Genomic Elements started.....");
+        objList.addAll(this.getGenomicElements(RgdId.OBJECT_KEY_CELL_LINES));
+        objList.addAll(this.getGenomicElements(RgdId.OBJECT_KEY_PROMOTERS));
+
+        return objList;
+
+            }
+    public List<IndexObject> getGenomicElements(int objectKey) throws Exception {
+        List<IndexObject> objList= new ArrayList<>();
+        String category=new String();
+        if(objectKey==11){
+            category="Cell line";
+        }
+        if(objectKey==16){
+            category="Promoter";
+        }
+       for(GenomicElement ge: gedao.getActiveElements(objectKey)){
+         //      GenomicElement ge= gedao.getElement(10053741);
+            IndexObject g= new IndexObject();
+            int rgdId=ge.getRgdId();
+            String symbol=ge.getSymbol();
+            int speciesTypeKey=ge.getSpeciesTypeKey();
+            String species=SpeciesType.getCommonName(speciesTypeKey);
+            g.setSpecies(species);
+            g.setTerm_acc(String.valueOf(rgdId));
+            g.setSymbol(symbol);
+            g.setCategory(category);
+            g.setSuggest(this.getSuggest(symbol, null, category.toLowerCase()));
+            List<AliasData> aliases= this.getAliases(rgdId);
+            List<String> synonyms= new ArrayList<>();
+            for(AliasData a: aliases){
+                synonyms.add(a.getAlias_name());
+            }
+            g.setSynonyms(synonyms);
+            g.setXdbIdentifiers(this.getExternalIdentifiers(rgdId));
+            if(species==null || species.equals("")){
+                System.out.println(symbol+"\t"+ rgdId);
+                log.info(symbol+"\t"+rgdId);
+            }
+
+            g.setAnnotationsCount(this.getAnnotsCount(rgdId));
+            objList.add(g);
+
+        }
+        return objList;
+    }
+    public List<IndexObject> getVariants() throws Exception{
+        List<IndexObject> objList= new ArrayList<>();
+
+        for(VariantInfo obj: vdao.getVariantsBySource("CLINVAR")){
+            //  VariantInfo obj= vdao.getVariant(8554914);
+            IndexObject v= new IndexObject();
+            int rgdId=obj.getRgdId();
+            String symbol= obj.getSymbol();
+            int speciesTypeKey=obj.getSpeciesTypeKey();
+            String species=(SpeciesType.getCommonName(speciesTypeKey));
+            Term term= ontologyXDAO.getTermByAccId(obj.getSoAccId());
+            List<AliasData> aliasDatas=this.getAliases(rgdId);
+            List<String> synonyms= new ArrayList<>();
+            v.setSpecies(species);
+            v.setSymbol(symbol);
+            v.setTerm_acc(String.valueOf(rgdId));
+            if(term!=null)
+                v.setType(term.getTerm());
+            v.setName(obj.getName());
+            v.setTrait(obj.getTraitName());
+            v.setCategory("Variant");
+            v.setSuggest(this.getSuggest(symbol, null, "variant"));
+
+
+            for(AliasData a:aliasDatas){
+                synonyms.add(a.getAlias_name());
+
+            }
+
+            v.setSynonyms(synonyms);
+            v.setXdbIdentifiers(this.getExternalIdentifiers(rgdId));
+
+            v.setMapDataList(this.getMapData(obj.getRgdId()));
+            v.setAnnotationsCount(this.getAnnotsCount(rgdId));
+            objList.add(v);
+        }
+
+
+        return objList;
+
+    }
+
+    public List<RefObject> getReference() throws Exception{
+
+        List<RefObject> objList= new ArrayList<>();
+        for(Reference ref: referenceDAO.getActiveReferences()){
+            // Reference ref=referenceDAO.getReference(1004);
+            int rgdId= ref.getRgdId();
+            RefObject r= new RefObject();
+            r.setTerm_acc(String.valueOf(rgdId));
+            r.setCitation(ref.getCitation());
+            r.setTitle(ref.getTitle());
+            List<String> authors=this.getAuthors(ref.getKey());
+            r.setAuthor(authors);
+
+            List<String> input= new ArrayList<>();
+            Suggest sugg= new Suggest();
+            if(authors!=null)
+                input.addAll(authors);
+            if(ref.getTitle()!=null)
+                input.add(ref.getTitle());
+            sugg.setInput(input);
+
+            Contexts contexts= new Contexts();
+            contexts.setCategory(new ArrayList<String>(Arrays.asList("reference")));
+
+            sugg.setContexts(contexts);
+            r.setSuggest(sugg);
+            r.setCategory("Reference");
+            int speciesTypeKey=ref.getSpeciesTypeKey();
+            String species=SpeciesType.getCommonName(speciesTypeKey);
+            r.setSpecies(species);
+            List<AliasData> alist= this.getAliases(rgdId);
+            r.setAliasDatas(alist);
+            r.setRefAbstract(ref.getRefAbstract());
+            List<String> synonyms= new ArrayList<>();
+
+            for(AliasData a:alist ){
+                synonyms.add(a.getAlias_name());
+            }
+            List<String> xids=this.getExternalIdentifiers(rgdId);
+
+            r.setXdbIdentifiers(xids);
+            if(ref.getPubDate()!=null)
+                r.setPub_year(Integer.toString(ref.getPubDate().getYear()+1900));
+            objList.add(r);
+        }
+
+        return objList;
+    }
+
+    public List<String> getAuthors(int refkey) throws Exception {
+        List<String> authors= new ArrayList<>();
+        for(Author author:referenceDAO.getAuthors(refkey)){
+            authors.add(author.getLastName() + " " + author.getFirstName());
+        }
+
+        return authors;
+    }
+
+     public int[][] getAnnotsMatrix(TermWithStats termWithStats) throws Exception {
+
+
+        int[][] annotsMatrix =new int[4][7];
+
+        List<SpeciesObject> speciesObjects=this.getSpeicesObjects(termWithStats);
+        int k=0;
+        for(SpeciesObject s:speciesObjects){
+
+            String species=s.getName().toLowerCase();
+
+            if(species.equals("rat"))k=0;
+            if(species.equals("human"))k=1;
+            if(species.equals("mouse"))k=2;
+            if(species.equals("chinchilla"))k=3;
+            if(species.equals("dog"))k=4;
+            if(species.equals("bonobo"))k=5;
+            if(species.equals("squirrel"))k=6;
+
+            annotsMatrix[0][k]=s.getGeneCount();
+            annotsMatrix[1][k]=s.getStrainCount();
+            annotsMatrix[2][k]=s.getQtlCount();
+            annotsMatrix[3][k]=s.getVariantCount();
+        }
+
+        return annotsMatrix;
+    }
+    /***************************************************************************************************/
+
+    public List<SpeciesObject> getSpeicesObjects(TermWithStats termWithStats) throws Exception {
+        List<SpeciesObject> sList= new ArrayList<>();
+        List<Integer> speciesTypeKeys=new ArrayList<>(Arrays.asList(1,2,3,4,5,6,7));
+        List<Integer> objectKeys= new ArrayList<>(Arrays.asList(1,5,6,7));
+        for(int skey:speciesTypeKeys){
+            SpeciesObject s= new SpeciesObject();
+            String species=SpeciesType.getCommonName(skey);
+            s.setName(species);
+            int count=0;
+            for(int okey:objectKeys){
+
+                 count=termWithStats.getStat("annotated_object_count",skey, okey, 1,null );
+
+                if(okey==1) s.setGeneCount(count);
+                if(okey==5) s.setStrainCount(count);
+                if(okey==6) s.setQtlCount(count);
+                if(okey==7) s.setVariantCount(count);
+
+            }
+            sList.add(s);
+        }
+        return sList;
+    }
+    /*************************************************************************************************/
+
+    public Collection[] split(List<IndexObject> objs, int size) throws Exception{
+        int numOfBatches=(objs.size()/size)+1;
+        Collection[] batches= new Collection[numOfBatches];
+        for(int index=0; index<numOfBatches; index++){
+            int count=index+1;
+            int fromIndex=Math.max(((count-1)*size),0);
+            int toIndex=Math.min((count*size), objs.size());
+            batches[index]= objs.subList(fromIndex, toIndex);
+        }
+        return batches;
+    }
+
+    public List<Annotation> getAnnotations(String term_acc) throws Exception {
+        AnnotationDAO annotationDAO= new AnnotationDAO();
+        List<Annotation> annots= annotationDAO.getAnnotations(term_acc);
+        List<Annotation> filteredAnnots=new ArrayList<>();
+        for(Annotation a: annots){
+            if(!containsAnnotatedRgdId(filteredAnnots, a.getAnnotatedObjectRgdId())){
+                filteredAnnots.add(a);
+            }
+        }
+
+        return filteredAnnots;
+    }
+    public boolean containsAnnotatedRgdId(List<Annotation> filteredAnnots, int annotated_object_rgd_id){
+        for(Annotation a:filteredAnnots){
+            if(a.getAnnotatedObjectRgdId()==annotated_object_rgd_id){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public List<String> getTermSynonyms(List<TermSynonym> synonyms, String acc_id) throws Exception{
+       List<String> synonymList= new ArrayList<>();
+
+        List<TermSynonym> termSynonyms=ontologyXDAO.getTermSynonyms(acc_id);
+        for(TermSynonym s:termSynonyms){
+           synonymList.add(s.getName());
+        }
+        return synonymList;
+    }
+
+    public List<String> getTermSynonyms(String acc_id) throws Exception{
+        List<String> synonymList= new ArrayList<>();
+
+        List<TermSynonym> termSynonyms=ontologyXDAO.getTermSynonyms(acc_id);
+        for(TermSynonym s:termSynonyms){
+            synonymList.add(s.getName());
+        }
+        return synonymList;
+    }
+
+    public List<AliasData> getAliases(int rgdid) throws Exception {
+        List<Alias> aliases=new ArrayList<>();
+        aliases=aliasDAO.getAliases(rgdid);
+        List<AliasData> aList= new ArrayList<>();
+        if (aliases.size() > 0) {
+            for(Alias a: aliases){
+                AliasData ad= new AliasData();
+                ad.setAlias_name(a.getValue());;
+                ad.setAlias_type(a.getTypeName());
+                aList.add(ad);
+            }
+        }
+        return aList;
+    }
+
+    public List<MapInfo> getMapData(int rgdId) throws Exception {
+        List<MapData> mapData = mapDAO.getMapData(rgdId);
+        List<MapInfo> mapList= new ArrayList<>();
+        for(MapData m: mapData){
+            MapInfo map= new MapInfo();
+            map.setChromosome(m.getChromosome());
+            map.setStartPos(m.getStartPos());
+            map.setStopPos(m.getStopPos());
+            map.setMap(this.getMapofMapkey(m.getMapKey()));
+            mapList.add(map);
+        }
+        return mapList;
+    }
+    public String getMapofMapkey(int mapkey) throws Exception {
+
+        MapDAO mapDAO = new MapDAO();
+        edu.mcw.rgd.datamodel.Map m = mapDAO.getMapByKey(mapkey);
+        return m.getDescription();
+
+    }
+
+
+
+
+    public java.util.Map<String, List<Annotation>> getAnnotations(int rgdId) throws Exception {
+
+        java.util.Map<String, List<Annotation>> annotMap = new HashMap<>();
+        List<Annotation> annotList = annotationDAO.getAnnotations(rgdId);
+
+        int isReferenceRgd = 0;
+
+        if (annotList.isEmpty()) {
+            annotList = annotationDAO.getAnnotationsByReference(rgdId);
+            if (annotList.size() > 0) {
+                isReferenceRgd = 1;
+            }
+        }
+
+        boolean hasPhenoMinerAnn = (annotationDAO.getPhenoAnnotationsCountByReference(rgdId) > 0);
+        AnnotationFormatter af = new AnnotationFormatter();
+        List<Annotation> filteredList = af.filterList(annotList, "D");
+        if (filteredList.size() > 0) {
+            // split annotations into 5 buckets
+            List<Annotation> listClinVar = new ArrayList<>(filteredList.size());
+            List<Annotation> listCTD = new ArrayList<>(filteredList.size());
+            List<Annotation> listOmim = new ArrayList<>(filteredList.size());
+            List<Annotation> listGAD = new ArrayList<>(filteredList.size());
+            List<Annotation> listManual = new ArrayList<>(filteredList.size());
+
+            for (Annotation ax : filteredList) {
+                switch (ax.getDataSrc()) {
+                    case "ClinVar":
+                        listClinVar.add(ax);
+
+                        break;
+                    case "CTD":
+                        listCTD.add(ax);
+
+                        break;
+                    case "OMIM":
+                        listOmim.add(ax);
+
+                        break;
+                    case "GAD":
+                        listGAD.add(ax);
+
+                        break;
+                    default:
+                        listManual.add(ax);
+
+                        break;
+                }
+            }
+            annotMap.put("ClinVar", listClinVar);
+            annotMap.put("CTD", listCTD);
+            annotMap.put("OMIM", listOmim);
+            annotMap.put("GAD", listGAD);
+            annotMap.put("ManualDisease", listManual);
+
+
+        }
+        filteredList = af.filterList(annotList, "E");
+        if (filteredList.size() > 0) {
+            annotMap.put("Gene_chem", filteredList);
+        }
+        List<Annotation> bpList = af.filterList(annotList, "P");
+        List<Annotation> ccList = af.filterList(annotList, "C");
+        List<Annotation> mfList = af.filterList(annotList, "F");
+        if ((bpList.size() + ccList.size() + mfList.size()) > 0) {
+            if (bpList.size() > 0) {
+                annotMap.put("BP", bpList);
+
+            }
+            if (ccList.size() > 0) {
+                annotMap.put("CC", ccList);
+
+            }
+            if (mfList.size() > 0) {
+                annotMap.put("MF", mfList);
+
+            }
+        }
+        List<XdbId> xdbKeggPathways = xdbDAO.getXdbIdsByRgdId(XdbId.XDB_KEY_KEGGPATHWAY, rgdId);
+        filteredList = af.filterList(annotList, "W");
+        if (!filteredList.isEmpty() || xdbKeggPathways.size() > 0) {
+            // split annotations into buckets
+            List<Annotation> listManual = new ArrayList<Annotation>(filteredList.size());
+            List<Annotation> listImportedPID = new ArrayList<Annotation>(filteredList.size());
+            List<Annotation> listImportedKEGG = new ArrayList<Annotation>(filteredList.size());
+            List<Annotation> listImportedSMPDB = new ArrayList<Annotation>(filteredList.size());
+            List<Annotation> listImported = new ArrayList<Annotation>(filteredList.size());
+
+            for (Annotation ax : filteredList) {
+                if (Utils.stringsAreEqual(ax.getDataSrc(), "RGD")) {
+                    listManual.add(ax);
+                } else if (Utils.stringsAreEqual(ax.getDataSrc(), "SMPDB")) {
+                    listImportedSMPDB.add(ax);
+                } else if (Utils.stringsAreEqual(ax.getDataSrc(), "KEGG")) {
+                    listImportedKEGG.add(ax);
+                } else if (Utils.stringsAreEqual(ax.getDataSrc(), "PID")) {
+                    listImportedPID.add(ax);
+                } else {
+                    listImported.add(ax);
+                }
+            }
+            annotMap.put("RGD", listManual);
+            annotMap.put("SMPDB", listImportedSMPDB);
+            annotMap.put("KEGG", listImportedKEGG);
+            annotMap.put("PID", listImportedPID);
+            annotMap.put("otherPW", listImported);
+
+
+
+        }
+        List<Annotation> mpList = af.filterList(annotList, "N");
+        List<Annotation> hpList = af.filterList(annotList, "H");
+        if (mpList.size() + hpList.size() > 0) {
+            if (mpList.size() > 0) {
+                annotMap.put("Mammalian Phenotype", mpList);
+
+            }
+            if (hpList.size() > 0) {
+                annotMap.put("HP", hpList);
+
+            }
+        }
+        List<Annotation> maList = af.filterList(annotList, "A");
+        List<Annotation> clList = af.filterList(annotList, "O");
+        List<Annotation> vtList = af.filterList(annotList, "V");
+        List<Annotation> rsList = af.filterList(annotList, "S");
+        List<Annotation> cmoList = af.filterList(annotList, "L");
+        List<Annotation> mmoList = af.filterList(annotList, "M");
+        List<Annotation> xcoList = af.filterList(annotList, "X");
+
+        int rgdid = phenominerDAO.getNumOfRecords(rgdId);
+
+        if (((clList.size() + vtList.size() + cmoList.size() + mmoList.size() + xcoList.size() > 0) && (isReferenceRgd == 0)) ||
+                ((isReferenceRgd == 1) && (rgdid > 0)) || hasPhenoMinerAnn) {
+            annotMap.put("CO", clList);
+            annotMap.put("CMO", cmoList);
+            annotMap.put("XCO", xcoList);
+            annotMap.put("MMO", mmoList);
+            annotMap.put("MA", maList);
+            annotMap.put("RS", rsList);
+            annotMap.put("VT", vtList);
+
+        }
+        return annotMap;
+    }
+
+    public List<String> getPromotersByGeneRgdId(int rgdId) throws Exception {
+        GenomicElementDAO gdao = new GenomicElementDAO();
+        List<String> symbols = new ArrayList<>();
+        List<Association> associations = adao.getAssociationsForDetailRgdId(rgdId, "promoter_to_gene");
+        for (Association a : associations) {
+            int mRgdId = a.getMasterRgdId();
+            GenomicElement g = gdao.getElement(mRgdId);
+            symbols.add(g.getSymbol());
+        }
+        return symbols;
+    }
+    public  List<String> getExternalIdentifiers(int rgdId) throws Exception {
+
+        Set<String> idTypes = new HashSet<>();
+        List<String> xIds=new ArrayList<>();
+        ResultSet rs = xdbDAO.getExternalIdsResultSet(rgdId);
+        ExternalIdentifierXRef xref;
+        while( (xref=xdbDAO.getNextExternalIdentifierXRef(rs))!=null ) {
+
+            // limit processed xdb ids only to genes, sslps, qtls, strains and references
+            if( !xref.getObjectType().equals("GENES") &&
+                    !xref.getObjectType().equals("SSLPS") &&
+                    !xref.getObjectType().equals("QTLS") &&
+                    !xref.getObjectType().equals("STRAINS") &&
+                    !xref.getObjectType().equals("VARIANTS") &&
+                    !xref.getObjectType().equals("REFERENCES") ) {
+                continue;
+            }
+
+
+            String id=xref.getExId();
+            xIds.add(id);
+
+        }
+        return xIds;
+    }
+    public List<String> getChildTermAccIds(String parentTermAccId) throws Exception{
+        List<String> childTermAccIds= new ArrayList<>();
+        List<Term> childTerms= ontologyXDAO.getAllActiveTermDescendants(parentTermAccId);
+        for(Term term:childTerms){
+            if(!childTermAccIds.contains(term.getAccId()))
+            childTermAccIds.add(term.getAccId());
+        }
+        return childTermAccIds;
+    }
+    public List<Annotation> getChildTermAnnotaions(String parentTermAccId) throws Exception {
+        List<String> childTermsIds=  this.getChildTermAccIds(parentTermAccId);
+        List<Annotation> allChildTermsAnnotations= new ArrayList<>();
+         for(String id:childTermsIds){
+
+           List<Annotation> childtermAnnots= annotationDAO.getAnnotations(id); //List of annotations included repeated annotated_object_rgd_id from mutiple sources
+           allChildTermsAnnotations.addAll(childtermAnnots);
+
+        }
+        return allChildTermsAnnotations;
+    }
+    public String getPathwayUrl(String term_acc_id) throws Exception {
+        PathwayDAO  pdao= new PathwayDAO();
+        String url=null;
+        Pathway pathway=pdao.getPathway(term_acc_id);
+        if(pathway!=null){
+             url="/rgdweb/pathway/pathwayRecord.html?acc_id="+ term_acc_id;
+         }
+        return url;
+    }
+
+    public static void main(String[] args) throws Exception {
+
+        IndexDAO dao= new IndexDAO();
+      for(IndexObject obj:  dao.getGenomicElements(RgdId.OBJECT_KEY_CELL_LINES)){
+           System.out.println(obj.getSymbol()+"\t"+ obj.getSpecies()+"\t"+ obj.getTerm_acc());
+        }
+        System.out.println("DONE");
+    }
+
+
+}

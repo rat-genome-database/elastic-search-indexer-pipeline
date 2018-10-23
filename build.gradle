@@ -1,0 +1,37 @@
+apply plugin: 'java'
+apply plugin: 'application'
+
+sourceCompatibility = 1.8
+mainClassName = "edu.mcw.rgd.indexer.Manager"
+applicationDefaultJvmArgs = ["-Dgreeting.language=en"]
+String myAppName="ESIndexer"
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        testCompile group: 'junit', name: 'junit', version: '4.11'
+        compile fileTree(dir: 'lib', include: '*.jar')
+
+    }
+    startScripts {
+        applicationName = myAppName
+    	}
+
+    jar {
+      baseName = myAppName
+      manifest {
+       	        attributes(
+                            'Built-By': System.getProperty('user.name'),
+                          'Built-Date': new Date(),
+                         'Built-JDK': System.getProperty('java.version')
+                       )
+          }
+    	}
+
+    distributions {
+    	    main {
+        	        baseName = myAppName
+          }
+   	}
