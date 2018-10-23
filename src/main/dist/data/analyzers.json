@@ -1,0 +1,73 @@
+{
+  "analysis" : {
+    "filter" : {
+      "stemmer_filter" : {
+        "name" : "english",
+        "type" : "stemmer"
+      },
+      "stop_filter" : {
+        "type" : "stop",
+        "stopwords" : [
+          "the",
+          "of",
+          "in"
+        ]
+      },
+      "ngram_filter" : {
+        "token_chars" : [
+          "letter",
+          "digit"
+        ],
+        "min_gram" : "2",
+        "type" : "edge_ngram",
+        "max_gram" : "15"
+      }
+    },
+    "analyzer" : {
+      "ngram_analyzer" : {
+        "filter" : [
+          "lowercase"
+        ],
+        "tokenizer" : "my_tokenizer"
+      },
+      "english_analyzer" : {
+        "filter" : [
+          "lowercase",
+          "stemmer_filter"
+        ],
+        "type" : "standard",
+        "stopwords" : "_english_"
+      },
+      "author_analyzer" : {
+        "filter" : [
+          "lowercase",
+          "stop_filter"
+        ],
+        "type" : "custom",
+        "tokenizer" : "standard"
+      },
+      "autocomplete_analyzer" : {
+        "filter" : [
+          "lowercase",
+          "ngram_filter",
+          "stop"
+        ],
+        "type" : "custom",
+        "tokenizer" : "whitespace"
+      },
+      "symbol_analyzer" : {
+        "filter" : [
+          "lowercase"
+        ],
+        "type":"custom",
+        "tokenizer" : "keyword"
+      }
+    },
+    "tokenizer" : {
+      "my_tokenizer" : {
+        "type" : "ngram",
+        "min_gram" : "2",
+        "max_gram" : "15"
+      }
+    }
+  }}

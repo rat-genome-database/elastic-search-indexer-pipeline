@@ -1,0 +1,163 @@
+{
+  "chromosomes": {
+    "properties": {
+
+      "assembly": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "mapKey": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "refSeqId": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "genBankId": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "seqLength": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "gapLength": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "gapCount":{
+        "type":"text",
+        "fields":{
+          "keyword":{
+            "type":"keyword"
+          }
+        }
+      },
+      "contigCount":{
+        "type":"text",
+        "fields":{
+          "keyword":{
+            "type":"keyword"
+          }
+        }
+      },
+      "chromosome":{
+        "type":"text",
+        "fields":{
+          "keyword":{
+            "type":"keyword"
+          }
+        }
+      },
+      "totalGenes":{
+        "type":"integer"
+
+      },
+      "proteinCoding":{
+        "type":"integer"
+
+      },
+      "ncrna":{
+        "type":"integer"
+
+      },
+      "tRna":{
+        "type":"integer"
+
+      },
+      "snRna":{
+        "type":"integer"
+
+      },
+      "rRna":{
+        "type":"integer"
+
+      },
+      "pseudo":{
+        "type":"integer"
+
+      },
+      "mirnaTargetsConfirmed":{
+        "type":"integer"
+      },
+      "mirnaTargetsPredicted":{
+        "type":"integer"
+
+      },
+      "transcripts":{
+        "type":"long"
+
+      },
+      "exons":{
+        "type":"long"
+
+      },
+      "qtls":{
+        "type":"long"
+
+      }
+    ,
+      "sslps":{
+        "type":"long"
+
+      },
+      "strains":{
+        "type":"long"
+
+      },
+      "utrs3":{
+        "type":"long"
+
+      },
+      "utrs5":{
+        "type":"long"
+
+      },
+      "variants":{
+        "type":"long"
+
+      },
+      "genesWithOrthologs":{
+        "type":"long"
+      },
+      "genesWithoutOrthologs":{ "type":"long"},
+      "humanOrthologs":{
+        "type":"long"
+      },
+      "ratOrthologs":{ "type":"long"},
+      "mouseOrthologs":{ "type":"long"},
+      "bonoboOrthologs":{ "type":"long"},
+      "squirrelOrthologs":{ "type":"long"},
+      "dogOrthologs":{ "type":"long"},
+      "chinchillaOrthologs":{ "type":"long"}
+    }
+  }
+
+}
+
+

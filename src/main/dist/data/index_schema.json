@@ -1,0 +1,282 @@
+{
+  "rgd_objects": {
+    "properties": {
+      "category": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "description": {
+        "type": "text",
+        "analyzer": "autocomplete_analyzer",
+        "search_analyzer":"standard",
+        "fields": {
+          "description": {
+            "type": "text",
+            "analyzer": "english_analyzer"
+          },
+          "lc": {
+            "type": "text",
+            "analyzer": "symbol_analyzer"
+          }
+        }
+      },
+      "term_acc": {
+        "type": "text",
+        "analyzer": "symbol_analyzer"
+      },
+      "mapDataList": {
+        "type": "nested",
+        "properties": {
+          "chromosome": {
+            "type": "keyword"
+          },
+          "experimentRecordCount": {
+            "type": "integer"
+          },
+          "map": {
+            "type": "keyword"
+          },
+          "startPos": {
+            "type": "long"
+          },
+          "stopPos": {
+            "type": "long"
+          }
+        }
+      },
+      "name": {
+        "type": "text",
+        "analyzer": "autocomplete_analyzer",
+        "search_analyzer":"standard",
+        "fields": {
+          "name": {
+            "type": "text",
+            "analyzer": "english_analyzer"
+          },
+          "symbol": {
+            "type": "text",
+            "analyzer": "symbol_analyzer"
+          }
+        }
+      },
+      "origin": {
+        "type": "text",
+        "analyzer": "autocomplete_analyzer",
+        "search_analyzer":"standard",
+        "fields": {
+          "origin": {
+            "type": "text",
+            "analyzer": "english_analyzer"
+          }
+        }
+      },
+      "source": {
+        "type": "text",
+        "analyzer": "autocomplete_analyzer",
+        "search_analyzer":"standard",
+        "fields": {
+          "source": {
+            "type": "text",
+            "analyzer": "english_analyzer"
+          }
+        }
+      },
+      "species": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "symbol": {
+        "type": "text",
+        "analyzer": "autocomplete_analyzer",
+        "search_analyzer":"standard",
+        "fields": {
+          "symbol": {
+            "type": "text",
+            "analyzer": "symbol_analyzer"
+          },
+          "keyword": {
+            "type": "keyword"
+          },
+          "ngram": {
+            "type": "text",
+            "analyzer": "ngram_analyzer",
+            "search_analyzer": "standard"
+          }
+
+        }
+      },
+      "htmlStrippedSymbol": {
+        "type": "text",
+        "analyzer": "autocomplete_analyzer",
+        "search_analyzer":"standard",
+        "fields": {
+          "htmlStrippedSymbol": {
+            "type": "text",
+            "analyzer": "symbol_analyzer"
+
+          },
+          "keyword": {
+            "type": "keyword"
+          },
+          "ngram": {
+            "type": "text",
+            "analyzer": "ngram_analyzer",
+            "search_analyzer": "standard"
+          }
+
+        }
+      },
+      "synonyms": {
+        "type": "text",
+        "analyzer": "autocomplete_analyzer",
+        "search_analyzer":"standard",
+        "fields": {
+          "synonyms": {
+            "type": "text",
+            "analyzer": "english_analyzer"
+          }
+        }
+      },
+
+      "annotation_synonyms": {
+        "type": "text",
+        "analyzer": "english_analyzer"
+      },
+      "trait": {
+        "type": "text",
+        "analyzer": "english_analyzer",
+        "fields":{
+          "keyword":{
+            "type":"keyword"
+          }
+        }
+      },
+      "subTrait": {
+        "type": "text",
+        "analyzer": "english_analyzer",
+        "fields":{
+          "keyword":{
+            "type":"keyword"
+          }
+        }
+      },
+      "transcript_ids": {
+        "type": "text",
+        "analyzer": "symbol_analyzer",
+        "fields":{
+          "keyword":{
+            "type":"keyword"
+          }
+        }
+      },
+      "protein_acc_ids": {
+        "type": "text",
+        "analyzer": "symbol_analyzer",
+        "fields":{
+          "keyword":{
+            "type":"keyword"
+          }
+        }
+      },
+      "type": {
+        "type": "text",
+        "analyzer": "english_analyzer",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "xdbIdentifiers": {
+        "type": "text",
+        "analyzer": "autocomplete_analyzer",
+        "search_analyzer":"standard",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          },
+          "lc": {
+            "type": "text",
+            "analyzer": "symbol_analyzer"
+          }
+        }
+      },
+      "xdata": {
+        "type": "text",
+        "analyzer": "english_analyzer",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "term": {
+        "type": "text",
+        "analyzer": "autocomplete_analyzer",
+        "search_analyzer":"standard",
+        "fields": {
+          "term": {
+            "type": "text",
+            "analyzer": "english_analyzer"
+          },
+          "keyword": {
+            "type": "keyword"
+          },
+          "symbol": {
+            "type": "text",
+            "analyzer": "symbol_analyzer"
+          }
+        }
+      },
+      "term_def": {
+        "type": "text",
+        "analyzer": "autocomplete_analyzer",
+        "search_analyzer":"standard",
+        "fields": {
+          "term": {
+            "type": "text",
+            "analyzer": "english_analyzer"
+          },
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "annotationsCount": {
+        "type": "integer"
+      },
+      "childTermsAnnotsCount": {
+        "type": "integer"
+      },
+      "termAnnotsCount": {
+        "type": "integer"
+      },
+      "pathwayDiagUrl": {
+        "type": "text",
+        "index": "not_analyzed"
+      },
+      "suggest":{
+        "type":"completion",
+        "analyzer":"standard",
+
+        "contexts":[
+          {
+            "name":"category",
+            "type":"category"
+
+      }
+        ]
+    }
+
+  }
+}
+}
+
