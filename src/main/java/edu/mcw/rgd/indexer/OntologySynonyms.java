@@ -90,7 +90,7 @@ public class OntologySynonyms {
         this.disease = disease;
     }
 */
-    public List<TermSynonym> getBP() {
+   public List<TermSynonym> getBP() {
         return bp;
     }
 

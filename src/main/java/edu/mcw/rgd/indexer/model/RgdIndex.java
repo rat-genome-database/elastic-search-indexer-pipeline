@@ -10,9 +10,7 @@ public  final class RgdIndex {
     private static String oldAlias;
     private static String newAlias;
     private static List<String> indices;
-    public void init(){
 
-    }
 
     public static String getOldAlias() {
         return oldAlias;
@@ -46,4 +44,5 @@ public  final class RgdIndex {
     public void setIndices(List<String> indices) {
         RgdIndex.indices = indices;
     }
+
 }

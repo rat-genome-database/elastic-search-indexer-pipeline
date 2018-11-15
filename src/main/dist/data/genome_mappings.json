@@ -1,0 +1,221 @@
+{
+  "genome": {
+    "properties": {
+      "primaryAssembly": {
+        "type":"keyword"
+      },
+      "species": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "assembly": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "mapKey": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "refSeqAsseblyAccession": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "ncbiLink": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "basepairs": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "totalLength": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "gapLength": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "gapBetweenScaffolds":{
+        "type":"text",
+        "fields":{
+          "keyword":{
+            "type":"keyword"
+          }
+        }
+      },
+      "scaffolds":{
+        "type":"text",
+        "fields":{
+          "keyword":{
+            "type":"keyword"
+          }
+        }
+      },
+      "scaffoldN50":{
+        "type":"text",
+        "fields":{
+          "keyword":{
+            "type":"keyword"
+          }
+        }
+      },
+      "scaffoldL50":{
+        "type":"text",
+        "fields":{
+          "keyword":{
+            "type":"keyword"
+          }
+        }
+      },
+      "contigs":{
+        "type":"text",
+        "fields":{
+          "keyword":{
+            "type":"keyword"
+          }
+        }
+      },
+      "contigsN50":{
+        "type":"text",
+        "fields":{
+          "keyword":{
+            "type":"keyword"
+          }
+        }
+      },
+      "contigL50":{
+        "type":"text",
+        "fields":{
+          "keyword":{
+            "type":"keyword"
+          }
+        }
+      },
+      "chromosomes":{
+        "type":"text",
+        "fields":{
+          "keyword":{
+            "type":"keyword"
+          }
+        }
+      },
+      "totalGenes":{
+        "type":"integer"
+
+      },
+      "proteinCoding":{
+        "type":"integer"
+
+      },
+      "ncrna":{
+        "type":"integer"
+
+      },
+      "tRna":{
+        "type":"integer"
+
+      },
+      "snRna":{
+        "type":"integer"
+
+      },
+      "rRna":{
+        "type":"integer"
+
+      },
+      "pseudo":{
+        "type":"integer"
+
+      },
+      "mirnaTargetsConfirmed":{
+        "type":"integer"
+      },
+      "mirnaTargetsPredicted":{
+        "type":"integer"
+
+      },
+      "transcripts":{
+        "type":"long"
+
+      },
+      "exons":{
+        "type":"long"
+
+      },
+      "qtls":{
+        "type":"long"
+
+      }
+    ,
+      "sslps":{
+        "type":"long"
+
+      },
+      "strains":{
+        "type":"long"
+
+      },
+      "utrs3":{
+        "type":"long"
+
+      },
+      "utrs5":{
+        "type":"long"
+
+      },
+      "variants":{
+        "type":"long"
+
+      },
+      "genesWithOrthologs":{
+        "type":"long"
+      },
+      "genesWithoutOrthologs":{ "type":"long"},
+      "humanOrthologs":{
+        "type":"long"
+      },
+      "ratOrthologs":{ "type":"long"},
+      "mouseOrthologs":{ "type":"long"},
+      "bonoboOrthologs":{ "type":"long"},
+      "squirrelOrthologs":{ "type":"long"},
+      "dogOrthologs":{ "type":"long"},
+      "chinchillaOrthologs":{ "type":"long"}
+    }
+  }
+
+}
+
+

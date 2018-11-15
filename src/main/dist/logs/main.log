@@ -1,0 +1,16 @@
+2018-11-15 09:34:23,748 INFO [test] - Indexer v. 0.1.0 Feb 9, 2017
+2018-11-15 09:34:23,748 INFO [main] - Indexer v. 0.1.0 Feb 9, 2017
+2018-11-15 09:34:23,762 INFO [main] - search_index_dev EXISTS RESPONSE:true
+2018-11-15 09:34:23,821 INFO [main] - search_index_dev1 deleted
+2018-11-15 09:34:23,821 INFO [main] - CREATING NEW INDEX...search_index_dev1
+2018-11-15 09:34:23,920 INFO [main] - search_index_dev1 created on  Thu Nov 15 09:34:23 CST 2018
+2018-11-15 09:34:23,923 INFO [main] - pool-2-thread-1: Reference started Thu Nov 15 09:34:23 CST 2018
+2018-11-15 09:34:23,994 INFO [edu.mcw.rgd.dao.spring.XmlBeanFactoryManager] - SPRING_CONFIG: /Apps/meads.xml
+2018-11-15 09:34:23,994 INFO [edu.mcw.rgd.dao.spring.XmlBeanFactoryManager] - creating XmlBeanFactory from /Apps/meads.xml
+2018-11-15 09:44:43,811 INFO [main] - Indexed Reference objects Size: 129861 Exiting thread.
+2018-11-15 09:44:43,811 INFO [main] - pool-2-thread-1 Reference END Thu Nov 15 09:44:43 CST 2018
+2018-11-15 09:44:43,811 INFO [main] - Finished all threads: Thu Nov 15 09:44:43 CST 2018
+2018-11-15 09:44:43,819 INFO [main] - CLUSTER STATE: GREEN
+2018-11-15 09:44:43,819 INFO [main] - CLUSTER STATUR:OK. Switching Alias...
+2018-11-15 09:44:43,833 INFO [main] - Switched from search_index_dev2 to  search_index_dev1
+2018-11-15 09:44:43,834 INFO [main] -  - 10 minutes 20 seconds 

@@ -261,7 +261,7 @@
       },
       "pathwayDiagUrl": {
         "type": "text",
-        "index": "not_analyzed"
+        "index":false
       },
       "suggest":{
         "type":"completion",

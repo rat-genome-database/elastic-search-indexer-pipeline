@@ -3,7 +3,8 @@ package edu.mcw.rgd.indexer.client;
 
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
+
+import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 
 import java.net.InetAddress;
@@ -37,11 +38,21 @@ public class ESClient {
     }
 
     public static TransportClient getInstance() {
-      if(client==null){
-            Settings settings=Settings.builder().put("cluster.name", "rgd-elastic").build();
-            try {
+     /* if(client==null){
+          Settings settings=Settings.builder().put("cluster.name", "rgd-elastic").build();
+                     try {
                 client= new PreBuiltTransportClient(settings)
                         .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("gray01.rgd.mcw.edu"), 9300));
+            } catch (UnknownHostException e) {
+                e.printStackTrace();
+            }
+
+        }*/
+        if(client==null){
+            Settings settings=Settings.builder().put("cluster.name", "erika").build();
+            try {
+                client= new PreBuiltTransportClient(settings)
+                        .addTransportAddress(new TransportAddress(InetAddress.getByName("erika01.rgd.mcw.edu"), 9300));
             } catch (UnknownHostException e) {
                 e.printStackTrace();
             }

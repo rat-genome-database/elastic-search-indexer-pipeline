@@ -15,6 +15,7 @@ import edu.mcw.rgd.indexer.model.genomeInfo.AssemblyInfo;
 import edu.mcw.rgd.indexer.model.genomeInfo.GeneCounts;
 import edu.mcw.rgd.indexer.model.genomeInfo.GenomeIndexObject;
 import edu.mcw.rgd.process.Utils;
+import edu.mcw.rgd.util.StringUtils;
 import org.apache.log4j.Logger;
 import org.jsoup.Jsoup;
 
@@ -125,7 +126,7 @@ public class IndexDAO {
             String name=gene.getName();
             String htmlStrippedSymbol= Jsoup.parse(symbol).text();
             String description= Utils.getGeneDescription(gene);
-          int speciesKey=gene.getSpeciesTypeKey();
+            int speciesKey=gene.getSpeciesTypeKey();
             String species=SpeciesType.getCommonName(speciesKey);
           String type=gene.getType();
 
@@ -305,9 +306,7 @@ public class IndexDAO {
             }
 
     } return annotations;}
-
-
-    public List<IndexObject> getStrains() throws Exception{
+   public List<IndexObject> getStrains() throws Exception{
 
         List<IndexObject> objList= new ArrayList<>();
         //  Strain strain=strainDAO.getStrain(7248453);
@@ -326,7 +325,7 @@ public class IndexDAO {
             String species=SpeciesType.getCommonName(speciesTypeKey);
             s.setSpecies(species);
             if(rgdId==60985){
-            System.out.println(species + "||" +speciesTypeKey);
+                System.out.println(species + "||" +speciesTypeKey);
             }
             s.setTerm_acc(String.valueOf(rgdId));
             s.setSymbol(symbol);
@@ -360,6 +359,46 @@ public class IndexDAO {
         }
         return objList;
     }
+
+  /*  public List<SearchIndex> getStrains() throws Exception{
+
+
+        List<Strain> strains= strainDAO.getActiveStrains();
+        List<SearchIndex> indexObjects= new ArrayList<>();
+        for(Strain strain: strains){
+
+
+            String symbol=strain.getSymbol();
+            String source= strain.getSource();
+            String origin= strain.getOrigin();
+            String strainTypeName= strain.getStrainTypeName();
+            String name= strain.getName();
+            int rgdId= strain.getRgdId();
+            int speciesTypeKey= strain.getSpeciesTypeKey();
+
+            String htmlStrippedSymbol= Jsoup.parse(symbol).text();
+
+            if(symbol!=null)
+            indexObjects.add(buildIndexObject(String.valueOf(rgdId), symbol, "STRAINS", "symbol", String.valueOf(speciesTypeKey)));
+            if(source!=null)
+            indexObjects.add(buildIndexObject(String.valueOf(rgdId), source, "STRAINS", "source", String.valueOf(speciesTypeKey)));
+            if(origin!=null)
+            indexObjects.add(buildIndexObject(String.valueOf(rgdId), origin, "STRAINS", "origin", String.valueOf(speciesTypeKey)));
+            if(strainTypeName!=null)
+            indexObjects.add(buildIndexObject(String.valueOf(rgdId), strainTypeName, "STRAINS", "type", String.valueOf(speciesTypeKey)));
+            if(name!=null)
+            indexObjects.add(buildIndexObject(String.valueOf(rgdId), name, "STRAINS", "name", String.valueOf(speciesTypeKey)));
+
+
+        }
+        List<Alias> aliases=aliasDAO.getActiveAliases(RgdId.OBJECT_KEY_STRAINS);
+        for(Alias a: aliases){
+            String aliasType=a.getTypeName()==null?"alias":a.getTypeName();
+            indexObjects.add(buildIndexObject(String.valueOf(a.getRgdId()), a.getValue(), "STRAINS", aliasType, String.valueOf(a.getSpeciesTypeKey())));
+        }
+        return indexObjects;
+    }*/
+
 
     public Suggest getSuggest(String symbol, String name, String category ){
         List<String> input= new ArrayList<>();
@@ -494,15 +533,12 @@ public class IndexDAO {
 
         for(SSLP sslp: sslpdao.getActiveSSLPs()){
             //  SSLP sslp= sslpdao.getSSLP(37320);
-
-
             IndexObject slp= new IndexObject();
             int rgdId= sslp.getRgdId();
             String name= sslp.getName();
             slp.setTerm_acc(String.valueOf(rgdId));
             slp.setSymbol(sslp.getName());
             slp.setSuggest(this.getSuggest(name, null, "sslp"));
-
 
             List<AliasData> aliases= this.getAliases(rgdId);
             List<String> synonyms= new ArrayList<>();
@@ -609,19 +645,16 @@ public class IndexDAO {
             v.setAnnotationsCount(this.getAnnotsCount(rgdId));
             objList.add(v);
         }
-
-
         return objList;
-
     }
 
-    public List<RefObject> getReference() throws Exception{
+    public List<IndexObject> getReference() throws Exception{
 
-        List<RefObject> objList= new ArrayList<>();
+        List<IndexObject> objList= new ArrayList<>();
         for(Reference ref: referenceDAO.getActiveReferences()){
             // Reference ref=referenceDAO.getReference(1004);
             int rgdId= ref.getRgdId();
-            RefObject r= new RefObject();
+            IndexObject r= new IndexObject();
             r.setTerm_acc(String.valueOf(rgdId));
             r.setCitation(ref.getCitation());
             r.setTitle(ref.getTitle());
@@ -646,7 +679,7 @@ public class IndexDAO {
             String species=SpeciesType.getCommonName(speciesTypeKey);
             r.setSpecies(species);
             List<AliasData> alist= this.getAliases(rgdId);
-            r.setAliasDatas(alist);
+      //      r.setAliasDatas(alist);
             r.setRefAbstract(ref.getRefAbstract());
             List<String> synonyms= new ArrayList<>();
 

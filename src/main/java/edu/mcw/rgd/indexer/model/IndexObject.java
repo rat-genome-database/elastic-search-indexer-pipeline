@@ -46,8 +46,56 @@ public class IndexObject {
     private int termAnnotsCount;
     private int[][] annotationsMatrix;
 
+    /*********************************ref data*********************************************/
+    private List<String> author;
+    private String pub_year;
+    private String citation;
+    private String title;
+    private String refAbstract;
+
+
 
     private Suggest suggest;
+
+    public List<String> getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(List<String> author) {
+        this.author = author;
+    }
+
+    public String getPub_year() {
+        return pub_year;
+    }
+
+    public void setPub_year(String pub_year) {
+        this.pub_year = pub_year;
+    }
+
+    public String getCitation() {
+        return citation;
+    }
+
+    public void setCitation(String citation) {
+        this.citation = citation;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getRefAbstract() {
+        return refAbstract;
+    }
+
+    public void setRefAbstract(String refAbstract) {
+        this.refAbstract = refAbstract;
+    }
 
     public Suggest getSuggest() {
         return suggest;
