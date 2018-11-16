@@ -47,8 +47,6 @@ public class IndexAdmin {
 
         this.setLog(log);
         IndicesAdminClient indicesAdminClient= ESClient.getClient().admin().indices();
-        System.out.println("RGDINDEX: "+ rgdIndex.getIndex());
-
         IndicesExistsResponse existsResponse= indicesAdminClient.exists(new IndicesExistsRequest(rgdIndex.getIndex())).actionGet();
 
         System.out.println(rgdIndex.getIndex() + " EXISTS RESPONSE:" + existsResponse.isExists());
@@ -60,7 +58,6 @@ public class IndexAdmin {
             if (response.getAliases().size() == 1) {
 
             for (String index : rgdIndex.getIndices()) {
-
             /* INDEX IS NOT ALIAS AND EXISTS, then DELETE INDEX AND CREATE NEW INDEX WITH SAME NAME.*/
                 if (!response.getAliases().containsKey(index)) {  // if index is not  alias to current index(rgd_index_dev)
                     IndicesExistsRequest request = new IndicesExistsRequest(index); // check if index exists
@@ -72,45 +69,11 @@ public class IndexAdmin {
                     }
 
                     createNewIndex(index, mappings, type);
-           /*     //    String mappings = new String(Files.readAllBytes(Paths.get("data/index_schema.json")));
-
-                    String mappings = new String(Files.readAllBytes(Paths.get("data/search_schema.json")));
-                    String refMappings = new String(Files.readAllBytes(Paths.get("data/ref_schema.json")));
-                    String genomeInfoMappings= new String(Files.readAllBytes(Paths.get("data/genomeInfo_schema.json")));
-                    String chromosomeMappings= new String(Files.readAllBytes(Paths.get("data/chromosome_schema.json")));
-                //    String analyzers = new String(Files.readAllBytes(Paths.get("data/analyzers.json")));
-
-                    String analyzers = new String(Files.readAllBytes(Paths.get("data/search_analyzers.json")));
-                    /********* create index, put mappings and analyzers ****/
-              /*      indicesAdminClient.prepareCreate(index)
-                            .setSettings(Settings.builder().loadFromSource(analyzers, XContentType.JSON)
-                                    .put("index.number_of_shards",5)
-                            .put("index.number_of_replicas", 1))
-                            .addMapping("rgd_objects", mappings)
-                            .addMapping("reference", refMappings)
-                            .addMapping("chromosomes", chromosomeMappings)
-                            .addMapping("genomeInfo", genomeInfoMappings).get();
-*/
-             /*       indicesAdminClient.prepareCreate(index)
-                            .setSettings(Settings.builder().loadFromSource(analyzers,XContentType.JSON)
-                                    .put("index.number_of_shards",5)
-                                    .put("index.number_of_replicas", 1)).get();
-                    indicesAdminClient.preparePutMapping(index).setType("search_index").setSource(mappings, XContentType.JSON).get();
-                /*    indicesAdminClient.preparePutMapping(index).setType("reference").setSource(refMappings, XContentType.JSON).get();
-                    indicesAdminClient.preparePutMapping(index).setType("chromosomes").setSource(chromosomeMappings, XContentType.JSON).get();
-                    indicesAdminClient.preparePutMapping(index).setType("genomeInfo").setSource(genomeInfoMappings, XContentType.JSON).get();*/
-
-               /*     System.out.println(index + " created on  " + new Date());
-                    log.info(index + " created on  " + new Date());
-                    RgdIndex.setNewAlias(index);*/
-
-                }
+              }
             /*INDEX IS ALIAS TO CURRENT INDEX, SET IT AS OLD INDEX TO SWITCH ALIAS FROM OLD INDEX TO NEW INDEX CREATED ABOVE */
                 else {
                     RgdIndex.setOldAlias(index);
-
                 }
-
             }
         }else{
                 if(response.getAliases().size()==0){
@@ -130,14 +93,10 @@ public class IndexAdmin {
         System.out.println("PATH: " +path+"\n"+ type);
         System.out.println("CREATING NEW INDEX..." + index);
         log.info("CREATING NEW INDEX..." + index);
-      //  String mappings = new String(Files.readAllBytes(Paths.get("data/search_schema.json")));
-        String mappings=new String(Files.readAllBytes(Paths.get(path)));
-    //    String refMappings= new String(Files.readAllBytes(Paths.get("data/ref_schema.json")));
-        String analyzers=new String(Files.readAllBytes(Paths.get("data/analyzers.json")));
-     //   String genomeInfoMappings= new String(Files.readAllBytes(Paths.get("data/genomeInfo_schema.json")));
-     //   String chromosomeMappings= new String(Files.readAllBytes(Paths.get("data/chromosome_schema.json")));
 
-    //    String analyzers = new String(Files.readAllBytes(Paths.get("data/search_analyzers.json")));
+        String mappings=new String(Files.readAllBytes(Paths.get(path)));
+        String analyzers=new String(Files.readAllBytes(Paths.get("data/analyzers.json")));
+
         /********* create index, put mappings and analyzers ****/
 
         indicesAdminClient.prepareCreate(index)

@@ -38,16 +38,7 @@ public class ESClient {
     }
 
     public static TransportClient getInstance() {
-     /* if(client==null){
-          Settings settings=Settings.builder().put("cluster.name", "rgd-elastic").build();
-                     try {
-                client= new PreBuiltTransportClient(settings)
-                        .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("gray01.rgd.mcw.edu"), 9300));
-            } catch (UnknownHostException e) {
-                e.printStackTrace();
-            }
 
-        }*/
         if(client==null){
             Settings settings=Settings.builder().put("cluster.name", "erika").build();
             try {

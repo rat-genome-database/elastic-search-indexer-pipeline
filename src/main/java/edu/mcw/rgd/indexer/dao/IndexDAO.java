@@ -116,7 +116,7 @@ public class IndexDAO {
 
         List<IndexObject> objList = new ArrayList<>();
         List<Gene> genes= geneDAO.getAllActiveGenes();
-
+        List<Alias> aliases=aliasDAO.getActiveAliases(RgdId.OBJECT_KEY_GENES);
       for(Gene gene: genes) {
          //  Gene gene= geneDAO.getGene(2004);
 
@@ -139,12 +139,12 @@ public class IndexDAO {
             obj.setCategory("Gene");
             obj.setName(name);
 
-            List<AliasData> aliases = this.getAliases(gene.getRgdId());
+        /*    List<AliasData> aliases = this.getAliases(gene.getRgdId());
             List<String> synonyms = new ArrayList<>();
             for (AliasData a : aliases) {
                 synonyms.add(a.getAlias_name());
-            }
-            obj.setSynonyms(synonyms);
+            }*/
+            obj.setSynonyms(getAliasesByRgdId(aliases, rgdId));
             obj.setXdbIdentifiers(this.getExternalIdentifiers(rgdId));
             obj.setPromoters(this.getPromotersByGeneRgdId(rgdId));
             obj.setMapDataList(this.getMapData(rgdId));
@@ -310,6 +310,7 @@ public class IndexDAO {
 
         List<IndexObject> objList= new ArrayList<>();
         //  Strain strain=strainDAO.getStrain(7248453);
+        List<Alias> aliases=aliasDAO.getActiveAliases(RgdId.OBJECT_KEY_STRAINS);
         List<Strain> strains= strainDAO.getActiveStrains();
         for(Strain strain: strains){
             IndexObject s= new IndexObject();
@@ -324,9 +325,6 @@ public class IndexDAO {
 
             String species=SpeciesType.getCommonName(speciesTypeKey);
             s.setSpecies(species);
-            if(rgdId==60985){
-                System.out.println(species + "||" +speciesTypeKey);
-            }
             s.setTerm_acc(String.valueOf(rgdId));
             s.setSymbol(symbol);
             s.setSource(source);
@@ -337,19 +335,9 @@ public class IndexDAO {
             String htmlStrippedSymbol= Jsoup.parse(symbol).text();
             s.setHtmlStrippedSymbol(htmlStrippedSymbol);
             s.setSuggest(this.getSuggest(symbol, null, "strain"));
-
-
-            List<AliasData> aliases=this.getAliases(rgdId);
-            List<String> synonyms = new ArrayList<>();
-            for (AliasData a : aliases) {
-                synonyms.add(a.getAlias_name());
-            }
-
-            s.setSynonyms(synonyms);
+            s.setSynonyms(getAliasesByRgdId(aliases,  rgdId));
             s.setXdbIdentifiers(this.getExternalIdentifiers(rgdId));
             s.setCategory("Strain");
-
-
             s.setExperimentRecordCount(this.getExperimentRecordCount(rgdId, "S"));
             s.setSampleExists(this.sampleExists(rgdId, 600));
             s.setMapDataList(this.getMapData(rgdId));
@@ -398,6 +386,16 @@ public class IndexDAO {
         }
         return indexObjects;
     }*/
+    public List<String> getAliasesByRgdId(List<Alias> aliases,int rgdid) throws Exception {
+        List<String> synonyms = new ArrayList<>();
+        for(Alias a: aliases){
+            if(a.getRgdId()==rgdid) {
+                String aliasType = a.getTypeName() == null ? "alias" : a.getTypeName();
+                synonyms.add(a.getValue());
+            }
+        }
+        return synonyms;
+    }
 
 
     public Suggest getSuggest(String symbol, String name, String category ){
@@ -447,18 +445,15 @@ public class IndexDAO {
         List<Annotation> annotations=annotationDAO.getAnnotationsByAspect(rgdid, aspect);
         int recordCount=0;
         for(Annotation a:annotations){
-
             String term_acc= a.getTermAcc();
             recordCount=recordCount+phenominerDAO.getRecordCountForTerm(term_acc);
-
-
         }
         return recordCount;
     }
 
     public List<IndexObject> getQtls() throws Exception{
         List<IndexObject> objList= new ArrayList<>();
-
+        List<Alias> aliases=aliasDAO.getActiveAliases(RgdId.OBJECT_KEY_QTLS);
         for(QTL qtl: qtlDAO.getActiveQTLs()){
             // QTL qtl= qtlDAO.getQTL(61368);
            IndexObject q= new IndexObject();
@@ -478,15 +473,9 @@ public class IndexDAO {
             q.setSpecies(species);
             q.setSuggest(this.getSuggest(symbol, null, "qtl"));
 
-
-            List<AliasData> aliases= this.getAliases(rgdId);
-            List<String> synonyms= new ArrayList<>();
-            for(AliasData a: aliases){
-                synonyms.add(a.getAlias_name());
-            }
             Map<String, List<Annotation>> annotMap= this.getAnnotations(rgdId);
             q.setXdata(this.getAnnotations(annotMap, "xdata", "qtl"));
-            q.setSynonyms(synonyms);
+            q.setSynonyms(getAliasesByRgdId(aliases, rgdId));
             q.setXdbIdentifiers(this.getExternalIdentifiers(rgdId));
             q.setCategory("QTL");
             q.setMapDataList(this.getMapData(rgdId));
@@ -530,7 +519,7 @@ public class IndexDAO {
     }
     public List<IndexObject> getSslps() throws Exception{
         List<IndexObject> objList= new ArrayList<>();
-
+        List<Alias> aliases=aliasDAO.getActiveAliases(RgdId.OBJECT_KEY_SSLPS);
         for(SSLP sslp: sslpdao.getActiveSSLPs()){
             //  SSLP sslp= sslpdao.getSSLP(37320);
             IndexObject slp= new IndexObject();
@@ -540,12 +529,7 @@ public class IndexDAO {
             slp.setSymbol(sslp.getName());
             slp.setSuggest(this.getSuggest(name, null, "sslp"));
 
-            List<AliasData> aliases= this.getAliases(rgdId);
-            List<String> synonyms= new ArrayList<>();
-            for(AliasData a: aliases){
-                synonyms.add(a.getAlias_name());
-            }
-            slp.setSynonyms(synonyms);
+            slp.setSynonyms(getAliasesByRgdId(aliases,rgdId));
             slp.setXdbIdentifiers(this.getExternalIdentifiers(rgdId));
             slp.setCategory("SSLP");
             int speciesTypeKey= sslp.getSpeciesTypeKey();
@@ -611,7 +595,7 @@ public class IndexDAO {
     }
     public List<IndexObject> getVariants() throws Exception{
         List<IndexObject> objList= new ArrayList<>();
-
+        List<Alias> aliases=aliasDAO.getActiveAliases(RgdId.OBJECT_KEY_VARIANTS);
         for(VariantInfo obj: vdao.getVariantsBySource("CLINVAR")){
             //  VariantInfo obj= vdao.getVariant(8554914);
             IndexObject v= new IndexObject();
@@ -621,7 +605,7 @@ public class IndexDAO {
             String species=(SpeciesType.getCommonName(speciesTypeKey));
             Term term= ontologyXDAO.getTermByAccId(obj.getSoAccId());
             List<AliasData> aliasDatas=this.getAliases(rgdId);
-            List<String> synonyms= new ArrayList<>();
+
             v.setSpecies(species);
             v.setSymbol(symbol);
             v.setTerm_acc(String.valueOf(rgdId));
@@ -631,14 +615,7 @@ public class IndexDAO {
             v.setTrait(obj.getTraitName());
             v.setCategory("Variant");
             v.setSuggest(this.getSuggest(symbol, null, "variant"));
-
-
-            for(AliasData a:aliasDatas){
-                synonyms.add(a.getAlias_name());
-
-            }
-
-            v.setSynonyms(synonyms);
+            v.setSynonyms(getAliasesByRgdId(aliases, rgdId));
             v.setXdbIdentifiers(this.getExternalIdentifiers(rgdId));
 
             v.setMapDataList(this.getMapData(obj.getRgdId()));
@@ -651,6 +628,7 @@ public class IndexDAO {
     public List<IndexObject> getReference() throws Exception{
 
         List<IndexObject> objList= new ArrayList<>();
+        List<Alias> aliases=aliasDAO.getActiveAliases(RgdId.OBJECT_KEY_REFERENCES);
         for(Reference ref: referenceDAO.getActiveReferences()){
             // Reference ref=referenceDAO.getReference(1004);
             int rgdId= ref.getRgdId();
@@ -681,11 +659,12 @@ public class IndexDAO {
             List<AliasData> alist= this.getAliases(rgdId);
       //      r.setAliasDatas(alist);
             r.setRefAbstract(ref.getRefAbstract());
-            List<String> synonyms= new ArrayList<>();
+       /*     List<String> synonyms= new ArrayList<>();
 
             for(AliasData a:alist ){
                 synonyms.add(a.getAlias_name());
-            }
+            }*/
+            r.setSynonyms(getAliasesByRgdId(aliases, rgdId));
             List<String> xids=this.getExternalIdentifiers(rgdId);
 
             r.setXdbIdentifiers(xids);
@@ -1029,6 +1008,7 @@ public class IndexDAO {
 
 
             String id=xref.getExId();
+
             xIds.add(id);
 
         }
