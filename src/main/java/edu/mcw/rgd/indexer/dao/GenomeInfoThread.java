@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static org.elasticsearch.client.Requests.refreshRequest;
+
 
 /**
  * Created by jthota on 10/24/2017.
@@ -182,8 +184,8 @@ public class GenomeInfoThread implements Runnable {
                 bulkRequestBuilder.add(new IndexRequest(index, "genome").source(json, XContentType.JSON));
 
             }
-         BulkResponse response=       bulkRequestBuilder.get();
-
+             BulkResponse response=       bulkRequestBuilder.get();
+           ESClient.getClient().admin().indices().refresh(refreshRequest()).actionGet();
             System.out.println("Indexed " + species + "  genome objects Size: " + objects.size() + " Exiting thread.");
             System.out.println(Thread.currentThread().getName() + ": " + species + " End " + new Date());
             log.info("Indexed " + species + "  genome objects Size: " + objects.size() + " Exiting thread.");

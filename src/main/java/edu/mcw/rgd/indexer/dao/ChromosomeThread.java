@@ -7,14 +7,22 @@ import edu.mcw.rgd.dao.impl.MapDAO;
 import edu.mcw.rgd.datamodel.*;
 import edu.mcw.rgd.indexer.client.ESClient;
 import edu.mcw.rgd.indexer.model.genomeInfo.*;
+import org.elasticsearch.action.bulk.BulkProcessor;
+import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.common.unit.ByteSizeUnit;
+import org.elasticsearch.common.unit.ByteSizeValue;
+import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentType;
 
 import java.util.*;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
+import static org.elasticsearch.client.Requests.refreshRequest;
 
 /**
  * Created by jthota on 11/7/2017.
@@ -120,20 +128,28 @@ public class ChromosomeThread implements  Runnable {
              }
                 if(objects.size()>0){
 
-                    BulkRequestBuilder bulkRequestBuilder= ESClient.getClient().prepareBulk();
+                //    BulkProcessor bulkProcessor=this.getBulkProcessor();
+                  BulkRequestBuilder bulkRequestBuilder= ESClient.getClient().prepareBulk();
+                    int i=1;
                 for (ChromosomeIndexObject o : objects) {
-                    ObjectMapper mapper = new ObjectMapper();
-                    byte[] json = new byte[0];
-                    try {
-                        json = mapper.writeValueAsBytes(o);
-                    } catch (JsonProcessingException e) {
-                        e.printStackTrace();
+                    if(i<=1000) {
+                        i++;
+                        ObjectMapper mapper = new ObjectMapper();
+                        byte[] json = new byte[0];
+                        try {
+                            json = mapper.writeValueAsBytes(o);
+                        } catch (JsonProcessingException e) {
+                            e.printStackTrace();
+                        }
+
+                  //      bulkProcessor.add(new IndexRequest(index, "chromosome").source(json, XContentType.JSON));
+                           bulkRequestBuilder.add(new IndexRequest(index, "chromosome").source(json, XContentType.JSON));
                     }
-
-                    bulkRequestBuilder.add(new IndexRequest(index, "chromosome").source(json, XContentType.JSON));
-
                 }
-                    BulkResponse response=       bulkRequestBuilder.get();
+             //       bulkProcessor.close();
+
+                BulkResponse response=       bulkRequestBuilder.get();
+                    ESClient.getClient().admin().indices().refresh(refreshRequest()).actionGet();
                 System.out.println("Indexed mapKey " + mapKey + ",  chromosome objects Size: " + objects.size() + " Exiting thread.");
                 System.out.println(Thread.currentThread().getName() + ": chromosomeThread" + mapKey + " End " + new Date());
             }
@@ -143,6 +159,29 @@ public class ChromosomeThread implements  Runnable {
             throw new RuntimeException();
         }
 
+    }
+    public BulkProcessor getBulkProcessor(){
+       return BulkProcessor.builder(ESClient.getClient(), new BulkProcessor.Listener() {
+            @Override
+            public void beforeBulk(long executionId, BulkRequest request) {
+                System.out.println("Number of Actions: "+ request.numberOfActions());
+            }
+
+            @Override
+            public void afterBulk(long executionId, BulkRequest request, BulkResponse response) {
+                System.out.println("Reponse failures: "+ response.hasFailures());
+            }
+
+            @Override
+            public void afterBulk(long executionId, BulkRequest request, Throwable failure) {
+                System.out.println("Failure: "+ failure);
+            }
+        })
+                .setBulkActions(1000)
+                .setBulkSize(new ByteSizeValue(5, ByteSizeUnit.MB))
+                .setFlushInterval(TimeValue.timeValueSeconds(5))
+                .setConcurrentRequests(0)
+                .build();
     }
 public StringBuffer getDiseaseGeneChartData(List<DiseaseGeneObject> diseaseGenes){
     StringBuffer sb = new StringBuffer();

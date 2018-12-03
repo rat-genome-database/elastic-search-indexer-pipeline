@@ -16,12 +16,10 @@ import java.net.UnknownHostException;
 public class ESClient {
 
   private static TransportClient client = null;
-    private ESClient(){
-
-    }
+    private ESClient(){}
     public void init(){
         System.out.println("Initializing...");
-        getInstance();
+        client=getInstance();
     }
     public void destroy(){
         System.out.println("destroying...");

@@ -16,6 +16,8 @@ import org.elasticsearch.common.xcontent.XContentType;
 import java.util.Date;
 import java.util.List;
 
+import static org.elasticsearch.client.Requests.refreshRequest;
+
 /**
  * Created by jthota on 6/21/2017.
  */
@@ -50,11 +52,11 @@ public class ObjectIndexerThread implements  Runnable {
                  /*        IndexResponse response =ESClient.getClient().prepareIndex(index, "rgd_objects", obj.getTerm_acc())
                              .setSource(json).get();*/
 
-                    bulkRequestBuilder.add(new IndexRequest(index, "search").source(json, XContentType.JSON));
+                    bulkRequestBuilder.add(new IndexRequest(index, "search",obj.getTerm_acc()).source(json, XContentType.JSON));
 
             }
-            BulkResponse response=       bulkRequestBuilder.get();
-
+                BulkResponse response=       bulkRequestBuilder.get();
+            ESClient.getClient().admin().indices().refresh(refreshRequest()).actionGet();
                 System.out.println("Indexed " + objectType + " objects Size: " + objs.size() + " Exiting thread.");
                 log.info("Indexed " + objectType + " objects Size: " + objs.size() + " Exiting thread.");
         //    }

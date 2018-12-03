@@ -84,10 +84,8 @@ public class Manager {
           manager.printUsage();
             log.info(e);
         }
-
+        es.destroy();
     }
-
-
     private void run(String[] args) throws Exception {
 
         long start = System.currentTimeMillis();

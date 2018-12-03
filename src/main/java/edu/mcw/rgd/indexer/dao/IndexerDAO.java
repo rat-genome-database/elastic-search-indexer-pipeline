@@ -24,6 +24,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import static org.elasticsearch.client.Requests.refreshRequest;
+
 /**
  * Created by jthota on 6/20/2017.
  */
@@ -146,11 +148,12 @@ public class IndexerDAO extends IndexDAO implements Runnable {
                 } catch (JsonProcessingException e) {
                     e.printStackTrace();
                 }
-                bulkRequestBuilder.add(new IndexRequest(index, "search").source(json, XContentType.JSON));
+                bulkRequestBuilder.add(new IndexRequest(index, "search",o.getTerm_acc()).source(json, XContentType.JSON));
 
             }
             BulkResponse response=       bulkRequestBuilder.get();
 
+            ESClient.getClient().admin().indices().refresh(refreshRequest()).actionGet();
             System.out.println("Indexed " + ont_id + " objects Size: " + objs.size() + " Exiting thread.");
             System.out.println(Thread.currentThread().getName() + ": " + ont_id + " End " + new Date());
             log.info("Indexed " + ont_id + " objects Size: " + objs.size() + " Exiting thread.");
