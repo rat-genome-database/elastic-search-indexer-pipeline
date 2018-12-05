@@ -1,5 +1,7 @@
 package edu.mcw.rgd.indexer.dao;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.mcw.rgd.dao.DataSourceFactory;
 import edu.mcw.rgd.dao.impl.*;
 import edu.mcw.rgd.dao.spring.StringMapQuery;
@@ -10,6 +12,7 @@ import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
 import edu.mcw.rgd.datamodel.ontologyx.TermWithStats;
 import edu.mcw.rgd.indexer.AnnotationFormatter;
+import edu.mcw.rgd.indexer.client.ESClient;
 import edu.mcw.rgd.indexer.model.*;
 import edu.mcw.rgd.indexer.model.genomeInfo.AssemblyInfo;
 import edu.mcw.rgd.indexer.model.genomeInfo.GeneCounts;
@@ -17,11 +20,19 @@ import edu.mcw.rgd.indexer.model.genomeInfo.GenomeIndexObject;
 import edu.mcw.rgd.process.Utils;
 import edu.mcw.rgd.util.StringUtils;
 import org.apache.log4j.Logger;
+import org.elasticsearch.action.bulk.BulkRequestBuilder;
+import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.support.WriteRequest;
+import org.elasticsearch.common.xcontent.XContentType;
 import org.jsoup.Jsoup;
 
 import java.sql.ResultSet;
 import java.util.*;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+
+import static org.elasticsearch.client.Requests.refreshRequest;
 
 /**
  * Created by jthota on 3/23/2017.
@@ -1044,6 +1055,33 @@ public class IndexDAO {
         return url;
     }
 
+    public void indexObjects(List<IndexObject> objs, String index, String type) throws ExecutionException, InterruptedException {
+        BulkRequestBuilder bulkRequestBuilder= ESClient.getClient().prepareBulk().setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
+        int docCount=0;
+        for (IndexObject o : objs) {
+            docCount++;
+            ObjectMapper mapper = new ObjectMapper();
+            byte[] json = new byte[0];
+            try {
+                json = mapper.writeValueAsBytes(o);
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+            bulkRequestBuilder.add(new IndexRequest(index, type,o.getTerm_acc()).source(json, XContentType.JSON));
+            if(docCount%100==0){
+                BulkResponse response=       bulkRequestBuilder.execute().get();
+                bulkRequestBuilder= ESClient.getClient().prepareBulk();
+            }else{
+                if(docCount>objs.size()-100 && docCount==objs.size()){
+                    BulkResponse response=       bulkRequestBuilder.execute().get();
+                    bulkRequestBuilder= ESClient.getClient().prepareBulk();
+                }
+            }
+        }
+        //   BulkResponse response=       bulkRequestBuilder.get();
+
+        ESClient.getClient().admin().indices().refresh(refreshRequest()).actionGet();
+    }
     public static void main(String[] args) throws Exception {
 
         IndexDAO dao= new IndexDAO();

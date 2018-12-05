@@ -16,6 +16,7 @@ import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.common.xcontent.XContentType;
 
 import java.util.ArrayList;
@@ -171,8 +172,10 @@ public class GenomeInfoThread implements Runnable {
         }
             System.out.println("Objects List Size of " + species + " : " + objects.size());
            log.info("Objects List Size of " + species + " : " + objects.size());
-         BulkRequestBuilder bulkRequestBuilder= ESClient.getClient().prepareBulk();
+         BulkRequestBuilder bulkRequestBuilder= ESClient.getClient().prepareBulk().setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
+         int docCount=0;
             for (GenomeIndexObject o : objects) {
+                docCount++;
                 ObjectMapper mapper = new ObjectMapper();
                 byte[] json = new byte[0];
                 try {
@@ -180,11 +183,20 @@ public class GenomeInfoThread implements Runnable {
                 } catch (JsonProcessingException e) {
                     e.printStackTrace();
                 }
-
                 bulkRequestBuilder.add(new IndexRequest(index, "genome").source(json, XContentType.JSON));
 
+                if(docCount%100==0){
+                    BulkResponse response=       bulkRequestBuilder.execute().get();
+                    bulkRequestBuilder= ESClient.getClient().prepareBulk();
+                }else{
+                    if(docCount>objects.size()-100 && docCount==objects.size()){
+                        BulkResponse response=       bulkRequestBuilder.execute().get();
+                        bulkRequestBuilder= ESClient.getClient().prepareBulk();
+                    }
+                }
+
             }
-             BulkResponse response=       bulkRequestBuilder.get();
+          //   BulkResponse response=       bulkRequestBuilder.get();
            ESClient.getClient().admin().indices().refresh(refreshRequest()).actionGet();
             System.out.println("Indexed " + species + "  genome objects Size: " + objects.size() + " Exiting thread.");
             System.out.println(Thread.currentThread().getName() + ": " + species + " End " + new Date());

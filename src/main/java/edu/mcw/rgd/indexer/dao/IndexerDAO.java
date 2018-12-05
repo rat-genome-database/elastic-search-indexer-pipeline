@@ -17,6 +17,7 @@ import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.common.xcontent.XContentType;
 
 import java.util.ArrayList;
@@ -139,21 +140,10 @@ public class IndexerDAO extends IndexDAO implements Runnable {
             }
             System.out.println("Objects List Size of " + ont_id + " : " + objs.size());
             log.info("Objects List Size of " + ont_id + " : " + objs.size());
-            BulkRequestBuilder bulkRequestBuilder= ESClient.getClient().prepareBulk();
-            for (IndexObject o : objs) {
-                ObjectMapper mapper = new ObjectMapper();
-                byte[] json = new byte[0];
-                try {
-                    json = mapper.writeValueAsBytes(o);
-                } catch (JsonProcessingException e) {
-                    e.printStackTrace();
-                }
-                bulkRequestBuilder.add(new IndexRequest(index, "search",o.getTerm_acc()).source(json, XContentType.JSON));
-
+            if(objs.size()>0){
+                indexDAO.indexObjects(objs, index, "search");
             }
-            BulkResponse response=       bulkRequestBuilder.get();
 
-            ESClient.getClient().admin().indices().refresh(refreshRequest()).actionGet();
             System.out.println("Indexed " + ont_id + " objects Size: " + objs.size() + " Exiting thread.");
             System.out.println(Thread.currentThread().getName() + ": " + ont_id + " End " + new Date());
             log.info("Indexed " + ont_id + " objects Size: " + objs.size() + " Exiting thread.");

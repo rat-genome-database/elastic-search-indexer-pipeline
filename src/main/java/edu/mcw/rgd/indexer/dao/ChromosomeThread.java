@@ -128,12 +128,12 @@ public class ChromosomeThread implements  Runnable {
              }
                 if(objects.size()>0){
 
-                //    BulkProcessor bulkProcessor=this.getBulkProcessor();
+
                   BulkRequestBuilder bulkRequestBuilder= ESClient.getClient().prepareBulk();
-                    int i=1;
+                    int docCount=1;
+
                 for (ChromosomeIndexObject o : objects) {
-                    if(i<=1000) {
-                        i++;
+                        docCount++;
                         ObjectMapper mapper = new ObjectMapper();
                         byte[] json = new byte[0];
                         try {
@@ -142,14 +142,20 @@ public class ChromosomeThread implements  Runnable {
                             e.printStackTrace();
                         }
 
-                  //      bulkProcessor.add(new IndexRequest(index, "chromosome").source(json, XContentType.JSON));
-                           bulkRequestBuilder.add(new IndexRequest(index, "chromosome").source(json, XContentType.JSON));
-                    }
-                }
-             //       bulkProcessor.close();
+                      bulkRequestBuilder.add(new IndexRequest(index, "chromosome").source(json, XContentType.JSON));
+                        if(docCount%100==0){
+                            BulkResponse response=       bulkRequestBuilder.execute().get();
+                            bulkRequestBuilder= ESClient.getClient().prepareBulk();
+                        }else{
+                            if(docCount>objects.size()-100 && docCount==objects.size()){
+                                BulkResponse response=       bulkRequestBuilder.execute().get();
+                                bulkRequestBuilder= ESClient.getClient().prepareBulk();
+                            }
+                        }
 
-                BulkResponse response=       bulkRequestBuilder.get();
-                    ESClient.getClient().admin().indices().refresh(refreshRequest()).actionGet();
+                }
+
+                ESClient.getClient().admin().indices().refresh(refreshRequest()).actionGet();
                 System.out.println("Indexed mapKey " + mapKey + ",  chromosome objects Size: " + objects.size() + " Exiting thread.");
                 System.out.println(Thread.currentThread().getName() + ": chromosomeThread" + mapKey + " End " + new Date());
             }
@@ -160,29 +166,7 @@ public class ChromosomeThread implements  Runnable {
         }
 
     }
-    public BulkProcessor getBulkProcessor(){
-       return BulkProcessor.builder(ESClient.getClient(), new BulkProcessor.Listener() {
-            @Override
-            public void beforeBulk(long executionId, BulkRequest request) {
-                System.out.println("Number of Actions: "+ request.numberOfActions());
-            }
 
-            @Override
-            public void afterBulk(long executionId, BulkRequest request, BulkResponse response) {
-                System.out.println("Reponse failures: "+ response.hasFailures());
-            }
-
-            @Override
-            public void afterBulk(long executionId, BulkRequest request, Throwable failure) {
-                System.out.println("Failure: "+ failure);
-            }
-        })
-                .setBulkActions(1000)
-                .setBulkSize(new ByteSizeValue(5, ByteSizeUnit.MB))
-                .setFlushInterval(TimeValue.timeValueSeconds(5))
-                .setConcurrentRequests(0)
-                .build();
-    }
 public StringBuffer getDiseaseGeneChartData(List<DiseaseGeneObject> diseaseGenes){
     StringBuffer sb = new StringBuffer();
     sb.append("[");
