@@ -2,9 +2,11 @@ package edu.mcw.rgd.indexer.dao;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.mcw.rgd.dao.AbstractDAO;
 import edu.mcw.rgd.dao.DataSourceFactory;
 import edu.mcw.rgd.dao.impl.*;
 import edu.mcw.rgd.dao.spring.StringMapQuery;
+import edu.mcw.rgd.dao.spring.XdbQuery;
 import edu.mcw.rgd.datamodel.*;
 
 import edu.mcw.rgd.datamodel.ontology.Annotation;
@@ -17,6 +19,7 @@ import edu.mcw.rgd.indexer.model.*;
 import edu.mcw.rgd.indexer.model.genomeInfo.AssemblyInfo;
 import edu.mcw.rgd.indexer.model.genomeInfo.GeneCounts;
 import edu.mcw.rgd.indexer.model.genomeInfo.GenomeIndexObject;
+import edu.mcw.rgd.indexer.spring.XdbObjectQuery;
 import edu.mcw.rgd.process.Utils;
 import edu.mcw.rgd.util.StringUtils;
 import org.apache.log4j.Logger;
@@ -27,7 +30,9 @@ import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.jsoup.Jsoup;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.*;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -37,7 +42,7 @@ import static org.elasticsearch.client.Requests.refreshRequest;
 /**
  * Created by jthota on 3/23/2017.
  */
-public class IndexDAO {
+public class IndexDAO extends AbstractDAO {
 
     private GeneDAO geneDAO = new GeneDAO();
     private StrainDAO strainDAO = new StrainDAO();
@@ -55,6 +60,7 @@ public class IndexDAO {
     private OntologyXDAO ontologyXDAO= new OntologyXDAO();
     private ReferenceDAO referenceDAO=new ReferenceDAO();
     private GenomeDAO genomeDAO=new GenomeDAO();
+    private GenomicElementDAO gdao= new GenomicElementDAO();
 
     private GenomicElementDAO gedao= new GenomicElementDAO();
     Logger log= Logger.getLogger("main");
@@ -128,6 +134,9 @@ public class IndexDAO {
         List<IndexObject> objList = new ArrayList<>();
         List<Gene> genes= geneDAO.getAllActiveGenes();
         List<Alias> aliases=aliasDAO.getActiveAliases(RgdId.OBJECT_KEY_GENES);
+        List<XdbObject> objects=getXdbIdsByObjectKey(RgdId.OBJECT_KEY_GENES);
+        List<Association> associations = adao.getAssociationsByType("promoter_to_gene");
+        List<GenomicElement> genomicElements=gdao.getActiveElements(RgdId.OBJECT_KEY_GENES);
       for(Gene gene: genes) {
          //  Gene gene= geneDAO.getGene(2004);
 
@@ -139,7 +148,7 @@ public class IndexDAO {
             String description= Utils.getGeneDescription(gene);
             int speciesKey=gene.getSpeciesTypeKey();
             String species=SpeciesType.getCommonName(speciesKey);
-          String type=gene.getType();
+            String type=gene.getType();
 
             obj.setTerm_acc(String.valueOf(rgdId));
             obj.setSymbol(symbol);
@@ -156,8 +165,10 @@ public class IndexDAO {
                 synonyms.add(a.getAlias_name());
             }*/
             obj.setSynonyms(getAliasesByRgdId(aliases, rgdId));
-            obj.setXdbIdentifiers(this.getExternalIdentifiers(rgdId));
-            obj.setPromoters(this.getPromotersByGeneRgdId(rgdId));
+         //   obj.setXdbIdentifiers(this.getExternalIdentifiers(rgdId));
+            obj.setXdbIdentifiers(getXdbIds(objects, rgdId));
+        //    obj.setPromoters(this.getPromotersByGeneRgdId(rgdId));
+            obj.setPromoters(getPromoersByRgdId(rgdId, associations, genomicElements));
             obj.setMapDataList(this.getMapData(rgdId));
             obj.setTranscriptIds(this.getTranscriptIds(rgdId));
             obj.setProtein_acc_ids(this.getTranscriptProteinIds(rgdId));
@@ -838,10 +849,6 @@ public class IndexDAO {
         return m.getDescription();
 
     }
-
-
-
-
     public java.util.Map<String, List<Annotation>> getAnnotations(int rgdId) throws Exception {
 
         java.util.Map<String, List<Annotation>> annotMap = new HashMap<>();
@@ -999,9 +1006,51 @@ public class IndexDAO {
         }
         return symbols;
     }
+    public List<String> getPromoersByRgdId(int rgdId, List<Association> associations, List<GenomicElement> gElements) throws Exception {
+
+        List<String> symbols = new ArrayList<>();
+        for (Association a : associations) {
+            if(a.getDetailRgdId()==rgdId) {
+                int mRgdId = a.getMasterRgdId();
+                GenomicElement g= getGenomicElement(mRgdId, gElements);
+            //   GenomicElement g = gdao.getElement(mRgdId);
+                if(g!=null)
+                symbols.add(g.getSymbol());
+            }
+        }
+        return symbols;
+    }
+    public GenomicElement getGenomicElement(int rgdId, List<GenomicElement> genomicElements){
+        for(GenomicElement g: genomicElements){
+            if(g.getRgdId()==rgdId){
+                return g;
+            }
+        }
+        return null;
+    }
+
+   public List<XdbObject> getXdbIdsByObjectKey(int objectKey) throws Exception {
+       String sql = "SELECT  x.rgd_id, x.acc_id FROM rgd_acc_xdb x, rgd_ids i, rgd_objects o, rgd_xdb d WHERE x.rgd_id = i.rgd_id AND i.object_key = o.object_key AND x.xdb_key = d.xdb_key  AND i.object_status=\'ACTIVE\' AND i.species_type_key<>8" +
+               " and o.object_key=?";
+       XdbObjectQuery query= new XdbObjectQuery(this.getDataSource(), sql);
+       List<XdbObject> xdbs= execute(query, new Object[]{objectKey});
+       System.out.println("XDBS SIZE:"+xdbs.size());
+       return xdbs;
+   }
+    public List<String> getXdbIds(List<XdbObject> objects,int rgdId) throws Exception {
+
+        List<String> xdbIds= new ArrayList<>();
+        for(XdbObject o:objects){
+            if(o.getRgdId()==732446){
+                xdbIds.add(o.getAccId());
+            }
+        }
+        return xdbIds;
+    }
+
     public  List<String> getExternalIdentifiers(int rgdId) throws Exception {
 
-        Set<String> idTypes = new HashSet<>();
+
         List<String> xIds=new ArrayList<>();
         ResultSet rs = xdbDAO.getExternalIdsResultSet(rgdId);
         ExternalIdentifierXRef xref;
@@ -1085,10 +1134,15 @@ public class IndexDAO {
     public static void main(String[] args) throws Exception {
 
         IndexDAO dao= new IndexDAO();
-      for(IndexObject obj:  dao.getGenomicElements(RgdId.OBJECT_KEY_CELL_LINES)){
-           System.out.println(obj.getSymbol()+"\t"+ obj.getSpecies()+"\t"+ obj.getTerm_acc());
+        List<XdbObject> objects=dao.getXdbIdsByObjectKey(1);
+        List<String> xdbIds= new ArrayList<>();
+        for(XdbObject o:objects){
+            if(o.getRgdId()==732446){
+                xdbIds.add(o.getAccId());
+            }
         }
-        System.out.println("DONE");
+        System.out.println("XDBIDS SIZE: "+ xdbIds.size());
+        System.out.println("DONE!!!!");
     }
 
 
