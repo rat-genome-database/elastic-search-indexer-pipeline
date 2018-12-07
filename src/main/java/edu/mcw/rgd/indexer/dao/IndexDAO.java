@@ -6,7 +6,7 @@ import edu.mcw.rgd.dao.AbstractDAO;
 import edu.mcw.rgd.dao.DataSourceFactory;
 import edu.mcw.rgd.dao.impl.*;
 import edu.mcw.rgd.dao.spring.StringMapQuery;
-import edu.mcw.rgd.dao.spring.XdbQuery;
+
 import edu.mcw.rgd.datamodel.*;
 
 import edu.mcw.rgd.datamodel.ontology.Annotation;
@@ -21,7 +21,7 @@ import edu.mcw.rgd.indexer.model.genomeInfo.GeneCounts;
 import edu.mcw.rgd.indexer.model.genomeInfo.GenomeIndexObject;
 import edu.mcw.rgd.indexer.spring.XdbObjectQuery;
 import edu.mcw.rgd.process.Utils;
-import edu.mcw.rgd.util.StringUtils;
+
 import org.apache.log4j.Logger;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
@@ -30,9 +30,9 @@ import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.jsoup.Jsoup;
 
-import java.sql.PreparedStatement;
+
 import java.sql.ResultSet;
-import java.sql.Statement;
+
 import java.util.*;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;

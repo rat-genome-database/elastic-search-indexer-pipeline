@@ -1,24 +1,12 @@
 package edu.mcw.rgd.indexer.dao;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
 import edu.mcw.rgd.dao.impl.*;
 
 import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
 import edu.mcw.rgd.datamodel.ontologyx.TermWithStats;
-import edu.mcw.rgd.indexer.client.ESClient;
-import edu.mcw.rgd.indexer.model.Contexts;
 import edu.mcw.rgd.indexer.model.IndexObject;
-
-
-import edu.mcw.rgd.indexer.model.Suggest;
-import org.elasticsearch.action.bulk.BulkRequestBuilder;
-import org.elasticsearch.action.bulk.BulkResponse;
-import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.index.IndexResponse;
-import org.elasticsearch.action.support.WriteRequest;
-import org.elasticsearch.common.xcontent.XContentType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
