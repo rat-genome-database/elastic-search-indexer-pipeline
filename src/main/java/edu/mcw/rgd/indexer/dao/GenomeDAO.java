@@ -260,7 +260,7 @@ public class GenomeDAO extends AbstractDAO{
 
     }
     public GeneCounts  getGeneCounts(int mapKey, int speciesTypeKey, String chr) throws Exception {
-     //   System.out.println("GENE COUNTS OF MAPKEY: " + mapKey +" || CHROMOSOME: "+ chr+"\n======================================");
+
         GeneDAO geneDAO= new GeneDAO();
         MapDAO mapDAO= new MapDAO();
 
@@ -270,7 +270,7 @@ public class GenomeDAO extends AbstractDAO{
         int snrna=0;
         int rrna=0;
         int pseudo=0;
-        int totalGenes=0;
+
         GeneCounts geneCounts = new GeneCounts();
         List<MappedGene> filteredGenes= new ArrayList<>();
         List<MappedGene> mGenes= geneDAO.getActiveMappedGenes(mapKey);
@@ -316,9 +316,7 @@ public class GenomeDAO extends AbstractDAO{
             geneCounts.setrRna(rrna);
             geneCounts.setSnRna(snrna);
             geneCounts.settRna(trna);
-          //  System.out.println("TOTAL GENES: " + filteredGenes.size() + "\nPC:" + proteninCoding + "\nncrna: " + ncrna + "\ntrna:" + trna + "\nsnrna:" + snrna + "\nrrna: " + rrna + "\npseudo: " + pseudo);
 
-        //    geneCounts.setTranscripts(this.getTranscriptsCount(mapKey, chr));
             geneCounts.setMirnaTargets(this.getMirnaTargetCount(mapKey, chr));
 
 
@@ -376,10 +374,7 @@ public class GenomeDAO extends AbstractDAO{
         Map<String, Integer> targetMap=new HashMap<>();
         StatsDAO statsDAO= new StatsDAO();
         targetMap= statsDAO.getMirnaTargetCountsMap(mapKey, chr);
-       /* for(Map.Entry entry:targetMap.entrySet()){
-            System.out.println(entry.getKey() + " : " + entry.getValue());
 
-        }*/
         return targetMap;
     }
     public int getTranscriptsCount(int mapKey, String chr) throws Exception {

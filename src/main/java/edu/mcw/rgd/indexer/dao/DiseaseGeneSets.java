@@ -31,9 +31,7 @@ public class DiseaseGeneSets extends AbstractDAO {
         String rootTerm=ontologyXDAO.getRootTerm("RDO");
         List<TermWithStats> topLevelDiseaseTerms=   ontologyXDAO.getActiveChildTerms(rootTerm,speciesTypeKey);
         List<DiseaseGeneObject> diseaseGeneSets= new ArrayList<>();
-   //     System.out.println("Top Level Terms: " + topLevelDiseaseTerms.size() );
-
-       Ontology ont= ontologyXDAO.getOntology("RDO");
+        Ontology ont= ontologyXDAO.getOntology("RDO");
         String aspect=ont.getAspect();
         for(TermWithStats t:topLevelDiseaseTerms){
             DiseaseGeneObject obj= new DiseaseGeneObject();

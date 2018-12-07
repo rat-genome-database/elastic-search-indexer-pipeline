@@ -29,11 +29,14 @@ import org.springframework.core.io.FileSystemResource;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -41,60 +44,58 @@ import java.util.concurrent.Executors;
  */
 public class Manager {
     private String version;
-
     private int threadCount;
     private IndexAdmin admin;
     private static List<String> envrionments;
     private OntologySynonyms ontSynonyms;
     private RgdIndex rgdIndex;
+    private boolean reindex;
 
     private static final Logger log = Logger.getLogger("main");
 
-    public static void main(String[] args) {
-         Logger esLog= Logger.getLogger("test");
+    public static void main(String[] args) throws Exception {
+        Logger esLog= Logger.getLogger("test");
         DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
         new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new FileSystemResource("properties/AppConfigure.xml"));
-        Manager manager = (Manager) bf.getBean("manager");
+
+       Manager manager = (Manager) bf.getBean("manager");
         ESClient es= (ESClient) bf.getBean("client");
         RgdIndex rgdIndex= (RgdIndex) bf.getBean("rgdIndex");
-        List<String> indices= new ArrayList<>();
-
         System.out.println(manager.getVersion());
         Logger log= Manager.log;
         esLog.info(manager.getVersion());
         System.out.println("LEVEL:" +esLog.getLevel());
         log.info(manager.getVersion());
-        try {
-            if(envrionments.contains(args[1])){
-                rgdIndex.setIndex("rgd_index_"+ args[1]);
-                indices.add("rgd_index_"+args[1]+"1");
-                indices.add("rgd_index_"+args[1]+"2");
-                rgdIndex.setIndices(indices);
 
-            }else{
-                throw new Exception("Incorrect Arguments. Please see USAGE.");
+        try {
+
+            List<String> indices= new ArrayList<>();
+            if (envrionments.contains(args[1])) {
+                rgdIndex.setIndex(args[2]+"_index" + "_" + args[1]);
+                indices.add(args[2]+"_index" + "_" + args[1] + "1");
+                indices.add(args[2]+"_index" + "_" + args[1] + "2");
+                rgdIndex.setIndices(indices);
             }
-          manager.run(args);
+
+        manager.run(args);
         } catch (Exception e) {
             es.destroy();
             e.printStackTrace();
           manager.printUsage();
             log.info(e);
         }
-
+        es.destroy();
     }
-
     private void run(String[] args) throws Exception {
+
         long start = System.currentTimeMillis();
-        boolean reindex=false;
         if (args.length <=2 || (!args[0].equalsIgnoreCase("update") && !args[0].equalsIgnoreCase("reindex"))) {
             printUsage();
             throw new Exception("INCORRECT ARGUMENTS. Please see the USAGE");
 
         }
-       if(args[0].equalsIgnoreCase("reindex")) {
+        if(args[0].equalsIgnoreCase("reindex")) {
            reindex=true;
-            admin.createIndex(log);
             args= (String[]) ArrayUtils.remove(args, 0);
         }
         if(args[0].equalsIgnoreCase("update")) {
@@ -106,89 +107,114 @@ public class Manager {
         }
 
         args= (String[]) ArrayUtils.remove(args, 0);
-        ExecutorService executor = Executors.newFixedThreadPool(threadCount);
 
-        int runningThreadsCount=0;
-        for (String arg : args) {
-            if (!arg.equalsIgnoreCase("annotations") && !arg.equalsIgnoreCase("genomeinfo") && !arg.equalsIgnoreCase("chromosomes")) {
-                runningThreadsCount=runningThreadsCount+1;
-                Runnable workerThread = new ObjectIndexerThread(arg, RgdIndex.getNewAlias(), log);
-                executor.execute(workerThread);
-            } else {
-                if (arg.equalsIgnoreCase("annotations")){
-                OntologyXDAO ontologyXDAO = new OntologyXDAO();
-                List<Ontology> ontologies = ontologyXDAO.getPublicOntologies();
-                for (Ontology o : ontologies) {
+        ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+            boolean searchIndexCreated=false;
+            int runningThreadsCount=0;
+            for (String arg : args) {
+                List<String> indices= new ArrayList<>();
+                Runnable workerThread;
 
-                    String ont_id = o.getId();
-                    List<TermSynonym> termSynonyms = (List<TermSynonym>) ontSynonyms.getClass().getMethod("get" + ont_id).invoke(ontSynonyms);
-                    //     if(!ont_id.equalsIgnoreCase("CHEBI")) {
 
-                    Runnable workerThread = new IndexerDAO(ont_id, o.getName(), RgdIndex.getNewAlias(), termSynonyms);
-                    executor.execute(workerThread);
-              //         }
-                }
-            }else{
+                switch(arg){
+                    case "Qtls" :
+                    case "Strains" :
+                    case "Genes" :
+                    case "Sslps" :
+                    case "GenomicElements" :
+                    case "Annotations" :
+                    case "Reference" :
+                    case "Variants" :
 
-                    if(arg.equalsIgnoreCase("genomeinfo")){
-                        System.out.println("INDEXING GENOMEINFO...");
-                      for(int key : SpeciesType.getSpeciesTypeKeys()) {
-                            // int key=3;
-                            if (key != 0) {
-                                Runnable workerThread= new GenomeInfoThread(key, RgdIndex.getNewAlias(), log);
-                                executor.execute(workerThread);
-            }
+                        if(!searchIndexCreated) {
+                            admin.createIndex(log, "search_mappings", "search");
+                            searchIndexCreated=true;
                         }
-                    }else {
+                        if(!arg.equalsIgnoreCase("annotations")) {
+                            runningThreadsCount = runningThreadsCount + 1;
+                            workerThread = new ObjectIndexerThread(arg, RgdIndex.getNewAlias(), log);
 
+                            executor.execute(workerThread);
+                        }else{
+                            OntologyXDAO ontologyXDAO = new OntologyXDAO();
+                            List<Ontology> ontologies = ontologyXDAO.getPublicOntologies();
+                            for (Ontology o : ontologies) {
+
+                                String ont_id = o.getId();
+                                List<TermSynonym> termSynonyms = (List<TermSynonym>) ontSynonyms.getClass().getMethod("get" + ont_id).invoke(ontSynonyms);
+                                //     if(!ont_id.equalsIgnoreCase("CHEBI")) {
+
+                                workerThread = new IndexerDAO(ont_id, o.getName(), RgdIndex.getNewAlias(), termSynonyms);
+                                executor.execute(workerThread);
+                            }
+                        }
+
+                    break;
+
+
+                    case "Chromosomes":
+                         admin.createIndex(log, "chromosome_mappings", "chromosome");
                         if(arg.equalsIgnoreCase("chromosomes")){
                             MapDAO mapDAO= new MapDAO();
                             System.out.println("INDEXING Chromosomes...");
-                         for(int key : SpeciesType.getSpeciesTypeKeys()) {
-                              //   int key=3;
+                            for(int key : SpeciesType.getSpeciesTypeKeys()) {
+                                //   int key=3;
                                 if (key != 0) {
-                                List<Map> maps=    mapDAO.getMaps(key,"bp");
+                                    List<Map> maps=    mapDAO.getMaps(key,"bp");
                                     for(Map m: maps){
                                         int mapKey= m.getKey();
                                         String assembly= m.getName();
                                         if(mapKey!=6 && mapKey!=36 && mapKey!=8 && mapKey!=21 && mapKey!=19 && mapKey!=7) {
-                                            Runnable workerThread = new ChromosomeThread(key, RgdIndex.getNewAlias(), mapKey, assembly);
+                                            workerThread = new ChromosomeThread(key, RgdIndex.getNewAlias(), mapKey, assembly);
                                             executor.execute(workerThread);
-                    }
-                }
+                                        }
+                                    }
 
-            }
+                                }
                             }
-                       }
-                    }
+                        }
+                        break;
+                    case "GenomeInfo":
+
+                        admin.createIndex(log, "genome_mappings", "genome");
+                        System.out.println("INDEXING GENOMEINFO...");
+                       for(int key : SpeciesType.getSpeciesTypeKeys()) {
+                         //    int key=3;
+                            if (key != 0) {
+                                workerThread= new GenomeInfoThread(key, RgdIndex.getNewAlias(), log);
+                                executor.execute(workerThread);
+                            }
+                      }
+                        break;
+                    default:
+                        break;
+
                 }
-
-        }
-
-        }
-        executor.shutdown();
-        while (!executor.isTerminated()) {}
-        System.out.println("Finished all threads: " + new Date());
-        log.info("Finished all threads: " + new Date());
-
-        String clusterStatus = this.getClusterHealth(RgdIndex.getNewAlias());
-        if (!clusterStatus.equalsIgnoreCase("ok")) {
-            System.out.println(clusterStatus + ", refusing to continue with operations");
-            log.info(clusterStatus + ", refusing to continue with operations");
-        } else {
-            if(reindex) {
-              System.out.println("CLUSTER STATUR:"+ clusterStatus+". Switching Alias...");
-                log.info("CLUSTER STATUR:"+ clusterStatus+". Switching Alias...");
-               switchAlias();
             }
+            executor.shutdown();
+            while (!executor.isTerminated()) {}
+            System.out.println("Finished all threads: " + new Date());
+            log.info("Finished all threads: " + new Date());
+
+            String clusterStatus = this.getClusterHealth(RgdIndex.getNewAlias());
+            if (!clusterStatus.equalsIgnoreCase("ok")) {
+                System.out.println(clusterStatus + ", refusing to continue with operations");
+                log.info(clusterStatus + ", refusing to continue with operations");
+            } else {
+                if(reindex) {
+                    System.out.println("CLUSTER STATUR:"+ clusterStatus+". Switching Alias...");
+                    log.info("CLUSTER STATUR:"+ clusterStatus+". Switching Alias...");
+                    switchAlias();
+                }
+            }
+
+            long end = System.currentTimeMillis();
+            System.out.println(" - " + Utils.formatElapsedTime(start, end));
+            log.info(" - " + Utils.formatElapsedTime(start, end));
+
+            System.out.println("CLIENT IS CLOSED");
         }
 
-        long end = System.currentTimeMillis();
-        System.out.println(" - " + Utils.formatElapsedTime(start, end));
-        log.info(" - " + Utils.formatElapsedTime(start, end));
-
-        System.out.println("CLIENT IS CLOSED");
-    }
     public boolean switchAlias() throws Exception {
         System.out.println("NEEW ALIAS: " + RgdIndex.getNewAlias() + " || OLD ALIAS:" + RgdIndex.getOldAlias());
 
@@ -285,5 +311,13 @@ return  true;
 
     public void setEnvrionments(List<String> envrionments) {
         this.envrionments = envrionments;
+    }
+
+    public boolean isReindex() {
+        return reindex;
+    }
+
+    public void setReindex(boolean reindex) {
+        this.reindex = reindex;
     }
 }

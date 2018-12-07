@@ -1,0 +1,27 @@
+{
+  "search_index":{
+    "properties":{
+
+      "id":{
+        "type":"keyword"
+      },
+      "value":{
+        "type":"text",
+        "analyzer":"my_analyzer",
+        "search_analyzer":"my_stop_analyzer",
+        "search_quote_analyzer": "my_analyzer"
+      },
+      "object_type":{
+        "type":"text",
+        "index":false
+      },
+      "field_type":{
+        "type":"text",
+        "index":false
+      },
+      "species_type_key":{
+        "type":"keyword"
+      }
+    }
+  }
+}

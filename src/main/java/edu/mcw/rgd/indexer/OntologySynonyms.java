@@ -12,7 +12,7 @@ import java.util.List;
  * Created by jthota on 7/20/2017.
  */
 public class OntologySynonyms {
-    private List<TermSynonym> pw;
+  private List<TermSynonym> pw;
     private List<TermSynonym> rdo;
   //  private List<TermSynonym> disease;
     private List<TermSynonym> bp;
@@ -90,7 +90,7 @@ public class OntologySynonyms {
         this.disease = disease;
     }
 */
-    public List<TermSynonym> getBP() {
+  public List<TermSynonym> getBP() {
         return bp;
     }
 

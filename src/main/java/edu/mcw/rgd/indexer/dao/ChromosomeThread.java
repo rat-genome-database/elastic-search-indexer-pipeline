@@ -7,16 +7,28 @@ import edu.mcw.rgd.dao.impl.MapDAO;
 import edu.mcw.rgd.datamodel.*;
 import edu.mcw.rgd.indexer.client.ESClient;
 import edu.mcw.rgd.indexer.model.genomeInfo.*;
+import org.elasticsearch.action.bulk.BulkProcessor;
+import org.elasticsearch.action.bulk.BulkRequest;
+import org.elasticsearch.action.bulk.BulkRequestBuilder;
+import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.common.unit.ByteSizeUnit;
+import org.elasticsearch.common.unit.ByteSizeValue;
+import org.elasticsearch.common.unit.TimeValue;
+import org.elasticsearch.common.xcontent.XContentType;
 
 import java.util.*;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
+import static org.elasticsearch.client.Requests.refreshRequest;
 
 /**
  * Created by jthota on 11/7/2017.
  */
 public class ChromosomeThread implements  Runnable {
-    private Thread t;
+ //   private Thread t;
     private int key;
     private int mapKey;
     private String assembly;
@@ -30,7 +42,7 @@ public class ChromosomeThread implements  Runnable {
     }
 
     @Override
-    public void run() {
+    public void run()  {
         System.out.println(Thread.currentThread().getName() + ": " + SpeciesType.getCommonName(key) + " || ChromosomeThread MapKey "+mapKey+ " started " + new Date());
         MapDAO mapDAO= new MapDAO();
         GenomeDAO genomeDAO= new GenomeDAO();
@@ -113,31 +125,48 @@ public class ChromosomeThread implements  Runnable {
                     }
                     objects.add(obj);
 
-               }
+             }
                 if(objects.size()>0){
 
 
-                for (ChromosomeIndexObject o : objects) {
-                    ObjectMapper mapper = new ObjectMapper();
-                    byte[] json = new byte[0];
-                    try {
-                        json = mapper.writeValueAsBytes(o);
-                    } catch (JsonProcessingException e) {
-                        e.printStackTrace();
-                    }
+                  BulkRequestBuilder bulkRequestBuilder= ESClient.getClient().prepareBulk();
+                    int docCount=1;
 
-                    IndexResponse response = ESClient.getClient().prepareIndex(index, "chromosomes")
-                            .setSource(json).get();
+                for (ChromosomeIndexObject o : objects) {
+                        docCount++;
+                        ObjectMapper mapper = new ObjectMapper();
+                        byte[] json = new byte[0];
+                        try {
+                            json = mapper.writeValueAsBytes(o);
+                        } catch (JsonProcessingException e) {
+                            e.printStackTrace();
+                        }
+
+                      bulkRequestBuilder.add(new IndexRequest(index, "chromosome").source(json, XContentType.JSON));
+                        if(docCount%100==0){
+                            BulkResponse response=       bulkRequestBuilder.execute().get();
+                            bulkRequestBuilder= ESClient.getClient().prepareBulk();
+                        }else{
+                            if(docCount>objects.size()-100 && docCount==objects.size()){
+                                BulkResponse response=       bulkRequestBuilder.execute().get();
+                                bulkRequestBuilder= ESClient.getClient().prepareBulk();
+                            }
+                        }
+
                 }
+
+                ESClient.getClient().admin().indices().refresh(refreshRequest()).actionGet();
                 System.out.println("Indexed mapKey " + mapKey + ",  chromosome objects Size: " + objects.size() + " Exiting thread.");
                 System.out.println(Thread.currentThread().getName() + ": chromosomeThread" + mapKey + " End " + new Date());
             }
             }
         }catch (Exception e){
             e.printStackTrace();
+            throw new RuntimeException();
         }
 
     }
+
 public StringBuffer getDiseaseGeneChartData(List<DiseaseGeneObject> diseaseGenes){
     StringBuffer sb = new StringBuffer();
     sb.append("[");

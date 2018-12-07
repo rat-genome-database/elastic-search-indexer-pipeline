@@ -21,14 +21,12 @@
     <bean id="client" class="edu.mcw.rgd.indexer.client.ESClient" init-method="init" destroy-method="destroy"/>
     <bean id="rdao" class="edu.mcw.rgd.indexer.dao.IndexDAO">
     </bean>
-<bean id="ontologySynonyms" class="edu.mcw.rgd.indexer.OntologySynonyms"/>
+    <bean id="ontologySynonyms" class="edu.mcw.rgd.indexer.OntologySynonyms"/>
 
     <bean id="admin" class="edu.mcw.rgd.indexer.client.IndexAdmin">
-        <property name="rgdIndex" ref="rgdIndex"/>
+            <property name="rgdIndex" ref="rgdIndex"/>
+    </bean>
+    <bean id="rgdIndex" class="edu.mcw.rgd.indexer.model.RgdIndex">
 
     </bean>
-<bean id="rgdIndex" class="edu.mcw.rgd.indexer.model.RgdIndex">
-
-</bean>
-
 </beans>

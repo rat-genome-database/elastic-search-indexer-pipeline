@@ -13,12 +13,19 @@ import edu.mcw.rgd.indexer.model.IndexObject;
 
 
 import edu.mcw.rgd.indexer.model.Suggest;
+import org.elasticsearch.action.bulk.BulkRequestBuilder;
+import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.action.support.WriteRequest;
+import org.elasticsearch.common.xcontent.XContentType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+
+import static org.elasticsearch.client.Requests.refreshRequest;
 
 /**
  * Created by jthota on 6/20/2017.
@@ -99,7 +106,7 @@ public class IndexerDAO extends IndexDAO implements Runnable {
 
                             annotsMatrix = this.getAnnotsMatrix(termStats);
                             obj.setAnnotationsMatrix(annotsMatrix);
-                            // System.out.println("AnnotsCount: "+ annotsCount+"\nTermOnlyAnnotsCount: "+ termOnlyAnnotsCount+"\nchildtermannotsCounts: "+ childTermAnnotsCount);
+
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -133,26 +140,17 @@ public class IndexerDAO extends IndexDAO implements Runnable {
             }
             System.out.println("Objects List Size of " + ont_id + " : " + objs.size());
             log.info("Objects List Size of " + ont_id + " : " + objs.size());
-            for (IndexObject o : objs) {
-                ObjectMapper mapper = new ObjectMapper();
-                byte[] json = new byte[0];
-                try {
-                    json = mapper.writeValueAsBytes(o);
-                } catch (JsonProcessingException e) {
-                    e.printStackTrace();
-                }
-
-                IndexResponse response = ESClient.getClient().prepareIndex(index, "rgd_objects", String.valueOf(o.getTerm_acc()))
-                        .setSource(json).get();
+            if(objs.size()>0){
+                indexDAO.indexObjects(objs, index, "search");
             }
-
 
             System.out.println("Indexed " + ont_id + " objects Size: " + objs.size() + " Exiting thread.");
             System.out.println(Thread.currentThread().getName() + ": " + ont_id + " End " + new Date());
             log.info("Indexed " + ont_id + " objects Size: " + objs.size() + " Exiting thread.");
             log.info(Thread.currentThread().getName() + ": " + ont_id + " End " + new Date());
         } catch (Exception e) {
-
+            e.printStackTrace();
+            throw new RuntimeException();
         }
     }
 

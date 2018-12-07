@@ -10,12 +10,20 @@ import edu.mcw.rgd.indexer.model.IndexObject;
 import edu.mcw.rgd.indexer.model.genomeInfo.AssemblyInfo;
 import edu.mcw.rgd.indexer.model.genomeInfo.GeneCounts;
 import edu.mcw.rgd.indexer.model.genomeInfo.GenomeIndexObject;
+import org.apache.commons.lang.ObjectUtils;
 import org.apache.log4j.Logger;
+import org.elasticsearch.action.bulk.BulkRequestBuilder;
+import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.action.support.WriteRequest;
+import org.elasticsearch.common.xcontent.XContentType;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import static org.elasticsearch.client.Requests.refreshRequest;
 
 
 /**
@@ -40,15 +48,18 @@ public class GenomeInfoThread implements Runnable {
     public void run() {
         System.out.println(Thread.currentThread().getName() + ": " + SpeciesType.getCommonName(key) + " started " + new Date());
         log.info(Thread.currentThread().getName() + ": " + SpeciesType.getCommonName(key) + " started " + new Date());
-        MapDAO mapDAO= new MapDAO();
+
+      MapDAO mapDAO= new MapDAO();
         GenomeDAO genomeDAO= new GenomeDAO();
         StrainVariants variants= new StrainVariants();
         List<GenomeIndexObject> objects= new ArrayList<>();
-        try {
-            String species = SpeciesType.getCommonName(key);
+     try {
+
+
+         String species = SpeciesType.getCommonName(key);
             List<Map> maps = mapDAO.getMaps(key,"bp");
-            for (edu.mcw.rgd.datamodel.Map m : maps) {
-             //   Map m= mapDAO.getMap(4);
+           for (edu.mcw.rgd.datamodel.Map m : maps) {
+             // Map m= mapDAO.getMap(4);
 
                 int mapKey=m.getKey();
                 if(mapKey!=6 && mapKey!=36 && mapKey!=8 && mapKey!=21 && mapKey!=19 && mapKey!=7) {
@@ -158,10 +169,13 @@ public class GenomeInfoThread implements Runnable {
 
                 objects.add(obj);
           }
-          }
+        }
             System.out.println("Objects List Size of " + species + " : " + objects.size());
            log.info("Objects List Size of " + species + " : " + objects.size());
+         BulkRequestBuilder bulkRequestBuilder= ESClient.getClient().prepareBulk().setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
+         int docCount=0;
             for (GenomeIndexObject o : objects) {
+                docCount++;
                 ObjectMapper mapper = new ObjectMapper();
                 byte[] json = new byte[0];
                 try {
@@ -169,18 +183,28 @@ public class GenomeInfoThread implements Runnable {
                 } catch (JsonProcessingException e) {
                     e.printStackTrace();
                 }
+                bulkRequestBuilder.add(new IndexRequest(index, "genome").source(json, XContentType.JSON));
 
-                IndexResponse response = ESClient.getClient().prepareIndex(index, "genomeinfo")
-                        .setSource(json).get();
+                if(docCount%100==0){
+                    BulkResponse response=       bulkRequestBuilder.execute().get();
+                    bulkRequestBuilder= ESClient.getClient().prepareBulk();
+                }else{
+                    if(docCount>objects.size()-100 && docCount==objects.size()){
+                        BulkResponse response=       bulkRequestBuilder.execute().get();
+                        bulkRequestBuilder= ESClient.getClient().prepareBulk();
+                    }
+                }
+
             }
-
-
+          //   BulkResponse response=       bulkRequestBuilder.get();
+           ESClient.getClient().admin().indices().refresh(refreshRequest()).actionGet();
             System.out.println("Indexed " + species + "  genome objects Size: " + objects.size() + " Exiting thread.");
             System.out.println(Thread.currentThread().getName() + ": " + species + " End " + new Date());
             log.info("Indexed " + species + "  genome objects Size: " + objects.size() + " Exiting thread.");
            log.info(Thread.currentThread().getName() + ": " + species + " End " + new Date());
-        }catch (Exception e){
+       }catch (Exception e){
             e.printStackTrace();
+            throw new RuntimeException();
         }
 
 
