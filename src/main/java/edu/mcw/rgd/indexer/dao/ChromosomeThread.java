@@ -2,25 +2,19 @@ package edu.mcw.rgd.indexer.dao;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import edu.mcw.rgd.dao.impl.GeneDAO;
+
 import edu.mcw.rgd.dao.impl.MapDAO;
 import edu.mcw.rgd.datamodel.*;
 import edu.mcw.rgd.indexer.client.ESClient;
 import edu.mcw.rgd.indexer.model.genomeInfo.*;
-import org.elasticsearch.action.bulk.BulkProcessor;
-import org.elasticsearch.action.bulk.BulkRequest;
+
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.index.IndexResponse;
-import org.elasticsearch.common.unit.ByteSizeUnit;
-import org.elasticsearch.common.unit.ByteSizeValue;
-import org.elasticsearch.common.unit.TimeValue;
+
 import org.elasticsearch.common.xcontent.XContentType;
 
 import java.util.*;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import static org.elasticsearch.client.Requests.refreshRequest;
 

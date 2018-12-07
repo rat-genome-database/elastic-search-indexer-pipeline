@@ -3,14 +3,12 @@ package edu.mcw.rgd.indexer.dao;
 import edu.mcw.rgd.dao.AbstractDAO;
 import edu.mcw.rgd.dao.impl.*;
 import edu.mcw.rgd.dao.spring.CountQuery;
-import edu.mcw.rgd.dao.spring.MappedGeneQuery;
-import edu.mcw.rgd.dao.spring.TranscriptQuery;
-import edu.mcw.rgd.dao.spring.ontologyx.TermQuery;
+
 import edu.mcw.rgd.datamodel.*;
-import edu.mcw.rgd.datamodel.ontologyx.Term;
+
 import edu.mcw.rgd.indexer.model.genomeInfo.*;
 
-import org.springframework.jdbc.object.MappingSqlQuery;
+
 
 
 import java.sql.Connection;

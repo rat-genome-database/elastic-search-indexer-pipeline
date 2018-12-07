@@ -1,25 +1,17 @@
 package edu.mcw.rgd.indexer.dao;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+
 import edu.mcw.rgd.indexer.Manager;
 import edu.mcw.rgd.indexer.client.ESClient;
 import edu.mcw.rgd.indexer.client.IndexAdmin;
 import edu.mcw.rgd.indexer.model.IndexObject;
-
-
 import edu.mcw.rgd.indexer.model.RgdIndex;
-import org.elasticsearch.action.ActionListener;
-import org.elasticsearch.action.bulk.BulkRequestBuilder;
-import org.elasticsearch.action.bulk.BulkResponse;
-import org.elasticsearch.action.index.IndexRequest;
 
 import org.apache.log4j.Logger;
-import org.elasticsearch.action.support.WriteRequest;
-import org.elasticsearch.common.xcontent.XContentType;
+
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.FileSystemResource;
-
 
 import java.util.ArrayList;
 import java.util.Date;

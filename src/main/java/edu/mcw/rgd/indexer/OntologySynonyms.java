@@ -2,10 +2,8 @@ package edu.mcw.rgd.indexer;
 
 import edu.mcw.rgd.dao.impl.OntologyXDAO;
 import edu.mcw.rgd.datamodel.ontologyx.Ontology;
-import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
