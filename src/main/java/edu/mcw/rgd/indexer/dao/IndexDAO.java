@@ -133,11 +133,16 @@ public class IndexDAO extends AbstractDAO {
 
         List<IndexObject> objList = new ArrayList<>();
         List<Gene> genes= geneDAO.getAllActiveGenes();
-        List<Alias> aliases=aliasDAO.getActiveAliases(RgdId.OBJECT_KEY_GENES);
+        System.out.println("Active Genes Size: " + genes.size());
+ /*       List<Alias> aliases=aliasDAO.getActiveAliases(RgdId.OBJECT_KEY_GENES);
+  //      System.out.println("gene alias size : "+ aliases.size());
         List<XdbObject> objects=getXdbIdsByObjectKey(RgdId.OBJECT_KEY_GENES);
+        System.out.println("XDB identifiers Size: "+ objects.size());
         List<Association> associations = adao.getAssociationsByType("promoter_to_gene");
+        System.out.println("Associations Size: "+ associations.size());
         List<GenomicElement> genomicElements=gdao.getActiveElements(RgdId.OBJECT_KEY_GENES);
-      for(Gene gene: genes) {
+        System.out.println("GenomicElements size: "+ genomicElements.size());*/
+     for(Gene gene: genes) {
          //  Gene gene= geneDAO.getGene(2004);
 
            IndexObject obj = new IndexObject();
@@ -159,16 +164,17 @@ public class IndexDAO extends AbstractDAO {
             obj.setCategory("Gene");
             obj.setName(name);
 
-        /*    List<AliasData> aliases = this.getAliases(gene.getRgdId());
+           List<AliasData> aliases = this.getAliases(gene.getRgdId());
             List<String> synonyms = new ArrayList<>();
             for (AliasData a : aliases) {
                 synonyms.add(a.getAlias_name());
-            }*/
-            obj.setSynonyms(getAliasesByRgdId(aliases, rgdId));
-         //   obj.setXdbIdentifiers(this.getExternalIdentifiers(rgdId));
-            obj.setXdbIdentifiers(getXdbIds(objects, rgdId));
-        //    obj.setPromoters(this.getPromotersByGeneRgdId(rgdId));
-            obj.setPromoters(getPromoersByRgdId(rgdId, associations, genomicElements));
+            }
+         obj.setSynonyms(synonyms);
+      //    obj.setSynonyms(getAliasesByRgdId(aliases, rgdId));
+         obj.setXdbIdentifiers(this.getExternalIdentifiers(rgdId));
+       //   obj.setXdbIdentifiers(getXdbIds(objects, rgdId));
+         obj.setPromoters(this.getPromotersByGeneRgdId(rgdId));
+          //  obj.setPromoters(getPromoersByRgdId(rgdId, associations, genomicElements));
             obj.setMapDataList(this.getMapData(rgdId));
             obj.setTranscriptIds(this.getTranscriptIds(rgdId));
             obj.setProtein_acc_ids(this.getTranscriptProteinIds(rgdId));
@@ -1134,14 +1140,7 @@ public class IndexDAO extends AbstractDAO {
     public static void main(String[] args) throws Exception {
 
         IndexDAO dao= new IndexDAO();
-        List<XdbObject> objects=dao.getXdbIdsByObjectKey(1);
-        List<String> xdbIds= new ArrayList<>();
-        for(XdbObject o:objects){
-            if(o.getRgdId()==732446){
-                xdbIds.add(o.getAccId());
-            }
-        }
-        System.out.println("XDBIDS SIZE: "+ xdbIds.size());
+       dao.getGenes();
         System.out.println("DONE!!!!");
     }
 
