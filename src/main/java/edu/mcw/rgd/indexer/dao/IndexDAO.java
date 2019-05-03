@@ -614,7 +614,7 @@ public class IndexDAO extends AbstractDAO {
        for(GenomicElement ge: gedao.getActiveElements(objectKey)) {
            //      GenomicElement ge= gedao.getElement(10053741);
            int speciesTypeKey = ge.getSpeciesTypeKey();
-         
+
            String species = SpeciesType.getCommonName(speciesTypeKey);
            if (SpeciesType.isSearchable(speciesTypeKey)) {
                IndexObject g = new IndexObject();
@@ -780,7 +780,7 @@ public class IndexDAO extends AbstractDAO {
     public List<SpeciesObject> getSpeicesObjects(TermWithStats termWithStats) throws Exception {
         List<SpeciesObject> sList= new ArrayList<>();
    //     List<Integer> speciesTypeKeys=new ArrayList<>(Arrays.asList(1,2,3,4,5,6,7));
-        List<Integer> speciesTypeKeys= (List<Integer>) SpeciesType.getSpeciesTypeKeys();
+        Collection<Integer> speciesTypeKeys=  SpeciesType.getSpeciesTypeKeys();
         List<Integer> objectKeys= new ArrayList<>(Arrays.asList(1,5,6,7));
         for(int skey:speciesTypeKeys){
             if(SpeciesType.isSearchable(skey)){
