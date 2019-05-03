@@ -612,36 +612,40 @@ public class IndexDAO extends AbstractDAO {
             category="Promoter";
         }
        for(GenomicElement ge: gedao.getActiveElements(objectKey)) {
-           //      GenomicElement ge= gedao.getElement(10053741);
-           int speciesTypeKey = ge.getSpeciesTypeKey();
+           try {
+               //      GenomicElement ge= gedao.getElement(10053741);
+               int speciesTypeKey = ge.getSpeciesTypeKey();
 
-           String species = SpeciesType.getCommonName(speciesTypeKey);
-           if (SpeciesType.isSearchable(speciesTypeKey)) {
-               IndexObject g = new IndexObject();
-               int rgdId = ge.getRgdId();
-               String symbol = ge.getSymbol();
+               String species = SpeciesType.getCommonName(speciesTypeKey);
+               if (SpeciesType.isSearchable(speciesTypeKey)) {
+                   IndexObject g = new IndexObject();
+                   int rgdId = ge.getRgdId();
+                   String symbol = ge.getSymbol();
 
-               g.setSpecies(species);
-               g.setTerm_acc(String.valueOf(rgdId));
-               g.setSymbol(symbol);
-               g.setCategory(category);
-               g.setSuggest(this.getSuggest(symbol, null, category.toLowerCase()));
-               List<AliasData> aliases = this.getAliases(rgdId);
-               List<String> synonyms = new ArrayList<>();
-               for (AliasData a : aliases) {
-                   synonyms.add(a.getAlias_name());
+                   g.setSpecies(species);
+                   g.setTerm_acc(String.valueOf(rgdId));
+                   g.setSymbol(symbol);
+                   g.setCategory(category);
+                   g.setSuggest(this.getSuggest(symbol, null, category.toLowerCase()));
+                   List<AliasData> aliases = this.getAliases(rgdId);
+                   List<String> synonyms = new ArrayList<>();
+                   for (AliasData a : aliases) {
+                       synonyms.add(a.getAlias_name());
+                   }
+                   g.setSynonyms(synonyms);
+                   g.setXdbIdentifiers(this.getExternalIdentifiers(rgdId));
+                   if (species == null || species.equals("")) {
+                       System.out.println(symbol + "\t" + rgdId);
+                       log.info(symbol + "\t" + rgdId);
+                   }
+
+                   g.setAnnotationsCount(this.getAnnotsCount(rgdId));
+                   objList.add(g);
                }
-               g.setSynonyms(synonyms);
-               g.setXdbIdentifiers(this.getExternalIdentifiers(rgdId));
-               if (species == null || species.equals("")) {
-                   System.out.println(symbol + "\t" + rgdId);
-                   log.info(symbol + "\t" + rgdId);
-               }
-
-               g.setAnnotationsCount(this.getAnnotsCount(rgdId));
-               objList.add(g);
+           }catch (Exception e){
+               System.out.println(ge.getRgdId()+"\t"+ ge.getSpeciesTypeKey());
+               e.printStackTrace();
            }
-
        }
         return objList;
     }
