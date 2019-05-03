@@ -248,6 +248,10 @@ public class GenomeDAO extends AbstractDAO{
                         info.setRefSeqAssemblyAccession("GCF_000236235.1");
                     }
                     break;
+                case 9:
+                    if(mapKey==900){}
+                    if(mapKey==910){}
+                    if(mapKey==911){}
                 default:
             }
 
