@@ -611,13 +611,15 @@ public class IndexDAO extends AbstractDAO {
         if(objectKey==16){
             category="Promoter";
         }
-       for(GenomicElement ge: gedao.getActiveElements(objectKey)) {
+     for(GenomicElement ge: gedao.getActiveElements(objectKey)) {
+       //    GenomicElement ge= gedao.getElement(8655626);
            try {
                //      GenomicElement ge= gedao.getElement(10053741);
                int speciesTypeKey = ge.getSpeciesTypeKey();
-
-               String species = SpeciesType.getCommonName(speciesTypeKey);
-               if (SpeciesType.isSearchable(speciesTypeKey)) {
+               boolean isSearchable= SpeciesType.isSearchable(speciesTypeKey);
+          
+               if (isSearchable) {
+                   String species = SpeciesType.getCommonName(speciesTypeKey);
                    IndexObject g = new IndexObject();
                    int rgdId = ge.getRgdId();
                    String symbol = ge.getSymbol();
@@ -646,7 +648,7 @@ public class IndexDAO extends AbstractDAO {
                System.out.println(ge.getRgdId()+"\t"+ ge.getSpeciesTypeKey());
                e.printStackTrace();
            }
-       }
+      }
         return objList;
     }
     public List<IndexObject> getVariants() throws Exception{
@@ -1179,8 +1181,9 @@ public class IndexDAO extends AbstractDAO {
         ESClient.getClient().admin().indices().refresh(refreshRequest()).actionGet();
     }
     public static void main(String[] args) throws Exception {
-
+        GenomicElementDAO gedao= new GenomicElementDAO();
         IndexDAO dao= new IndexDAO();
+
        dao.getGenomicElements();
         System.out.println("DONE!!!!");
     }
