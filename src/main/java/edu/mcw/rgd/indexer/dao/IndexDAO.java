@@ -64,11 +64,13 @@ public class IndexDAO extends AbstractDAO {
 
     private GenomicElementDAO gedao= new GenomicElementDAO();
     Logger log= Logger.getLogger("main");
+
     public List<GenomeIndexObject> getGenomeInfo() throws Exception {
         List<GenomeIndexObject> objects= new ArrayList<>();
         for(int key : SpeciesType.getSpeciesTypeKeys()) {
             //  int key=3;
-            if (key != 0) {
+            boolean isSearchable=SpeciesType.isSearchable(key);
+            if (key != 0 && isSearchable) {
              //   System.out.println("SPECIES TYPE KEY: " + key);
                 String species = SpeciesType.getCommonName(key);
                 List<edu.mcw.rgd.datamodel.Map> maps = mapDAO.getMaps(key);
@@ -137,46 +139,48 @@ public class IndexDAO extends AbstractDAO {
 
      for(Gene gene: genes) {
          //  Gene gene= geneDAO.getGene(2004);
+         int speciesKey = gene.getSpeciesTypeKey();
+            boolean isSearchable=SpeciesType.isSearchable(speciesKey);
+         if (isSearchable) {
+             String species = SpeciesType.getCommonName(speciesKey);
+             IndexObject obj = new IndexObject();
+             int rgdId = gene.getRgdId();
+             String symbol = gene.getSymbol();
+             String name = gene.getName();
+             String htmlStrippedSymbol = Jsoup.parse(symbol).text();
+             String description = Utils.getGeneDescription(gene);
 
-           IndexObject obj = new IndexObject();
-            int rgdId=gene.getRgdId();
-            String symbol=gene.getSymbol();
-            String name=gene.getName();
-            String htmlStrippedSymbol= Jsoup.parse(symbol).text();
-            String description= Utils.getGeneDescription(gene);
-            int speciesKey=gene.getSpeciesTypeKey();
-            String species=SpeciesType.getCommonName(speciesKey);
-            String type=gene.getType();
+             String type = gene.getType();
 
-            obj.setTerm_acc(String.valueOf(rgdId));
-            obj.setSymbol(symbol);
-            obj.setHtmlStrippedSymbol(htmlStrippedSymbol);
-            obj.setDescription(description);
-            obj.setSpecies(species);
-            obj.setType(type);
-            obj.setCategory("Gene");
-            obj.setName(name);
+             obj.setTerm_acc(String.valueOf(rgdId));
+             obj.setSymbol(symbol);
+             obj.setHtmlStrippedSymbol(htmlStrippedSymbol);
+             obj.setDescription(description);
+             obj.setSpecies(species);
+             obj.setType(type);
+             obj.setCategory("Gene");
+             obj.setName(name);
 
-           List<AliasData> aliases = this.getAliases(gene.getRgdId());
-            List<String> synonyms = new ArrayList<>();
-            for (AliasData a : aliases) {
-                synonyms.add(a.getAlias_name());
-            }
-         obj.setSynonyms(synonyms);
-      //    obj.setSynonyms(getAliasesByRgdId(aliases, rgdId));
-         obj.setXdbIdentifiers(this.getExternalIdentifiers(rgdId));
-       //   obj.setXdbIdentifiers(getXdbIds(objects, rgdId));
-         obj.setPromoters(this.getPromotersByGeneRgdId(rgdId));
-          //  obj.setPromoters(getPromoersByRgdId(rgdId, associations, genomicElements));
-            obj.setMapDataList(this.getMapData(rgdId));
-            obj.setTranscriptIds(this.getTranscriptIds(rgdId));
-            obj.setProtein_acc_ids(this.getTranscriptProteinIds(rgdId));
-            obj.setAnnotationsCount(this.getAnnotsCount(rgdId));
-            obj.setSuggest(this.getSuggest(symbol, null, "gene"));
-            objList.add(obj);
+             List<AliasData> aliases = this.getAliases(gene.getRgdId());
+             List<String> synonyms = new ArrayList<>();
+             for (AliasData a : aliases) {
+                 synonyms.add(a.getAlias_name());
+             }
+             obj.setSynonyms(synonyms);
+             //    obj.setSynonyms(getAliasesByRgdId(aliases, rgdId));
+             obj.setXdbIdentifiers(this.getExternalIdentifiers(rgdId));
+             //   obj.setXdbIdentifiers(getXdbIds(objects, rgdId));
+             obj.setPromoters(this.getPromotersByGeneRgdId(rgdId));
+             //  obj.setPromoters(getPromoersByRgdId(rgdId, associations, genomicElements));
+             obj.setMapDataList(this.getMapData(rgdId));
+             obj.setTranscriptIds(this.getTranscriptIds(rgdId));
+             obj.setProtein_acc_ids(this.getTranscriptProteinIds(rgdId));
+             obj.setAnnotationsCount(this.getAnnotsCount(rgdId));
+             obj.setSuggest(this.getSuggest(symbol, null, "gene"));
+             objList.add(obj);
 
+         }
      }
-
         return objList;
     }
     public int getAnnotsCount(int rgdId) throws Exception {
@@ -333,44 +337,48 @@ public class IndexDAO extends AbstractDAO {
         //  Strain strain=strainDAO.getStrain(7248453);
   //      List<Alias> aliases=aliasDAO.getActiveAliases(RgdId.OBJECT_KEY_STRAINS);
         List<Strain> strains= strainDAO.getActiveStrains();
-        for(Strain strain: strains){
-            IndexObject s= new IndexObject();
-            String symbol=strain.getSymbol();
-            String source= strain.getSource();
-            String origin= strain.getOrigin();
-            String strainTypeName= strain.getStrainTypeName();
-            String name= strain.getName();
+        for(Strain strain: strains) {
+            int speciesTypeKey = strain.getSpeciesTypeKey();
+            boolean isSearchable=SpeciesType.isSearchable(speciesTypeKey);
 
-            int rgdId= strain.getRgdId();
-            int speciesTypeKey= strain.getSpeciesTypeKey();
+            if (isSearchable) {
+                String species = SpeciesType.getCommonName(speciesTypeKey);
+                IndexObject s = new IndexObject();
+                String symbol = strain.getSymbol();
+                String source = strain.getSource();
+                String origin = strain.getOrigin();
+                String strainTypeName = strain.getStrainTypeName();
+                String name = strain.getName();
 
-            String species=SpeciesType.getCommonName(speciesTypeKey);
-            s.setSpecies(species);
-            s.setTerm_acc(String.valueOf(rgdId));
-            s.setSymbol(symbol);
-            s.setSource(source);
-            s.setOrigin(origin);
-            s.setType(strainTypeName);
-            s.setName(name);
+                int rgdId = strain.getRgdId();
 
-            String htmlStrippedSymbol= Jsoup.parse(symbol).text();
-            s.setHtmlStrippedSymbol(htmlStrippedSymbol);
-            s.setSuggest(this.getSuggest(symbol, null, "strain"));
-            List<AliasData> aliases = this.getAliases(rgdId);
-            List<String> synonyms = new ArrayList<>();
-            for (AliasData a : aliases) {
-                synonyms.add(a.getAlias_name());
+                s.setSpecies(species);
+                s.setTerm_acc(String.valueOf(rgdId));
+                s.setSymbol(symbol);
+                s.setSource(source);
+                s.setOrigin(origin);
+                s.setType(strainTypeName);
+                s.setName(name);
+
+                String htmlStrippedSymbol = Jsoup.parse(symbol).text();
+                s.setHtmlStrippedSymbol(htmlStrippedSymbol);
+                s.setSuggest(this.getSuggest(symbol, null, "strain"));
+                List<AliasData> aliases = this.getAliases(rgdId);
+                List<String> synonyms = new ArrayList<>();
+                for (AliasData a : aliases) {
+                    synonyms.add(a.getAlias_name());
+                }
+                s.setSynonyms(synonyms);
+                //     s.setSynonyms(getAliasesByRgdId(aliases,  rgdId));
+                s.setXdbIdentifiers(this.getExternalIdentifiers(rgdId));
+                s.setCategory("Strain");
+                s.setExperimentRecordCount(this.getExperimentRecordCount(rgdId, "S"));
+                s.setSampleExists(this.sampleExists(rgdId, 600));
+                s.setMapDataList(this.getMapData(rgdId));
+                s.setAnnotationsCount(this.getAnnotsCount(rgdId));
+                objList.add(s);
+
             }
-           s.setSynonyms(synonyms);
-       //     s.setSynonyms(getAliasesByRgdId(aliases,  rgdId));
-            s.setXdbIdentifiers(this.getExternalIdentifiers(rgdId));
-            s.setCategory("Strain");
-            s.setExperimentRecordCount(this.getExperimentRecordCount(rgdId, "S"));
-            s.setSampleExists(this.sampleExists(rgdId, 600));
-            s.setMapDataList(this.getMapData(rgdId));
-            s.setAnnotationsCount(this.getAnnotsCount(rgdId));
-            objList.add(s);
-
         }
         return objList;
     }
@@ -481,48 +489,52 @@ public class IndexDAO extends AbstractDAO {
     public List<IndexObject> getQtls() throws Exception{
         List<IndexObject> objList= new ArrayList<>();
      //   List<Alias> aliases=aliasDAO.getActiveAliases(RgdId.OBJECT_KEY_QTLS);
-        for(QTL qtl: qtlDAO.getActiveQTLs()){
+        for(QTL qtl: qtlDAO.getActiveQTLs()) {
             // QTL qtl= qtlDAO.getQTL(61368);
-           IndexObject q= new IndexObject();
-            String symbol=qtl.getSymbol();
-            String name= qtl.getName();
-            int rgdId=qtl.getRgdId();
-            int key=qtl.getSpeciesTypeKey();
-            String species=SpeciesType.getCommonName(key);
-            String htmlStrippedSymbol= Jsoup.parse(symbol).text();
+            int key = qtl.getSpeciesTypeKey();
+            boolean isSearchable=SpeciesType.isSearchable(key);
+            if (isSearchable) {
+                String species = SpeciesType.getCommonName(key);
+                IndexObject q = new IndexObject();
+                String symbol = qtl.getSymbol();
+                String name = qtl.getName();
+                int rgdId = qtl.getRgdId();
 
-            q.setTerm_acc(String.valueOf(rgdId));
-            q.setSymbol(symbol);
-            q.setTrait(this.getTraitSubTrait(qtl.getRgdId(),"V" ));
-            q.setSubTrait(this.getTraitSubTrait(qtl.getRgdId(), "L"));
-            q.setSymbol(htmlStrippedSymbol);
-            q.setName(name);
-            q.setSpecies(species);
-            q.setSuggest(this.getSuggest(symbol, null, "qtl"));
+                String htmlStrippedSymbol = Jsoup.parse(symbol).text();
 
-            Map<String, List<Annotation>> annotMap= this.getAnnotations(rgdId);
-            q.setXdata(this.getAnnotations(annotMap, "xdata", "qtl"));
-          //  q.setSynonyms(getAliasesByRgdId(aliases, rgdId));
-            List<AliasData> aliases = this.getAliases(rgdId);
-            List<String> synonyms = new ArrayList<>();
-            for (AliasData a : aliases) {
-                synonyms.add(a.getAlias_name());
+                q.setTerm_acc(String.valueOf(rgdId));
+                q.setSymbol(symbol);
+                q.setTrait(this.getTraitSubTrait(qtl.getRgdId(), "V"));
+                q.setSubTrait(this.getTraitSubTrait(qtl.getRgdId(), "L"));
+                q.setSymbol(htmlStrippedSymbol);
+                q.setName(name);
+                q.setSpecies(species);
+                q.setSuggest(this.getSuggest(symbol, null, "qtl"));
+
+                Map<String, List<Annotation>> annotMap = this.getAnnotations(rgdId);
+                q.setXdata(this.getAnnotations(annotMap, "xdata", "qtl"));
+                //  q.setSynonyms(getAliasesByRgdId(aliases, rgdId));
+                List<AliasData> aliases = this.getAliases(rgdId);
+                List<String> synonyms = new ArrayList<>();
+                for (AliasData a : aliases) {
+                    synonyms.add(a.getAlias_name());
+                }
+                q.setSynonyms(synonyms);
+                q.setXdbIdentifiers(this.getExternalIdentifiers(rgdId));
+                q.setCategory("QTL");
+                q.setMapDataList(this.getMapData(rgdId));
+                q.setAnnotationsCount(this.getAnnotsCount(rgdId));
+                objList.add(q);
+
             }
-            q.setSynonyms(synonyms);
-            q.setXdbIdentifiers(this.getExternalIdentifiers(rgdId));
-            q.setCategory("QTL");
-            q.setMapDataList(this.getMapData(rgdId));
-            q.setAnnotationsCount(this.getAnnotsCount(rgdId));
-            objList.add(q);
-
+            Collections.sort(objList, new Comparator<IndexObject>() {
+                @Override
+                public int compare(IndexObject o1, IndexObject o2) {
+                    Utils.stringsCompareToIgnoreCase(o1.getSymbol(), o2.getSymbol());
+                    return 0;
+                }
+            });
         }
-        Collections.sort(objList, new Comparator<IndexObject>() {
-            @Override
-            public int compare(IndexObject o1, IndexObject o2) {
-                Utils.stringsCompareToIgnoreCase(o1.getSymbol(), o2.getSymbol());
-                return 0;
-            }
-        });
         return objList;
 
     }
@@ -553,30 +565,34 @@ public class IndexDAO extends AbstractDAO {
     public List<IndexObject> getSslps() throws Exception{
         List<IndexObject> objList= new ArrayList<>();
      //   List<Alias> aliases=aliasDAO.getActiveAliases(RgdId.OBJECT_KEY_SSLPS);
-        for(SSLP sslp: sslpdao.getActiveSSLPs()){
+        for(SSLP sslp: sslpdao.getActiveSSLPs()) {
             //  SSLP sslp= sslpdao.getSSLP(37320);
-            IndexObject slp= new IndexObject();
-            int rgdId= sslp.getRgdId();
-            String name= sslp.getName();
-            slp.setTerm_acc(String.valueOf(rgdId));
-            slp.setSymbol(sslp.getName());
-            slp.setSuggest(this.getSuggest(name, null, "sslp"));
-            List<AliasData> aliases = this.getAliases(rgdId);
-            List<String> synonyms = new ArrayList<>();
-            for (AliasData a : aliases) {
-                synonyms.add(a.getAlias_name());
-            }
-            slp.setSynonyms(synonyms);
-       //     slp.setSynonyms(getAliasesByRgdId(aliases,rgdId));
-            slp.setXdbIdentifiers(this.getExternalIdentifiers(rgdId));
-            slp.setCategory("SSLP");
-            int speciesTypeKey= sslp.getSpeciesTypeKey();
-            String species=SpeciesType.getCommonName(speciesTypeKey);
-            slp.setSpecies(species);
-            slp.setMapDataList(this.getMapData(rgdId));
-            slp.setAnnotationsCount(this.getAnnotsCount(rgdId));
-            objList.add(slp);
+            int speciesTypeKey = sslp.getSpeciesTypeKey();
+           boolean isSearchable=SpeciesType.isSearchable(speciesTypeKey);
+            if (isSearchable) {
+                String species = SpeciesType.getCommonName(speciesTypeKey);
+                IndexObject slp = new IndexObject();
+                int rgdId = sslp.getRgdId();
+                String name = sslp.getName();
+                slp.setTerm_acc(String.valueOf(rgdId));
+                slp.setSymbol(sslp.getName());
+                slp.setSuggest(this.getSuggest(name, null, "sslp"));
+                List<AliasData> aliases = this.getAliases(rgdId);
+                List<String> synonyms = new ArrayList<>();
+                for (AliasData a : aliases) {
+                    synonyms.add(a.getAlias_name());
+                }
+                slp.setSynonyms(synonyms);
+                //     slp.setSynonyms(getAliasesByRgdId(aliases,rgdId));
+                slp.setXdbIdentifiers(this.getExternalIdentifiers(rgdId));
+                slp.setCategory("SSLP");
 
+                slp.setSpecies(species);
+                slp.setMapDataList(this.getMapData(rgdId));
+                slp.setAnnotationsCount(this.getAnnotsCount(rgdId));
+                objList.add(slp);
+
+            }
         }
 
         return objList;
@@ -601,70 +617,84 @@ public class IndexDAO extends AbstractDAO {
         if(objectKey==16){
             category="Promoter";
         }
-       for(GenomicElement ge: gedao.getActiveElements(objectKey)){
-         //      GenomicElement ge= gedao.getElement(10053741);
-            IndexObject g= new IndexObject();
-            int rgdId=ge.getRgdId();
-            String symbol=ge.getSymbol();
-            int speciesTypeKey=ge.getSpeciesTypeKey();
-            String species=SpeciesType.getCommonName(speciesTypeKey);
-            g.setSpecies(species);
-            g.setTerm_acc(String.valueOf(rgdId));
-            g.setSymbol(symbol);
-            g.setCategory(category);
-            g.setSuggest(this.getSuggest(symbol, null, category.toLowerCase()));
-            List<AliasData> aliases= this.getAliases(rgdId);
-            List<String> synonyms= new ArrayList<>();
-            for(AliasData a: aliases){
-                synonyms.add(a.getAlias_name());
-            }
-            g.setSynonyms(synonyms);
-            g.setXdbIdentifiers(this.getExternalIdentifiers(rgdId));
-            if(species==null || species.equals("")){
-                System.out.println(symbol+"\t"+ rgdId);
-                log.info(symbol+"\t"+rgdId);
-            }
+     for(GenomicElement ge: gedao.getActiveElements(objectKey)) {
+       //    GenomicElement ge= gedao.getElement(8655626);
+           try {
+               //      GenomicElement ge= gedao.getElement(10053741);
+               int speciesTypeKey = ge.getSpeciesTypeKey();
+               boolean isSearchable= SpeciesType.isSearchable(speciesTypeKey);
 
-            g.setAnnotationsCount(this.getAnnotsCount(rgdId));
-            objList.add(g);
+               if (isSearchable) {
+                   String species = SpeciesType.getCommonName(speciesTypeKey);
+                   IndexObject g = new IndexObject();
+                   int rgdId = ge.getRgdId();
+                   String symbol = ge.getSymbol();
 
-        }
+                   g.setSpecies(species);
+                   g.setTerm_acc(String.valueOf(rgdId));
+                   g.setSymbol(symbol);
+                   g.setCategory(category);
+                   g.setSuggest(this.getSuggest(symbol, null, category.toLowerCase()));
+                   List<AliasData> aliases = this.getAliases(rgdId);
+                   List<String> synonyms = new ArrayList<>();
+                   for (AliasData a : aliases) {
+                       synonyms.add(a.getAlias_name());
+                   }
+                   g.setSynonyms(synonyms);
+                   g.setXdbIdentifiers(this.getExternalIdentifiers(rgdId));
+                   if (species == null || species.equals("")) {
+                       System.out.println(symbol + "\t" + rgdId);
+                       log.info(symbol + "\t" + rgdId);
+                   }
+
+                   g.setAnnotationsCount(this.getAnnotsCount(rgdId));
+                   objList.add(g);
+               }
+           }catch (Exception e){
+               System.out.println(ge.getRgdId()+"\t"+ ge.getSpeciesTypeKey());
+               e.printStackTrace();
+           }
+      }
         return objList;
     }
     public List<IndexObject> getVariants() throws Exception{
         List<IndexObject> objList= new ArrayList<>();
      //   List<Alias> aliases=aliasDAO.getActiveAliases(RgdId.OBJECT_KEY_VARIANTS);
-        for(VariantInfo obj: vdao.getVariantsBySource("CLINVAR")){
+        List<VariantInfo> variants=vdao.getVariantsBySource("CLINVAR");
+        System.out.println("VARIANTS SIZE: "+ variants.size());
+        for(VariantInfo obj: variants) {
             //  VariantInfo obj= vdao.getVariant(8554914);
-            IndexObject v= new IndexObject();
-            int rgdId=obj.getRgdId();
-            String symbol= obj.getSymbol();
-            int speciesTypeKey=obj.getSpeciesTypeKey();
-            String species=(SpeciesType.getCommonName(speciesTypeKey));
-            Term term= ontologyXDAO.getTermByAccId(obj.getSoAccId());
-            List<AliasData> aliasDatas=this.getAliases(rgdId);
+            int speciesTypeKey = obj.getSpeciesTypeKey();
+            String species = (SpeciesType.getCommonName(speciesTypeKey));
+            if (SpeciesType.isSearchable(speciesTypeKey)) {
+                IndexObject v = new IndexObject();
+                int rgdId = obj.getRgdId();
+                String symbol = obj.getSymbol();
 
-            v.setSpecies(species);
-            v.setSymbol(symbol);
-            v.setTerm_acc(String.valueOf(rgdId));
-            if(term!=null)
-                v.setType(term.getTerm());
-            v.setName(obj.getName());
-            v.setTrait(obj.getTraitName());
-            v.setCategory("Variant");
-            v.setSuggest(this.getSuggest(symbol, null, "variant"));
-         //   v.setSynonyms(getAliasesByRgdId(aliases, rgdId));
-            List<AliasData> aliases = this.getAliases(rgdId);
-            List<String> synonyms = new ArrayList<>();
-            for (AliasData a : aliases) {
-                synonyms.add(a.getAlias_name());
+                Term term = ontologyXDAO.getTermByAccId(obj.getSoAccId());
+
+                v.setSpecies(species);
+                v.setSymbol(symbol);
+                v.setTerm_acc(String.valueOf(rgdId));
+                if (term != null)
+                    v.setType(term.getTerm());
+                v.setName(obj.getName());
+                v.setTrait(obj.getTraitName());
+                v.setCategory("Variant");
+                v.setSuggest(this.getSuggest(symbol, null, "variant"));
+                //   v.setSynonyms(getAliasesByRgdId(aliases, rgdId));
+                List<AliasData> aliases = this.getAliases(rgdId);
+                List<String> synonyms = new ArrayList<>();
+                for (AliasData a : aliases) {
+                    synonyms.add(a.getAlias_name());
+                }
+                v.setSynonyms(synonyms);
+                v.setXdbIdentifiers(this.getExternalIdentifiers(rgdId));
+
+                v.setMapDataList(this.getMapData(obj.getRgdId()));
+                v.setAnnotationsCount(this.getAnnotsCount(rgdId));
+                objList.add(v);
             }
-            v.setSynonyms(synonyms);
-            v.setXdbIdentifiers(this.getExternalIdentifiers(rgdId));
-
-            v.setMapDataList(this.getMapData(obj.getRgdId()));
-            v.setAnnotationsCount(this.getAnnotsCount(rgdId));
-            objList.add(v);
         }
         return objList;
     }
@@ -675,6 +705,11 @@ public class IndexDAO extends AbstractDAO {
     //    List<Alias> aliases=aliasDAO.getActiveAliases(RgdId.OBJECT_KEY_REFERENCES);
         for(Reference ref: referenceDAO.getActiveReferences()){
             // Reference ref=referenceDAO.getReference(1004);
+            int speciesTypeKey=ref.getSpeciesTypeKey();
+            boolean isSearchable=SpeciesType.isSearchable(speciesTypeKey);
+            if(isSearchable){
+            String species=SpeciesType.getCommonName(speciesTypeKey);
+
             int rgdId= ref.getRgdId();
             IndexObject r= new IndexObject();
             r.setTerm_acc(String.valueOf(rgdId));
@@ -697,8 +732,7 @@ public class IndexDAO extends AbstractDAO {
             sugg.setContexts(contexts);
             r.setSuggest(sugg);
             r.setCategory("Reference");
-            int speciesTypeKey=ref.getSpeciesTypeKey();
-            String species=SpeciesType.getCommonName(speciesTypeKey);
+
             r.setSpecies(species);
             List<AliasData> alist= this.getAliases(rgdId);
       //      r.setAliasDatas(alist);
@@ -715,7 +749,7 @@ public class IndexDAO extends AbstractDAO {
             if(ref.getPubDate()!=null)
                 r.setPub_year(Integer.toString(ref.getPubDate().getYear()+1900));
             objList.add(r);
-        }
+        }}
 
         return objList;
     }
@@ -732,7 +766,7 @@ public class IndexDAO extends AbstractDAO {
      public int[][] getAnnotsMatrix(TermWithStats termWithStats) throws Exception {
 
 
-        int[][] annotsMatrix =new int[4][7];
+        int[][] annotsMatrix =new int[4][8];
 
         List<SpeciesObject> speciesObjects=this.getSpeicesObjects(termWithStats);
         int k=0;
@@ -747,6 +781,7 @@ public class IndexDAO extends AbstractDAO {
             if(species.equals("dog"))k=4;
             if(species.equals("bonobo"))k=5;
             if(species.equals("squirrel"))k=6;
+            if(species.equals("pig"))k=7;
 
             annotsMatrix[0][k]=s.getGeneCount();
             annotsMatrix[1][k]=s.getStrainCount();
@@ -760,9 +795,13 @@ public class IndexDAO extends AbstractDAO {
 
     public List<SpeciesObject> getSpeicesObjects(TermWithStats termWithStats) throws Exception {
         List<SpeciesObject> sList= new ArrayList<>();
-        List<Integer> speciesTypeKeys=new ArrayList<>(Arrays.asList(1,2,3,4,5,6,7));
+   //     List<Integer> speciesTypeKeys=new ArrayList<>(Arrays.asList(1,2,3,4,5,6,7));
+        Collection<Integer> speciesTypeKeys=  SpeciesType.getSpeciesTypeKeys();
         List<Integer> objectKeys= new ArrayList<>(Arrays.asList(1,5,6,7));
         for(int skey:speciesTypeKeys){
+            boolean isSearchable= SpeciesType.isSearchable(skey);
+            if(isSearchable){
+            if(SpeciesType.isSearchable(skey)){
             SpeciesObject s= new SpeciesObject();
             String species=SpeciesType.getCommonName(skey);
             s.setName(species);
@@ -778,7 +817,7 @@ public class IndexDAO extends AbstractDAO {
 
             }
             sList.add(s);
-        }
+        }}}
         return sList;
     }
     /*************************************************************************************************/
@@ -1154,9 +1193,10 @@ public class IndexDAO extends AbstractDAO {
         ESClient.getClient().admin().indices().refresh(refreshRequest()).actionGet();
     }
     public static void main(String[] args) throws Exception {
-
+        GenomicElementDAO gedao= new GenomicElementDAO();
         IndexDAO dao= new IndexDAO();
-       dao.getGenes();
+
+       dao.getGenomicElements();
         System.out.println("DONE!!!!");
     }
 

@@ -3,15 +3,13 @@ package edu.mcw.rgd.indexer.dao;
 
 import edu.mcw.rgd.dao.impl.*;
 
+import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
 import edu.mcw.rgd.datamodel.ontologyx.TermWithStats;
 import edu.mcw.rgd.indexer.model.IndexObject;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static org.elasticsearch.client.Requests.refreshRequest;
 
@@ -77,15 +75,17 @@ public class IndexerDAO extends IndexDAO implements Runnable {
 
                     int[][] annotsMatrix = new int[4][7];
                     try {
-                        List<Integer> speciesTypeKeys = new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5, 6, 7));
+               //         List<Integer> speciesTypeKeys = new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5, 6, 7));
+                        Collection<Integer> speciesTypeKeys =  SpeciesType.getSpeciesTypeKeys();
                         int annotsCount = 0;
                         int termOnlyAnnotsCount = 0;
                         int childTermAnnotsCount =0;
                         for (int species : speciesTypeKeys) {
-                            annotsCount=annotsCount+ termStats.getAnnotObjectCountForTermAndChildren(species);
-                            termOnlyAnnotsCount=termOnlyAnnotsCount+termStats.getAnnotObjectCountForTerm(species);
+                            if (SpeciesType.isSearchable(species)) {
+                                annotsCount = annotsCount + termStats.getAnnotObjectCountForTermAndChildren(species);
+                                termOnlyAnnotsCount = termOnlyAnnotsCount + termStats.getAnnotObjectCountForTerm(species);
+                            }
                         }
-
                         if (annotsCount > 0) {
                             childTermAnnotsCount=annotsCount - termOnlyAnnotsCount;
                             obj.setAnnotationsCount(annotsCount);

@@ -157,18 +157,20 @@ public class Manager {
                             MapDAO mapDAO= new MapDAO();
                             System.out.println("INDEXING Chromosomes...");
                             for(int key : SpeciesType.getSpeciesTypeKeys()) {
-                                //   int key=3;
-                                if (key != 0) {
-                                    List<Map> maps=    mapDAO.getMaps(key,"bp");
-                                    for(Map m: maps){
-                                        int mapKey= m.getKey();
-                                        String assembly= m.getName();
-                                        if(mapKey!=6 && mapKey!=36 && mapKey!=8 && mapKey!=21 && mapKey!=19 && mapKey!=7) {
-                                            workerThread = new ChromosomeThread(key, RgdIndex.getNewAlias(), mapKey, assembly);
-                                            executor.execute(workerThread);
+                                if (SpeciesType.isSearchable(key)) {
+                                    //   int key=3;
+                                    if (key != 0) {
+                                        List<Map> maps = mapDAO.getMaps(key, "bp");
+                                        for (Map m : maps) {
+                                            int mapKey = m.getKey();
+                                            String assembly = m.getName();
+                                            if (mapKey != 6 && mapKey != 36 && mapKey != 8 && mapKey != 21 && mapKey != 19 && mapKey != 7) {
+                                                workerThread = new ChromosomeThread(key, RgdIndex.getNewAlias(), mapKey, assembly);
+                                                executor.execute(workerThread);
+                                            }
                                         }
-                                    }
 
+                                    }
                                 }
                             }
                         }
@@ -179,10 +181,12 @@ public class Manager {
                         System.out.println("INDEXING GENOMEINFO...");
                        for(int key : SpeciesType.getSpeciesTypeKeys()) {
                          //    int key=3;
-                            if (key != 0) {
-                                workerThread= new GenomeInfoThread(key, RgdIndex.getNewAlias(), log);
-                                executor.execute(workerThread);
-                            }
+                           if(SpeciesType.isSearchable(key)) {
+                               if (key != 0) {
+                                   workerThread = new GenomeInfoThread(key, RgdIndex.getNewAlias(), log);
+                                   executor.execute(workerThread);
+                               }
+                           }
                       }
                         break;
                     default:
