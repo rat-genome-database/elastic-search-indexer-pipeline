@@ -620,7 +620,6 @@ public class IndexDAO extends AbstractDAO {
      for(GenomicElement ge: gedao.getActiveElements(objectKey)) {
        //    GenomicElement ge= gedao.getElement(8655626);
            try {
-               //      GenomicElement ge= gedao.getElement(10053741);
                int speciesTypeKey = ge.getSpeciesTypeKey();
                boolean isSearchable= SpeciesType.isSearchable(speciesTypeKey);
 
@@ -661,12 +660,12 @@ public class IndexDAO extends AbstractDAO {
         List<IndexObject> objList= new ArrayList<>();
      //   List<Alias> aliases=aliasDAO.getActiveAliases(RgdId.OBJECT_KEY_VARIANTS);
         List<VariantInfo> variants=vdao.getVariantsBySource("CLINVAR");
-        System.out.println("VARIANTS SIZE: "+ variants.size());
         for(VariantInfo obj: variants) {
             //  VariantInfo obj= vdao.getVariant(8554914);
             int speciesTypeKey = obj.getSpeciesTypeKey();
-            String species = (SpeciesType.getCommonName(speciesTypeKey));
+
             if (SpeciesType.isSearchable(speciesTypeKey)) {
+                String species = (SpeciesType.getCommonName(speciesTypeKey));
                 IndexObject v = new IndexObject();
                 int rgdId = obj.getRgdId();
                 String symbol = obj.getSymbol();
