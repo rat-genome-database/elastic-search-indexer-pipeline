@@ -490,12 +490,12 @@ public class IndexDAO extends AbstractDAO {
         List<IndexObject> objList= new ArrayList<>();
      //   List<Alias> aliases=aliasDAO.getActiveAliases(RgdId.OBJECT_KEY_QTLS);
         List<QTL> qtls=qtlDAO.getActiveQTLs();
-        System.out.println(qtls.size());
+
         for(QTL qtl: qtls) {
             // QTL qtl= qtlDAO.getQTL(61368);
             int key = qtl.getSpeciesTypeKey();
             boolean isSearchable=SpeciesType.isSearchable(key);
-            System.out.println(isSearchable);
+
             if (isSearchable) {
                 String species = SpeciesType.getCommonName(key);
                 IndexObject q = new IndexObject();
@@ -530,6 +530,7 @@ public class IndexDAO extends AbstractDAO {
                 objList.add(q);
 
             }
+
          /*   Collections.sort(objList, new Comparator<IndexObject>() {
                 @Override
                 public int compare(IndexObject o1, IndexObject o2) {
@@ -538,6 +539,7 @@ public class IndexDAO extends AbstractDAO {
                 }
             });*/
         }
+        System.out.println(objList.size());
         return objList;
 
     }
