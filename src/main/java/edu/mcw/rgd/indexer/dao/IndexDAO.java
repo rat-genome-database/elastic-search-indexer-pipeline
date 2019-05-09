@@ -489,10 +489,13 @@ public class IndexDAO extends AbstractDAO {
     public List<IndexObject> getQtls() throws Exception{
         List<IndexObject> objList= new ArrayList<>();
      //   List<Alias> aliases=aliasDAO.getActiveAliases(RgdId.OBJECT_KEY_QTLS);
-        for(QTL qtl: qtlDAO.getActiveQTLs()) {
+        List<QTL> qtls=qtlDAO.getActiveQTLs();
+        System.out.println(qtls.size());
+        for(QTL qtl: qtls) {
             // QTL qtl= qtlDAO.getQTL(61368);
             int key = qtl.getSpeciesTypeKey();
             boolean isSearchable=SpeciesType.isSearchable(key);
+            System.out.println(isSearchable);
             if (isSearchable) {
                 String species = SpeciesType.getCommonName(key);
                 IndexObject q = new IndexObject();
@@ -527,13 +530,13 @@ public class IndexDAO extends AbstractDAO {
                 objList.add(q);
 
             }
-            Collections.sort(objList, new Comparator<IndexObject>() {
+         /*   Collections.sort(objList, new Comparator<IndexObject>() {
                 @Override
                 public int compare(IndexObject o1, IndexObject o2) {
-                    Utils.stringsCompareToIgnoreCase(o1.getSymbol(), o2.getSymbol());
-                    return 0;
+                  return   Utils.stringsCompareToIgnoreCase(o1.getSymbol(), o2.getSymbol());
+
                 }
-            });
+            });*/
         }
         return objList;
 
@@ -1195,7 +1198,7 @@ public class IndexDAO extends AbstractDAO {
         GenomicElementDAO gedao= new GenomicElementDAO();
         IndexDAO dao= new IndexDAO();
 
-       dao.getGenomicElements();
+       dao.getQtls();
         System.out.println("DONE!!!!");
     }
 
