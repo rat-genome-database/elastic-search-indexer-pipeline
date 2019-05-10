@@ -496,7 +496,7 @@ public class IndexDAO extends AbstractDAO {
             int key = qtl.getSpeciesTypeKey();
             boolean isSearchable=SpeciesType.isSearchable(key);
 
-            if (isSearchable) {
+       //     if (isSearchable) {
                 String species = SpeciesType.getCommonName(key);
                 IndexObject q = new IndexObject();
                 String symbol = qtl.getSymbol();
@@ -538,7 +538,7 @@ public class IndexDAO extends AbstractDAO {
 
                 }
             });*/
-        }
+     //   }
         System.out.println(objList.size());
         return objList;
 
@@ -711,7 +711,7 @@ public class IndexDAO extends AbstractDAO {
             // Reference ref=referenceDAO.getReference(1004);
             int speciesTypeKey=ref.getSpeciesTypeKey();
             boolean isSearchable=SpeciesType.isSearchable(speciesTypeKey);
-            if(isSearchable){
+      //      if(isSearchable){
             String species=SpeciesType.getCommonName(speciesTypeKey);
 
             int rgdId= ref.getRgdId();
@@ -753,7 +753,8 @@ public class IndexDAO extends AbstractDAO {
             if(ref.getPubDate()!=null)
                 r.setPub_year(Integer.toString(ref.getPubDate().getYear()+1900));
             objList.add(r);
-        }}
+        }
+    //}
 
         return objList;
     }
