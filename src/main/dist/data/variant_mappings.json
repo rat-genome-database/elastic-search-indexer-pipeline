@@ -1,0 +1,130 @@
+{
+  "variant" : {
+    "properties" : {
+      "chromosome" : {
+        "type" : "text"
+      },
+      "endPos" : {
+        "type" : "long"
+      },
+
+      "fullRefAAPos" : {
+        "type" : "long"
+      },
+      "fullRefNucPos" : {
+        "type" : "long"
+      },
+      "geneRgdId" : {
+        "type" : "long"
+      },
+      "mapKey" : {
+        "type" : "long"
+      },
+
+      "patientId" : {
+        "type" : "long"
+      },
+      "qualityScore" : {
+        "type" : "long"
+      },
+      "refNuc" : {
+        "type" : "text",
+        "fields" : {
+          "keyword" : {
+            "type" : "keyword",
+            "ignore_above" : 256
+          }
+        }
+      },
+      "refRgdId" : {
+        "type" : "long"
+      },
+
+      "rgdId" : {
+        "type" : "long"
+      },
+
+      "sampleId" : {
+        "type" : "long"
+      },
+
+      "startPos" : {
+        "type" : "long"
+      },
+
+      "strainRgdId" : {
+        "type" : "long"
+      },
+      "totalDepth" : {
+        "type" : "long"
+      },
+
+      "transcriptRgdId" : {
+        "type" : "long"
+      },
+      "varFreq" : {
+        "type" : "long"
+      },
+      "varNuc" : {
+        "type" : "text",
+        "fields" : {
+          "keyword" : {
+            "type" : "keyword",
+            "ignore_above" : 256
+          }
+        }
+      },
+
+
+      "variantTranscriptId" : {
+        "type" : "long"
+      },
+      "variant_id" : {
+        "type" : "long"
+      },
+
+      "zygosityInPseudo" : {
+        "type" : "text",
+        "fields" : {
+          "keyword" : {
+            "type" : "keyword",
+            "ignore_above" : 256
+          }
+        }
+      },
+      "zygosityNumAllele" : {
+        "type" : "long"
+      },
+      "zygosityPercentRead" : {
+        "type" : "float"
+      },
+      "zygosityPossError" : {
+        "type" : "text",
+        "fields" : {
+          "keyword" : {
+            "type" : "keyword",
+            "ignore_above" : 256
+          }
+        }
+      },
+      "zygosityRefAllele" : {
+        "type" : "text",
+        "fields" : {
+          "keyword" : {
+            "type" : "keyword",
+            "ignore_above" : 256
+          }
+        }
+      },
+      "zygosityStatus" : {
+        "type" : "text",
+        "fields" : {
+          "keyword" : {
+            "type" : "keyword",
+            "ignore_above" : 256
+          }
+        }
+      }
+   }
+  }
+}
