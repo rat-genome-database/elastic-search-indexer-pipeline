@@ -23,21 +23,23 @@ public class VariantDao extends VariantDAO {
         q.declareParameter(new SqlParameter(12));
         return q.execute(new Object[]{sampleId, chr});
     }
-    public List<VariantResult> getVariantResults(int sampleId, String chr)  {
+    public List<VariantResult> getVariantResults(int sampleId, String chr, int mapKey)  {
      String sql="select v.*, vt.*, p.*, cs.* from variant v\n" +
-             "inner join gene_loci gl on (gl.map_key=60 and gl.chromosome=v.chromosome and gl.pos=v.start_pos) " +
+             "inner join gene_loci gl on (gl.map_key=? and gl.chromosome=v.chromosome and gl.pos=v.start_pos) " +
              "inner join variant_transcript vt on v.variant_id=vt.variant_id " +
              "inner join transcripts t on vt.transcript_rgd_id=t.transcript_rgd_id " +
              "inner join polyphen p on (v.variant_id=p.variant_id and p.protein_status='100 PERC MATCH') " +
-             "left outer JOIN sample s on (v.sample_id=s.sample_id and s.map_key=60) " +
+             "left outer JOIN sample s on (v.sample_id=s.sample_id and s.map_key=?) " +
              "inner join CONSERVATION_SCORE cs on (cs.chr=v.chromosome and cs.position=v.start_pos) " +
              "where v.sample_id=? " +
              "and v.chromosome=?";
         List<VariantResult> vrList = new ArrayList<>();
         try(Connection connection= DataSourceFactory.getInstance().getCarpeNovoDataSource().getConnection()){
             PreparedStatement stmt=connection.prepareStatement(sql);
-            stmt.setInt(1, sampleId);
-            stmt.setString(2, chr);
+            stmt.setInt(1, mapKey);
+            stmt.setInt(2, mapKey);
+            stmt.setInt(3, sampleId);
+            stmt.setString(4, chr);
             ResultSet rs=  stmt.executeQuery();
             long lastVariant = 0L;
             VariantResultBuilder vrb = new VariantResultBuilder();
@@ -88,7 +90,7 @@ public class VariantDao extends VariantDAO {
         dao.setDataSource(DataSourceFactory.getInstance().getCarpeNovoDataSource());
       /*  List<Variant> variants= dao.getVariants(516, "1");
         System.out.println("VARIANTS: "+ variants.size());*/
-        List<VariantResult> variantResults= dao.getVariantResults(516,"10");
+        List<VariantResult> variantResults= dao.getVariantResults(516,"10", 60);
         List<SNPlotyper> snps=new ArrayList<>();
         for (VariantResult v: variantResults) {
          List<MappedGene> mappedGenes = gdao.getActiveMappedGenes(v.getVariant().getChromosome(), v.getVariant().getStartPos(), v.getVariant().getEndPos(), 60);

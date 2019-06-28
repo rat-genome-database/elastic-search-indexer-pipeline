@@ -46,7 +46,7 @@ public class VariantIndexer  implements  Runnable{
         }
         List<VariantIndex> variantsList= new ArrayList<>();
 
-        List<VariantResult> vrs=variantDao.getVariantResults(sampleId, chromosome);
+        List<VariantResult> vrs=variantDao.getVariantResults(sampleId, chromosome, mapKey);
         if(vrs.size()>0){
             for(VariantResult vr:vrs){
                 VariantIndex vi= new VariantIndex();
