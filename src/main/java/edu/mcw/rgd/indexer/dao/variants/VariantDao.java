@@ -71,16 +71,7 @@ public class VariantDao extends VariantDAO {
       //  this.logger.debug("found vrList size " + vrList.size());
         return vrList;
     }
-    public List<MappedGene> getMappedGenes(Variant v, int mapKey)  {
-        GeneDAO gdao= new GeneDAO();
-        List<MappedGene> mappedGenes = null;
-        try {
-            mappedGenes = gdao.getActiveMappedGenes(v.getChromosome(), v.getStartPos(), v.getEndPos(), mapKey);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return mappedGenes;
-    }
+
 
 
     public static void main(String[] args) throws Exception {

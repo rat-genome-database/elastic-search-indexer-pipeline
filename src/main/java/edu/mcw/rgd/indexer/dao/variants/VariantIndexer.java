@@ -3,6 +3,7 @@ package edu.mcw.rgd.indexer.dao.variants;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.mcw.rgd.dao.DataSourceFactory;
+import edu.mcw.rgd.dao.impl.GeneDAO;
 import edu.mcw.rgd.datamodel.*;
 import edu.mcw.rgd.indexer.client.ESClient;
 import edu.mcw.rgd.indexer.model.variants.VariantIndex;
@@ -73,7 +74,7 @@ public class VariantIndexer  implements  Runnable{
                 }
                 List<Integer> geneRgdIds=new ArrayList<>();
                 List<String> geneSymbols= new ArrayList<>();
-                for(MappedGene g: variantDao.getMappedGenes(vr.getVariant(), mapKey)){
+                for(MappedGene g: getMappedGenes(vr.getVariant(), mapKey)){
                     geneRgdIds.add(g.getGene().getRgdId());
                     geneSymbols.add(g.getGene().getSymbol());
                 }
@@ -124,5 +125,15 @@ public class VariantIndexer  implements  Runnable{
             System.out.println(Thread.currentThread().getName() + ": VariantThread" + mapKey + " End " + new Date());
         }
 
+    }
+    public List<MappedGene> getMappedGenes(Variant v, int mapKey)  {
+        GeneDAO gdao= new GeneDAO();
+        List<MappedGene> mappedGenes = null;
+        try {
+            mappedGenes = gdao.getActiveMappedGenes(v.getChromosome(), v.getStartPos(), v.getEndPos(), mapKey);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return mappedGenes;
     }
 }
