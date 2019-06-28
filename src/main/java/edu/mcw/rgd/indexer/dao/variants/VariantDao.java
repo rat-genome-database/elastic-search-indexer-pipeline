@@ -23,7 +23,7 @@ public class VariantDao extends VariantDAO {
         q.declareParameter(new SqlParameter(12));
         return q.execute(new Object[]{sampleId, chr});
     }
-    public List<VariantResult> getVariantResults(int sampleId, String chr, int mapKey)  {
+    public List<VariantResult> getVariantResults(int sampleId, String chr, int mapKey) {
      String sql="select v.*, vt.*, p.*, cs.* from variant v\n" +
              "inner join gene_loci gl on (gl.map_key=? and gl.chromosome=v.chromosome and gl.pos=v.start_pos) " +
              "inner join variant_transcript vt on v.variant_id=vt.variant_id " +
@@ -34,13 +34,15 @@ public class VariantDao extends VariantDAO {
              "where v.sample_id=? " +
              "and v.chromosome=?";
         List<VariantResult> vrList = new ArrayList<>();
-        try(Connection connection= DataSourceFactory.getInstance().getCarpeNovoDataSource().getConnection()){
-            PreparedStatement stmt=connection.prepareStatement(sql);
+        ResultSet rs= null;
+        try(Connection connection= DataSourceFactory.getInstance().getCarpeNovoDataSource().getConnection();
+            PreparedStatement stmt=connection.prepareStatement(sql);){
+
             stmt.setInt(1, mapKey);
             stmt.setInt(2, mapKey);
             stmt.setInt(3, sampleId);
             stmt.setString(4, chr);
-            ResultSet rs=  stmt.executeQuery();
+            rs=  stmt.executeQuery();
             long lastVariant = 0L;
             VariantResultBuilder vrb = new VariantResultBuilder();
             boolean found = false;
@@ -63,8 +65,18 @@ public class VariantDao extends VariantDAO {
             if(found) {
                 vrList.add(vrb.getVariantResult());
             }
+            stmt.close();
+             connection.close();
         } catch (Exception e) {
             e.printStackTrace();
+        }finally {
+            if(rs!=null){
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
 
         lastQuery = sql;
