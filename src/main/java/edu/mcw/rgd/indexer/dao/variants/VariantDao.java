@@ -28,7 +28,7 @@ public class VariantDao extends VariantDAO {
              "inner join gene_loci gl on (gl.map_key=? and gl.chromosome=v.chromosome and gl.pos=v.start_pos) " +
              "inner join variant_transcript vt on v.variant_id=vt.variant_id " +
              "inner join transcripts t on vt.transcript_rgd_id=t.transcript_rgd_id " +
-             "inner join polyphen p on (v.variant_id=p.variant_id and p.protein_status='100 PERC MATCH') " +
+             "left outer join polyphen p on (v.variant_id=p.variant_id and p.protein_status='100 PERC MATCH') " +
              "left outer JOIN sample s on (v.sample_id=s.sample_id and s.map_key=?) " +
              "inner join CONSERVATION_SCORE cs on (cs.chr=v.chromosome and cs.position=v.start_pos) " +
              "where v.sample_id=? " +
