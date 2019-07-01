@@ -67,7 +67,7 @@ public class VariantIndexer  implements  Runnable{
                 vi.setZygosityPercentRead(vr.getVariant().getZygosityPercentRead());
                 vi.setZygosityInPseudo(vr.getVariant().getZygosityInPseudo());
                 vi.setGenicStatus(vr.getVariant().getGenicStatus());
-
+                vi.setMapKey(mapKey);
                 List<BigDecimal> conScores=new ArrayList<>();
                 for(ConservationScore s:vr.getVariant().getConservationScore()){
                     conScores.add(s.getScore());
