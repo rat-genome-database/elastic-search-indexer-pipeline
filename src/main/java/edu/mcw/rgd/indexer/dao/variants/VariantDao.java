@@ -25,7 +25,7 @@ public class VariantDao extends VariantDAO {
     }
     public List<VariantResult> getVariantResults(int sampleId, String chr, int mapKey) {
      String sql="select v.*, vt.*, p.*, cs.* from variant v\n" +
-             "left outer JOIN join gene_loci gl on (gl.map_key=? and gl.chromosome=v.chromosome and gl.pos=v.start_pos) " +
+             "left outer join gene_loci gl on (gl.map_key=? and gl.chromosome=v.chromosome and gl.pos=v.start_pos) " +
              "left outer join variant_transcript vt on v.variant_id=vt.variant_id " +
              "left outer join transcripts t on vt.transcript_rgd_id=t.transcript_rgd_id " +
              "left outer join polyphen p on (v.variant_id=p.variant_id and p.protein_status='100 PERC MATCH') " +
