@@ -24,7 +24,7 @@ public class VariantDao extends VariantDAO {
         return q.execute(new Object[]{sampleId, chr});
     }
     public List<VariantResult> getVariantResults(int sampleId, String chr, int mapKey) {
-     String sql="select v.*, vt.*, p.*, cs.* from variant v\n" +
+   /*  String sql="select v.*, vt.*, p.*, cs.* from variant v\n" +
              "left outer join gene_loci gl on (gl.map_key=? and gl.chromosome=v.chromosome and gl.pos=v.start_pos) " +
              "left outer join variant_transcript vt on v.variant_id=vt.variant_id " +
              "left outer join transcripts t on vt.transcript_rgd_id=t.transcript_rgd_id " +
@@ -32,7 +32,21 @@ public class VariantDao extends VariantDAO {
              "left outer JOIN sample s on (v.sample_id=s.sample_id and s.map_key=?) " +
              "inner join CONSERVATION_SCORE cs on (cs.chr=v.chromosome and cs.position=v.start_pos) " +
              "where v.sample_id=? " +
-             "and v.chromosome=?";
+             "and v.chromosome=?";*/
+        String sql="select v.*, vt.*,t.*, p.*, cs.*,dbs.* , dbs.snp_name as MCW_DBS_SNP_NAME, md.* from variant v " +
+                "left outer join gene_loci gl on (gl.map_key=? and gl.chromosome=v.chromosome and gl.pos=v.start_pos) " +
+                "left outer join variant_transcript vt on v.variant_id=vt.variant_id " +
+                "left outer join transcripts t on vt.transcript_rgd_id=t.transcript_rgd_id " +
+                "left outer join polyphen p on (v.variant_id=p.variant_id and p.protein_status='100 PERC MATCH') " +
+                "left outer JOIN sample s on (v.sample_id=s.sample_id and s.map_key=?)" +
+                "left outer JOIN  db_snp dbs  ON  " +
+                "( v.START_POS = dbs.POSITION     AND v.CHROMOSOME = dbs.CHROMOSOME      AND v.VAR_NUC = dbs.ALLELE      AND dbs.MAP_KEY = s.MAP_KEY AND dbs.source=s.dbsnp_source) " +
+                "left outer join CONSERVATION_SCORE cs on (cs.chr=v.chromosome and cs.position=v.start_pos) " +
+                "left outer join maps_data md on (md.chromosome=v.chromosome and md.rgd_id=t.gene_rgd_id and md.map_key=?) " +
+                "left outer join rgd_ids r on (r.rgd_id=md.rgd_id and r.object_status='ACTIVE') " +
+                "where v.chromosome=? " +
+                "and v.total_depth>8 " +
+                "and v.sample_id=?";
         List<VariantResult> vrList = new ArrayList<>();
         ResultSet rs= null;
         try(Connection connection= DataSourceFactory.getInstance().getCarpeNovoDataSource().getConnection();
@@ -40,8 +54,9 @@ public class VariantDao extends VariantDAO {
 
             stmt.setInt(1, mapKey);
             stmt.setInt(2, mapKey);
-            stmt.setInt(3, sampleId);
+            stmt.setInt(3, mapKey);
             stmt.setString(4, chr);
+            stmt.setInt(5, sampleId);
             rs=  stmt.executeQuery();
             long lastVariant = 0L;
             VariantResultBuilder vrb = new VariantResultBuilder();
