@@ -205,9 +205,9 @@ public class Manager {
                         if (key != 0) {
                         if(SpeciesType.isSearchable(key)) {
                            List<Map> maps=mapDAO.getMaps(key);
-                           for(Map m:maps){
-                          int mapKey=m.getKey();
-                       //     int mapKey=60;
+                     //      for(Map m:maps){
+                      //    int mapKey=m.getKey();
+                         int mapKey=360;
                             List<Chromosome> chromosomes=mapDAO.getChromosomes(mapKey);
                              List<Sample> samples=sdao.getSamplesByMapKey(mapKey);
                             for(Sample s:samples){
@@ -220,7 +220,7 @@ public class Manager {
                                    }
                                }
 
-                           }
+                      //     }
                             }
                         }
                         break;
