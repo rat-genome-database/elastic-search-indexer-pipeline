@@ -123,6 +123,8 @@ public class VariantDao extends VariantDAO {
                 vrList.add(vi);
             }
 
+            rs.close();
+
             stmt.close();
              connection.close();
         } catch (Exception e) {
