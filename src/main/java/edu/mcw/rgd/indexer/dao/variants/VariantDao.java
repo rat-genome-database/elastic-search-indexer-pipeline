@@ -61,7 +61,7 @@ public class VariantDao extends VariantDAO {
             stmt.setInt(5, sampleId);
             rs=  stmt.executeQuery();
 
-           System.out.println("RESULT SET SIZE: "+ rs.getFetchSize());
+        //   System.out.println("RESULT SET SIZE: "+ rs.getFetchSize());
             while(rs.next()) {
                 VariantIndex vi= new VariantIndex();
                 vi.setVariant_id(rs.getInt("variant_id"));
