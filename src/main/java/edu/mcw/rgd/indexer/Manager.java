@@ -196,7 +196,7 @@ public class Manager {
                       }
                         break;
                     case "Variant":
-            //            admin.createIndex(log, "variant_mappings", "variant");
+                      admin.createIndex(log, "variant_mappings", "variant");
                         MapDAO mapDAO= new MapDAO();
                         SampleDAO sdao= new SampleDAO();
                         sdao.setDataSource(DataSourceFactory.getInstance().getCarpeNovoDataSource());
