@@ -196,7 +196,7 @@ public class Manager {
                       }
                         break;
                     case "Variant":
-                        admin.createIndex(log, "variant_mappings", "variant");
+            //            admin.createIndex(log, "variant_mappings", "variant");
                         MapDAO mapDAO= new MapDAO();
                         SampleDAO sdao= new SampleDAO();
                         sdao.setDataSource(DataSourceFactory.getInstance().getCarpeNovoDataSource());
@@ -204,21 +204,21 @@ public class Manager {
                         int key=3;
                         if (key != 0) {
                         if(SpeciesType.isSearchable(key)) {
-                           List<Map> maps=mapDAO.getMaps(key);
+                     //      List<Map> maps=mapDAO.getMaps(key);
                      //      for(Map m:maps){
                       //    int mapKey=m.getKey();
                          int mapKey=360;
                             List<Chromosome> chromosomes=mapDAO.getChromosomes(mapKey);
                              List<Sample> samples=sdao.getSamplesByMapKey(mapKey);
-                            for(Sample s:samples){
-                                 int sampleId=s.getId();
-                             //   int sampleId=516;
-                                 for(Chromosome chr:chromosomes){
-                                   //  Chromosome chr=mapDAO.getChromosome(60,"1");
+                           for(Sample s:samples){
+                                int sampleId=s.getId();
+                           //  int sampleId=911;
+                               for(Chromosome chr:chromosomes){
+                                   //  Chromosome chr=mapDAO.getChromosome(360,"1");
                                         workerThread = new VariantIndexer(sampleId, chr.getChromosome(), mapKey, key,RgdIndex.getNewAlias());
                                         executor.execute(workerThread);
-                                   }
-                               }
+                                  }
+                              }
 
                       //     }
                             }

@@ -30,7 +30,7 @@ public class VariantIndex {
     private int qualityScore;
     private String HGVSNAME;
     private int rgdId;
-
+    private String regionName;
     /*****************Sample******************/
 
    private String  analysisName;
@@ -83,6 +83,24 @@ public class VariantIndex {
 /**************************************************/
     private List<BigDecimal> conScores;
 
+    /*******************ployphen*********************/
+    private String polyphenPrediction;
+
+    public String getPolyphenPrediction() {
+        return polyphenPrediction;
+    }
+
+    public void setPolyphenPrediction(String polyphenPrediction) {
+        this.polyphenPrediction = polyphenPrediction;
+    }
+
+    public String getRegionName() {
+        return regionName;
+    }
+
+    public void setRegionName(String regionName) {
+        this.regionName = regionName;
+    }
 
     public long getVariant_id() {
         return variant_id;

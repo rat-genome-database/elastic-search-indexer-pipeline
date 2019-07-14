@@ -45,51 +45,14 @@ public class VariantIndexer  implements  Runnable{
         } catch (Exception e) {
             e.printStackTrace();
         }
-        List<VariantIndex> variantsList= new ArrayList<>();
 
-        List<VariantResult> vrs=variantDao.getVariantResults(sampleId, chromosome, mapKey);
-        if(vrs.size()>0){
-            for(VariantResult vr:vrs){
-                VariantIndex vi= new VariantIndex();
 
-                vi.setVariant_id(vr.getVariant().getId());
-                vi.setChromosome(vr.getVariant().getChromosome());
-                vi.setEndPos(vr.getVariant().getEndPos());
-                vi.setStartPos(vr.getVariant().getStartPos());
-                vi.setRefNuc(vr.getVariant().getReferenceNucleotide());
-                vi.setSampleId(vr.getVariant().getSampleId());
-                vi.setTotalDepth(vr.getVariant().getDepth());
-                vi.setVarFreq(vr.getVariant().getVariantFrequency());
-                vi.setVariantType(vr.getVariant().getVariantType());
-                vi.setVarNuc(vr.getVariant().getVariantNucleotide());
-                vi.setZygosityStatus(vr.getVariant().getZygosityStatus());
-                vi.setZygosityPossError(vr.getVariant().getZygosityPossibleError());
-                vi.setZygosityPercentRead(vr.getVariant().getZygosityPercentRead());
-                vi.setZygosityInPseudo(vr.getVariant().getZygosityInPseudo());
-                vi.setGenicStatus(vr.getVariant().getGenicStatus());
-                vi.setMapKey(mapKey);
-                List<BigDecimal> conScores=new ArrayList<>();
-                for(ConservationScore s:vr.getVariant().getConservationScore()){
-                    conScores.add(s.getScore());
-                }
-                List<Integer> geneRgdIds=new ArrayList<>();
-                List<String> geneSymbols= new ArrayList<>();
-                for(MappedGene g: getMappedGenes(vr.getVariant(), mapKey)){
-                    geneRgdIds.add(g.getGene().getRgdId());
-                    geneSymbols.add(g.getGene().getSymbol());
-                }
-                vi.setGeneRgdIds(geneRgdIds);
-                vi.setGeneSymbols(geneSymbols);
-                vi.setConScores(conScores);
-                variantsList.add(vi);
-            }
-
-        }
-        if(variantsList.size()>0){
+        List<VariantIndex> vrs=variantDao.getVariantResults(sampleId, chromosome, mapKey);
+       if(vrs.size()>0){
             BulkRequestBuilder bulkRequestBuilder= ESClient.getClient().prepareBulk();
             int docCount=1;
 
-            for (VariantIndex o : variantsList) {
+            for (VariantIndex o : vrs) {
                 docCount++;
                 ObjectMapper mapper = new ObjectMapper();
                 byte[] json = new byte[0];
@@ -108,7 +71,7 @@ public class VariantIndexer  implements  Runnable{
                     }
                     bulkRequestBuilder= ESClient.getClient().prepareBulk();
                 }else{
-                    if(docCount>variantsList.size()-100 && docCount==variantsList.size()){
+                    if(docCount>vrs.size()-100 && docCount==vrs.size()){
                         try {
                             BulkResponse response=       bulkRequestBuilder.execute().get();
                         } catch (InterruptedException | ExecutionException e) {
@@ -121,7 +84,7 @@ public class VariantIndexer  implements  Runnable{
             }
 
             ESClient.getClient().admin().indices().refresh(refreshRequest()).actionGet();
-            System.out.println("Indexed mapKey " + mapKey + ",  Variant objects Size: " + variantsList.size() + " Exiting thread.");
+            System.out.println("Indexed mapKey " + mapKey + ", chromosome: "+ chromosome+", Variant objects Size: " + vrs.size() + " Exiting thread.");
             System.out.println(Thread.currentThread().getName() + ": VariantThread" + mapKey + " End " + new Date());
         }
 
