@@ -11,8 +11,8 @@ import org.springframework.jdbc.core.SqlParameter;
 
 import java.math.BigDecimal;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.Map;
 
 /**
  * Created by jthota on 6/26/2019.
@@ -26,6 +26,7 @@ public class VariantDao extends VariantDAO {
         return q.execute(new Object[]{sampleId, chr});
     }
     public List<VariantIndex> getVariantResults(int sampleId, String chr, int mapKey) {
+        GeneDAO geneDAO=new GeneDAO();
    /*  String sql="select v.*, vt.*, p.*, cs.* from variant v\n" +
              "left outer join gene_loci gl on (gl.map_key=? and gl.chromosome=v.chromosome and gl.pos=v.start_pos) " +
              "left outer join variant_transcript vt on v.variant_id=vt.variant_id " +
@@ -50,6 +51,7 @@ public class VariantDao extends VariantDAO {
                 "and v.total_depth>8 " +
                 "and v.sample_id=?";
         List<VariantIndex> vrList = new ArrayList<>();
+        Set<Long> variantIds= new HashSet<>();
         ResultSet rs= null;
         try(Connection connection= DataSourceFactory.getInstance().getCarpeNovoDataSource().getConnection();
             PreparedStatement stmt=connection.prepareStatement(sql);){
@@ -60,71 +62,115 @@ public class VariantDao extends VariantDAO {
             stmt.setString(4, chr);
             stmt.setInt(5, sampleId);
             rs=  stmt.executeQuery();
-
+            java.util.Map<Long, VariantIndex> variants= new HashMap<>();
         //   System.out.println("RESULT SET SIZE: "+ rs.getFetchSize());
             while(rs.next()) {
-                VariantIndex vi= new VariantIndex();
-                vi.setVariant_id(rs.getInt("variant_id"));
-                vi.setChromosome(rs.getString("chromosome"));
-                vi.setPaddingBase(rs.getString("padding_base"));
-                vi.setEndPos(rs.getLong("end_pos"));
-                vi.setRefNuc(rs.getString("ref_nuc"));
-                vi.setSampleId(rs.getInt("sample_id"));
-                vi.setStartPos(rs.getLong("start_pos"));
-                vi.setTotalDepth(rs.getInt("total_depth"));
-                vi.setVarFreq(rs.getInt("var_freq"));
-                vi.setVariantType(rs.getString("variant_type"));
-                vi.setVarNuc(rs.getString("var_nuc"));
-                vi.setZygosityStatus(rs.getString("zygosity_status"));
-                vi.setGenicStatus(rs.getString("genic_status"));
-                vi.setZygosityPercentRead(rs.getDouble("zygosity_percent_read"));
-                vi.setZygosityPossError(rs.getString("zygosity_poss_error"));
-                vi.setZygosityRefAllele(rs.getString("zygosity_ref_allele"));
-                vi.setZygosityNumAllele(rs.getInt("zygosity_num_allele"));
-                vi.setZygosityInPseudo(rs.getString("zygosity_in_pseudo"));
-                vi.setQualityScore(rs.getInt("quality_score"));
-                vi.setHGVSNAME(rs.getString("hgvs_name"));
+                try {
+                    VariantIndex vi = new VariantIndex();
+                    long variant_id = rs.getLong("variant_id");
+                    if (!variantIds.contains(variant_id)) {
+                        variantIds.add(variant_id);
+                        vi.setVariant_id(variant_id);
+                        vi.setChromosome(rs.getString("chromosome"));
+                        vi.setPaddingBase(rs.getString("padding_base"));
+                        vi.setEndPos(rs.getLong("end_pos"));
+                        vi.setRefNuc(rs.getString("ref_nuc"));
+                        vi.setSampleId(rs.getInt("sample_id"));
+                        vi.setStartPos(rs.getLong("start_pos"));
+                        vi.setTotalDepth(rs.getInt("total_depth"));
+                        vi.setVarFreq(rs.getInt("var_freq"));
+                        vi.setVariantType(rs.getString("variant_type"));
+                        vi.setVarNuc(rs.getString("var_nuc"));
+                        vi.setZygosityStatus(rs.getString("zygosity_status"));
+                        vi.setGenicStatus(rs.getString("genic_status"));
+                        vi.setZygosityPercentRead(rs.getDouble("zygosity_percent_read"));
+                        vi.setZygosityPossError(rs.getString("zygosity_poss_error"));
+                        vi.setZygosityRefAllele(rs.getString("zygosity_ref_allele"));
+                        vi.setZygosityNumAllele(rs.getInt("zygosity_num_allele"));
+                        vi.setZygosityInPseudo(rs.getString("zygosity_in_pseudo"));
+                        vi.setQualityScore(rs.getInt("quality_score"));
+                        vi.setHGVSNAME(rs.getString("hgvs_name"));
 
-                /***************Variant Transcript****************************/
-                vi.setVariantTranscriptId(rs.getInt("variant_transcript_id"));
-                vi.setTranscriptRgdId(rs.getInt("transcript_rgd_id"));
-                vi.setRefAA(rs.getString("ref_aa"));
-                vi.setVarAA(rs.getString("var_aa"));
-                vi.setGeneSpliceStatus(rs.getString("genesplice_status"));
-                vi.setPolyphenStatus(rs.getString("polyphen_status"));
-                vi.setSynStatus(rs.getString("syn_status"));
-                vi.setLocationName(rs.getString("location_name"));
-                vi.setNearSpliceSite(rs.getString("near_splice_site"));
-                //    vi.setFullRefNuc(rs.getString("full_ref_nuc"));
-                vi.setFullRefNucPos(rs.getInt("full_ref_nuc_pos"));
-                //   vi.setFullRefAA(rs.getString("full_ref_aa"));
-                vi.setFullRefAAPos(rs.getInt("full_ref_aa_pos"));
-                vi.setUniprotId(rs.getString("uniprot_id"));
-                vi.setTripletError(rs.getString("triplet_error"));
-                vi.setFrameShift(rs.getString("frameshift"));
 
-                /*****************polyphen******************/
+                        /***************Variant Transcript****************************/
+                        //   vi.setVariantTranscriptId(rs.getInt("variant_transcript_id"));
+                        //  vi.setTranscriptRgdId(rs.getInt("transcript_rgd_id"));
+                        List<Long> vtIds=new ArrayList<>();
+                        vtIds.add(rs.getLong("variant_transcript_id"));
+                        vi.setVariantTranscriptIds(vtIds);
+                        List<Long> tIds= new ArrayList<>();
+                        tIds.add(rs.getLong("transcript_rgd_id"));
+                         vi.setTranscriptRgdIds(tIds);
+                        vi.setRefAA(rs.getString("ref_aa"));
+                        vi.setVarAA(rs.getString("var_aa"));
+                        vi.setGeneSpliceStatus(rs.getString("genesplice_status"));
+                        vi.setPolyphenStatus(rs.getString("polyphen_status"));
+                        vi.setSynStatus(rs.getString("syn_status"));
+                        vi.setLocationName(rs.getString("location_name"));
+                        vi.setNearSpliceSite(rs.getString("near_splice_site"));
+                        //    vi.setFullRefNuc(rs.getString("full_ref_nuc"));
+                        vi.setFullRefNucPos(rs.getInt("full_ref_nuc_pos"));
+                        //   vi.setFullRefAA(rs.getString("full_ref_aa"));
+                        vi.setFullRefAAPos(rs.getInt("full_ref_aa_pos"));
+                        vi.setUniprotId(rs.getString("uniprot_id"));
+                        vi.setTripletError(rs.getString("triplet_error"));
+                        vi.setFrameShift(rs.getString("frameshift"));
 
-                vi.setPolyphenPrediction(rs.getString("prediction"));
-                /******************region_name*******************/
-                vi.setRegionName(rs.getString("region_name"));
-                List<BigDecimal> conScores=new ArrayList<>();
-                conScores.add(rs.getBigDecimal("score"));
-                List<Integer> geneRgdIds=new ArrayList<>();
-                List<String> geneSymbols= new ArrayList<>();
-                for(MappedGene g: getMappedGenes(rs.getString("chromosome"),rs.getLong("start_pos"), rs.getLong("end_pos"), rs.getInt("map_key"))){
-                    geneRgdIds.add(g.getGene().getRgdId());
-                    geneSymbols.add(g.getGene().getSymbol());
+                        /*****************polyphen******************/
+
+                        vi.setPolyphenPrediction(rs.getString("prediction"));
+                        /******************region_name*******************/
+                        vi.setRegionName(rs.getString("region_name"));
+                        List<BigDecimal> conScores = new ArrayList<>();
+                        conScores.add(rs.getBigDecimal("score"));
+               /*     List<Integer> geneRgdIds = new ArrayList<>();
+                    List<String> geneSymbols = new ArrayList<>();
+                   for (MappedGene g : getMappedGenes(rs.getString("chromosome"), rs.getLong("start_pos"), rs.getLong("end_pos"), rs.getInt("map_key"))) {
+                        geneRgdIds.add(g.getGene().getRgdId());
+                        geneSymbols.add(g.getGene().getSymbol());
+                    }
+
+                    vi.setGeneRgdIds(geneRgdIds);
+                    vi.setGeneSymbols(geneSymbols);*/
+                        int geneRgdId = rs.getInt("gene_rgd_id");
+                        if(geneRgdId!=0) {
+                            List<Integer> gIds = new ArrayList<>();
+                            gIds.add(geneRgdId);
+                            vi.setGeneRgdIds(gIds);
+                            List<String> gSymbols = new ArrayList<>();
+                            gSymbols.add(geneDAO.getGene(geneRgdId).getSymbol());
+                            vi.setGeneSymbols(gSymbols);
+                        }
+                        vi.setConScores(conScores);
+                        variants.put(variant_id, vi);
+                        //     vrList.add(vi);
+                    } else {
+                        VariantIndex obj = variants.get(variant_id);
+                        Long vtId=rs.getLong("variant_transcript_id");
+                        Long tId=rs.getLong("transcript_rgd_id");
+                        if(!obj.getVariantTranscriptIds().contains(vtId))
+                            obj.getVariantTranscriptIds().add(vtId);
+                        if(!obj.getTranscriptRgdIds().contains(tId))
+                            obj.getTranscriptRgdIds().add(tId);
+
+                        int geneRgdId = rs.getInt("gene_rgd_id");
+                        if(geneRgdId!=0) {
+                            if(!obj.getGeneRgdIds().contains(geneRgdId))
+                                obj.getGeneRgdIds().add(geneRgdId);
+                            String geneSymbol=geneDAO.getGene(geneRgdId).getSymbol();
+                            if(!obj.getGeneSymbols().contains(geneSymbol))
+                                obj.getGeneSymbols().add(geneSymbol);
+                        }
+                        variants.put(variant_id, obj);
+                    }
+                }catch (Exception e){
+                    e.printStackTrace();
                 }
-
-                vi.setGeneRgdIds(geneRgdIds);
-                vi.setGeneSymbols(geneSymbols);
-                vi.setConScores(conScores);
-                vrList.add(vi);
             }
-
+            for(Map.Entry e:variants.entrySet()){
+                vrList.add((VariantIndex) e.getValue());
+            }
             rs.close();
-
             stmt.close();
              connection.close();
         } catch (Exception e) {
@@ -143,7 +189,58 @@ public class VariantDao extends VariantDAO {
       //  this.logger.debug("found vrList size " + vrList.size());
         return vrList;
     }
+    public List<VariantIndex> getVariantResults1(int sampleId, String chr, int mapKey) {
 
+        List<VariantIndex> objects= new ArrayList<>();
+       String sql="select * from variants where sample_id=? and chromosome=?";
+        VariantMapper mapper= new VariantMapper(this.getDataSource(), sql);
+        List<Variant> variants=mapper.execute(new Object[]{sampleId, chr});
+        for(Variant v:variants){
+
+            VariantIndex vi= new VariantIndex();
+            vi.setVariant_id(v.getId());
+            vi.setChromosome(v.getChromosome());
+       //     vi.setPaddingBase();
+            vi.setEndPos(v.getEndPos());
+            vi.setRefNuc(v.getReferenceNucleotide());
+            vi.setSampleId(v.getSampleId());
+            vi.setStartPos(v.getStartPos());
+            vi.setTotalDepth(v.getDepth());
+            vi.setVarFreq(v.getVariantFrequency());
+            vi.setVariantType(v.getVariantType());
+            vi.setVarNuc(v.getVariantNucleotide());
+            vi.setZygosityStatus(v.getZygosityStatus());
+            vi.setGenicStatus(v.getGenicStatus());
+            vi.setZygosityPercentRead(v.getZygosityPercentRead());
+            vi.setZygosityPossError(v.getZygosityPossibleError());
+            vi.setZygosityRefAllele(v.getZygosityRefAllele());
+            vi.setZygosityNumAllele(v.getZygosityNumberAllele());
+            vi.setZygosityInPseudo(v.getZygosityInPseudo());
+            vi.setQualityScore(v.getQualityScore());
+            vi.setHGVSNAME(v.getHgvsName());
+            /***************Variant Transcript****************************/
+         //   this.mapVaraintTranscript(v.getId());
+
+         /*   vi.setVariantTranscriptIds(this.getVariantTranscriptIds(v.getId()));
+            vi.setTranscriptRgdIds(this.getTranscriptIds(v.getId));
+            vi.setRefAA(rs.getString("ref_aa"));
+            vi.setVarAA(rs.getString("var_aa"));
+            vi.setGeneSpliceStatus(rs.getString("genesplice_status"));
+            vi.setPolyphenStatus(rs.getString("polyphen_status"));
+            vi.setSynStatus(rs.getString("syn_status"));
+            vi.setLocationName(rs.getString("location_name"));
+            vi.setNearSpliceSite(rs.getString("near_splice_site"));
+            //    vi.setFullRefNuc(rs.getString("full_ref_nuc"));
+            vi.setFullRefNucPos(rs.getInt("full_ref_nuc_pos"));
+            //   vi.setFullRefAA(rs.getString("full_ref_aa"));
+            vi.setFullRefAAPos(rs.getInt("full_ref_aa_pos"));
+            vi.setUniprotId(rs.getString("uniprot_id"));
+            vi.setTripletError(rs.getString("triplet_error"));
+            vi.setFrameShift(rs.getString("frameshift"));
+*/
+        }
+        return null;
+    }
     public List<MappedGene> getMappedGenes(String chr,long startPos, long endPos, int mapKey)  {
         GeneDAO gdao= new GeneDAO();
         List<MappedGene> mappedGenes = null;

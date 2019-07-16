@@ -51,6 +51,8 @@ public class VariantIndex {
    private int refRgdId;
 
 /*****************Variant_Transcript******************/
+    private List<Long> variantTranscriptIds;
+    private List<Long>  transcriptRgdIds;
 
     private long variantTranscriptId;
     private long   transcriptRgdId;
@@ -60,6 +62,9 @@ public class VariantIndex {
     private String polyphenStatus;
     private String synStatus;
     private String locationName;
+
+
+
     private String nearSpliceSite;
     private String fullRefNuc;
     private long   fullRefNucPos;
@@ -85,6 +90,15 @@ public class VariantIndex {
 
     /*******************ployphen*********************/
     private String polyphenPrediction;
+
+
+    public List<Long> getTranscriptRgdIds() {
+        return transcriptRgdIds;
+    }
+
+    public void setTranscriptRgdIds(List<Long> transcriptRgdIds) {
+        this.transcriptRgdIds = transcriptRgdIds;
+    }
 
     public String getPolyphenPrediction() {
         return polyphenPrediction;
@@ -613,5 +627,13 @@ public class VariantIndex {
 
     public void setConScores(List<BigDecimal> conScores) {
         this.conScores = conScores;
+    }
+
+    public List<Long> getVariantTranscriptIds() {
+        return variantTranscriptIds;
+    }
+
+    public void setVariantTranscriptIds(List<Long> variantTranscriptIds) {
+        this.variantTranscriptIds = variantTranscriptIds;
     }
 }

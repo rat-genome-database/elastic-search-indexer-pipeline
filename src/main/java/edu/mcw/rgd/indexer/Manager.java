@@ -211,14 +211,14 @@ public class Manager {
                             List<Chromosome> chromosomes=mapDAO.getChromosomes(mapKey);
                              List<Sample> samples=sdao.getSamplesByMapKey(mapKey);
                            for(Sample s:samples){
-                                int sampleId=s.getId();
-                           //  int sampleId=911;
-                               for(Chromosome chr:chromosomes){
+                              int sampleId=s.getId();
+                          //   int sampleId=911;
+                             for(Chromosome chr:chromosomes){
                                    //  Chromosome chr=mapDAO.getChromosome(360,"1");
                                         workerThread = new VariantIndexer(sampleId, chr.getChromosome(), mapKey, key,RgdIndex.getNewAlias());
                                         executor.execute(workerThread);
-                                  }
-                              }
+                                 }
+                            }
 
                       //     }
                             }
