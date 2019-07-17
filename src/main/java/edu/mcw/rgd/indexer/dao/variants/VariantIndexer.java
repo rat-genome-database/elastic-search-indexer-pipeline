@@ -85,7 +85,7 @@ public class VariantIndexer  implements  Runnable{
 
             ESClient.getClient().admin().indices().refresh(refreshRequest()).actionGet();
             System.out.println("Indexed mapKey " + mapKey + ", chromosome: "+ chromosome+", Variant objects Size: " + vrs.size() + " Exiting thread.");
-            System.out.println(Thread.currentThread().getName() + ": VariantThread" + mapKey + " End " + new Date());
+            System.out.println(Thread.currentThread().getName() + ": VariantThread" + mapKey +"\tSample "+sampleId+ " End " + new Date());
         }
 
     }
