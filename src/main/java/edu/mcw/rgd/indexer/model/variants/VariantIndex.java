@@ -31,6 +31,7 @@ public class VariantIndex {
     private String HGVSNAME;
     private int rgdId;
     private String regionName;
+    private String regionNameLc;
     /*****************Sample******************/
 
    private String  analysisName;
@@ -91,6 +92,13 @@ public class VariantIndex {
     /*******************ployphen*********************/
     private String polyphenPrediction;
 
+    public String getRegionNameLc() {
+        return regionNameLc;
+    }
+
+    public void setRegionNameLc(String regionNameLc) {
+        this.regionNameLc = regionNameLc;
+    }
 
     public List<Long> getTranscriptRgdIds() {
         return transcriptRgdIds;

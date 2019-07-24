@@ -118,7 +118,9 @@ public class VariantDao extends VariantDAO {
 
                         vi.setPolyphenPrediction(rs.getString("prediction"));
                         /******************region_name*******************/
-                        vi.setRegionName(rs.getString("region_name"));
+                        String regionName=rs.getString("region_name");
+                        vi.setRegionName(regionName);
+                        vi.setRegionNameLc(regionName.toLowerCase());
                         List<BigDecimal> conScores = new ArrayList<>();
                         conScores.add(rs.getBigDecimal("score"));
 
