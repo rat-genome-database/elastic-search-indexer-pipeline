@@ -29,6 +29,8 @@ public class IndexObject {
     private List<MapInfo> mapDataList;
     private List<String> promoters;
     private String subcat;
+    private List<String> associations;
+
 
     private List<String> xdata;
     private List<String> annotated_objects;
@@ -56,6 +58,14 @@ public class IndexObject {
 
 
     private Suggest suggest;
+
+    public List<String> getAssociations() {
+        return associations;
+    }
+
+    public void setAssociations(List<String> associations) {
+        this.associations = associations;
+    }
 
     public List<String> getAuthor() {
         return author;

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.mcw.rgd.dao.AbstractDAO;
 import edu.mcw.rgd.dao.DataSourceFactory;
 import edu.mcw.rgd.dao.impl.*;
+import edu.mcw.rgd.dao.spring.GeneQuery;
 import edu.mcw.rgd.dao.spring.StringMapQuery;
 
 import edu.mcw.rgd.datamodel.*;
@@ -31,8 +32,10 @@ import org.elasticsearch.common.xcontent.XContentType;
 import org.jsoup.Jsoup;
 
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 
+import java.sql.Statement;
 import java.util.*;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -337,11 +340,13 @@ public class IndexDAO extends AbstractDAO {
         //  Strain strain=strainDAO.getStrain(7248453);
   //      List<Alias> aliases=aliasDAO.getActiveAliases(RgdId.OBJECT_KEY_STRAINS);
         List<Strain> strains= strainDAO.getActiveStrains();
+        Map<Integer, Gene> genes=getStrainAssociations(strains);
         for(Strain strain: strains) {
             int speciesTypeKey = strain.getSpeciesTypeKey();
             boolean isSearchable=SpeciesType.isSearchable(speciesTypeKey);
 
             if (isSearchable) {
+
                 String species = SpeciesType.getCommonName(speciesTypeKey);
                 IndexObject s = new IndexObject();
                 String symbol = strain.getSymbol();
@@ -351,7 +356,6 @@ public class IndexDAO extends AbstractDAO {
                 String name = strain.getName();
 
                 int rgdId = strain.getRgdId();
-
                 s.setSpecies(species);
                 s.setTerm_acc(String.valueOf(rgdId));
                 s.setSymbol(symbol);
@@ -376,11 +380,51 @@ public class IndexDAO extends AbstractDAO {
                 s.setSampleExists(this.sampleExists(rgdId, 600));
                 s.setMapDataList(this.getMapData(rgdId));
                 s.setAnnotationsCount(this.getAnnotsCount(rgdId));
+                Gene g=genes.get(rgdId);
+                if(g!=null){
+                    List<String> associations= new ArrayList<>();
+                    associations.add(g.getSymbol());
+                    associations.add(g.getName());
+                    s.setAssociations(associations);
+                }
                 objList.add(s);
 
             }
         }
+
         return objList;
+    }
+    public Map<Integer, Gene> getStrainAssociations(List<Strain> strains) throws Exception {
+        Map<Integer, Gene> genes= new HashMap<>();
+        List<Integer> rgdIds=new ArrayList<>();
+
+        for(Strain s:strains){
+           rgdIds.add(s.getRgdId());
+        }
+        String sql="select s.rgd_id as strain_rgd_id, g.* from genes g, " +
+                "genes_variations gv, " +
+                "genes a, rgd_ids r, " +
+                "strains s," +
+                "rgd_strains_rgd rs " +
+                "where gv.gene_key=g.gene_key " +
+                "AND gv.variation_key=a.gene_key " +
+                "and a.rgd_id=rs.rgd_id " +
+                "and rs.strain_key=s.strain_key " +
+                "and r.rgd_id=g.rgd_id " +
+                "and r.object_status='ACTIVE' " +
+                "and s.rgd_id in ("+Utils.concatenate(rgdIds,",")+")";
+
+        Connection conn=this.getDataSource().getConnection();
+        Statement stmt= conn.createStatement();
+        ResultSet rs=stmt.executeQuery(sql);
+        while(rs.next()){
+            Gene g= new Gene();
+            g.setSymbol(rs.getString("gene_symbol").toLowerCase());
+            g.setName(rs.getString("full_name_lc"));
+
+            genes.put(rs.getInt("strain_rgd_id"),g );
+        }
+        return genes;
     }
 
   /*  public List<SearchIndex> getStrains() throws Exception{
@@ -1198,10 +1242,10 @@ public class IndexDAO extends AbstractDAO {
         ESClient.getClient().admin().indices().refresh(refreshRequest()).actionGet();
     }
     public static void main(String[] args) throws Exception {
-        GenomicElementDAO gedao= new GenomicElementDAO();
-        IndexDAO dao= new IndexDAO();
-
-       dao.getQtls();
+          IndexDAO dao= new IndexDAO();
+      /*   Map<Integer, Gene> genes=  dao.getStrainAssociations(Arrays.asList(5143985,6893600));
+        System.out.println("NUMBER OF GENES:"+genes.size());
+        System.out.println(genes.get(5143985).toString());*/
         System.out.println("DONE!!!!");
     }
 
