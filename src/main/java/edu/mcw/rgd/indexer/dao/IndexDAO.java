@@ -31,8 +31,10 @@ import org.elasticsearch.common.xcontent.XContentType;
 import org.jsoup.Jsoup;
 
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 
+import java.sql.Statement;
 import java.util.*;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -331,17 +333,19 @@ public class IndexDAO extends AbstractDAO {
             }
 
     } return annotations;}
-   public List<IndexObject> getStrains() throws Exception{
+    public List<IndexObject> getStrains() throws Exception{
 
         List<IndexObject> objList= new ArrayList<>();
         //  Strain strain=strainDAO.getStrain(7248453);
-  //      List<Alias> aliases=aliasDAO.getActiveAliases(RgdId.OBJECT_KEY_STRAINS);
+        //      List<Alias> aliases=aliasDAO.getActiveAliases(RgdId.OBJECT_KEY_STRAINS);
         List<Strain> strains= strainDAO.getActiveStrains();
+        Map<Integer, Gene> genes=getStrainAssociations(strains);
         for(Strain strain: strains) {
             int speciesTypeKey = strain.getSpeciesTypeKey();
             boolean isSearchable=SpeciesType.isSearchable(speciesTypeKey);
 
             if (isSearchable) {
+
                 String species = SpeciesType.getCommonName(speciesTypeKey);
                 IndexObject s = new IndexObject();
                 String symbol = strain.getSymbol();
@@ -351,7 +355,6 @@ public class IndexDAO extends AbstractDAO {
                 String name = strain.getName();
 
                 int rgdId = strain.getRgdId();
-
                 s.setSpecies(species);
                 s.setTerm_acc(String.valueOf(rgdId));
                 s.setSymbol(symbol);
@@ -376,14 +379,69 @@ public class IndexDAO extends AbstractDAO {
                 s.setSampleExists(this.sampleExists(rgdId, 600));
                 s.setMapDataList(this.getMapData(rgdId));
                 s.setAnnotationsCount(this.getAnnotsCount(rgdId));
+                Gene g=genes.get(rgdId);
+                if(g!=null){
+                    List<String> associations= new ArrayList<>();
+                    associations.add(g.getSymbol());
+                    associations.add(g.getName());
+                    s.setAssociations(associations);
+                }
                 objList.add(s);
 
             }
         }
+
         return objList;
     }
+    public Map<Integer, Gene> getStrainAssociations(List<Strain> strains) throws Exception {
+        Map<Integer, Gene> genes= new HashMap<>();
+        List<Integer> rgdIds=new ArrayList<>();
 
-  /*  public List<SearchIndex> getStrains() throws Exception{
+        for(Strain s:strains){
+            rgdIds.add(s.getRgdId());
+        }
+        Collection[] colletions = this.split(rgdIds, 1000);
+        Connection conn=null;
+        Statement stmt= null;
+        ResultSet rs=null;
+        for(int i=0; i<colletions.length;i++){
+            List c= (List) colletions[i];
+            String sql="select s.rgd_id as strain_rgd_id, g.* from genes g, " +
+                    "genes_variations gv, " +
+                    "genes a, rgd_ids r, " +
+                    "strains s," +
+                    "rgd_strains_rgd rs " +
+                    "where gv.gene_key=g.gene_key " +
+                    "AND gv.variation_key=a.gene_key " +
+                    "and a.rgd_id=rs.rgd_id " +
+                    "and rs.strain_key=s.strain_key " +
+                    "and r.rgd_id=g.rgd_id " +
+                    "and r.object_status='ACTIVE' " +
+                    "and s.rgd_id in ("+Utils.concatenate(c,",")+")";
+
+            conn=this.getDataSource().getConnection();
+            stmt= conn.createStatement();
+            rs=stmt.executeQuery(sql);
+            while(rs.next()){
+                Gene g= new Gene();
+                g.setSymbol(rs.getString("gene_symbol").toLowerCase());
+                g.setName(rs.getString("full_name_lc"));
+
+                genes.put(rs.getInt("strain_rgd_id"),g );
+            }
+
+            rs.close();
+            stmt.close();
+            if(!conn.isClosed()){
+                conn.close();
+            }
+        }
+
+        return genes;
+    }
+
+
+    /*  public List<SearchIndex> getStrains() throws Exception{
 
 
         List<Strain> strains= strainDAO.getActiveStrains();
@@ -827,7 +885,7 @@ public class IndexDAO extends AbstractDAO {
     }
     /*************************************************************************************************/
 
-    public Collection[] split(List<IndexObject> objs, int size) throws Exception{
+    public Collection[] split(List objs, int size) throws Exception{
         int numOfBatches=(objs.size()/size)+1;
         Collection[] batches= new Collection[numOfBatches];
         for(int index=0; index<numOfBatches; index++){
@@ -838,6 +896,7 @@ public class IndexDAO extends AbstractDAO {
         }
         return batches;
     }
+
 
     public List<Annotation> getAnnotations(String term_acc) throws Exception {
         AnnotationDAO annotationDAO= new AnnotationDAO();
