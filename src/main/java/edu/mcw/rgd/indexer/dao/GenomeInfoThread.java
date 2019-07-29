@@ -58,8 +58,8 @@ public class GenomeInfoThread implements Runnable {
 
          String species = SpeciesType.getCommonName(key);
             List<Map> maps = mapDAO.getMaps(key,"bp");
-    //       for (edu.mcw.rgd.datamodel.Map m : maps) {
-              Map m= mapDAO.getMap(360);
+        for (edu.mcw.rgd.datamodel.Map m : maps) {
+           //   Map m= mapDAO.getMap(360);
 
                 int mapKey=m.getKey();
                 if(mapKey!=6 && mapKey!=36 && mapKey!=8 && mapKey!=21 && mapKey!=19 && mapKey!=7 && mapKey!=900) {
@@ -109,7 +109,7 @@ public class GenomeInfoThread implements Runnable {
                 obj.setBonoboOrthologs(geneCounts.getBonoboOrthologs());
                 obj.setGenesWithoutOrthologs(geneCounts.getGenesWithoutOrthologs());
                 obj.setGenesWithOrthologs(geneCounts.getGenesWithOrthologs());
-                System.out.println("DONE GENE COUNTS");
+
                 obj.setProteinsCount(genomeDAO.getProteinCounts(mapKey, null));
 
                 java.util.Map<String, Integer> mirnaTargets = geneCounts.getMirnaTargets();
@@ -169,7 +169,7 @@ public class GenomeInfoThread implements Runnable {
 
                 objects.add(obj);
           }
-      //  }
+       }
             System.out.println("Objects List Size of " + species + " : " + objects.size());
            log.info("Objects List Size of " + species + " : " + objects.size());
          BulkRequestBuilder bulkRequestBuilder= ESClient.getClient().prepareBulk().setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
