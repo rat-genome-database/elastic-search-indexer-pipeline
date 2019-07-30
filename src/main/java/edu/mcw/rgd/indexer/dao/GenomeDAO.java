@@ -249,9 +249,40 @@ public class GenomeDAO extends AbstractDAO{
                     }
                     break;
                 case 9:
-                    if(mapKey==900){}
-                    if(mapKey==910){}
-                    if(mapKey==911){}
+                    if(mapKey==900){
+
+
+                    }
+                    if(mapKey==910){
+                        info.setBasePairs("3,024,658,544");
+                        info.setTotalLength("2,808,525,991");
+                        info.setGapLength("");
+                        info.setGapBetweenScaffolds("5,323");
+                        info.setScaffolds("9,906");
+                        info.setScaffoldN50("576,008");
+                        info.setScaffoldL50("1,303");
+                        info.setContigs("243,021");
+                        info.setContigN50("69,503");
+                        info.setContigL50("8,632");
+                        info.setChromosome("21");
+                        info.setNcbiLink("https://www.ncbi.nlm.nih.gov/assembly/GCF_000003025.5/");
+                        info.setRefSeqAssemblyAccession("GCF_000003025.5");
+                    }
+                    if(mapKey==911){
+                        info.setBasePairs("2,478,444,698");
+                        info.setTotalLength("2,501,912,388");
+                        info.setGapLength("");
+                        info.setGapBetweenScaffolds("93");
+                        info.setScaffolds("706");
+                        info.setScaffoldN50("88,231,837");
+                        info.setScaffoldL50("9");
+                        info.setContigs("1,118");
+                        info.setContigN50("48,231,277");
+                        info.setContigL50("15");
+                        info.setChromosome("21");
+                        info.setNcbiLink("https://www.ncbi.nlm.nih.gov/assembly/GCF_000003025.6/");
+                        info.setRefSeqAssemblyAccession("GCF_000003025.6");
+                    }
                 default:
             }
 
@@ -276,6 +307,7 @@ public class GenomeDAO extends AbstractDAO{
         GeneCounts geneCounts = new GeneCounts();
         List<MappedGene> filteredGenes= new ArrayList<>();
         List<MappedGene> mGenes= geneDAO.getActiveMappedGenes(mapKey);
+        System.out.println("MapKey: "+ mapKey + "\t"+ mGenes.size());
         if(chr!=null){
             for(MappedGene m: mGenes){
                if(m.getChromosome().equals(chr)){
@@ -318,13 +350,15 @@ public class GenomeDAO extends AbstractDAO{
             geneCounts.setrRna(rrna);
             geneCounts.setSnRna(snrna);
             geneCounts.settRna(trna);
-
-            geneCounts.setMirnaTargets(this.getMirnaTargetCount(mapKey, chr));
+            Map<String, Integer> mirTargetCount=  this.getMirnaTargetCount(mapKey, chr);
+            System.out.println("MIRTARGE COUNT: "+ mirTargetCount);
+            geneCounts.setMirnaTargets(mirTargetCount);
 
 
         }
         Map<String, Integer> orthCounts=new HashMap<>();
         orthCounts = this.getOrthologCounts(mapKey, speciesTypeKey, chr);
+        System.out.println("ORTHOCOUNTS:"+ orthCounts);
         for(Map.Entry e: orthCounts.entrySet()){
             String key= (String) e.getKey();
             int value= (int) e.getValue();
@@ -348,6 +382,9 @@ public class GenomeDAO extends AbstractDAO{
                 geneCounts.setDogOrthologs(value);
             }
             if(key.equals("7")){
+                geneCounts.setSquirrelOrthologs(value);
+            }
+            if(key.equals("9")){
                 geneCounts.setSquirrelOrthologs(value);
             }
             if(key.equalsIgnoreCase("withOrthologs")){

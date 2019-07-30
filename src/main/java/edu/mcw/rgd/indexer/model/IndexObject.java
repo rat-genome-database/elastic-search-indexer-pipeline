@@ -31,6 +31,7 @@ public class IndexObject {
     private String subcat;
     private List<String> associations;
 
+
     private List<String> xdata;
     private List<String> annotated_objects;
     private List<String> annotation_synonyms;

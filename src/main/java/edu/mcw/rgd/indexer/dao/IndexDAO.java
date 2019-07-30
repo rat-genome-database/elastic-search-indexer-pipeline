@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.mcw.rgd.dao.AbstractDAO;
 import edu.mcw.rgd.dao.DataSourceFactory;
 import edu.mcw.rgd.dao.impl.*;
+import edu.mcw.rgd.dao.spring.GeneQuery;
 import edu.mcw.rgd.dao.spring.StringMapQuery;
 
 import edu.mcw.rgd.datamodel.*;
@@ -333,11 +334,11 @@ public class IndexDAO extends AbstractDAO {
             }
 
     } return annotations;}
-    public List<IndexObject> getStrains() throws Exception{
+   public List<IndexObject> getStrains() throws Exception{
 
         List<IndexObject> objList= new ArrayList<>();
         //  Strain strain=strainDAO.getStrain(7248453);
-        //      List<Alias> aliases=aliasDAO.getActiveAliases(RgdId.OBJECT_KEY_STRAINS);
+  //      List<Alias> aliases=aliasDAO.getActiveAliases(RgdId.OBJECT_KEY_STRAINS);
         List<Strain> strains= strainDAO.getActiveStrains();
         Map<Integer, Gene> genes=getStrainAssociations(strains);
         for(Strain strain: strains) {
@@ -398,7 +399,7 @@ public class IndexDAO extends AbstractDAO {
         List<Integer> rgdIds=new ArrayList<>();
 
         for(Strain s:strains){
-            rgdIds.add(s.getRgdId());
+           rgdIds.add(s.getRgdId());
         }
         Collection[] colletions = this.split(rgdIds, 1000);
         Connection conn=null;
@@ -419,9 +420,9 @@ public class IndexDAO extends AbstractDAO {
                     "and r.object_status='ACTIVE' " +
                     "and s.rgd_id in ("+Utils.concatenate(c,",")+")";
 
-            conn=this.getDataSource().getConnection();
-            stmt= conn.createStatement();
-            rs=stmt.executeQuery(sql);
+           conn=this.getDataSource().getConnection();
+           stmt= conn.createStatement();
+          rs=stmt.executeQuery(sql);
             while(rs.next()){
                 Gene g= new Gene();
                 g.setSymbol(rs.getString("gene_symbol").toLowerCase());
@@ -440,8 +441,7 @@ public class IndexDAO extends AbstractDAO {
         return genes;
     }
 
-
-    /*  public List<SearchIndex> getStrains() throws Exception{
+  /*  public List<SearchIndex> getStrains() throws Exception{
 
 
         List<Strain> strains= strainDAO.getActiveStrains();
@@ -1257,10 +1257,10 @@ public class IndexDAO extends AbstractDAO {
         ESClient.getClient().admin().indices().refresh(refreshRequest()).actionGet();
     }
     public static void main(String[] args) throws Exception {
-        GenomicElementDAO gedao= new GenomicElementDAO();
-        IndexDAO dao= new IndexDAO();
-
-       dao.getQtls();
+          IndexDAO dao= new IndexDAO();
+      /*   Map<Integer, Gene> genes=  dao.getStrainAssociations(Arrays.asList(5143985,6893600));
+        System.out.println("NUMBER OF GENES:"+genes.size());
+        System.out.println(genes.get(5143985).toString());*/
         System.out.println("DONE!!!!");
     }
 
