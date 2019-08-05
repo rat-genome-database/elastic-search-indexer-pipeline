@@ -206,7 +206,7 @@ public class Manager {
                                 case 1:
                                     break;
                                 case 3:
-                                    admin.createIndex(log, "variant_mappings", "variant_rat");
+                                    admin.createIndex(log, "variant_mappings", "variant");
                                     if(SpeciesType.isSearchable(species)) {
                                         List<Map> maps=mapDAO.getMaps(species);
                                         for(Map m:maps){
