@@ -117,6 +117,8 @@ public class VariantDao extends VariantDAO {
                         /*****************polyphen******************/
 
                         vi.setPolyphenPrediction(rs.getString("prediction"));
+                        /**************************dbs_snp****************************/
+                        vi.setDbsSnpName(rs.getString("MCW_DBS_SNP_NAME"));
                         /******************region_name*******************/
                         String regionName=rs.getString("region_name");
                         vi.setRegionName(regionName);

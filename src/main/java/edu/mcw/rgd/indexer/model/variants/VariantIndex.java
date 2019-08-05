@@ -92,8 +92,22 @@ public class VariantIndex {
     /*******************ployphen*********************/
     private String polyphenPrediction;
 
+
+    /********************dbs_snp*******************************/
+    private String dbsSnpName;
+
     public String getRegionNameLc() {
         return regionNameLc;
+
+
+    }
+
+    public String getDbsSnpName() {
+        return dbsSnpName;
+    }
+
+    public void setDbsSnpName(String dbsSnpName) {
+        this.dbsSnpName = dbsSnpName;
     }
 
     public void setRegionNameLc(String regionNameLc) {
