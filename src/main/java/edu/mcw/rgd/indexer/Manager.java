@@ -200,7 +200,8 @@ public class Manager {
                         MapDAO mapDAO= new MapDAO();
                         SampleDAO sdao= new SampleDAO();
                         sdao.setDataSource(DataSourceFactory.getInstance().getCarpeNovoDataSource());
-                        List<Integer> speciesTypeKeys= new ArrayList<>(Arrays.asList(1,3, 6));
+                     //   List<Integer> speciesTypeKeys= new ArrayList<>(Arrays.asList(1,3, 6));
+                        List<Integer> speciesTypeKeys= new ArrayList<>(Arrays.asList(3));
                         for(int species:speciesTypeKeys){
                             switch (species){
                                 case 1:
@@ -209,20 +210,23 @@ public class Manager {
                                     admin.createIndex(log, "variant_mappings", "variant");
                                     if(SpeciesType.isSearchable(species)) {
                                         List<Map> maps=mapDAO.getMaps(species);
-                                        for(Map m:maps){
-                                             int mapKey=m.getKey();
-                                        //    int mapKey=360;
-                                            List<Chromosome> chromosomes=mapDAO.getChromosomes(mapKey);
-                                            List<Sample> samples=sdao.getSamplesByMapKey(mapKey);
-                                            for(Sample s:samples){
-                                                int sampleId=s.getId();
+                                        for(Map m:maps) {
+                                            int mapKey = m.getKey();
+                                            //    int mapKey=360;
+                                            List<Sample> samples = sdao.getSamplesByMapKey(mapKey);
+                                            if (samples != null && samples.size() > 0){
+                                                List<Chromosome> chromosomes = mapDAO.getChromosomes(mapKey);
+
+                                            for (Sample s : samples) {
+                                                int sampleId = s.getId();
                                                 //   int sampleId=911;
-                                                for(Chromosome chr:chromosomes){
+                                                for (Chromosome chr : chromosomes) {
                                                     //    Chromosome chr=mapDAO.getChromosome(360,"10");
-                                                    workerThread = new VariantIndexer(sampleId, chr.getChromosome(), mapKey, species,RgdIndex.getNewAlias());
+                                                    workerThread = new VariantIndexer(sampleId, chr.getChromosome(), mapKey, species, RgdIndex.getNewAlias());
                                                     executor.execute(workerThread);
                                                 }
                                             }
+                                        }
                                         }
                                     }
 
