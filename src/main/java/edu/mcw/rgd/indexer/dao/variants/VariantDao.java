@@ -201,9 +201,23 @@ public class VariantDao extends VariantDAO {
                 }
             }
 
+                rs.close();
+                stmt.close();
+               connection.close();
 
         } catch (Exception e) {
             e.printStackTrace();
+            try {
+                if(rs!=null)
+                    rs.close();
+                if(stmt!=null)
+                    stmt.close();
+                if(connection!=null)
+                    connection.close();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+
         }finally {
              try {
                     if(rs!=null)
