@@ -72,8 +72,8 @@ public class IndexDAO extends AbstractDAO {
         List<GenomeIndexObject> objects= new ArrayList<>();
         for(int key : SpeciesType.getSpeciesTypeKeys()) {
             //  int key=3;
-            boolean isSearchable=SpeciesType.isSearchable(key);
-            if (key != 0 && isSearchable) {
+            boolean isSearchable2=SpeciesType.isSearchable2(key);
+            if (key != 0 && isSearchable2) {
              //   System.out.println("SPECIES TYPE KEY: " + key);
                 String species = SpeciesType.getCommonName(key);
                 List<edu.mcw.rgd.datamodel.Map> maps = mapDAO.getMaps(key);
@@ -143,8 +143,8 @@ public class IndexDAO extends AbstractDAO {
      for(Gene gene: genes) {
          //  Gene gene= geneDAO.getGene(2004);
          int speciesKey = gene.getSpeciesTypeKey();
-            boolean isSearchable=SpeciesType.isSearchable(speciesKey);
-         if (isSearchable) {
+            boolean isSearchable2=SpeciesType.isSearchable2(speciesKey);
+         if (isSearchable2) {
              String species = SpeciesType.getCommonName(speciesKey);
              IndexObject obj = new IndexObject();
              int rgdId = gene.getRgdId();
@@ -343,16 +343,9 @@ public class IndexDAO extends AbstractDAO {
         Map<Integer, Gene> genes=getStrainAssociations(strains);
         for(Strain strain: strains) {
             int speciesTypeKey = strain.getSpeciesTypeKey();
-            boolean isSearchable=SpeciesType.isSearchable(speciesTypeKey);
+            boolean isSearchable2=SpeciesType.isSearchable2(speciesTypeKey);
             String species = SpeciesType.getCommonName(speciesTypeKey);
-            if (species.toLowerCase().equalsIgnoreCase("rat") ||
-                    species.toLowerCase().equalsIgnoreCase("human")||
-                    species.toLowerCase().equalsIgnoreCase("mouse")||
-                    species.toLowerCase().equalsIgnoreCase("chinchilla")||
-                    species.toLowerCase().equalsIgnoreCase("dog")||
-                    species.toLowerCase().equalsIgnoreCase("pig")||
-                    species.toLowerCase().equalsIgnoreCase("bonobo")||
-                    species.toLowerCase().equalsIgnoreCase("squirrel")) {
+            if (isSearchable2) {
 
 
                 IndexObject s = new IndexObject();
@@ -559,9 +552,9 @@ public class IndexDAO extends AbstractDAO {
         for(QTL qtl: qtls) {
             // QTL qtl= qtlDAO.getQTL(61368);
             int key = qtl.getSpeciesTypeKey();
-            boolean isSearchable=SpeciesType.isSearchable(key);
+            boolean isSearchable2=SpeciesType.isSearchable2(key);
 
-       //     if (isSearchable) {
+       //     if (isSearchable2) {
                 String species = SpeciesType.getCommonName(key);
                 IndexObject q = new IndexObject();
                 String symbol = qtl.getSymbol();
@@ -638,8 +631,8 @@ public class IndexDAO extends AbstractDAO {
         for(SSLP sslp: sslpdao.getActiveSSLPs()) {
             //  SSLP sslp= sslpdao.getSSLP(37320);
             int speciesTypeKey = sslp.getSpeciesTypeKey();
-           boolean isSearchable=SpeciesType.isSearchable(speciesTypeKey);
-            if (isSearchable) {
+           boolean isSearchable2=SpeciesType.isSearchable2(speciesTypeKey);
+            if (isSearchable2) {
                 String species = SpeciesType.getCommonName(speciesTypeKey);
                 IndexObject slp = new IndexObject();
                 int rgdId = sslp.getRgdId();
@@ -691,9 +684,9 @@ public class IndexDAO extends AbstractDAO {
        //    GenomicElement ge= gedao.getElement(8655626);
            try {
                int speciesTypeKey = ge.getSpeciesTypeKey();
-               boolean isSearchable= SpeciesType.isSearchable(speciesTypeKey);
+               boolean isSearchable2= SpeciesType.isSearchable2(speciesTypeKey);
 
-               if (isSearchable) {
+               if (isSearchable2) {
                    String species = SpeciesType.getCommonName(speciesTypeKey);
                    IndexObject g = new IndexObject();
                    int rgdId = ge.getRgdId();
@@ -734,7 +727,7 @@ public class IndexDAO extends AbstractDAO {
             //  VariantInfo obj= vdao.getVariant(8554914);
             int speciesTypeKey = obj.getSpeciesTypeKey();
 
-            if (SpeciesType.isSearchable(speciesTypeKey)) {
+            if (SpeciesType.isSearchable2(speciesTypeKey)) {
                 String species = (SpeciesType.getCommonName(speciesTypeKey));
                 IndexObject v = new IndexObject();
                 int rgdId = obj.getRgdId();
@@ -775,8 +768,8 @@ public class IndexDAO extends AbstractDAO {
         for(Reference ref: referenceDAO.getActiveReferences()){
             // Reference ref=referenceDAO.getReference(1004);
             int speciesTypeKey=ref.getSpeciesTypeKey();
-            boolean isSearchable=SpeciesType.isSearchable(speciesTypeKey);
-      //      if(isSearchable){
+      //      boolean isSearchable2=SpeciesType.isSearchable2(speciesTypeKey);
+      //      if(isSearchable2){
             String species=SpeciesType.getCommonName(speciesTypeKey);
 
             int rgdId= ref.getRgdId();
@@ -869,9 +862,9 @@ public class IndexDAO extends AbstractDAO {
         Collection<Integer> speciesTypeKeys=  SpeciesType.getSpeciesTypeKeys();
         List<Integer> objectKeys= new ArrayList<>(Arrays.asList(1,5,6,7));
         for(int skey:speciesTypeKeys){
-            boolean isSearchable= SpeciesType.isSearchable(skey);
-            if(isSearchable){
-            if(SpeciesType.isSearchable(skey)){
+            boolean isSearchable2= SpeciesType.isSearchable2(skey);
+            if(isSearchable2){
+       //     if(SpeciesType.isSearchable2(skey)){
             SpeciesObject s= new SpeciesObject();
             String species=SpeciesType.getCommonName(skey);
             s.setName(species);
@@ -887,7 +880,8 @@ public class IndexDAO extends AbstractDAO {
 
             }
             sList.add(s);
-        }}}
+       // }
+            }}
         return sList;
     }
     /*************************************************************************************************/
