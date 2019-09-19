@@ -143,9 +143,10 @@ public class IndexDAO extends AbstractDAO {
      for(Gene gene: genes) {
          //  Gene gene= geneDAO.getGene(2004);
          int speciesKey = gene.getSpeciesTypeKey();
+         String species = SpeciesType.getCommonName(speciesKey);
             boolean isSearchable=SpeciesType.isSearchable(speciesKey);
          if (isSearchable) {
-             String species = SpeciesType.getCommonName(speciesKey);
+
              IndexObject obj = new IndexObject();
              int rgdId = gene.getRgdId();
              String symbol = gene.getSymbol();
@@ -343,7 +344,7 @@ public class IndexDAO extends AbstractDAO {
         Map<Integer, Gene> genes=getStrainAssociations(strains);
         for(Strain strain: strains) {
             int speciesTypeKey = strain.getSpeciesTypeKey();
-            boolean isSearchable=SpeciesType.isSearchable(speciesTypeKey);
+          //  boolean isSearchable=SpeciesType.isSearchable(speciesTypeKey);
             String species = SpeciesType.getCommonName(speciesTypeKey);
             if (species.toLowerCase().equalsIgnoreCase("rat") ||
                     species.toLowerCase().equalsIgnoreCase("human")||
@@ -639,8 +640,16 @@ public class IndexDAO extends AbstractDAO {
             //  SSLP sslp= sslpdao.getSSLP(37320);
             int speciesTypeKey = sslp.getSpeciesTypeKey();
            boolean isSearchable=SpeciesType.isSearchable(speciesTypeKey);
-            if (isSearchable) {
-                String species = SpeciesType.getCommonName(speciesTypeKey);
+            String species = SpeciesType.getCommonName(speciesTypeKey);
+            if (species.toLowerCase().equalsIgnoreCase("rat") ||
+                    species.toLowerCase().equalsIgnoreCase("human")||
+                    species.toLowerCase().equalsIgnoreCase("mouse")||
+                    species.toLowerCase().equalsIgnoreCase("chinchilla")||
+                    species.toLowerCase().equalsIgnoreCase("dog")||
+                    species.toLowerCase().equalsIgnoreCase("pig")||
+                    species.toLowerCase().equalsIgnoreCase("bonobo")||
+                    species.toLowerCase().equalsIgnoreCase("squirrel")) {
+
                 IndexObject slp = new IndexObject();
                 int rgdId = sslp.getRgdId();
                 String name = sslp.getName();
@@ -692,9 +701,16 @@ public class IndexDAO extends AbstractDAO {
            try {
                int speciesTypeKey = ge.getSpeciesTypeKey();
                boolean isSearchable= SpeciesType.isSearchable(speciesTypeKey);
+               String species = SpeciesType.getCommonName(speciesTypeKey);
+               if (species.toLowerCase().equalsIgnoreCase("rat") ||
+                       species.toLowerCase().equalsIgnoreCase("human")||
+                       species.toLowerCase().equalsIgnoreCase("mouse")||
+                       species.toLowerCase().equalsIgnoreCase("chinchilla")||
+                       species.toLowerCase().equalsIgnoreCase("dog")||
+                       species.toLowerCase().equalsIgnoreCase("pig")||
+                       species.toLowerCase().equalsIgnoreCase("bonobo")||
+                       species.toLowerCase().equalsIgnoreCase("squirrel")) {
 
-               if (isSearchable) {
-                   String species = SpeciesType.getCommonName(speciesTypeKey);
                    IndexObject g = new IndexObject();
                    int rgdId = ge.getRgdId();
                    String symbol = ge.getSymbol();
@@ -733,9 +749,16 @@ public class IndexDAO extends AbstractDAO {
         for(VariantInfo obj: variants) {
             //  VariantInfo obj= vdao.getVariant(8554914);
             int speciesTypeKey = obj.getSpeciesTypeKey();
+            String species = (SpeciesType.getCommonName(speciesTypeKey));
+            if (species.toLowerCase().equalsIgnoreCase("rat") ||
+                    species.toLowerCase().equalsIgnoreCase("human")||
+                    species.toLowerCase().equalsIgnoreCase("mouse")||
+                    species.toLowerCase().equalsIgnoreCase("chinchilla")||
+                    species.toLowerCase().equalsIgnoreCase("dog")||
+                    species.toLowerCase().equalsIgnoreCase("pig")||
+                    species.toLowerCase().equalsIgnoreCase("bonobo")||
+                    species.toLowerCase().equalsIgnoreCase("squirrel")) {
 
-            if (SpeciesType.isSearchable(speciesTypeKey)) {
-                String species = (SpeciesType.getCommonName(speciesTypeKey));
                 IndexObject v = new IndexObject();
                 int rgdId = obj.getRgdId();
                 String symbol = obj.getSymbol();
@@ -775,7 +798,7 @@ public class IndexDAO extends AbstractDAO {
         for(Reference ref: referenceDAO.getActiveReferences()){
             // Reference ref=referenceDAO.getReference(1004);
             int speciesTypeKey=ref.getSpeciesTypeKey();
-            boolean isSearchable=SpeciesType.isSearchable(speciesTypeKey);
+        //    boolean isSearchable=SpeciesType.isSearchable(speciesTypeKey);
       //      if(isSearchable){
             String species=SpeciesType.getCommonName(speciesTypeKey);
 
@@ -869,11 +892,20 @@ public class IndexDAO extends AbstractDAO {
         Collection<Integer> speciesTypeKeys=  SpeciesType.getSpeciesTypeKeys();
         List<Integer> objectKeys= new ArrayList<>(Arrays.asList(1,5,6,7));
         for(int skey:speciesTypeKeys){
-            boolean isSearchable= SpeciesType.isSearchable(skey);
-            if(isSearchable){
-            if(SpeciesType.isSearchable(skey)){
-            SpeciesObject s= new SpeciesObject();
+      //      boolean isSearchable= SpeciesType.isSearchable(skey);
             String species=SpeciesType.getCommonName(skey);
+            if (species.toLowerCase().equalsIgnoreCase("rat") ||
+                    species.toLowerCase().equalsIgnoreCase("human")||
+                    species.toLowerCase().equalsIgnoreCase("mouse")||
+                    species.toLowerCase().equalsIgnoreCase("chinchilla")||
+                    species.toLowerCase().equalsIgnoreCase("dog")||
+                    species.toLowerCase().equalsIgnoreCase("pig")||
+                    species.toLowerCase().equalsIgnoreCase("bonobo")||
+                    species.toLowerCase().equalsIgnoreCase("squirrel")) {
+
+
+            SpeciesObject s= new SpeciesObject();
+
             s.setName(species);
             int count=0;
             for(int okey:objectKeys){
@@ -887,7 +919,7 @@ public class IndexDAO extends AbstractDAO {
 
             }
             sList.add(s);
-        }}}
+        }}
         return sList;
     }
     /*************************************************************************************************/
