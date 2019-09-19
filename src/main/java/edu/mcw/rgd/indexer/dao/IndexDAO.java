@@ -344,10 +344,17 @@ public class IndexDAO extends AbstractDAO {
         for(Strain strain: strains) {
             int speciesTypeKey = strain.getSpeciesTypeKey();
             boolean isSearchable=SpeciesType.isSearchable(speciesTypeKey);
+            String species = SpeciesType.getCommonName(speciesTypeKey);
+            if (species.toLowerCase().equalsIgnoreCase("rat") ||
+                    species.toLowerCase().equalsIgnoreCase("human")||
+                    species.toLowerCase().equalsIgnoreCase("mouse")||
+                    species.toLowerCase().equalsIgnoreCase("chinchilla")||
+                    species.toLowerCase().equalsIgnoreCase("dog")||
+                    species.toLowerCase().equalsIgnoreCase("pig")||
+                    species.toLowerCase().equalsIgnoreCase("bonobo")||
+                    species.toLowerCase().equalsIgnoreCase("squirrel")) {
 
-            if (isSearchable) {
 
-                String species = SpeciesType.getCommonName(speciesTypeKey);
                 IndexObject s = new IndexObject();
                 String symbol = strain.getSymbol();
                 String source = strain.getSource();
@@ -1258,10 +1265,8 @@ public class IndexDAO extends AbstractDAO {
     }
     public static void main(String[] args) throws Exception {
           IndexDAO dao= new IndexDAO();
-      /*   Map<Integer, Gene> genes=  dao.getStrainAssociations(Arrays.asList(5143985,6893600));
-        System.out.println("NUMBER OF GENES:"+genes.size());
-        System.out.println(genes.get(5143985).toString());*/
-        System.out.println("DONE!!!!");
+    List<IndexObject> strains=dao.getStrains();
+        System.out.println("Strains Size: "+strains.size()+"DONE!!!!");
     }
 
 
