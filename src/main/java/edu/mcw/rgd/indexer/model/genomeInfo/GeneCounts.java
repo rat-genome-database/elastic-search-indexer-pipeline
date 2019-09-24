@@ -28,13 +28,7 @@ public class GeneCounts {
 
     private int genesWithOrthologs;
     private int genesWithoutOrthologs;
-    private int humanOrthologs;
-    private int ratOrthologs;
-    private int mouseOrthologs;
-    private int bonoboOrthologs;
-    private int squirrelOrthologs;
-    private int dogOrthologs;
-    private int chinchillaOrthologs;
+
     private  Map<String, Integer> orthologCountsMap;
     public GeneCounts(){}
 
@@ -62,61 +56,7 @@ public class GeneCounts {
         this.genesWithoutOrthologs = genesWithoutOrthologs;
     }
 
-    public int getHumanOrthologs() {
-        return humanOrthologs;
-    }
 
-    public void setHumanOrthologs(int humanOrthologs) {
-        this.humanOrthologs = humanOrthologs;
-    }
-
-    public int getRatOrthologs() {
-        return ratOrthologs;
-    }
-
-    public void setRatOrthologs(int ratOrthologs) {
-        this.ratOrthologs = ratOrthologs;
-    }
-
-    public int getMouseOrthologs() {
-        return mouseOrthologs;
-    }
-
-    public void setMouseOrthologs(int mouseOrthologs) {
-        this.mouseOrthologs = mouseOrthologs;
-    }
-
-    public int getBonoboOrthologs() {
-        return bonoboOrthologs;
-    }
-
-    public void setBonoboOrthologs(int bonoboOrthologs) {
-        this.bonoboOrthologs = bonoboOrthologs;
-    }
-
-    public int getSquirrelOrthologs() {
-        return squirrelOrthologs;
-    }
-
-    public void setSquirrelOrthologs(int squirrelOrthologs) {
-        this.squirrelOrthologs = squirrelOrthologs;
-    }
-
-    public int getDogOrthologs() {
-        return dogOrthologs;
-    }
-
-    public void setDogOrthologs(int dogOrthologs) {
-        this.dogOrthologs = dogOrthologs;
-    }
-
-    public int getChinchillaOrthologs() {
-        return chinchillaOrthologs;
-    }
-
-    public void setChinchillaOrthologs(int chinchillaOrthologs) {
-        this.chinchillaOrthologs = chinchillaOrthologs;
-    }
 
     public int getTotalGenes() {
         return totalGenes;

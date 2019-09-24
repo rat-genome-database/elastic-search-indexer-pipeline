@@ -48,6 +48,7 @@ public class ChromosomeIndexObject {
     private int squirrelOrthologs;
     private int dogOrthologs;
     private int chinchillaOrthologs;
+    private int pigOrthologs;
 
     private String assembly;
     private StringBuffer pieData;
@@ -65,6 +66,14 @@ public class ChromosomeIndexObject {
 
     //PROTEIN COUNT
     private int proteinsCount;
+
+    public int getPigOrthologs() {
+        return pigOrthologs;
+    }
+
+    public void setPigOrthologs(int pigOrthologs) {
+        this.pigOrthologs = pigOrthologs;
+    }
 
     public int getProteinsCount() {
         return proteinsCount;

@@ -101,18 +101,10 @@ public class GenomeInfoThread implements Runnable {
                 obj.setPseudo(geneCounts.getPseudo());
               //  obj.setTranscripts(geneCounts.getTranscripts());
                 java.util.Map<String, Integer> orthoCounts=geneCounts.getOrthologCountsMap();
-                if(orthoCounts.get("1")!=null){
-                    obj.setHumanOrthologs(orthoCounts.get("1"));
-                }
-                 if(orthoCounts.get("2")!=null){
-                     obj.setMouseOrthologs(orthoCounts.get("2"));
-                 }
-                    if(orthoCounts.get("3")!=null) {
-                        obj.setRatOrthologs(orthoCounts.get("3"));
-                    }
-                    if(orthoCounts.get("4")!=null) {
-                        obj.setChinchillaOrthologs(orthoCounts.get("4"));
-                    }
+                if(orthoCounts.get("1")!=null){obj.setHumanOrthologs(orthoCounts.get("1")); }
+                 if(orthoCounts.get("2")!=null){obj.setMouseOrthologs(orthoCounts.get("2"));}
+                    if(orthoCounts.get("3")!=null) {obj.setRatOrthologs(orthoCounts.get("3"));}
+                    if(orthoCounts.get("4")!=null) {obj.setChinchillaOrthologs(orthoCounts.get("4"));}
                     if(orthoCounts.get("6")!=null){    obj.setDogOrthologs(orthoCounts.get("6"));}
                     if(orthoCounts.get("7")!=null){    obj.setSquirrelOrthologs(orthoCounts.get("7"));}
                     if(orthoCounts.get("5")!=null){    obj.setBonoboOrthologs(orthoCounts.get("5"));}
