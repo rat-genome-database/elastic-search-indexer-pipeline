@@ -70,19 +70,19 @@ public class IndexDAO extends AbstractDAO {
 
     public List<GenomeIndexObject> getGenomeInfo() throws Exception {
         List<GenomeIndexObject> objects= new ArrayList<>();
-        for(int key : SpeciesType.getSpeciesTypeKeys()) {
+        for(int speciesTypeKey : SpeciesType.getSpeciesTypeKeys()) {
             //  int key=3;
-            boolean isSearchable=SpeciesType.isSearchable(key);
-            if (key != 0 && isSearchable) {
+            boolean isSearchable=SpeciesType.isSearchable(speciesTypeKey);
+            if (speciesTypeKey != 0 && isSearchable) {
              //   System.out.println("SPECIES TYPE KEY: " + key);
-                String species = SpeciesType.getCommonName(key);
-                List<edu.mcw.rgd.datamodel.Map> maps = mapDAO.getMaps(key);
+                String species = SpeciesType.getCommonName(speciesTypeKey);
+                List<edu.mcw.rgd.datamodel.Map> maps = mapDAO.getMaps(speciesTypeKey);
                 for (edu.mcw.rgd.datamodel.Map m : maps) {
 
                     GenomeIndexObject obj = new GenomeIndexObject();
                     obj.setSpecies(species);
                     AssemblyInfo info = new AssemblyInfo();
-                    info = genomeDAO.getAssemblyInfo(key, m.getKey());
+                    info = genomeDAO.getAssemblyInfo(speciesTypeKey, m.getKey());
                     //    info=genomeDAO.getAssemblyInfo(3, 70);
                     obj.setBasePairs(info.getBasePairs());
                     obj.setTotalLength(info.getTotalLength());
@@ -101,7 +101,7 @@ public class IndexDAO extends AbstractDAO {
                     //      obj.setMapKey(70);
 
                     GeneCounts geneCounts = new GeneCounts();
-                    geneCounts = genomeDAO.getGeneCounts(m.getKey(), key, null);
+                    geneCounts = genomeDAO.getGeneCounts(m.getKey(), speciesTypeKey, null);
                     // geneCounts= genomeDAO.getGeneCounts(70);
                     obj.setTotalGenes(geneCounts.getTotalGenes());
                     obj.setProteinCoding(geneCounts.getProteinCoding());
@@ -127,7 +127,8 @@ public class IndexDAO extends AbstractDAO {
                 }
 
             }else {
-                System.out.println("getGenomicInfo() isSearchable False for SpeciesKey: "+key);
+                if(speciesTypeKey!=8 && speciesTypeKey!=10 && speciesTypeKey!=11 && speciesTypeKey!=12)
+                System.out.println("getGenomicInfo() isSearchable False for SpeciesKey: "+speciesTypeKey);
             }
         }
      //   System.out.println("GENOMEINFO OBJECTS SIZE: "+ objects.size());
@@ -144,10 +145,10 @@ public class IndexDAO extends AbstractDAO {
 
      for(Gene gene: genes) {
          //  Gene gene= geneDAO.getGene(2004);
-         int speciesKey = gene.getSpeciesTypeKey();
-            boolean isSearchable=SpeciesType.isSearchable(speciesKey);
+         int speciesTypeKey = gene.getSpeciesTypeKey();
+            boolean isSearchable=SpeciesType.isSearchable(speciesTypeKey);
          if (isSearchable) {
-             String species = SpeciesType.getCommonName(speciesKey);
+             String species = SpeciesType.getCommonName(speciesTypeKey);
              IndexObject obj = new IndexObject();
              int rgdId = gene.getRgdId();
              String symbol = gene.getSymbol();
@@ -185,7 +186,8 @@ public class IndexDAO extends AbstractDAO {
              objList.add(obj);
 
          }else {
-             System.out.println("getGenes() isSearchable False for SpeciesKey: "+speciesKey+"\tRGDID: "+gene.getRgdId());
+             if(speciesTypeKey!=8 && speciesTypeKey!=10 && speciesTypeKey!=11 && speciesTypeKey!=12)
+             System.out.println("getGenes() isSearchable False for SpeciesKey: "+speciesTypeKey+"\tRGDID: "+gene.getRgdId());
          }
      }
         return objList;
@@ -394,6 +396,7 @@ public class IndexDAO extends AbstractDAO {
                 objList.add(s);
 
             }else {
+                if(speciesTypeKey!=8 && speciesTypeKey!=10 && speciesTypeKey!=11 && speciesTypeKey!=12)
                 System.out.println("getStrains() isSearchable False for SpeciesKey: "+speciesTypeKey+"\tRGDID: "+strain.getRgdId());
             }
         }
@@ -557,11 +560,11 @@ public class IndexDAO extends AbstractDAO {
 
         for(QTL qtl: qtls) {
             // QTL qtl= qtlDAO.getQTL(61368);
-            int key = qtl.getSpeciesTypeKey();
-            boolean isSearchable=SpeciesType.isSearchable(key);
+            int speciesTypeKey = qtl.getSpeciesTypeKey();
+            boolean isSearchable=SpeciesType.isSearchable(speciesTypeKey);
 
            if (isSearchable) {
-                String species = SpeciesType.getCommonName(key);
+                String species = SpeciesType.getCommonName(speciesTypeKey);
                 IndexObject q = new IndexObject();
                 String symbol = qtl.getSymbol();
                 String name = qtl.getName();
@@ -594,7 +597,8 @@ public class IndexDAO extends AbstractDAO {
                 objList.add(q);
 
             }else{
-               System.out.println("getQTLS() isSearchable False for SpeciesKey: "+key+"\tRGDID: "+qtl.getRgdId());
+               if(speciesTypeKey!=8 && speciesTypeKey!=10 && speciesTypeKey!=11 && speciesTypeKey!=12)
+               System.out.println("getQTLS() isSearchable False for SpeciesKey: "+speciesTypeKey+"\tRGDID: "+qtl.getRgdId());
            }
 
          /*   Collections.sort(objList, new Comparator<IndexObject>() {
@@ -664,6 +668,7 @@ public class IndexDAO extends AbstractDAO {
                 objList.add(slp);
 
             }else {
+                if(speciesTypeKey!=8 && speciesTypeKey!=10 && speciesTypeKey!=11 && speciesTypeKey!=12)
                 System.out.println("getSSLPS() isSearchable False for SpeciesKey: "+speciesTypeKey+"\tRGDID: "+sslp.getRgdId());
             }
         }
@@ -722,6 +727,7 @@ public class IndexDAO extends AbstractDAO {
                    g.setAnnotationsCount(this.getAnnotsCount(rgdId));
                    objList.add(g);
                }else {
+                   if(speciesTypeKey!=8 && speciesTypeKey!=10 && speciesTypeKey!=11 && speciesTypeKey!=12)
                    System.out.println("getGenomicElements isSearchable False for SpeciesKey: "+speciesTypeKey+"\tRGDID: "+ge.getRgdId());
                }
            }catch (Exception e){
@@ -769,6 +775,7 @@ public class IndexDAO extends AbstractDAO {
                 v.setAnnotationsCount(this.getAnnotsCount(rgdId));
                 objList.add(v);
             }else {
+                if(speciesTypeKey!=8 && speciesTypeKey!=10 && speciesTypeKey!=11 && speciesTypeKey!=12)
                 System.out.println("getVariants() isSearchable False for SpeciesKey: "+speciesTypeKey+"\tRGDID: "+obj.getRgdId());
             }
         }
@@ -875,17 +882,17 @@ public class IndexDAO extends AbstractDAO {
    //     List<Integer> speciesTypeKeys=new ArrayList<>(Arrays.asList(1,2,3,4,5,6,7));
         Collection<Integer> speciesTypeKeys=  SpeciesType.getSpeciesTypeKeys();
         List<Integer> objectKeys= new ArrayList<>(Arrays.asList(1,5,6,7));
-        for(int skey:speciesTypeKeys){
-            boolean isSearchable= SpeciesType.isSearchable(skey);
+        for(int speciesTypeKey:speciesTypeKeys){
+            boolean isSearchable= SpeciesType.isSearchable(speciesTypeKey);
             if(isSearchable){
        //     if(SpeciesType.isSearchable(skey)){
             SpeciesObject s= new SpeciesObject();
-            String species=SpeciesType.getCommonName(skey);
+            String species=SpeciesType.getCommonName(speciesTypeKey);
             s.setName(species);
             int count=0;
             for(int okey:objectKeys){
 
-                 count=termWithStats.getStat("annotated_object_count",skey, okey, 1,null );
+                 count=termWithStats.getStat("annotated_object_count",speciesTypeKey, okey, 1,null );
 
                 if(okey==1) s.setGeneCount(count);
                 if(okey==5) s.setStrainCount(count);
@@ -896,7 +903,8 @@ public class IndexDAO extends AbstractDAO {
             sList.add(s);
        // }
             }else {
-                System.out.println("getSpeciesObjects() isSearchable False for SpeciesKey: "+skey);
+                if(speciesTypeKey!=8 && speciesTypeKey!=10 && speciesTypeKey!=11 && speciesTypeKey!=12)
+                System.out.println("getSpeciesObjects() isSearchable False for SpeciesKey: "+speciesTypeKey);
             }
         }
         return sList;

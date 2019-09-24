@@ -292,7 +292,7 @@ public class GenomeDAO extends AbstractDAO{
     public void getPrimaryRef(int speciesTypeKey) throws Exception {
 
     }
-    public GeneCounts  getGeneCounts(int mapKey, int speciesTypeKey, String chr) throws Exception {
+  /*  public GeneCounts  getGeneCounts(int mapKey, int speciesTypeKey, String chr) throws Exception {
 
         GeneDAO geneDAO= new GeneDAO();
         MapDAO mapDAO= new MapDAO();
@@ -396,6 +396,78 @@ public class GenomeDAO extends AbstractDAO{
         }
         return geneCounts;
 
+    }*/
+    public GeneCounts  getGeneCounts(int mapKey, int speciesTypeKey, String chr) throws Exception {
+
+        GeneDAO geneDAO= new GeneDAO();
+        MapDAO mapDAO= new MapDAO();
+
+        int proteninCoding=0;
+        int ncrna=0;
+        int trna=0;
+        int snrna=0;
+        int rrna=0;
+        int pseudo=0;
+
+        GeneCounts geneCounts = new GeneCounts();
+        List<MappedGene> filteredGenes= new ArrayList<>();
+        List<MappedGene> mGenes= geneDAO.getActiveMappedGenes(mapKey);
+        System.out.println("MapKey: "+ mapKey + "\t"+ mGenes.size());
+        if(chr!=null){
+            for(MappedGene m: mGenes){
+                if(m.getChromosome().equals(chr)){
+                    filteredGenes.add(m);
+                }
+            }
+        }else{
+            filteredGenes=mGenes;
+        }
+        if(filteredGenes.size()>0) {
+            for (MappedGene g : filteredGenes) {
+
+                Gene gene = g.getGene();
+                String type = gene.getType();
+
+                if (type.equalsIgnoreCase("protein-coding")) {
+                    proteninCoding++;
+                }
+                if (type.equalsIgnoreCase("ncrna")) {
+                    ncrna++;
+                }
+                if (type.equalsIgnoreCase("trna")) {
+                    trna++;
+                }
+                if (type.equalsIgnoreCase("snrna")) {
+                    snrna++;
+                }
+                if (type.equalsIgnoreCase("rrna")) {
+                    rrna++;
+                }
+                if (type.equalsIgnoreCase("pseudo")) {
+                    pseudo++;
+                }
+            }
+
+            geneCounts.setTotalGenes(filteredGenes.size());
+            geneCounts.setProteinCoding(proteninCoding);
+            geneCounts.setNcrna(ncrna);
+            geneCounts.setPseudo(pseudo);
+            geneCounts.setrRna(rrna);
+            geneCounts.setSnRna(snrna);
+            geneCounts.settRna(trna);
+            Map<String, Integer> mirTargetCount=  this.getMirnaTargetCount(mapKey, chr);
+            System.out.println("MIRTARGE COUNT: "+ mirTargetCount);
+            geneCounts.setMirnaTargets(mirTargetCount);
+
+
+        }
+        Map<String, Integer> orthCounts=new HashMap<>();
+        orthCounts = this.getOrthologCounts(mapKey, speciesTypeKey, chr);
+        geneCounts.setOrthologCountsMap(orthCounts);
+        System.out.println("ORTHOCOUNTS:"+ orthCounts);
+
+        return geneCounts;
+
     }
     public Map<String, Integer> getOrthologCounts(int mapKey, int speciesTypeKey, String chr) throws Exception {
 
@@ -404,7 +476,7 @@ public class GenomeDAO extends AbstractDAO{
         int genesWithOrthologs= orthologDAO.getGeneCountWithOrthologs(mapKey, speciesTypeKey, chr);
         int genesWithoutOrthologs= orthologDAO.getGeneCountWithOutOrthologs(mapKey, speciesTypeKey, chr);
         counts.put("withOrthologs", genesWithOrthologs);
-        counts.put("WithOutOrthologs: ",genesWithoutOrthologs);
+        counts.put("WithOutOrthologs",genesWithoutOrthologs);
         return counts;
 
     }

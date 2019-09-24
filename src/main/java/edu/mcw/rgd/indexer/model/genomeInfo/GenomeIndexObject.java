@@ -53,12 +53,21 @@ public class GenomeIndexObject {
     private int squirrelOrthologs;
     private int dogOrthologs;
     private int chinchillaOrthologs;
+    private int pigOrthologs;
 
     private List<String> refs;
 
 
     private String[][] variantsMatrix;
     private int proteinsCount;
+
+    public int getPigOrthologs() {
+        return pigOrthologs;
+    }
+
+    public void setPigOrthologs(int pigOrthologs) {
+        this.pigOrthologs = pigOrthologs;
+    }
 
     public int getProteinsCount() {
         return proteinsCount;

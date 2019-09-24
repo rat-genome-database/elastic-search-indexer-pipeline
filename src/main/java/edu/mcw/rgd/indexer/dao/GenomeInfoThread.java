@@ -100,15 +100,26 @@ public class GenomeInfoThread implements Runnable {
                 obj.setrRna(geneCounts.getrRna());
                 obj.setPseudo(geneCounts.getPseudo());
               //  obj.setTranscripts(geneCounts.getTranscripts());
-                obj.setHumanOrthologs(geneCounts.getHumanOrthologs());
-                obj.setMouseOrthologs(geneCounts.getMouseOrthologs());
-                obj.setRatOrthologs(geneCounts.getRatOrthologs());
-                obj.setChinchillaOrthologs(geneCounts.getChinchillaOrthologs());
-                obj.setDogOrthologs(geneCounts.getDogOrthologs());
-                obj.setSquirrelOrthologs(geneCounts.getSquirrelOrthologs());
-                obj.setBonoboOrthologs(geneCounts.getBonoboOrthologs());
-                obj.setGenesWithoutOrthologs(geneCounts.getGenesWithoutOrthologs());
-                obj.setGenesWithOrthologs(geneCounts.getGenesWithOrthologs());
+                java.util.Map<String, Integer> orthoCounts=geneCounts.getOrthologCountsMap();
+                if(orthoCounts.get("1")!=null){
+                    obj.setHumanOrthologs(orthoCounts.get("1"));
+                }
+                 if(orthoCounts.get("2")!=null){
+                     obj.setMouseOrthologs(orthoCounts.get("2"));
+                 }
+                    if(orthoCounts.get("3")!=null) {
+                        obj.setRatOrthologs(orthoCounts.get("3"));
+                    }
+                    if(orthoCounts.get("4")!=null) {
+                        obj.setChinchillaOrthologs(orthoCounts.get("4"));
+                    }
+                    if(orthoCounts.get("6")!=null){    obj.setDogOrthologs(orthoCounts.get("6"));}
+                    if(orthoCounts.get("7")!=null){    obj.setSquirrelOrthologs(orthoCounts.get("7"));}
+                    if(orthoCounts.get("5")!=null){    obj.setBonoboOrthologs(orthoCounts.get("5"));}
+                    if(orthoCounts.get("9")!=null){    obj.setPigOrthologs(orthoCounts.get("9"));}
+
+                obj.setGenesWithoutOrthologs(orthoCounts.get("WithOutOrthologs"));
+                obj.setGenesWithOrthologs(orthoCounts.get("withOrthologs"));
 
                 obj.setProteinsCount(genomeDAO.getProteinCounts(mapKey, null));
 

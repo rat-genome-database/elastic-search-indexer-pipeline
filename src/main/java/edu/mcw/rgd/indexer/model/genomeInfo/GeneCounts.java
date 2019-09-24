@@ -35,9 +35,16 @@ public class GeneCounts {
     private int squirrelOrthologs;
     private int dogOrthologs;
     private int chinchillaOrthologs;
-
+    private  Map<String, Integer> orthologCountsMap;
     public GeneCounts(){}
 
+    public Map<String, Integer> getOrthologCountsMap() {
+        return orthologCountsMap;
+    }
+
+    public void setOrthologCountsMap(Map<String, Integer> orthologCountsMap) {
+        this.orthologCountsMap = orthologCountsMap;
+    }
 
     public int getGenesWithOrthologs() {
         return genesWithOrthologs;
