@@ -640,16 +640,9 @@ public class IndexDAO extends AbstractDAO {
             //  SSLP sslp= sslpdao.getSSLP(37320);
             int speciesTypeKey = sslp.getSpeciesTypeKey();
            boolean isSearchable=SpeciesType.isSearchable(speciesTypeKey);
-            String species = SpeciesType.getCommonName(speciesTypeKey);
-            if (species.toLowerCase().equalsIgnoreCase("rat") ||
-                    species.toLowerCase().equalsIgnoreCase("human")||
-                    species.toLowerCase().equalsIgnoreCase("mouse")||
-                    species.toLowerCase().equalsIgnoreCase("chinchilla")||
-                    species.toLowerCase().equalsIgnoreCase("dog")||
-                    species.toLowerCase().equalsIgnoreCase("pig")||
-                    species.toLowerCase().equalsIgnoreCase("bonobo")||
-                    species.toLowerCase().equalsIgnoreCase("squirrel")) {
 
+            if (isSearchable) {
+                String species = SpeciesType.getCommonName(speciesTypeKey);
                 IndexObject slp = new IndexObject();
                 int rgdId = sslp.getRgdId();
                 String name = sslp.getName();
