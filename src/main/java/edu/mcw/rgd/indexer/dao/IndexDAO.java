@@ -344,17 +344,10 @@ public class IndexDAO extends AbstractDAO {
         Map<Integer, Gene> genes=getStrainAssociations(strains);
         for(Strain strain: strains) {
             int speciesTypeKey = strain.getSpeciesTypeKey();
-          //  boolean isSearchable=SpeciesType.isSearchable(speciesTypeKey);
-            String species = SpeciesType.getCommonName(speciesTypeKey);
-            if (species.toLowerCase().equalsIgnoreCase("rat") ||
-                    species.toLowerCase().equalsIgnoreCase("human")||
-                    species.toLowerCase().equalsIgnoreCase("mouse")||
-                    species.toLowerCase().equalsIgnoreCase("chinchilla")||
-                    species.toLowerCase().equalsIgnoreCase("dog")||
-                    species.toLowerCase().equalsIgnoreCase("pig")||
-                    species.toLowerCase().equalsIgnoreCase("bonobo")||
-                    species.toLowerCase().equalsIgnoreCase("squirrel")) {
+          boolean isSearchable=SpeciesType.isSearchable(speciesTypeKey);
 
+            if (isSearchable) {
+                String species = SpeciesType.getCommonName(speciesTypeKey);
 
                 IndexObject s = new IndexObject();
                 String symbol = strain.getSymbol();
