@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.mcw.rgd.dao.AbstractDAO;
 import edu.mcw.rgd.dao.DataSourceFactory;
 import edu.mcw.rgd.dao.impl.*;
+import edu.mcw.rgd.dao.spring.ExperimentQuery;
 import edu.mcw.rgd.dao.spring.GeneQuery;
 import edu.mcw.rgd.dao.spring.StringMapQuery;
 
@@ -126,9 +127,11 @@ public class IndexDAO extends AbstractDAO {
                     objects.add(obj);
                 }
 
-            }else {
-                if(speciesTypeKey!=8 && speciesTypeKey!=10 && speciesTypeKey!=11 && speciesTypeKey!=12)
-                System.out.println("getGenomicInfo() isSearchable False for SpeciesKey: "+speciesTypeKey);
+            }else{
+                if(speciesTypeKey==3 || speciesTypeKey==2 || speciesTypeKey==1 || speciesTypeKey==4 || speciesTypeKey==5
+                        || speciesTypeKey==7 || speciesTypeKey==6 || speciesTypeKey==9){
+                    throw new Exception("Species Type Key: " +speciesTypeKey +"\tin getGenomeInfo Method"+"\t isSearchable: "+ isSearchable);
+                }
             }
         }
      //   System.out.println("GENOMEINFO OBJECTS SIZE: "+ objects.size());
@@ -146,9 +149,10 @@ public class IndexDAO extends AbstractDAO {
      for(Gene gene: genes) {
          //  Gene gene= geneDAO.getGene(2004);
          int speciesTypeKey = gene.getSpeciesTypeKey();
+         String species = SpeciesType.getCommonName(speciesTypeKey);
             boolean isSearchable=SpeciesType.isSearchable(speciesTypeKey);
          if (isSearchable) {
-             String species = SpeciesType.getCommonName(speciesTypeKey);
+
              IndexObject obj = new IndexObject();
              int rgdId = gene.getRgdId();
              String symbol = gene.getSymbol();
@@ -185,9 +189,11 @@ public class IndexDAO extends AbstractDAO {
              obj.setSuggest(this.getSuggest(symbol, null, "gene"));
              objList.add(obj);
 
-         }else {
-             if(speciesTypeKey!=8 && speciesTypeKey!=10 && speciesTypeKey!=11 && speciesTypeKey!=12)
-             System.out.println("getGenes() isSearchable False for SpeciesKey: "+speciesTypeKey+"\tRGDID: "+gene.getRgdId());
+         }else{
+             if(speciesTypeKey==3 || speciesTypeKey==2 || speciesTypeKey==1 || speciesTypeKey==4 || speciesTypeKey==5
+                     || speciesTypeKey==7 || speciesTypeKey==6 || speciesTypeKey==9){
+                 throw new Exception("Species Type Key: " +speciesTypeKey +"\tGene RGD ID: "+ gene.getRgdId()+"\t isSearchable: "+ isSearchable);
+             }
          }
      }
         return objList;
@@ -349,9 +355,9 @@ public class IndexDAO extends AbstractDAO {
         Map<Integer, Gene> genes=getStrainAssociations(strains);
         for(Strain strain: strains) {
             int speciesTypeKey = strain.getSpeciesTypeKey();
-            boolean isSearchable=SpeciesType.isSearchable(speciesTypeKey);
-
-            if (isSearchable) {
+          boolean isSearchable=SpeciesType.isSearchable(speciesTypeKey);
+          //  System.out.println("isSearchable: "+isSearchable +"\tSpeciesTypeKey: "+ speciesTypeKey+"\tStrain RGDID: "+strain.getRgdId());
+           if (isSearchable) {
                 String species = SpeciesType.getCommonName(speciesTypeKey);
 
                 IndexObject s = new IndexObject();
@@ -395,12 +401,14 @@ public class IndexDAO extends AbstractDAO {
                 }
                 objList.add(s);
 
-            }else {
-                if(speciesTypeKey!=8 && speciesTypeKey!=10 && speciesTypeKey!=11 && speciesTypeKey!=12)
-                System.out.println("getStrains() isSearchable False for SpeciesKey: "+speciesTypeKey+"\tRGDID: "+strain.getRgdId());
-            }
+            }else{
+               if(speciesTypeKey==3 || speciesTypeKey==2 || speciesTypeKey==1 || speciesTypeKey==4 || speciesTypeKey==5
+                       || speciesTypeKey==7 || speciesTypeKey==6 || speciesTypeKey==9){
+                   throw new Exception("Species Type Key: " +speciesTypeKey +"\tStrain RGD ID: "+ strain.getRgdId()+"\t isSearchable: "+ isSearchable);
+               }
+           }
         }
-
+        System.out.println(objList.size());
         return objList;
     }
     public Map<Integer, Gene> getStrainAssociations(List<Strain> strains) throws Exception {
@@ -563,7 +571,7 @@ public class IndexDAO extends AbstractDAO {
             int speciesTypeKey = qtl.getSpeciesTypeKey();
             boolean isSearchable=SpeciesType.isSearchable(speciesTypeKey);
 
-           if (isSearchable) {
+          if (isSearchable) {
                 String species = SpeciesType.getCommonName(speciesTypeKey);
                 IndexObject q = new IndexObject();
                 String symbol = qtl.getSymbol();
@@ -597,9 +605,11 @@ public class IndexDAO extends AbstractDAO {
                 objList.add(q);
 
             }else{
-               if(speciesTypeKey!=8 && speciesTypeKey!=10 && speciesTypeKey!=11 && speciesTypeKey!=12)
-               System.out.println("getQTLS() isSearchable False for SpeciesKey: "+speciesTypeKey+"\tRGDID: "+qtl.getRgdId());
-           }
+              if(speciesTypeKey==3 || speciesTypeKey==2 || speciesTypeKey==1 || speciesTypeKey==4 || speciesTypeKey==5
+                      || speciesTypeKey==7 || speciesTypeKey==6 || speciesTypeKey==9){
+                  throw new Exception("Species Type Key: " +speciesTypeKey +"\tQTL RGD ID: "+ qtl.getRgdId()+"\t isSearchable: "+ isSearchable);
+              }
+          }
 
          /*   Collections.sort(objList, new Comparator<IndexObject>() {
                 @Override
@@ -644,6 +654,7 @@ public class IndexDAO extends AbstractDAO {
             //  SSLP sslp= sslpdao.getSSLP(37320);
             int speciesTypeKey = sslp.getSpeciesTypeKey();
            boolean isSearchable=SpeciesType.isSearchable(speciesTypeKey);
+
             if (isSearchable) {
                 String species = SpeciesType.getCommonName(speciesTypeKey);
                 IndexObject slp = new IndexObject();
@@ -667,9 +678,11 @@ public class IndexDAO extends AbstractDAO {
                 slp.setAnnotationsCount(this.getAnnotsCount(rgdId));
                 objList.add(slp);
 
-            }else {
-                if(speciesTypeKey!=8 && speciesTypeKey!=10 && speciesTypeKey!=11 && speciesTypeKey!=12)
-                System.out.println("getSSLPS() isSearchable False for SpeciesKey: "+speciesTypeKey+"\tRGDID: "+sslp.getRgdId());
+            }else{
+                if(speciesTypeKey==3 || speciesTypeKey==2 || speciesTypeKey==1 || speciesTypeKey==4 || speciesTypeKey==5
+                        || speciesTypeKey==7 || speciesTypeKey==6 || speciesTypeKey==9){
+                    throw new Exception("Species Type Key: " +speciesTypeKey +"\tSSLP RGD ID: "+ sslp.getRgdId()+"\t isSearchable: "+ isSearchable);
+                }
             }
         }
 
@@ -700,9 +713,9 @@ public class IndexDAO extends AbstractDAO {
            try {
                int speciesTypeKey = ge.getSpeciesTypeKey();
                boolean isSearchable= SpeciesType.isSearchable(speciesTypeKey);
-
+               String species = SpeciesType.getCommonName(speciesTypeKey);
                if (isSearchable) {
-                   String species = SpeciesType.getCommonName(speciesTypeKey);
+
                    IndexObject g = new IndexObject();
                    int rgdId = ge.getRgdId();
                    String symbol = ge.getSymbol();
@@ -726,9 +739,11 @@ public class IndexDAO extends AbstractDAO {
 
                    g.setAnnotationsCount(this.getAnnotsCount(rgdId));
                    objList.add(g);
-               }else {
-                   if(speciesTypeKey!=8 && speciesTypeKey!=10 && speciesTypeKey!=11 && speciesTypeKey!=12)
-                   System.out.println("getGenomicElements isSearchable False for SpeciesKey: "+speciesTypeKey+"\tRGDID: "+ge.getRgdId());
+               }else{
+                   if(speciesTypeKey==3 || speciesTypeKey==2 || speciesTypeKey==1 || speciesTypeKey==4 || speciesTypeKey==5
+                           || speciesTypeKey==7 || speciesTypeKey==6 || speciesTypeKey==9){
+                       throw new Exception("Species Type Key: " +speciesTypeKey +"\tGenomic Element RGD ID: "+ ge.getRgdId()+"\t isSearchable: "+ isSearchable);
+                   }
                }
            }catch (Exception e){
                System.out.println(ge.getRgdId()+"\t"+ ge.getSpeciesTypeKey());
@@ -744,8 +759,8 @@ public class IndexDAO extends AbstractDAO {
         for(VariantInfo obj: variants) {
             //  VariantInfo obj= vdao.getVariant(8554914);
             int speciesTypeKey = obj.getSpeciesTypeKey();
-
-            if (SpeciesType.isSearchable(speciesTypeKey)) {
+            boolean isSearchable=SpeciesType.isSearchable(speciesTypeKey);
+            if (isSearchable) {
                 String species = (SpeciesType.getCommonName(speciesTypeKey));
                 IndexObject v = new IndexObject();
                 int rgdId = obj.getRgdId();
@@ -774,9 +789,11 @@ public class IndexDAO extends AbstractDAO {
                 v.setMapDataList(this.getMapData(obj.getRgdId()));
                 v.setAnnotationsCount(this.getAnnotsCount(rgdId));
                 objList.add(v);
-            }else {
-                if(speciesTypeKey!=8 && speciesTypeKey!=10 && speciesTypeKey!=11 && speciesTypeKey!=12)
-                System.out.println("getVariants() isSearchable False for SpeciesKey: "+speciesTypeKey+"\tRGDID: "+obj.getRgdId());
+            }else{
+                if(speciesTypeKey==3 || speciesTypeKey==2 || speciesTypeKey==1 || speciesTypeKey==4 || speciesTypeKey==5
+                        || speciesTypeKey==7 || speciesTypeKey==6 || speciesTypeKey==9){
+                    throw new Exception("Species Type Key: " +speciesTypeKey +"\tVariant RGD ID: "+ obj.getRgdId()+"\t isSearchable: "+ isSearchable);
+                }
             }
         }
         return objList;
@@ -789,7 +806,7 @@ public class IndexDAO extends AbstractDAO {
         for(Reference ref: referenceDAO.getActiveReferences()){
             // Reference ref=referenceDAO.getReference(1004);
             int speciesTypeKey=ref.getSpeciesTypeKey();
-      //      boolean isSearchable=SpeciesType.isSearchable(speciesTypeKey);
+        //    boolean isSearchable=SpeciesType.isSearchable(speciesTypeKey);
       //      if(isSearchable){
             String species=SpeciesType.getCommonName(speciesTypeKey);
 
@@ -883,11 +900,13 @@ public class IndexDAO extends AbstractDAO {
         Collection<Integer> speciesTypeKeys=  SpeciesType.getSpeciesTypeKeys();
         List<Integer> objectKeys= new ArrayList<>(Arrays.asList(1,5,6,7));
         for(int speciesTypeKey:speciesTypeKeys){
-            boolean isSearchable= SpeciesType.isSearchable(speciesTypeKey);
-            if(isSearchable){
-       //     if(SpeciesType.isSearchable(skey)){
-            SpeciesObject s= new SpeciesObject();
+         boolean isSearchable= SpeciesType.isSearchable(speciesTypeKey);
             String species=SpeciesType.getCommonName(speciesTypeKey);
+            if (isSearchable) {
+
+
+            SpeciesObject s= new SpeciesObject();
+
             s.setName(species);
             int count=0;
             for(int okey:objectKeys){
@@ -901,12 +920,12 @@ public class IndexDAO extends AbstractDAO {
 
             }
             sList.add(s);
-       // }
-            }else {
-                if(speciesTypeKey!=8 && speciesTypeKey!=10 && speciesTypeKey!=11 && speciesTypeKey!=12)
-                System.out.println("getSpeciesObjects() isSearchable False for SpeciesKey: "+speciesTypeKey);
-            }
-        }
+        }else{
+                if(speciesTypeKey==3 || speciesTypeKey==2 || speciesTypeKey==1 || speciesTypeKey==4 || speciesTypeKey==5
+                        || speciesTypeKey==7 || speciesTypeKey==6 || speciesTypeKey==9){
+                    throw new Exception("Species Type Key: " +speciesTypeKey +"Method: "+ "getSpeicesObjects()"+"\t isSearchable: "+ isSearchable);
+                }
+            }}
         return sList;
     }
     /*************************************************************************************************/
