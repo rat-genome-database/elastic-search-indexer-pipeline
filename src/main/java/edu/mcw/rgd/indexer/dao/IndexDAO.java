@@ -356,7 +356,7 @@ public class IndexDAO extends AbstractDAO {
         for(Strain strain: strains) {
             int speciesTypeKey = strain.getSpeciesTypeKey();
           boolean isSearchable=SpeciesType.isSearchable(speciesTypeKey);
-            System.out.println("isSearchable: "+isSearchable +"\tSpeciesTypeKey: "+ speciesTypeKey+"\tStrain RGDID: "+strain.getRgdId());
+          //  System.out.println("isSearchable: "+isSearchable +"\tSpeciesTypeKey: "+ speciesTypeKey+"\tStrain RGDID: "+strain.getRgdId());
            if (isSearchable) {
                 String species = SpeciesType.getCommonName(speciesTypeKey);
 
