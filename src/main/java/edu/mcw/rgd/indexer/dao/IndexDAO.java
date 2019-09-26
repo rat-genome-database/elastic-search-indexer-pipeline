@@ -144,7 +144,7 @@ public class IndexDAO extends AbstractDAO {
 
         List<IndexObject> objList = new ArrayList<>();
         List<Gene> genes= geneDAO.getAllActiveGenes();
-        System.out.println("Active Genes Size: " + genes.size());
+        //System.out.println("Active Genes Size: " + genes.size());
 
      for(Gene gene: genes) {
          //  Gene gene= geneDAO.getGene(2004);
@@ -692,7 +692,7 @@ public class IndexDAO extends AbstractDAO {
 
     public List<IndexObject> getGenomicElements() throws Exception{
         List<IndexObject> objList= new ArrayList<>();
-        System.out.println("Genomic Elements started.....");
+        //System.out.println("Genomic Elements started.....");
         objList.addAll(this.getGenomicElements(RgdId.OBJECT_KEY_CELL_LINES));
         objList.addAll(this.getGenomicElements(RgdId.OBJECT_KEY_PROMOTERS));
 
@@ -733,7 +733,7 @@ public class IndexDAO extends AbstractDAO {
                    g.setSynonyms(synonyms);
                    g.setXdbIdentifiers(this.getExternalIdentifiers(rgdId));
                    if (species == null || species.equals("")) {
-                       System.out.println(symbol + "\t" + rgdId);
+                       //System.out.println(symbol + "\t" + rgdId);
                        log.info(symbol + "\t" + rgdId);
                    }
 

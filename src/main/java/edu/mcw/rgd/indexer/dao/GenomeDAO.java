@@ -412,7 +412,7 @@ public class GenomeDAO extends AbstractDAO{
         GeneCounts geneCounts = new GeneCounts();
         List<MappedGene> filteredGenes= new ArrayList<>();
         List<MappedGene> mGenes= geneDAO.getActiveMappedGenes(mapKey);
-        System.out.println("MapKey: "+ mapKey + "\t"+ mGenes.size());
+ //       System.out.println("MapKey: "+ mapKey + "\t"+ mGenes.size());
         if(chr!=null){
             for(MappedGene m: mGenes){
                 if(m.getChromosome().equals(chr)){
@@ -456,7 +456,7 @@ public class GenomeDAO extends AbstractDAO{
             geneCounts.setSnRna(snrna);
             geneCounts.settRna(trna);
             Map<String, Integer> mirTargetCount=  this.getMirnaTargetCount(mapKey, chr);
-            System.out.println("MIRTARGE COUNT: "+ mirTargetCount);
+      //      System.out.println("MIRTARGE COUNT: "+ mirTargetCount);
             geneCounts.setMirnaTargets(mirTargetCount);
 
 
@@ -464,7 +464,7 @@ public class GenomeDAO extends AbstractDAO{
         Map<String, Integer> orthCounts=new HashMap<>();
         orthCounts = this.getOrthologCounts(mapKey, speciesTypeKey, chr);
         geneCounts.setOrthologCountsMap(orthCounts);
-        System.out.println("ORTHOCOUNTS:"+ orthCounts);
+     //   System.out.println("ORTHOCOUNTS:"+ orthCounts);
 
         return geneCounts;
 
