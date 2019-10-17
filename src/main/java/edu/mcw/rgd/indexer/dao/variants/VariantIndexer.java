@@ -48,6 +48,7 @@ public class VariantIndexer  implements  Runnable{
 
 
         List<VariantIndex> vrs=variantDao.getVariantResults(sampleId, chromosome, mapKey);
+        System.out.println("Variants Size:"+vrs.size()+"\tMapKey:"+mapKey+"\tChr:"+chromosome+"\tSampleId:"+sampleId );
        if(vrs.size()>0){
             BulkRequestBuilder bulkRequestBuilder= ESClient.getClient().prepareBulk();
             int docCount=1;

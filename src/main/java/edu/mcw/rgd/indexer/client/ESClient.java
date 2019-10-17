@@ -38,10 +38,10 @@ public class ESClient {
     public static TransportClient getInstance() {
 
         if(client==null){
-            Settings settings=Settings.builder().put("cluster.name", "erika").build();
+            Settings settings=Settings.builder().put("cluster.name", "green").build();
             try {
                 client= new PreBuiltTransportClient(settings)
-                        .addTransportAddress(new TransportAddress(InetAddress.getByName("erika01.rgd.mcw.edu"), 9300));
+                        .addTransportAddress(new TransportAddress(InetAddress.getByName("green.rgd.mcw.edu"), 9300));
             } catch (UnknownHostException e) {
                 e.printStackTrace();
             }

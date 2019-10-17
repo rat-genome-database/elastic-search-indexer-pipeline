@@ -21,6 +21,7 @@ import edu.mcw.rgd.indexer.dao.ObjectIndexerThread;
 import edu.mcw.rgd.indexer.dao.variants.*;
 import edu.mcw.rgd.indexer.dao.variants.VariantIndexer;
 import edu.mcw.rgd.indexer.model.RgdIndex;
+import edu.mcw.rgd.indexer.model.genomeInfo.ChromosomeIndexObject;
 import edu.mcw.rgd.process.Utils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
@@ -62,7 +63,8 @@ public class Manager {
         new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new FileSystemResource("properties/AppConfigure.xml"));
 
        Manager manager = (Manager) bf.getBean("manager");
-        ESClient es= (ESClient) bf.getBean("client");
+       ESClient es= (ESClient) bf.getBean("client");
+   //     ESClient es=null;
         RgdIndex rgdIndex= (RgdIndex) bf.getBean("rgdIndex");
         System.out.println(manager.getVersion());
         Logger log= Manager.log;
@@ -82,6 +84,7 @@ public class Manager {
 
         manager.run(args);
         } catch (Exception e) {
+            if(es!=null)
             es.destroy();
             e.printStackTrace();
           manager.printUsage();
@@ -201,7 +204,8 @@ public class Manager {
                         SampleDAO sdao= new SampleDAO();
                         sdao.setDataSource(DataSourceFactory.getInstance().getCarpeNovoDataSource());
                      //   List<Integer> speciesTypeKeys= new ArrayList<>(Arrays.asList(1,3, 6));
-                        List<Integer> speciesTypeKeys= new ArrayList<>(Arrays.asList(3));
+                     //   List<Integer> speciesTypeKeys= new ArrayList<>(Arrays.asList(3));
+                        List<Integer> speciesTypeKeys= new ArrayList<>(Arrays.asList(6));
                         for(int species:speciesTypeKeys){
                             switch (species){
                                 case 1:
@@ -232,6 +236,30 @@ public class Manager {
 
                                     break;
                                 case 6:
+                                    admin.createIndex(log, "variant_mappings", "variant");
+                                    List<Map> maps=mapDAO.getMaps(species);
+                                    System.out.println("DOG MAPS SIZE: "+ maps.size());
+                              //      for(Map m:maps) {
+                                      //  int mapKey = m.getKey();
+                                           int mapKey=631;
+                                        List<Sample> samples = sdao.getSamplesByMapKey(mapKey);
+                                        System.out.println("SAMPLES: "+samples.size());
+                                       if (samples.size() > 0){
+                                            List<Chromosome> chromosomes = mapDAO.getChromosomes(mapKey);
+
+                                          //  for (Sample s : samples) {
+                                           Sample s=samples.get(0);
+                                                int sampleId = s.getId();
+                                                //   int sampleId=911;
+                                               for (Chromosome chr : chromosomes) {
+                                                    //    Chromosome chr=mapDAO.getChromosome(360,"10");
+                                          // Chromosome chr=chromosomes.get(0);
+                                                    workerThread = new VariantIndexer(sampleId, chr.getChromosome(), mapKey, species, RgdIndex.getNewAlias());
+                                                    executor.execute(workerThread);
+                                                }
+                                           // }
+                                        }
+                              //      }
                                     break;
                                 default:
                                     break;
@@ -245,7 +273,7 @@ public class Manager {
 
                 }
             }
-            executor.shutdown();
+           executor.shutdown();
             while (!executor.isTerminated()) {}
             System.out.println("Finished all threads: " + new Date());
             log.info("Finished all threads: " + new Date());
@@ -265,7 +293,6 @@ public class Manager {
             long end = System.currentTimeMillis();
             System.out.println(" - " + Utils.formatElapsedTime(start, end));
             log.info(" - " + Utils.formatElapsedTime(start, end));
-
             System.out.println("CLIENT IS CLOSED");
         }
 
