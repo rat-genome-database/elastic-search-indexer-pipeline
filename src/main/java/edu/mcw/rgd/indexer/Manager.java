@@ -243,7 +243,7 @@ public class Manager {
                                       //  int mapKey = m.getKey();
                                        int mapKey=631;
                                         List<Sample> samples = sdao.getSamplesByMapKey(mapKey);
-                                        System.out.println("SAMPLES: "+samples.size());
+
                                        if (samples.size() > 0){
                                             List<Chromosome> chromosomes = mapDAO.getChromosomes(mapKey);
 

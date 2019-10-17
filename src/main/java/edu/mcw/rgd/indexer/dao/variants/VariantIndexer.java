@@ -48,7 +48,7 @@ public class VariantIndexer  implements  Runnable{
 
 
         List<VariantIndex> vrs=variantDao.getVariantResults(sampleId, chromosome, mapKey);
-        System.out.println("Variants Size:"+vrs.size()+"\tMapKey:"+mapKey+"\tChr:"+chromosome+"\tSampleId:"+sampleId );
+      //  System.out.println("Variants Size:"+vrs.size()+"\tMapKey:"+mapKey+"\tChr:"+chromosome+"\tSampleId:"+sampleId );
        if(vrs.size()>0){
             BulkRequestBuilder bulkRequestBuilder= ESClient.getClient().prepareBulk();
             int docCount=1;
@@ -86,7 +86,7 @@ public class VariantIndexer  implements  Runnable{
 
             ESClient.getClient().admin().indices().refresh(refreshRequest()).actionGet();
             System.out.println("Indexed mapKey " + mapKey + ", chromosome: "+ chromosome+", Variant objects Size: " + vrs.size() + " Exiting thread.");
-            System.out.println(Thread.currentThread().getName() + ": VariantThread" + mapKey +"\tSample "+sampleId+ " End " + new Date());
+            System.out.println(Thread.currentThread().getName() + ": VariantThread" + mapKey +"\tSample: "+sampleId+"\tChromosome: "+chromosome+ " End " + new Date());
         }
 
     }
