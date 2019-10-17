@@ -241,14 +241,14 @@ public class Manager {
                                     System.out.println("DOG MAPS SIZE: "+ maps.size());
                               //      for(Map m:maps) {
                                       //  int mapKey = m.getKey();
-                                           int mapKey=631;
+                                       int mapKey=631;
                                         List<Sample> samples = sdao.getSamplesByMapKey(mapKey);
                                         System.out.println("SAMPLES: "+samples.size());
                                        if (samples.size() > 0){
                                             List<Chromosome> chromosomes = mapDAO.getChromosomes(mapKey);
 
-                                          //  for (Sample s : samples) {
-                                           Sample s=samples.get(0);
+                                           for (Sample s : samples) {
+                                          // Sample s=samples.get(0);
                                                 int sampleId = s.getId();
                                                 //   int sampleId=911;
                                                for (Chromosome chr : chromosomes) {
@@ -257,7 +257,7 @@ public class Manager {
                                                     workerThread = new VariantIndexer(sampleId, chr.getChromosome(), mapKey, species, RgdIndex.getNewAlias());
                                                     executor.execute(workerThread);
                                                 }
-                                           // }
+                                          }
                                         }
                               //      }
                                     break;
