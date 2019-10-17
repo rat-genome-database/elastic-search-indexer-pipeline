@@ -65,9 +65,9 @@ public class IndexAdmin {
                     boolean indicesExists = indicesAdminClient.exists(request).actionGet().isExists();
                    if (indicesExists) {   /**** delete index if exists ****/
                   //    DeleteIndexResponse deleteResponse = indicesAdminClient.prepareDelete(index).get();
-                       DeleteIndexRequest deleteIndexRequest = new DeleteIndexRequest(index);
+                  /*     DeleteIndexRequest deleteIndexRequest = new DeleteIndexRequest(index);
                        System.out.println(index + " deleted");
-                        log.info(index + " deleted");
+                        log.info(index + " deleted");*/
                     }
                     if(!indicesExists)
                     createNewIndex(index, mappings, type);
