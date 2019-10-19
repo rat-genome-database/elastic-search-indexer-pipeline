@@ -239,9 +239,9 @@ public class Manager {
                                     admin.createIndex(log, "variant_mappings", "variant");
                                     List<Map> maps=mapDAO.getMaps(species);
                                     System.out.println("DOG MAPS SIZE: "+ maps.size());
-                              //      for(Map m:maps) {
-                                      //  int mapKey = m.getKey();
-                                       int mapKey=631;
+                                for(Map m:maps) {
+                                      int mapKey = m.getKey();
+                                    //   int mapKey=631;
                                         List<Sample> samples = sdao.getSamplesByMapKey(mapKey);
 
                                        if (samples.size() > 0){
@@ -259,7 +259,7 @@ public class Manager {
                                                 }
                                           }
                                         }
-                              //      }
+                                }
                                     break;
                                 default:
                                     break;
