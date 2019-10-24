@@ -2,6 +2,7 @@ package edu.mcw.rgd.indexer;
 
 import edu.mcw.rgd.indexer.client.ESClient;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.*;
 
@@ -32,7 +33,11 @@ public class MyThreadPoolExecutor extends ThreadPoolExecutor {
         if(t!=null){
             System.err.println("Uncaught exception! "+t +" STACKTRACE:"+ Arrays.toString(t.getStackTrace()));
             if(ESClient.getClient()!=null)
-            ESClient.getClient().close();
+                try {
+                    ESClient.getClient().close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             System.exit(1);
         }
     }

@@ -26,8 +26,12 @@ import edu.mcw.rgd.process.Utils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
 
+import org.elasticsearch.action.admin.cluster.health.ClusterHealthRequest;
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
 
+import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest;
+import org.elasticsearch.action.support.master.AcknowledgedResponse;
+import org.elasticsearch.client.RequestOptions;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.FileSystemResource;
@@ -298,8 +302,28 @@ public class Manager {
 
     public boolean switchAlias() throws Exception {
         System.out.println("NEEW ALIAS: " + RgdIndex.getNewAlias() + " || OLD ALIAS:" + RgdIndex.getOldAlias());
+        IndicesAliasesRequest request = new IndicesAliasesRequest();
 
+            IndicesAliasesRequest.AliasActions removeAliasAction =
+                    new IndicesAliasesRequest.AliasActions(IndicesAliasesRequest.AliasActions.Type.REMOVE)
+                            .index(rgdIndex.getIndex())
+                            .alias(RgdIndex.getOldAlias());
+            IndicesAliasesRequest.AliasActions addAliasAction =
+                    new IndicesAliasesRequest.AliasActions(IndicesAliasesRequest.AliasActions.Type.ADD)
+                            .index(rgdIndex.getIndex())
+                            .alias(RgdIndex.getOldAlias());
         if (RgdIndex.getOldAlias() != null) {
+            request.addAliasAction(removeAliasAction);
+            request.addAliasAction(addAliasAction);
+            log.info("Switched from " + RgdIndex.getOldAlias() + " to  " + RgdIndex.getNewAlias());
+
+        }else{
+            request.addAliasAction(addAliasAction);
+            log.info(rgdIndex.getIndex() + " pointed to " + RgdIndex.getNewAlias());
+        }
+        AcknowledgedResponse indicesAliasesResponse =
+                ESClient.getClient().indices().updateAliases(request, RequestOptions.DEFAULT);
+    /*    if (RgdIndex.getOldAlias() != null) {
             ESClient.getClient().admin().indices().prepareAliases().removeAlias(RgdIndex.getOldAlias(), rgdIndex.getIndex())
                     .addAlias(RgdIndex.getNewAlias(), rgdIndex.getIndex()).execute().actionGet();
             System.out.println("Switched from " + RgdIndex.getOldAlias() + " to  " + RgdIndex.getNewAlias());
@@ -310,7 +334,7 @@ public class Manager {
                     .addAlias(RgdIndex.getNewAlias(), rgdIndex.getIndex()).execute().actionGet();
             System.out.println(rgdIndex.getIndex() + " pointed to " + RgdIndex.getNewAlias());
             log.info(rgdIndex.getIndex() + " pointed to " + RgdIndex.getNewAlias());
-        }
+        }*/
         return  true;
 
     }
@@ -335,7 +359,10 @@ public class Manager {
     }
 
     public String getClusterHealth(String index) throws Exception {
-        ClusterHealthResponse response = ESClient.getClient().admin().cluster().prepareHealth(index).execute().actionGet();
+
+        ClusterHealthRequest request = new ClusterHealthRequest(index);
+        ClusterHealthResponse response = ESClient.getClient().cluster().health(request, RequestOptions.DEFAULT);
+      /*  ClusterHealthResponse response = ESClient.getClient().admin().cluster().prepareHealth(index).execute().actionGet();*/
         System.out.println(response.getStatus().name());
         log.info("CLUSTER STATE: " + response.getStatus().name());
         if (response.isTimedOut()) {
