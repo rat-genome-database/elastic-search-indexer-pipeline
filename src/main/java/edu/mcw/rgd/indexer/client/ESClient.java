@@ -27,8 +27,10 @@ public class ESClient {
     }
     public void destroy() throws IOException {
         System.out.println("destroying...");
-        client.close();
-        client=null;
+        if(client!=null) {
+            client.close();
+            client = null;
+        }
     }
 
     public static RestHighLevelClient getClient() {
@@ -46,7 +48,7 @@ public class ESClient {
             try {
               /*  client= new PreBuiltTransportClient(settings)
                         .addTransportAddress(new TransportAddress(InetAddress.getByName("green.rgd.mcw.edu"), 9300));*/
-                RestHighLevelClient client=new RestHighLevelClient(RestClient.builder(
+                client=new RestHighLevelClient(RestClient.builder(
                         new HttpHost("green.rgd.mcw.edu", 9200, "http")
                 ));
             } catch (Exception e) {

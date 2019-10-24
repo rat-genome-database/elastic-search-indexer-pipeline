@@ -304,20 +304,26 @@ public class Manager {
         System.out.println("NEEW ALIAS: " + RgdIndex.getNewAlias() + " || OLD ALIAS:" + RgdIndex.getOldAlias());
         IndicesAliasesRequest request = new IndicesAliasesRequest();
 
+
+        if (RgdIndex.getOldAlias() != null) {
+
             IndicesAliasesRequest.AliasActions removeAliasAction =
                     new IndicesAliasesRequest.AliasActions(IndicesAliasesRequest.AliasActions.Type.REMOVE)
-                            .index(rgdIndex.getIndex())
-                            .alias(RgdIndex.getOldAlias());
+                            .index(RgdIndex.getOldAlias())
+                            .alias(rgdIndex.getIndex());
             IndicesAliasesRequest.AliasActions addAliasAction =
                     new IndicesAliasesRequest.AliasActions(IndicesAliasesRequest.AliasActions.Type.ADD)
-                            .index(rgdIndex.getIndex())
-                            .alias(RgdIndex.getOldAlias());
-        if (RgdIndex.getOldAlias() != null) {
+                            .index(RgdIndex.getNewAlias())
+                            .alias(rgdIndex.getIndex());
             request.addAliasAction(removeAliasAction);
             request.addAliasAction(addAliasAction);
             log.info("Switched from " + RgdIndex.getOldAlias() + " to  " + RgdIndex.getNewAlias());
 
         }else{
+            IndicesAliasesRequest.AliasActions addAliasAction =
+                    new IndicesAliasesRequest.AliasActions(IndicesAliasesRequest.AliasActions.Type.ADD)
+                            .index(RgdIndex.getNewAlias())
+                            .alias(rgdIndex.getIndex());
             request.addAliasAction(addAliasAction);
             log.info(rgdIndex.getIndex() + " pointed to " + RgdIndex.getNewAlias());
         }
