@@ -30,7 +30,7 @@ public class VariantDao extends VariantDAO {
     public List<VariantIndex> getVariantResults(int sampleId, String chr, int mapKey) {
 
 
-        String sql="select v.*, vt.*,t.*,  cs.*,dbs.* , dbs.snp_name as MCW_DBS_SNP_NAME, md.*, gl.gene_symbols as region_name, g.gene_symbol as symbol, g.gene_symbol_lc as symbol_lc from variant_dog v " +
+        String sql="select v.*, vt.*,t.*,  cs.*,dbs.* , dbs.snp_name as MCW_DBS_SNP_NAME, md.*, gl.gene_symbols as region_name, g.gene_symbol as symbol, g.gene_symbol_lc as symbol_lc , s.analysis_name from variant_dog v " +
                 "left outer join gene_loci gl on (gl.map_key=? and gl.chromosome=v.chromosome and gl.pos=v.start_pos) " +
                 "left outer join variant_transcript vt on v.variant_id=vt.variant_id " +
                 "left outer join transcripts t on vt.transcript_rgd_id=t.transcript_rgd_id " +
