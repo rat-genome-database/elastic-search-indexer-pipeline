@@ -7,15 +7,15 @@ import edu.mcw.rgd.indexer.model.RgdIndex;
 import org.apache.log4j.Logger;
 
 import org.elasticsearch.action.admin.indices.alias.get.GetAliasesRequest;
-
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 
 import org.elasticsearch.client.RequestOptions;
-
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.GetIndexRequest;
+
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentType;
+
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.FileSystemResource;
@@ -62,20 +62,18 @@ public class IndexAdmin {
         System.out.println(rgdIndex.getIndex() + " :" + indicesExists);
         log.info(rgdIndex.getIndex() +" :"+indicesExists);
         if(indicesExists) {  /* CHECK IF INDEX NAME PROVIDED EXISTS*/
-            System.out.println(rgdIndex.getIndex() + " exists.");
-       //     GetAliasesResponse response = indicesAdminClient.getAliases(new GetAliasesRequest().indices(rgdIndex.getIndex())).actionGet();
+     //     GetAliasesResponse response = indicesAdminClient.getAliases(new GetAliasesRequest().indices(rgdIndex.getIndex())).actionGet();
             GetAliasesRequest aliasesRequest=new GetAliasesRequest(rgdIndex.getIndex());
             boolean existsAlias=ESClient.getClient().indices().existsAlias(aliasesRequest, RequestOptions.DEFAULT);
 
-         //   if (response.getAliases().size() == 1) {
-                if (existsAlias) {
+            if (existsAlias) {
             for (String index : rgdIndex.getIndices()) {
             /* INDEX IS NOT ALIAS AND EXISTS, then DELETE INDEX AND CREATE NEW INDEX WITH SAME NAME.*/
              //   if (!response.getAliases().containsKey(index)) {
                     if (!Arrays.asList(aliasesRequest.aliases()).contains(index)) {// if index is not  alias to current index(rgd_index_dev)
                         GetIndexRequest request1=new GetIndexRequest(index);
                         //         IndicesExistsRequest request = new IndicesExistsRequest(index); // check if index exists
-                        boolean indexExists=ESClient.getClient().indices().exists(request, RequestOptions.DEFAULT);
+                        boolean indexExists=ESClient.getClient().indices().exists(request1, RequestOptions.DEFAULT);
            //         boolean indicesExists = indicesAdminClient.exists(request).actionGet().isExists();
                    if (indexExists) {   /**** delete index if exists ****/
                   //    DeleteIndexResponse deleteResponse = indicesAdminClient.prepareDelete(index).get();
@@ -93,8 +91,7 @@ public class IndexAdmin {
                 }
             }
         }else{
-              //  if(response.getAliases().size()==0){
-                    if (aliasesRequest.aliases().length==0) {
+               if (aliasesRequest.aliases().length==0) {
                     createNewIndex(rgdIndex.getIndex()+"1",mappings, type);
                 }
             }
@@ -106,7 +103,6 @@ public class IndexAdmin {
     }
     public void createNewIndex(String index, String _mappings, String type) throws Exception {
 
- //       IndicesAdminClient indicesAdminClient= ESClient.getClient().admin().indices();
         String path="data/"+_mappings+".json";
         System.out.println("PATH: " +path+"\n"+ type);
         System.out.println("CREATING NEW INDEX..." + index);
@@ -122,14 +118,7 @@ public class IndexAdmin {
                 .put("index.number_of_replicas", 0)
         .loadFromSource(analyzers,XContentType.JSON));
         request.mapping(mappings, XContentType.JSON);
-
-       /* indicesAdminClient.prepareCreate(index)
-                .setSettings(Settings.builder().loadFromSource(analyzers,XContentType.JSON)
-                .put("index.number_of_shards",1)
-                .put("index.number_of_replicas", 0)).get();
-      indicesAdminClient.preparePutMapping(index).setType(type).setSource(mappings, XContentType.JSON).get();*/
         org.elasticsearch.client.indices.CreateIndexResponse createIndexResponse = ESClient.getClient().indices().create(request, RequestOptions.DEFAULT);
-
 
         System.out.println(index + " created on  " + new Date());
         log.info(index + " created on  " + new Date());
@@ -141,9 +130,6 @@ public class IndexAdmin {
             System.out.println("Updating " + rgdIndex.getIndex() + "...");
             GetIndexRequest request=new GetIndexRequest(rgdIndex.getIndex());
             boolean indicesExists=ESClient.getClient().indices().exists(request, RequestOptions.DEFAULT);
-         //   IndicesAdminClient indicesAdminClient = ESClient.getClient().admin().indices();
-
-         //   IndicesExistsResponse existsResponse = indicesAdminClient.exists(new IndicesExistsRequest(rgdIndex.getIndex())).actionGet();
             if (indicesExists) {  /* CHECK IF INDEX NAME PROVIDED EXISTS*/
 
                 RgdIndex.setNewAlias(rgdIndex.getIndex());

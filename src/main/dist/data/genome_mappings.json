@@ -1,5 +1,5 @@
 {
-  "genome": {
+
     "properties": {
       "primaryAssembly": {
         "type":"keyword"
@@ -216,6 +216,6 @@
     }
   }
 
-}
+
 
 
