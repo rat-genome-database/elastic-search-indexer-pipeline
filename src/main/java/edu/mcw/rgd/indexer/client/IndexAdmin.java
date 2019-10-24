@@ -7,7 +7,9 @@ import edu.mcw.rgd.indexer.model.RgdIndex;
 import org.apache.log4j.Logger;
 
 import org.elasticsearch.action.admin.indices.alias.get.GetAliasesRequest;
+
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
+
 import org.elasticsearch.client.RequestOptions;
 
 import org.elasticsearch.client.indices.CreateIndexRequest;
@@ -78,6 +80,8 @@ public class IndexAdmin {
                    if (indexExists) {   /**** delete index if exists ****/
                   //    DeleteIndexResponse deleteResponse = indicesAdminClient.prepareDelete(index).get();
                        DeleteIndexRequest deleteIndexRequest = new DeleteIndexRequest(index);
+                       org.elasticsearch.action.support.master.AcknowledgedResponse deleteIndexResponse = ESClient.getClient().indices().delete(deleteIndexRequest, RequestOptions.DEFAULT);
+
                        System.out.println(index + " deleted");
                         log.info(index + " deleted");
                     }else
@@ -124,6 +128,7 @@ public class IndexAdmin {
                 .put("index.number_of_shards",1)
                 .put("index.number_of_replicas", 0)).get();
       indicesAdminClient.preparePutMapping(index).setType(type).setSource(mappings, XContentType.JSON).get();*/
+        org.elasticsearch.client.indices.CreateIndexResponse createIndexResponse = ESClient.getClient().indices().create(request, RequestOptions.DEFAULT);
 
 
         System.out.println(index + " created on  " + new Date());
