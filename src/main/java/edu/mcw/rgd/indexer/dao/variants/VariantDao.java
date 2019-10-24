@@ -88,7 +88,7 @@ public class VariantDao extends VariantDAO {
                         vi.setZygosityInPseudo(rs.getString("zygosity_in_pseudo"));
                         vi.setQualityScore(rs.getInt("quality_score"));
                         vi.setHGVSNAME(rs.getString("hgvs_name"));
-
+                        vi.setAnalysisName(rs.getString("analysis_name"));
 
                         /***************Variant Transcript****************************/
                         //   vi.setVariantTranscriptId(rs.getInt("variant_transcript_id"));

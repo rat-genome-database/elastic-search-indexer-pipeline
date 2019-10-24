@@ -7,11 +7,16 @@ import edu.mcw.rgd.dao.impl.GeneDAO;
 import edu.mcw.rgd.datamodel.*;
 import edu.mcw.rgd.indexer.client.ESClient;
 import edu.mcw.rgd.indexer.model.variants.VariantIndex;
+import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
+import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.support.WriteRequest;
+import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.common.xcontent.XContentType;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
@@ -50,8 +55,10 @@ public class VariantIndexer  implements  Runnable{
         List<VariantIndex> vrs=variantDao.getVariantResults(sampleId, chromosome, mapKey);
       //  System.out.println("Variants Size:"+vrs.size()+"\tMapKey:"+mapKey+"\tChr:"+chromosome+"\tSampleId:"+sampleId );
        if(vrs.size()>0){
-            BulkRequestBuilder bulkRequestBuilder= ESClient.getClient().prepareBulk();
-            int docCount=1;
+           BulkRequest bulkRequest=new BulkRequest();
+           bulkRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
+
+           int docCount=1;
 
             for (VariantIndex o : vrs) {
                 docCount++;
@@ -63,29 +70,39 @@ public class VariantIndexer  implements  Runnable{
                     e.printStackTrace();
                 }
 
-                bulkRequestBuilder.add(new IndexRequest(index, "variant").source(json, XContentType.JSON));
+                bulkRequest.add(new IndexRequest(index).source(json, XContentType.JSON));
                 if(docCount%100==0){
+
                     try {
-                        BulkResponse response=       bulkRequestBuilder.execute().get();
-                    } catch (InterruptedException | ExecutionException e) {
+                        BulkResponse response=      ESClient.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
+                    } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    bulkRequestBuilder= ESClient.getClient().prepareBulk();
+                    bulkRequest= new BulkRequest();
+
+
                 }else{
                     if(docCount>vrs.size()-100 && docCount==vrs.size()){
                         try {
-                            BulkResponse response=       bulkRequestBuilder.execute().get();
-                        } catch (InterruptedException | ExecutionException e) {
+                            BulkResponse response=      ESClient.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
+                        } catch (IOException e) {
                             e.printStackTrace();
                         }
-                        bulkRequestBuilder= ESClient.getClient().prepareBulk();
+                        bulkRequest= new BulkRequest();
+
+
                     }
                 }
 
             }
 
-            ESClient.getClient().admin().indices().refresh(refreshRequest()).actionGet();
-            System.out.println("Indexed mapKey " + mapKey + ", chromosome: "+ chromosome+", Variant objects Size: " + vrs.size() + " Exiting thread.");
+           RefreshRequest refreshRequest=new RefreshRequest();
+           try {
+               ESClient.getClient().indices().refresh(refreshRequest, RequestOptions.DEFAULT);
+           } catch (IOException e) {
+               e.printStackTrace();
+           }
+           System.out.println("Indexed mapKey " + mapKey + ", chromosome: "+ chromosome+", Variant objects Size: " + vrs.size() + " Exiting thread.");
             System.out.println(Thread.currentThread().getName() + ": VariantThread" + mapKey +"\tSample: "+sampleId+"\tChromosome: "+chromosome+ " End " + new Date());
         }
 

@@ -12,11 +12,13 @@ import edu.mcw.rgd.indexer.model.genomeInfo.GeneCounts;
 import edu.mcw.rgd.indexer.model.genomeInfo.GenomeIndexObject;
 
 import org.apache.log4j.Logger;
-import org.elasticsearch.action.bulk.BulkRequestBuilder;
+
+import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
+import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequest;
-
 import org.elasticsearch.action.support.WriteRequest;
+import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.common.xcontent.XContentType;
 
 import java.util.ArrayList;
@@ -175,7 +177,10 @@ public class GenomeInfoThread implements Runnable {
        }
             System.out.println("Objects List Size of " + species + " : " + objects.size());
            log.info("Objects List Size of " + species + " : " + objects.size());
-         BulkRequestBuilder bulkRequestBuilder= ESClient.getClient().prepareBulk().setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
+    //     BulkRequestBuilder bulkRequestBuilder= ESClient.getClient().prepareBulk().setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
+         BulkRequest bulkRequest=new BulkRequest();
+         bulkRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
+
          int docCount=0;
             for (GenomeIndexObject o : objects) {
                 docCount++;
@@ -186,21 +191,26 @@ public class GenomeInfoThread implements Runnable {
                 } catch (JsonProcessingException e) {
                     e.printStackTrace();
                 }
-                bulkRequestBuilder.add(new IndexRequest(index, "genome").source(json, XContentType.JSON));
+                bulkRequest.add(new IndexRequest(index).source(json, XContentType.JSON));
 
                 if(docCount%100==0){
-                    BulkResponse response=       bulkRequestBuilder.execute().get();
-                    bulkRequestBuilder= ESClient.getClient().prepareBulk();
+                  //  BulkResponse response=       bulkRequestBuilder.execute().get();
+                    BulkResponse response=      ESClient.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
+                    bulkRequest= new BulkRequest();
                 }else{
                     if(docCount>objects.size()-100 && docCount==objects.size()){
-                        BulkResponse response=       bulkRequestBuilder.execute().get();
-                        bulkRequestBuilder= ESClient.getClient().prepareBulk();
+                      /*  BulkResponse response=       bulkRequestBuilder.execute().get();
+                        bulkRequestBuilder= ESClient.getClient().prepareBulk();*/
+                        BulkResponse response=      ESClient.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
+                        bulkRequest= new BulkRequest();
                     }
                 }
 
             }
           //   BulkResponse response=       bulkRequestBuilder.get();
-           ESClient.getClient().admin().indices().refresh(refreshRequest()).actionGet();
+         //  ESClient.getClient().admin().indices().refresh(refreshRequest()).actionGet();
+         RefreshRequest refreshRequest=new RefreshRequest();
+         ESClient.getClient().indices().refresh(refreshRequest, RequestOptions.DEFAULT);
             System.out.println("Indexed " + species + "  genome objects Size: " + objects.size() + " Exiting thread.");
             System.out.println(Thread.currentThread().getName() + ": " + species + " End " + new Date());
             log.info("Indexed " + species + "  genome objects Size: " + objects.size() + " Exiting thread.");

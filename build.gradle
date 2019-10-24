@@ -20,7 +20,11 @@ String myAppName="ESIndexer"
      //   compile group: 'org.elasticsearch.client', name: 'transport', version: '6.4.0'
         // https://mvnrepository.com/artifact/org.elasticsearch.client/transport
         compile group: 'org.elasticsearch.client', name: 'transport', version: '7.4.0'
+// https://mvnrepository.com/artifact/org.elasticsearch.client/elasticsearch-rest-client
+        compile group: 'org.elasticsearch.client', name: 'elasticsearch-rest-client', version: '7.4.0'
 
+// https://mvnrepository.com/artifact/org.elasticsearch.client/elasticsearch-rest-high-level-client
+        compile group: 'org.elasticsearch.client', name: 'elasticsearch-rest-high-level-client', version: '7.4.0'
 
    //     compile group: 'org.apache.lucene', name: 'lucene-core', version: '7.4.0'
         // https://mvnrepository.com/artifact/org.apache.lucene/lucene-core

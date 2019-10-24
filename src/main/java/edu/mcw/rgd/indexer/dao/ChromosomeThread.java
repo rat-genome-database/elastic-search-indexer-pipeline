@@ -8,10 +8,14 @@ import edu.mcw.rgd.datamodel.*;
 import edu.mcw.rgd.indexer.client.ESClient;
 import edu.mcw.rgd.indexer.model.genomeInfo.*;
 
+import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
+import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequest;
 
+import org.elasticsearch.action.support.WriteRequest;
+import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.common.xcontent.XContentType;
 
 import java.util.*;
@@ -125,7 +129,9 @@ public class ChromosomeThread implements  Runnable {
                 if(objects.size()>0){
 
 
-                  BulkRequestBuilder bulkRequestBuilder= ESClient.getClient().prepareBulk();
+                    BulkRequest bulkRequest=new BulkRequest();
+                    bulkRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
+
                     int docCount=1;
 
                 for (ChromosomeIndexObject o : objects) {
@@ -138,20 +144,26 @@ public class ChromosomeThread implements  Runnable {
                             e.printStackTrace();
                         }
 
-                      bulkRequestBuilder.add(new IndexRequest(index, "chromosome").source(json, XContentType.JSON));
+                   //   bulkRequestBuilder.add(new IndexRequest(index, "chromosome").source(json, XContentType.JSON));
+                    bulkRequest.add(new IndexRequest(index).source(json, XContentType.JSON));
                         if(docCount%100==0){
-                            BulkResponse response=       bulkRequestBuilder.execute().get();
-                            bulkRequestBuilder= ESClient.getClient().prepareBulk();
+                          /*  BulkResponse response=       bulkRequestBuilder.execute().get();
+                            bulkRequestBuilder= ESClient.getClient().prepareBulk();*/
+                            BulkResponse response=      ESClient.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
+                            bulkRequest= new BulkRequest();
                         }else{
                             if(docCount>objects.size()-100 && docCount==objects.size()){
-                                BulkResponse response=       bulkRequestBuilder.execute().get();
-                                bulkRequestBuilder= ESClient.getClient().prepareBulk();
+                                /*BulkResponse response=       bulkRequestBuilder.execute().get();
+                                bulkRequestBuilder= ESClient.getClient().prepareBulk();*/
+                                BulkResponse response=      ESClient.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
+                                bulkRequest= new BulkRequest();
                             }
                         }
 
                 }
-
-                ESClient.getClient().admin().indices().refresh(refreshRequest()).actionGet();
+                    RefreshRequest refreshRequest=new RefreshRequest();
+                    ESClient.getClient().indices().refresh(refreshRequest, RequestOptions.DEFAULT);
+              //  ESClient.getClient().admin().indices().refresh(refreshRequest()).actionGet();
                 System.out.println("Indexed mapKey " + mapKey + ",  chromosome objects Size: " + objects.size() + " Exiting thread.");
                 System.out.println(Thread.currentThread().getName() + ": chromosomeThread" + mapKey + " End " + new Date());
             }
