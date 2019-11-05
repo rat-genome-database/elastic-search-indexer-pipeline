@@ -62,18 +62,14 @@ public class Manager {
     private static final Logger log = Logger.getLogger("main");
 
     public static void main(String[] args) throws Exception {
-        Logger esLog= Logger.getLogger("test");
+
         DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
         new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new FileSystemResource("properties/AppConfigure.xml"));
 
        Manager manager = (Manager) bf.getBean("manager");
        ESClient es= (ESClient) bf.getBean("client");
-   //     ESClient es=null;
-        RgdIndex rgdIndex= (RgdIndex) bf.getBean("rgdIndex");
-        System.out.println(manager.getVersion());
-        Logger log= Manager.log;
-        esLog.info(manager.getVersion());
-        System.out.println("LEVEL:" +esLog.getLevel());
+       RgdIndex rgdIndex= (RgdIndex) bf.getBean("rgdIndex");
+        log.info("LEVEL:" +log.getLevel());
         log.info(manager.getVersion());
 
         try {
@@ -139,7 +135,7 @@ public class Manager {
                     case "Variants" :
 
                         if(!searchIndexCreated) {
-                            admin.createIndex(log, "search_mappings", "search");
+                            admin.createIndex("search_mappings", "search");
                             searchIndexCreated=true;
                         }
                         if(!arg.equalsIgnoreCase("annotations")) {
@@ -165,7 +161,7 @@ public class Manager {
 
 
                     case "Chromosomes":
-                         admin.createIndex(log, "chromosome_mappings", "chromosome");
+                         admin.createIndex("chromosome_mappings", "chromosome");
                         if(arg.equalsIgnoreCase("chromosomes")){
                             MapDAO mapDAO= new MapDAO();
                             System.out.println("INDEXING Chromosomes...");
@@ -190,7 +186,7 @@ public class Manager {
                         break;
                     case "GenomeInfo":
 
-                        admin.createIndex(log, "genome_mappings", "genome");
+                        admin.createIndex("genome_mappings", "genome");
                         System.out.println("INDEXING GENOMEINFO...");
                        for(int key : SpeciesType.getSpeciesTypeKeys()) {
                          //    int key=3;
@@ -215,7 +211,7 @@ public class Manager {
                                 case 1:
                                     break;
                                 case 3:
-                                    admin.createIndex(log, "variant_mappings", "variant");
+                                    admin.createIndex("variant_mappings", "variant");
                                     if(SpeciesType.isSearchable(species)) {
                                         List<Map> maps=mapDAO.getMaps(species);
                                         for(Map m:maps) {
@@ -240,7 +236,7 @@ public class Manager {
 
                                     break;
                                 case 6:
-                                    admin.createIndex(log, "variant_mappings", "variant");
+                                    admin.createIndex("variant_mappings", "variant");
                                     List<Map> maps=mapDAO.getMaps(species);
                                     System.out.println("DOG MAPS SIZE: "+ maps.size());
                                 for(Map m:maps) {

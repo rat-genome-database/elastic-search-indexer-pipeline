@@ -37,17 +37,18 @@ public class GenomeInfoThread implements Runnable {
     private int key;
     private int mapKey;
     private String index;
-    private Logger log;
+
 
     public GenomeInfoThread(int speciestypeKey, String index, Logger log){
 
      this.key=speciestypeKey;
        this.index= index;
-        this.log=log;
+
     }
 
     @Override
     public void run() {
+        Logger log=Logger.getLogger("genome");
         System.out.println(Thread.currentThread().getName() + ": " + SpeciesType.getCommonName(key) + " started " + new Date());
         log.info(Thread.currentThread().getName() + ": " + SpeciesType.getCommonName(key) + " started " + new Date());
 
@@ -217,6 +218,7 @@ public class GenomeInfoThread implements Runnable {
            log.info(Thread.currentThread().getName() + ": " + species + " End " + new Date());
        }catch (Exception e){
             e.printStackTrace();
+            log.info(e);
             throw new RuntimeException();
         }
 

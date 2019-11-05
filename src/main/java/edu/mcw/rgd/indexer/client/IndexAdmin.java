@@ -1,8 +1,6 @@
 package edu.mcw.rgd.indexer.client;
 
-
-
-
+import edu.mcw.rgd.indexer.Manager;
 import edu.mcw.rgd.indexer.model.RgdIndex;
 import org.apache.log4j.Logger;
 
@@ -37,30 +35,15 @@ import java.util.List;
 public class IndexAdmin {
 
 
-    private Logger log;
+    private static Logger log=Logger.getLogger(Manager.class);
     private RgdIndex rgdIndex;
-
-    public Logger getLog() {
-        return log;
-    }
-
-    public void setLog(Logger log) {
-        this.log = log;
-    }
-
-    public void createIndex(Logger log, String mappings, String type) throws Exception {
-
-        this.setLog(log);
-  //    IndicesAdminClient indicesAdminClient= ESClient.getClient().admin().indices();
-    // IndicesExistsResponse existsResponse= indicesAdminClient.exists(new IndicesExistsRequest(rgdIndex.getIndex())).actionGet();
-
+    public void createIndex(String mappings, String type) throws Exception {
 
         GetIndexRequest request=new GetIndexRequest(rgdIndex.getIndex());
         request.local(false);
         request.humanReadable(true);
         boolean indicesExists=ESClient.getClient().indices().exists(request, RequestOptions.DEFAULT);
-        System.out.println(rgdIndex.getIndex() + " :" + indicesExists);
-        log.info(rgdIndex.getIndex() +" :"+indicesExists);
+        log.info(rgdIndex.getIndex() + " :" + indicesExists);
         if(indicesExists) {  /* CHECK IF INDEX NAME PROVIDED EXISTS*/
      //     GetAliasesResponse response = indicesAdminClient.getAliases(new GetAliasesRequest().indices(rgdIndex.getIndex())).actionGet();
             GetAliasesRequest aliasesRequest=new GetAliasesRequest(rgdIndex.getIndex());
@@ -79,9 +62,7 @@ public class IndexAdmin {
                   //    DeleteIndexResponse deleteResponse = indicesAdminClient.prepareDelete(index).get();
                        DeleteIndexRequest deleteIndexRequest = new DeleteIndexRequest(index);
                        org.elasticsearch.action.support.master.AcknowledgedResponse deleteIndexResponse = ESClient.getClient().indices().delete(deleteIndexRequest, RequestOptions.DEFAULT);
-
-                       System.out.println(index + " deleted");
-                        log.info(index + " deleted");
+                       log.info(index + " deleted");
                     }else
                       createNewIndex(index, mappings, type);
               }
@@ -96,7 +77,7 @@ public class IndexAdmin {
                 }
             }
         }else{ // IF INDEX NAME PROVIDED DOES NOT EXISTS THEN CREATE NEW INDEX
-            System.out.println(rgdIndex.getIndex() + " does not exists.");
+            log.info(rgdIndex.getIndex() + " does not exists.Creating "+ rgdIndex.getIndex()+" ....");
             this.createNewIndex(rgdIndex.getIndex()+"1", mappings, type);
         }
 
@@ -104,8 +85,6 @@ public class IndexAdmin {
     public void createNewIndex(String index, String _mappings, String type) throws Exception {
 
         String path="data/"+_mappings+".json";
-        System.out.println("PATH: " +path+"\n"+ type);
-        System.out.println("CREATING NEW INDEX..." + index);
         log.info("CREATING NEW INDEX..." + index);
 
         String mappings=new String(Files.readAllBytes(Paths.get(path)));
@@ -119,15 +98,13 @@ public class IndexAdmin {
         .loadFromSource(analyzers,XContentType.JSON));
         request.mapping(mappings, XContentType.JSON);
         org.elasticsearch.client.indices.CreateIndexResponse createIndexResponse = ESClient.getClient().indices().create(request, RequestOptions.DEFAULT);
-
-        System.out.println(index + " created on  " + new Date());
         log.info(index + " created on  " + new Date());
 
         RgdIndex.setNewAlias(index);
     }
     public int updateIndex() throws Exception {
         if(rgdIndex.getIndex()!=null) {
-            System.out.println("Updating " + rgdIndex.getIndex() + "...");
+            log.info("Updating " + rgdIndex.getIndex() + "...");
             GetIndexRequest request=new GetIndexRequest(rgdIndex.getIndex());
             boolean indicesExists=ESClient.getClient().indices().exists(request, RequestOptions.DEFAULT);
             if (indicesExists) {  /* CHECK IF INDEX NAME PROVIDED EXISTS*/
@@ -136,11 +113,11 @@ public class IndexAdmin {
 
                 return 1;
             } else {
-                System.out.println("Cannot Update. " + rgdIndex.getIndex() + " does not exists. Use REINDEX option to create index");
+               log.info("Cannot Update. " + rgdIndex.getIndex() + " does not exists. Use REINDEX option to create index");
                 return 0;
             }
         }else {
-            System.out.println("INDEX cannot be null");
+            log.info("INDEX cannot be null");
             return 0;
         }
     }
@@ -172,7 +149,7 @@ public class IndexAdmin {
 
         Logger log= Logger.getLogger(IndexAdmin.class);
         try {
-            admin.createIndex(log, "","");
+            admin.createIndex("","");
         } catch (Exception e) {
 
             e.printStackTrace();
