@@ -1298,18 +1298,24 @@ public class IndexDAO extends AbstractDAO {
             }
        //     bulkRequestBuilder.add(new IndexRequest(index, type,o.getTerm_acc()).source(json, XContentType.JSON));
             bulkRequest.add(new IndexRequest(index).source(json, XContentType.JSON));
-      /*      if(docCount%100==0){
+            if(docCount%100==0){
                 ESClient.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
                 bulkRequest= new BulkRequest();
+                bulkRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.WAIT_UNTIL);
+                bulkRequest.timeout(TimeValue.timeValueMinutes(2));
+                bulkRequest.timeout("2m");
             }else{
                 if(docCount>objs.size()-100 && docCount==objs.size()){
 
                   ESClient.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
                     bulkRequest= new BulkRequest();
+                    bulkRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.WAIT_UNTIL);
+                    bulkRequest.timeout(TimeValue.timeValueMinutes(2));
+                    bulkRequest.timeout("2m");
                 }
-            }*/
+            }
         }
-        ESClient.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
+     //   ESClient.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
 
         //   BulkResponse response=       bulkRequestBuilder.get();
 
