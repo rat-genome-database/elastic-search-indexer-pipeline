@@ -67,7 +67,7 @@ public class ESClient {
                     public RequestConfig.Builder customizeRequestConfig(RequestConfig.Builder requestConfigBuilder) {
                         return requestConfigBuilder
                                 .setConnectTimeout(5000)
-                                .setSocketTimeout(60000);
+                                .setSocketTimeout(120000);
                     }
                 })
                 );
