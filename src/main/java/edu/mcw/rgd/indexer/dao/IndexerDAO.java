@@ -8,8 +8,10 @@ import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
 import edu.mcw.rgd.datamodel.ontologyx.TermWithStats;
 import edu.mcw.rgd.indexer.model.IndexObject;
+import org.apache.log4j.Logger;
 
 import java.util.*;
+
 
 import static org.elasticsearch.client.Requests.refreshRequest;
 
@@ -43,6 +45,7 @@ public class IndexerDAO extends IndexDAO implements Runnable {
 
     }
     public void run() {
+        Logger log= Logger.getLogger("ontology");
         try {
 
             System.out.println(Thread.currentThread().getName() + ": " + ont_id + " started " + new Date());
@@ -138,6 +141,7 @@ public class IndexerDAO extends IndexDAO implements Runnable {
             log.info(Thread.currentThread().getName() + ": " + ont_id + " End " + new Date());
         } catch (Exception e) {
             e.printStackTrace();
+            log.info(e);
             throw new RuntimeException();
         }
     }

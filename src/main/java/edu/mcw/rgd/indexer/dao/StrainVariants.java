@@ -68,11 +68,11 @@ public class StrainVariants extends AbstractDAO{
         sql=sql+ "   group by variant_type";
         try{
             conn= DataSourceFactory.getInstance().getCarpeNovoDataSource().getConnection();
-            System.out.println("SAMPLE SIZE: "+ samples.size());
+         //   System.out.println("SAMPLE SIZE: "+ samples.size());
 
             int totalVariants=0;
             for(Sample s:samples){
-                System.out.println("SAMPLE ID:"+s.getId());
+           //     System.out.println("SAMPLE ID:"+s.getId());
                 VariantCounts vc= new VariantCounts();
                 ps= conn.prepareStatement(sql);
                 int sampleId=s.getId();
@@ -97,14 +97,14 @@ public class StrainVariants extends AbstractDAO{
                         vc.setDel(rs.getString("tot"));
 
                     totalVariants=totalVariants+rs.getInt("tot");
-                      System.out.println(rs.getString("variant_type")+ " || "+ rs.getString("tot"));
+                 //     System.out.println(rs.getString("variant_type")+ " || "+ rs.getString("tot"));
                 }
                 vc.setSnv(String.valueOf(snvAndSnps));
                 variantCounts.add(vc);
                 rs.close();
                 ps.close();
             }
-            System.out.println();
+        //    System.out.println();
         }catch (Exception e){
             e.printStackTrace();
         }finally {

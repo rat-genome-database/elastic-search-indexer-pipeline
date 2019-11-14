@@ -26,19 +26,19 @@ public class ObjectIndexerThread implements  Runnable {
     private Thread t;
     private String objectType;
     private String index;
-    private Logger log;
 
     public ObjectIndexerThread(){}
     public ObjectIndexerThread(String object, String indexName, Logger log){
         objectType=object;
         index=indexName;
-        this.log=log;
+
 
     }
     @Override
     public void run(){
+        Logger log=Logger.getLogger("search");
         System.out.println(Thread.currentThread().getName()  + ": " + objectType+ " started " + new Date() );
-       log.info(Thread.currentThread().getName()  + ": " + objectType+ " started " + new Date() );
+        log.info(Thread.currentThread().getName()  + ": " + objectType+ " started " + new Date() );
 
         try {
             IndexDAO indexDao=new IndexDAO();
@@ -57,6 +57,7 @@ public class ObjectIndexerThread implements  Runnable {
 
         }  catch (Exception e) {
             e.printStackTrace();
+            log.info(e);
             throw new RuntimeException();
         }
 
@@ -80,7 +81,7 @@ public class ObjectIndexerThread implements  Runnable {
             indices.add("search"+"_index" + "_" + "test" + "2");
             rgdIndex.setIndices(indices);
     //    }
-        admin.createIndex(log, "search_mappings", "search");
+        admin.createIndex("search_mappings", "search");
         ObjectIndexerThread indexer= new ObjectIndexerThread("Strains", RgdIndex.getNewAlias(), log);
 
         indexer.run();

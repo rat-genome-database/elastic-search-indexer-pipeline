@@ -25,14 +25,19 @@ import edu.mcw.rgd.indexer.spring.XdbObjectQuery;
 import edu.mcw.rgd.process.Utils;
 
 import org.apache.log4j.Logger;
+import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
+import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.support.WriteRequest;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.jsoup.Jsoup;
 
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 
@@ -144,7 +149,7 @@ public class IndexDAO extends AbstractDAO {
 
         List<IndexObject> objList = new ArrayList<>();
         List<Gene> genes= geneDAO.getAllActiveGenes();
-        System.out.println("Active Genes Size: " + genes.size());
+        //System.out.println("Active Genes Size: " + genes.size());
 
      for(Gene gene: genes) {
          //  Gene gene= geneDAO.getGene(2004);
@@ -692,7 +697,7 @@ public class IndexDAO extends AbstractDAO {
 
     public List<IndexObject> getGenomicElements() throws Exception{
         List<IndexObject> objList= new ArrayList<>();
-        System.out.println("Genomic Elements started.....");
+        //System.out.println("Genomic Elements started.....");
         objList.addAll(this.getGenomicElements(RgdId.OBJECT_KEY_CELL_LINES));
         objList.addAll(this.getGenomicElements(RgdId.OBJECT_KEY_PROMOTERS));
 
@@ -733,7 +738,7 @@ public class IndexDAO extends AbstractDAO {
                    g.setSynonyms(synonyms);
                    g.setXdbIdentifiers(this.getExternalIdentifiers(rgdId));
                    if (species == null || species.equals("")) {
-                       System.out.println(symbol + "\t" + rgdId);
+                       //System.out.println(symbol + "\t" + rgdId);
                        log.info(symbol + "\t" + rgdId);
                    }
 
@@ -1274,8 +1279,13 @@ public class IndexDAO extends AbstractDAO {
         return url;
     }
 
-    public void indexObjects(List<IndexObject> objs, String index, String type) throws ExecutionException, InterruptedException {
-        BulkRequestBuilder bulkRequestBuilder= ESClient.getClient().prepareBulk().setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
+    public void indexObjects(List<IndexObject> objs, String index, String type) throws ExecutionException, InterruptedException, IOException {
+       // BulkRequestBuilder bulkRequestBuilder= ESClient.getClient().prepareBulk().setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
+        BulkRequest bulkRequest=new BulkRequest();
+      //  bulkRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
+        bulkRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.WAIT_UNTIL);
+        bulkRequest.timeout(TimeValue.timeValueMinutes(2));
+        bulkRequest.timeout("2m");
         int docCount=0;
         for (IndexObject o : objs) {
             docCount++;
@@ -1286,20 +1296,32 @@ public class IndexDAO extends AbstractDAO {
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
             }
-            bulkRequestBuilder.add(new IndexRequest(index, type,o.getTerm_acc()).source(json, XContentType.JSON));
+       //     bulkRequestBuilder.add(new IndexRequest(index, type,o.getTerm_acc()).source(json, XContentType.JSON));
+            bulkRequest.add(new IndexRequest(index).source(json, XContentType.JSON));
             if(docCount%100==0){
-                BulkResponse response=       bulkRequestBuilder.execute().get();
-                bulkRequestBuilder= ESClient.getClient().prepareBulk();
+                ESClient.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
+                bulkRequest= new BulkRequest();
+                bulkRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.WAIT_UNTIL);
+                bulkRequest.timeout(TimeValue.timeValueMinutes(2));
+                bulkRequest.timeout("2m");
             }else{
                 if(docCount>objs.size()-100 && docCount==objs.size()){
-                    BulkResponse response=       bulkRequestBuilder.execute().get();
-                    bulkRequestBuilder= ESClient.getClient().prepareBulk();
+
+                  ESClient.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
+                    bulkRequest= new BulkRequest();
+                    bulkRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.WAIT_UNTIL);
+                    bulkRequest.timeout(TimeValue.timeValueMinutes(2));
+                    bulkRequest.timeout("2m");
                 }
             }
         }
+     //   ESClient.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
+
         //   BulkResponse response=       bulkRequestBuilder.get();
 
-        ESClient.getClient().admin().indices().refresh(refreshRequest()).actionGet();
+      //  ESClient.getClient().admin().indices().refresh(refreshRequest()).actionGet();
+        RefreshRequest refreshRequest=new RefreshRequest();
+        ESClient.getClient().indices().refresh(refreshRequest, RequestOptions.DEFAULT);
     }
     public static void main(String[] args) throws Exception {
           IndexDAO dao= new IndexDAO();

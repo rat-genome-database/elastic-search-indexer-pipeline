@@ -1,5 +1,5 @@
 {
-  "variant" : {
+
     "properties" : {
       "chromosome" : {
         "type" : "text"
@@ -127,4 +127,3 @@
       }
    }
   }
-}
