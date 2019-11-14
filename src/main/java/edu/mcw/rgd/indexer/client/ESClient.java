@@ -88,7 +88,7 @@ public class ESClient {
 
         try{
        //     fis=new FileInputStream("C:/Apps/properties.properties");
-            fis=new FileInputStream("~/properties/properties.properties");
+            fis=new FileInputStream("~/pipelines/properties/es_properties.properties");
             props.load(fis);
 
         }catch (Exception e){
