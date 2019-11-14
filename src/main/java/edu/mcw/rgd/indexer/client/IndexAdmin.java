@@ -37,7 +37,50 @@ public class IndexAdmin {
 
     private static Logger log=Logger.getLogger(Manager.class);
     private RgdIndex rgdIndex;
+
+
     public void createIndex(String mappings, String type) throws Exception {
+
+        GetAliasesRequest aliasesRequest=new GetAliasesRequest(rgdIndex.getIndex());
+        boolean existsAlias = ESClient.getClient().indices().existsAlias(aliasesRequest, RequestOptions.DEFAULT);
+        if(existsAlias) {
+            for (String index : rgdIndex.getIndices()) {
+                aliasesRequest.indices(index);
+                existsAlias = ESClient.getClient().indices().existsAlias(aliasesRequest, RequestOptions.DEFAULT);
+                if (!existsAlias) {
+                    RgdIndex.setNewAlias(index);
+                    GetIndexRequest request1 = new GetIndexRequest(index);
+                    boolean indexExists = ESClient.getClient().indices().exists(request1, RequestOptions.DEFAULT);
+
+                    if (indexExists) {   /**** delete index if exists ****/
+
+                        DeleteIndexRequest deleteIndexRequest = new DeleteIndexRequest(index);
+                        ESClient.getClient().indices().delete(deleteIndexRequest, RequestOptions.DEFAULT);
+                        log.info(index + " deleted");
+                    }
+                    createNewIndex(index, mappings, type);
+                }else {
+                    RgdIndex.setOldAlias(index);
+                }
+
+            }
+        }else{
+            GetIndexRequest request1=new GetIndexRequest(rgdIndex.getIndex()+"1");
+            boolean indexExists=ESClient.getClient().indices().exists(request1, RequestOptions.DEFAULT);
+            if (indexExists) {   /**** delete index if exists ****/
+
+                DeleteIndexRequest deleteIndexRequest = new DeleteIndexRequest(rgdIndex.getIndex()+"1");
+                ESClient.getClient().indices().delete(deleteIndexRequest, RequestOptions.DEFAULT);
+                log.info(rgdIndex.getIndex()+"1" + " deleted");
+            }
+            createNewIndex(rgdIndex.getIndex()+"1",mappings, type);
+
+        }
+
+
+
+    }
+  /*  public void createIndex(String mappings, String type) throws Exception {
 
         GetIndexRequest request=new GetIndexRequest(rgdIndex.getIndex());
         request.local(false);
@@ -46,27 +89,27 @@ public class IndexAdmin {
         log.info(rgdIndex.getIndex() + " :" + indicesExists);
         if(indicesExists) {  /* CHECK IF INDEX NAME PROVIDED EXISTS*/
 
-            GetAliasesRequest aliasesRequest=new GetAliasesRequest(rgdIndex.getIndex());
+  /*          GetAliasesRequest aliasesRequest=new GetAliasesRequest(rgdIndex.getIndex());
             boolean existsAlias=ESClient.getClient().indices().existsAlias(aliasesRequest, RequestOptions.DEFAULT);
 
             if (existsAlias) {
             for (String index : rgdIndex.getIndices()) {
             /* INDEX IS NOT ALIAS AND EXISTS, then DELETE INDEX AND CREATE NEW INDEX WITH SAME NAME.*/
 
-                    if (!Arrays.asList(aliasesRequest.aliases()).contains(index)) {// if index is not  alias to current index(rgd_index_dev)
+   /*                 if (!Arrays.asList(aliasesRequest.aliases()).contains(index)) {// if index is not  alias to current index(rgd_index_dev)
                         GetIndexRequest request1=new GetIndexRequest(index);
                         boolean indexExists=ESClient.getClient().indices().exists(request1, RequestOptions.DEFAULT);
 
                    if (indexExists) {   /**** delete index if exists ****/
 
-                       DeleteIndexRequest deleteIndexRequest = new DeleteIndexRequest(index);
+ /*                      DeleteIndexRequest deleteIndexRequest = new DeleteIndexRequest(index);
                        org.elasticsearch.action.support.master.AcknowledgedResponse deleteIndexResponse = ESClient.getClient().indices().delete(deleteIndexRequest, RequestOptions.DEFAULT);
                        log.info(index + " deleted");
                     }else
                       createNewIndex(index, mappings, type);
               }
             /*INDEX IS ALIAS TO CURRENT INDEX, SET IT AS OLD INDEX TO SWITCH ALIAS FROM OLD INDEX TO NEW INDEX CREATED ABOVE */
-                else {
+/*                else {
                     RgdIndex.setOldAlias(index);
                 }
             }
@@ -89,7 +132,7 @@ public class IndexAdmin {
             this.createNewIndex(rgdIndex.getIndex()+"1", mappings, type);
         }
 
-    }
+    }*/
     public void createNewIndex(String index, String _mappings, String type) throws Exception {
 
         String path="data/"+_mappings+".json";
