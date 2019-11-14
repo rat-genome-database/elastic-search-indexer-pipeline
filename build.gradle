@@ -13,10 +13,23 @@ String myAppName="ESIndexer"
     dependencies {
         testCompile group: 'junit', name: 'junit', version: '4.11'
         compile fileTree(dir: 'lib', include: '*.jar')
-        compile group: 'org.elasticsearch', name: 'elasticsearch', version: '6.4.0'
-        compile group: 'org.elasticsearch.client', name: 'transport', version: '6.4.0'
+      //  compile group: 'org.elasticsearch', name: 'elasticsearch', version: '6.4.0'
+        // https://mvnrepository.com/artifact/org.elasticsearch/elasticsearch
+        compile group: 'org.elasticsearch', name: 'elasticsearch', version: '7.4.0'
 
-        compile group: 'org.apache.lucene', name: 'lucene-core', version: '7.4.0'
+     //   compile group: 'org.elasticsearch.client', name: 'transport', version: '6.4.0'
+        // https://mvnrepository.com/artifact/org.elasticsearch.client/transport
+        compile group: 'org.elasticsearch.client', name: 'transport', version: '7.4.0'
+// https://mvnrepository.com/artifact/org.elasticsearch.client/elasticsearch-rest-client
+        compile group: 'org.elasticsearch.client', name: 'elasticsearch-rest-client', version: '7.4.0'
+
+// https://mvnrepository.com/artifact/org.elasticsearch.client/elasticsearch-rest-high-level-client
+        compile group: 'org.elasticsearch.client', name: 'elasticsearch-rest-high-level-client', version: '7.4.0'
+
+   //     compile group: 'org.apache.lucene', name: 'lucene-core', version: '7.4.0'
+        // https://mvnrepository.com/artifact/org.apache.lucene/lucene-core
+        compile group: 'org.apache.lucene', name: 'lucene-core', version: '8.2.0'
+
 
         compile 'commons-dbcp:commons-dbcp:1.4'
         compile group: 'commons-logging', name: 'commons-logging', version: '1.2'

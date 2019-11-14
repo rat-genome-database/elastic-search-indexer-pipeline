@@ -30,11 +30,11 @@ public class VariantDao extends VariantDAO {
     public List<VariantIndex> getVariantResults(int sampleId, String chr, int mapKey) {
 
 
-        String sql="select v.*, vt.*,t.*, p.*, cs.*,dbs.* , dbs.snp_name as MCW_DBS_SNP_NAME, md.*, gl.gene_symbols as region_name, g.gene_symbol as symbol, g.gene_symbol_lc as symbol_lc from variant v " +
+        String sql="select v.*, vt.*,t.*,  cs.*,dbs.* , dbs.snp_name as MCW_DBS_SNP_NAME, md.*, gl.gene_symbols as region_name, g.gene_symbol as symbol, g.gene_symbol_lc as symbol_lc , s.analysis_name from variant_dog v " +
                 "left outer join gene_loci gl on (gl.map_key=? and gl.chromosome=v.chromosome and gl.pos=v.start_pos) " +
                 "left outer join variant_transcript vt on v.variant_id=vt.variant_id " +
                 "left outer join transcripts t on vt.transcript_rgd_id=t.transcript_rgd_id " +
-                "left outer join polyphen p on (v.variant_id=p.variant_id and p.protein_status='100 PERC MATCH') " +
+
                 "left outer JOIN sample s on (v.sample_id=s.sample_id and s.map_key=?)" +
                 "left outer JOIN  db_snp dbs  ON  " +
                 "( v.START_POS = dbs.POSITION     AND v.CHROMOSOME = dbs.CHROMOSOME      AND v.VAR_NUC = dbs.ALLELE      AND dbs.MAP_KEY = s.MAP_KEY AND dbs.source=s.dbsnp_source) " +
@@ -88,7 +88,7 @@ public class VariantDao extends VariantDAO {
                         vi.setZygosityInPseudo(rs.getString("zygosity_in_pseudo"));
                         vi.setQualityScore(rs.getInt("quality_score"));
                         vi.setHGVSNAME(rs.getString("hgvs_name"));
-
+                        vi.setAnalysisName(rs.getString("analysis_name"));
 
                         /***************Variant Transcript****************************/
                         //   vi.setVariantTranscriptId(rs.getInt("variant_transcript_id"));
@@ -116,7 +116,7 @@ public class VariantDao extends VariantDAO {
 
                         /*****************polyphen******************/
 
-                        vi.setPolyphenPrediction(rs.getString("prediction"));
+//                        vi.setPolyphenPrediction(rs.getString("prediction"));
                         /**************************dbs_snp****************************/
                         vi.setDbsSnpName(rs.getString("MCW_DBS_SNP_NAME"));
                         /******************region_name*******************/
