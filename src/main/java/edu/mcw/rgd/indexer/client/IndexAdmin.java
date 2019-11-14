@@ -45,21 +45,20 @@ public class IndexAdmin {
         boolean indicesExists=ESClient.getClient().indices().exists(request, RequestOptions.DEFAULT);
         log.info(rgdIndex.getIndex() + " :" + indicesExists);
         if(indicesExists) {  /* CHECK IF INDEX NAME PROVIDED EXISTS*/
-     //     GetAliasesResponse response = indicesAdminClient.getAliases(new GetAliasesRequest().indices(rgdIndex.getIndex())).actionGet();
+
             GetAliasesRequest aliasesRequest=new GetAliasesRequest(rgdIndex.getIndex());
             boolean existsAlias=ESClient.getClient().indices().existsAlias(aliasesRequest, RequestOptions.DEFAULT);
 
             if (existsAlias) {
             for (String index : rgdIndex.getIndices()) {
             /* INDEX IS NOT ALIAS AND EXISTS, then DELETE INDEX AND CREATE NEW INDEX WITH SAME NAME.*/
-             //   if (!response.getAliases().containsKey(index)) {
+
                     if (!Arrays.asList(aliasesRequest.aliases()).contains(index)) {// if index is not  alias to current index(rgd_index_dev)
                         GetIndexRequest request1=new GetIndexRequest(index);
-                        //         IndicesExistsRequest request = new IndicesExistsRequest(index); // check if index exists
                         boolean indexExists=ESClient.getClient().indices().exists(request1, RequestOptions.DEFAULT);
-           //         boolean indicesExists = indicesAdminClient.exists(request).actionGet().isExists();
+
                    if (indexExists) {   /**** delete index if exists ****/
-                  //    DeleteIndexResponse deleteResponse = indicesAdminClient.prepareDelete(index).get();
+
                        DeleteIndexRequest deleteIndexRequest = new DeleteIndexRequest(index);
                        org.elasticsearch.action.support.master.AcknowledgedResponse deleteIndexResponse = ESClient.getClient().indices().delete(deleteIndexRequest, RequestOptions.DEFAULT);
                        log.info(index + " deleted");
@@ -78,6 +77,15 @@ public class IndexAdmin {
             }
         }else{ // IF INDEX NAME PROVIDED DOES NOT EXISTS THEN CREATE NEW INDEX
             log.info(rgdIndex.getIndex() + " does not exists.Creating "+ rgdIndex.getIndex()+" ....");
+            request=new GetIndexRequest(rgdIndex.getIndex()+"1");
+            request.local(false);
+            request.humanReadable(true);
+            indicesExists=ESClient.getClient().indices().exists(request, RequestOptions.DEFAULT);
+            if(indicesExists){
+                DeleteIndexRequest deleteIndexRequest = new DeleteIndexRequest(rgdIndex.getIndex()+"1");
+                org.elasticsearch.action.support.master.AcknowledgedResponse deleteIndexResponse = ESClient.getClient().indices().delete(deleteIndexRequest, RequestOptions.DEFAULT);
+                log.info(rgdIndex.getIndex()+"1" + " deleted");
+            }
             this.createNewIndex(rgdIndex.getIndex()+"1", mappings, type);
         }
 

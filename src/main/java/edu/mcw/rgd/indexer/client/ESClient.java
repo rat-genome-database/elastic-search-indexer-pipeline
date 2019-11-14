@@ -8,16 +8,12 @@ import org.apache.log4j.Logger;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.client.security.user.privileges.ManageApplicationPrivilege;
-import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.settings.Settings;
 
-import org.elasticsearch.common.transport.TransportAddress;
-import org.elasticsearch.transport.client.PreBuiltTransportClient;
-
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+
+import java.util.Properties;
+
 
 /**
  * Created by jthota on 2/3/2017.
@@ -54,12 +50,16 @@ public class ESClient {
     public static RestHighLevelClient getInstance() {
 
         if(client==null){
-            Settings settings=Settings.builder().put("cluster.name", "green").build();
-            try {
-              /*  client= new PreBuiltTransportClient(settings)
-                        .addTransportAddress(new TransportAddress(InetAddress.getByName("green.rgd.mcw.edu"), 9300));*/
-                client=new RestHighLevelClient(RestClient.builder(
-                        new HttpHost("green.rgd.mcw.edu", 9200, "http")
+           // Settings settings=Settings.builder().put("cluster.name", "green").build();
+            Properties props= getProperties();
+
+             try {
+                  client=new RestHighLevelClient(RestClient.builder(
+                        new HttpHost(props.get("HOST1").toString(), 9200, "http"),
+                        new HttpHost(props.get("HOST2").toString(), 9200, "http"),
+                        new HttpHost(props.get("HOST3").toString(), 9200, "http"),
+                        new HttpHost(props.get("HOST4").toString(), 9200, "http"),
+                        new HttpHost(props.get("HOST5").toString(), 9200, "http")
 
                 ).setRequestConfigCallback(new RestClientBuilder.RequestConfigCallback(){
 
@@ -80,6 +80,28 @@ public class ESClient {
         }
 
         return client;
+    }
+     static Properties getProperties(){
+        Properties props= new Properties();
+        FileInputStream fis=null;
+
+
+        try{
+       //     fis=new FileInputStream("C:/Apps/properties.properties");
+            fis=new FileInputStream("~/properties/properties.properties");
+            props.load(fis);
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+         try {
+             if (fis != null) {
+                 fis.close();
+             }
+         } catch (IOException e) {
+             e.printStackTrace();
+         }
+         return props;
     }
 
 }
