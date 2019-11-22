@@ -7,6 +7,7 @@ import edu.mcw.rgd.dao.impl.OntologyXDAO;
 import edu.mcw.rgd.dao.impl.SampleDAO;
 import edu.mcw.rgd.dao.impl.VariantDAO;
 import edu.mcw.rgd.datamodel.*;
+import edu.mcw.rgd.datamodel.Map;
 import edu.mcw.rgd.datamodel.ontologyx.Ontology;
 
 import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
@@ -20,6 +21,8 @@ import edu.mcw.rgd.indexer.dao.ObjectIndexerThread;
 
 import edu.mcw.rgd.indexer.dao.variants.*;
 import edu.mcw.rgd.indexer.dao.variants.VariantIndexer;
+import edu.mcw.rgd.indexer.human.GeneCache;
+import edu.mcw.rgd.indexer.human.HumanVariantIndexer;
 import edu.mcw.rgd.indexer.model.RgdIndex;
 import edu.mcw.rgd.indexer.model.genomeInfo.ChromosomeIndexObject;
 import edu.mcw.rgd.process.Utils;
@@ -32,19 +35,19 @@ import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest;
 import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.FileSystemResource;
 
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.io.*;
+import java.util.*;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.zip.GZIPInputStream;
 
 
 /**
@@ -58,8 +61,16 @@ public class Manager {
     private OntologySynonyms ontSynonyms;
     private RgdIndex rgdIndex;
     private boolean reindex;
-
+    private GeneCache geneCache;
     private static final Logger log = Logger.getLogger("main");
+
+    public GeneCache getGeneCache() {
+        return geneCache;
+    }
+
+    public void setGeneCache(GeneCache geneCache) {
+        this.geneCache = geneCache;
+    }
 
     public static void main(String[] args) throws Exception {
 
@@ -67,8 +78,9 @@ public class Manager {
         new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new FileSystemResource("properties/AppConfigure.xml"));
 
        Manager manager = (Manager) bf.getBean("manager");
-       ESClient es= (ESClient) bf.getBean("client");
-       RgdIndex rgdIndex= (RgdIndex) bf.getBean("rgdIndex");
+        ESClient es= (ESClient) bf.getBean("client");
+
+       manager.rgdIndex= (RgdIndex) bf.getBean("rgdIndex");
         log.info("LEVEL:" +log.getLevel());
         log.info(manager.getVersion());
 
@@ -76,21 +88,21 @@ public class Manager {
 
             List<String> indices= new ArrayList<>();
             if (envrionments.contains(args[1])) {
-                rgdIndex.setIndex(args[2]+"_index" + "_" + args[1]);
+                manager.rgdIndex.setIndex(args[2]+"_index" + "_" + args[1]);
                 indices.add(args[2]+"_index" + "_" + args[1] + "1");
                 indices.add(args[2]+"_index" + "_" + args[1] + "2");
-                rgdIndex.setIndices(indices);
+                manager.rgdIndex.setIndices(indices);
             }
 
         manager.run(args);
         } catch (Exception e) {
-            if(es!=null)
-            es.destroy();
+           if(es!=null)
+           es.destroy();
             e.printStackTrace();
           manager.printUsage();
             log.info(e);
-        }
-        if(es!=null)
+       }
+      if(es!=null)
         es.destroy();
 
     }
@@ -107,7 +119,9 @@ public class Manager {
             args= (String[]) ArrayUtils.remove(args, 0);
         }
         if(args[0].equalsIgnoreCase("update")) {
+
             int update=admin.updateIndex();
+
             if(update==0){
                 return;
             }
@@ -203,12 +217,75 @@ public class Manager {
                         MapDAO mapDAO= new MapDAO();
                         SampleDAO sdao= new SampleDAO();
                         sdao.setDataSource(DataSourceFactory.getInstance().getCarpeNovoDataSource());
-                     //   List<Integer> speciesTypeKeys= new ArrayList<>(Arrays.asList(1,3, 6));
-                     //   List<Integer> speciesTypeKeys= new ArrayList<>(Arrays.asList(3));
                         List<Integer> speciesTypeKeys= new ArrayList<>(Arrays.asList(6));
                         for(int species:speciesTypeKeys){
                             switch (species){
                                 case 1:
+                                    admin.createIndex("variant_mappings", "");
+
+                                    List<Sample> samples= sdao.getSamplesByMapKey(17);
+
+                                    java.util.Map<String, Sample> sampleIdMap= new HashMap<>();
+                                    for(Sample s:samples){
+                                        String analysisName=s.getAnalysisName();
+                                        String substr;
+                                        if(analysisName.contains(":")){
+                                            substr  = analysisName.substring(analysisName.indexOf("(")+1, analysisName.indexOf(":"));
+                                        }else {
+                                            if(analysisName.contains(")"))
+                                                substr  = analysisName.substring(analysisName.indexOf("(")+1, analysisName.indexOf(")"));
+                                            else
+                                                substr  = analysisName.substring(analysisName.indexOf("(")+1);
+
+                                        }
+                                        //   System.out.println(substr);
+                                        sampleIdMap.put(substr, s);
+                                    }
+                                    HumanVariantIndexer.sampleIdMap=sampleIdMap;
+                                   File file= new File(args[2]);
+                                //    File file= new File("data/sample.vcf");
+                                //    geneCache= new GeneCache();
+                                    geneCache.loadCache(17, "1", DataSourceFactory.getInstance().getCarpeNovoDataSource() );
+                                    BufferedReader reader;
+                                    if( file.getName().endsWith(".txt.gz") || file.getName().endsWith(".vcf.gz") ) {
+                                        reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(file))));
+                                    } else {
+                                        reader = new BufferedReader(new FileReader(file));
+                                    }
+                                    String line;
+                                    int lineCount=0;
+                                    String[] header = null;
+                                    int strainCount = 0;
+
+                                    while((line=reader.readLine())!=null ) {
+                                        // skip comment line
+                                        if( line.startsWith("#") ){
+                                            header = line.substring(1).split("[\\t]", -1);
+
+                                            strainCount = header.length - 9;
+
+                                        }
+                                        //  continue;
+                                        else {//if(lineCount<10) {
+                                           //  System.out.println(line);
+
+                                            //  indexer.processLine(line, strainCount, header);
+                                         //   System.out.println("LINE SIZE:"+ line.length());
+                                            HumanVariantIndexer indexer=new HumanVariantIndexer(RgdIndex.getNewAlias(), line, strainCount, header);
+                                            indexer.run();
+                                         //   workerThread = new HumanVariantIndexer(RgdIndex.getNewAlias(), line, strainCount, header);
+                                         //   executor.execute(workerThread);
+
+                                       // }
+                                            lineCount++;
+                                        }
+
+
+
+                                    }
+                                    System.out.println("LINE COUNT: "+ lineCount);
+                                    // cleanup
+                                    reader.close();
                                     break;
                                 case 3:
                                     admin.createIndex("variant_mappings", "variant");
@@ -217,7 +294,7 @@ public class Manager {
                                         for(Map m:maps) {
                                             int mapKey = m.getKey();
                                             //    int mapKey=360;
-                                            List<Sample> samples = sdao.getSamplesByMapKey(mapKey);
+                                            samples = sdao.getSamplesByMapKey(mapKey);
                                             if (samples != null && samples.size() > 0){
                                                 List<Chromosome> chromosomes = mapDAO.getChromosomes(mapKey);
 
@@ -239,28 +316,29 @@ public class Manager {
                                     admin.createIndex("variant_mappings", "variant");
                                     List<Map> maps=mapDAO.getMaps(species);
                                     System.out.println("DOG MAPS SIZE: "+ maps.size());
-                                for(Map m:maps) {
-                                      int mapKey = m.getKey();
-                                    //   int mapKey=631;
-                                        List<Sample> samples = sdao.getSamplesByMapKey(mapKey);
+                             for(Map m:maps) {
+                                    int mapKey = m.getKey();
+                                  //  int mapKey=631;
+                                       samples = sdao.getSamplesByMapKey(mapKey);
 
                                        if (samples.size() > 0){
                                             List<Chromosome> chromosomes = mapDAO.getChromosomes(mapKey);
 
-                                           for (Sample s : samples) {
-                                          // Sample s=samples.get(0);
+                                          for (Sample s : samples) {
+                                        //  Sample s=samples.get(0);
                                                 int sampleId = s.getId();
                                                 //   int sampleId=911;
-                                               for (Chromosome chr : chromosomes) {
+                                             for (Chromosome chr : chromosomes) {
                                                     //    Chromosome chr=mapDAO.getChromosome(360,"10");
-                                          // Chromosome chr=chromosomes.get(0);
+                                        // Chromosome chr=chromosomes.get(0);
                                                     workerThread = new VariantIndexer(sampleId, chr.getChromosome(), mapKey, species, RgdIndex.getNewAlias());
                                                     executor.execute(workerThread);
-                                                }
-                                          }
+                                               }
                                         }
+                                      }
                                 }
                                     break;
+
                                 default:
                                     break;
                             }
