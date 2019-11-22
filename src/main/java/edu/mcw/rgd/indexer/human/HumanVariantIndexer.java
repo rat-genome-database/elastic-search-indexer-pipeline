@@ -17,7 +17,7 @@ import java.util.*;
  * Created by jthota on 11/8/2019.
  */
 public class HumanVariantIndexer {
-    private Thread t;
+ /*   private Thread t;
     private String objectType;
     private String index;
     private String line;
