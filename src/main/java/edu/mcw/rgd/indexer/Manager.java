@@ -5,7 +5,7 @@ import edu.mcw.rgd.dao.impl.MapDAO;
 import edu.mcw.rgd.dao.impl.OntologyXDAO;
 
 import edu.mcw.rgd.dao.impl.SampleDAO;
-import edu.mcw.rgd.dao.impl.VariantDAO;
+
 import edu.mcw.rgd.datamodel.*;
 import edu.mcw.rgd.datamodel.Map;
 import edu.mcw.rgd.datamodel.ontologyx.Ontology;
@@ -19,12 +19,12 @@ import edu.mcw.rgd.indexer.dao.GenomeInfoThread;
 import edu.mcw.rgd.indexer.dao.IndexerDAO;
 import edu.mcw.rgd.indexer.dao.ObjectIndexerThread;
 
-import edu.mcw.rgd.indexer.dao.variants.*;
+
 import edu.mcw.rgd.indexer.dao.variants.VariantIndexer;
-import edu.mcw.rgd.indexer.human.GeneCache;
-import edu.mcw.rgd.indexer.human.HumanVariantIndexer;
+
+
 import edu.mcw.rgd.indexer.model.RgdIndex;
-import edu.mcw.rgd.indexer.model.genomeInfo.ChromosomeIndexObject;
+
 import edu.mcw.rgd.process.Utils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
@@ -35,7 +35,7 @@ import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest;
 import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.RestHighLevelClient;
+
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.FileSystemResource;
@@ -61,16 +61,16 @@ public class Manager {
     private OntologySynonyms ontSynonyms;
     private RgdIndex rgdIndex;
     private boolean reindex;
-    private GeneCache geneCache;
+  //  private GeneCache geneCache;
     private static final Logger log = Logger.getLogger("main");
 
-    public GeneCache getGeneCache() {
+ /*   public GeneCache getGeneCache() {
         return geneCache;
     }
 
     public void setGeneCache(GeneCache geneCache) {
         this.geneCache = geneCache;
-    }
+    }*/
 
     public static void main(String[] args) throws Exception {
 
@@ -218,10 +218,11 @@ public class Manager {
                         SampleDAO sdao= new SampleDAO();
                         sdao.setDataSource(DataSourceFactory.getInstance().getCarpeNovoDataSource());
                         List<Integer> speciesTypeKeys= new ArrayList<>(Arrays.asList(6));
+                        List<Sample> samples=new ArrayList<>();
                         for(int species:speciesTypeKeys){
                             switch (species){
                                 case 1:
-                                    admin.createIndex("variant_mappings", "");
+                                  /*  admin.createIndex("variant_mappings", "");
 
                                     List<Sample> samples= sdao.getSamplesByMapKey(17);
 
@@ -285,7 +286,7 @@ public class Manager {
                                     }
                                     System.out.println("LINE COUNT: "+ lineCount);
                                     // cleanup
-                                    reader.close();
+                                    reader.close();*/
                                     break;
                                 case 3:
                                     admin.createIndex("variant_mappings", "variant");
