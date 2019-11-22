@@ -1,5 +1,7 @@
 package edu.mcw.rgd.indexer.model.variants;
 
+import edu.mcw.rgd.indexer.human.VariantTranscript;
+
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -52,6 +54,8 @@ public class VariantIndex {
    private int refRgdId;
 
 /*****************Variant_Transcript******************/
+    List<VariantTranscript> variantTranscripts;
+
     private List<Long> variantTranscriptIds;
     private List<Long>  transcriptRgdIds;
 
@@ -76,7 +80,15 @@ public class VariantIndex {
     private String tripletError;
     private String  frameShift;
 
-/*****************Transcripts******************/
+    public List<VariantTranscript> getVariantTranscripts() {
+        return variantTranscripts;
+    }
+
+    public void setVariantTranscripts(List<VariantTranscript> variantTranscripts) {
+        this.variantTranscripts = variantTranscripts;
+    }
+
+    /*****************Transcripts******************/
 
     private List<Integer> geneRgdIds;
     private List<String> geneSymbols;

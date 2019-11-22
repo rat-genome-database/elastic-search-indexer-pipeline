@@ -6,6 +6,7 @@ import edu.mcw.rgd.dao.impl.TranscriptDAO;
 import edu.mcw.rgd.dao.impl.VariantDAO;
 import edu.mcw.rgd.dao.spring.VariantMapper;
 import edu.mcw.rgd.datamodel.*;
+import edu.mcw.rgd.indexer.human.VariantTranscript;
 import edu.mcw.rgd.indexer.model.variants.VariantIndex;
 import org.springframework.jdbc.core.SqlParameter;
 
@@ -100,9 +101,34 @@ public class VariantDao extends VariantDAO {
                         vi.setAnalysisName(rs.getString("analysis_name"));
 
                         /***************Variant Transcript****************************/
-                        //   vi.setVariantTranscriptId(rs.getInt("variant_transcript_id"));
-                        //  vi.setTranscriptRgdId(rs.getInt("transcript_rgd_id"));
+                        vi.setGeneSpliceStatus(rs.getString("genesplice_status"));
+                        vi.setPolyphenStatus(rs.getString("polyphen_status"));
+                        vi.setSynStatus(rs.getString("syn_status"));
                         List<Long> vtIds=new ArrayList<>();
+                        vtIds.add(rs.getLong("variant_transcript_id"));
+                        vi.setVariantTranscriptIds(vtIds);
+                       /* List<Long> tIds= new ArrayList<>();
+                        tIds.add(rs.getLong("transcript_rgd_id"));
+                        vi.setTranscriptRgdIds(tIds);*/
+                        VariantTranscript vt= new VariantTranscript();
+                        vt.setId(rs.getLong("variant_transcript_id"));
+                        vt.setVariantId(rs.getLong("variant_id"));
+                        vt.setRefAA(rs.getString("ref_aa"));
+                        vt.setVarAA(rs.getString("var_aa"));
+                        vt.setTranscriptRgdId(rs.getInt("transcript_rgd_id"));
+                        vt.setLocationName(rs.getString("location_name"));
+                        vt.setNearSpliceSite(rs.getString("near_splice_site"));
+                        vt.setFullRefNuc(rs.getString("full_ref_nuc"));
+                        vt.setFullRefNucPos(rs.getInt("full_ref_nuc_pos"));
+                        vt.setFullRefAA(rs.getString("full_ref_aa"));
+                        vt.setFullRefAAPos(rs.getInt("full_ref_aa_pos"));
+                        vt.setUniprotId(rs.getString("uniprot_id"));
+                        vt.setTripletError(rs.getString("triplet_error"));
+                        vt.setFrameShift(rs.getString("frameshift"));
+                        List<VariantTranscript> vts= new ArrayList<>();
+                        vts.add(vt);
+                        vi.setVariantTranscripts(vts);
+                      /*  List<Long> vtIds=new ArrayList<>();
                         vtIds.add(rs.getLong("variant_transcript_id"));
                         vi.setVariantTranscriptIds(vtIds);
                         List<Long> tIds= new ArrayList<>();
@@ -122,7 +148,7 @@ public class VariantDao extends VariantDAO {
                         vi.setUniprotId(rs.getString("uniprot_id"));
                         vi.setTripletError(rs.getString("triplet_error"));
                         vi.setFrameShift(rs.getString("frameshift"));
-
+                        */
                         /*****************polyphen******************/
 
                      vi.setPolyphenPrediction(rs.getString("prediction"));
@@ -154,14 +180,34 @@ public class VariantDao extends VariantDAO {
                         vi.setConScores(conScores);
                         variants.put(variant_id, vi);
 
-                    }/* else {
+                    } else {
                         VariantIndex obj = variants.get(variant_id);
                         Long vtId=rs.getLong("variant_transcript_id");
-                        Long tId=rs.getLong("transcript_rgd_id");
-                        if(vtId!=0 && !obj.getVariantTranscriptIds().contains(vtId))
+                     //   Long tId=rs.getLong("transcript_rgd_id");
+                        if(vtId!=0 && !obj.getVariantTranscriptIds().contains(vtId)){
+                            List<VariantTranscript> vts= obj.getVariantTranscripts();
+
+                            VariantTranscript vt= new VariantTranscript();
+
+                            vt.setRefAA(rs.getString("ref_aa"));
+                            vt.setVarAA(rs.getString("var_aa"));
+                            vt.setTranscriptRgdId(rs.getInt("transcript_rgd_id"));
+                            vt.setLocationName(rs.getString("location_name"));
+                            vt.setNearSpliceSite(rs.getString("near_splice_site"));
+                            vt.setFullRefNuc(rs.getString("full_ref_nuc"));
+                            vt.setFullRefNucPos(rs.getInt("full_ref_nuc_pos"));
+                            vt.setFullRefAA(rs.getString("full_ref_aa"));
+                            vt.setFullRefAAPos(rs.getInt("full_ref_aa_pos"));
+                            vt.setUniprotId(rs.getString("uniprot_id"));
+                            vt.setTripletError(rs.getString("triplet_error"));
+                            vt.setFrameShift(rs.getString("frameshift"));
+                             vts.add(vt);
+                            vi.setVariantTranscripts(vts);
                             obj.getVariantTranscriptIds().add(vtId);
-                        if(tId!=0 && !obj.getTranscriptRgdIds().contains(tId))
-                            obj.getTranscriptRgdIds().add(tId);
+                        }
+
+                       /* if(tId!=0 && !obj.getTranscriptRgdIds().contains(tId))
+                            obj.getTranscriptRgdIds().add(tId);*/
 
                         int geneRgdId = rs.getInt("gene_rgd_id");
                          if(geneRgdId!=0) {
@@ -203,7 +249,7 @@ public class VariantDao extends VariantDAO {
 
                         }
                         variants.put(variant_id, obj);
-                    }*/
+                    }
                 }catch (Exception e){
 
                     e.printStackTrace();
