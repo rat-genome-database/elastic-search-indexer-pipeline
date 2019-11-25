@@ -1,5 +1,6 @@
 package edu.mcw.rgd.indexer.model.variants;
 
+import edu.mcw.rgd.datamodel.prediction.PolyPhenPrediction;
 import edu.mcw.rgd.indexer.human.VariantTranscript;
 
 import java.math.BigDecimal;
@@ -103,7 +104,7 @@ public class VariantIndex {
 
     /*******************ployphen*********************/
     private String polyphenPrediction;
-
+    private List<PolyPhenPrediction> polyPhenPredictions;
 
     /********************dbs_snp*******************************/
     private String dbsSnpName;
@@ -112,6 +113,14 @@ public class VariantIndex {
         return regionNameLc;
 
 
+    }
+
+    public List<PolyPhenPrediction> getPolyPhenPredictions() {
+        return polyPhenPredictions;
+    }
+
+    public void setPolyPhenPredictions(List<PolyPhenPrediction> polyPhenPredictions) {
+        this.polyPhenPredictions = polyPhenPredictions;
     }
 
     public String getDbsSnpName() {

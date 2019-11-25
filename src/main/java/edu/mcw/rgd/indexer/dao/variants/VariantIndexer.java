@@ -56,7 +56,7 @@ public class VariantIndexer  implements  Runnable{
 
 
         List<VariantIndex> vrs=variantDao.getVariantResults(sampleId, chromosome, mapKey, SpeciesType.getCommonName(speciesTypeKey));
-        System.out.println("Variants Size:"+vrs.size()+"\tMapKey:"+mapKey+"\tChr:"+chromosome+"\tSampleId:"+sampleId );
+  //  System.out.println("Variants Size:"+vrs.size()+"\tMapKey:"+mapKey+"\tChr:"+chromosome+"\tSampleId:"+sampleId );
        if(vrs.size()>0){
 
            BulkProcessor.Listener listener = new BulkProcessor.Listener() {

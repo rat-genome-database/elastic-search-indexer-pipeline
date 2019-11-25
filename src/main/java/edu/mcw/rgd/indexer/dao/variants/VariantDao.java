@@ -4,8 +4,10 @@ import edu.mcw.rgd.dao.DataSourceFactory;
 import edu.mcw.rgd.dao.impl.GeneDAO;
 import edu.mcw.rgd.dao.impl.TranscriptDAO;
 import edu.mcw.rgd.dao.impl.VariantDAO;
+import edu.mcw.rgd.dao.spring.PolyPhenMapper;
 import edu.mcw.rgd.dao.spring.VariantMapper;
 import edu.mcw.rgd.datamodel.*;
+import edu.mcw.rgd.datamodel.prediction.PolyPhenPrediction;
 import edu.mcw.rgd.indexer.human.VariantTranscript;
 import edu.mcw.rgd.indexer.model.variants.VariantIndex;
 import org.springframework.jdbc.core.SqlParameter;
@@ -42,7 +44,7 @@ public class VariantDao extends VariantDAO {
                 "left outer join gene_loci gl on (gl.map_key=? and gl.chromosome=v.chromosome and gl.pos=v.start_pos) " +
                 "left outer join "+variantTranscriptTable +" vt on v.variant_id=vt.variant_id " +
                 "left outer join transcripts t on vt.transcript_rgd_id=t.transcript_rgd_id " +
-                "inner join "+polyPhenTable
+                "left outer join "+polyPhenTable
 
                 +" p on (v.variant_id=p.variant_id and p.protein_status='100 PERC MATCH') " +
                 "left outer JOIN sample s on (v.sample_id=s.sample_id and s.map_key=?)" +
@@ -128,6 +130,27 @@ public class VariantDao extends VariantDAO {
                         List<VariantTranscript> vts= new ArrayList<>();
                         vts.add(vt);
                         vi.setVariantTranscripts(vts);
+                        List<PolyPhenPrediction> predictions=new ArrayList<>();
+
+                        PolyPhenPrediction p=new PolyPhenPrediction();
+                        p.setPrediction(rs.getString("prediction"));
+                        p.setBasis(rs.getString("basis"));
+                        p.setPosition(rs.getInt("position"));
+                        p.setProteinId(rs.getString("protein_id"));
+                        p.setScore1(rs.getString("score1"));
+                        p.setScore2(rs.getString("score2"));
+                        p.setId(rs.getInt("polyphen_id"));
+                        p.setNumObserved(rs.getString("num_observ"));
+                        p.setInvertedFlag(rs.getString("inverted_flag"));
+                        p.setDiff(rs.getString("SCORE_DELTA"));
+                        p.setEffect(rs.getString("EFFECT"));
+                        p.setSite(rs.getString("SITE"));
+                        p.setNumStructureFilt(rs.getString("NUM_STRUCT_FILT"));
+                        p.setPdbId(rs.getString("PDB_ID"));
+
+                        predictions.add(p);
+                        vi.setPolyPhenPredictions(predictions);
+
                       /*  List<Long> vtIds=new ArrayList<>();
                         vtIds.add(rs.getLong("variant_transcript_id"));
                         vi.setVariantTranscriptIds(vtIds);
@@ -241,6 +264,7 @@ public class VariantDao extends VariantDAO {
 
                                 }
                                 obj.setGeneSymbols(gSymbols);
+
                             }catch (Exception e){
                                 System.err.print("GENE RGD ID: "+ geneRgdId);
                                 throw new Exception("GENE RGD _ID" + geneRgdId);
@@ -248,6 +272,35 @@ public class VariantDao extends VariantDAO {
                             }
 
                         }
+                        /**************************polyphen*******************************************/
+                       List<PolyPhenPrediction> polyPredictions= obj.getPolyPhenPredictions();
+                        int polyphenId= rs.getInt("polyphen_id");
+                        boolean exists=false;
+                        for (PolyPhenPrediction p:polyPredictions){
+                           if(p.getId()==polyphenId){
+                               exists=true;
+                            }
+                        }
+                        if(!exists){
+                            PolyPhenPrediction p=new PolyPhenPrediction();
+                            p.setPrediction(rs.getString("prediction"));
+                            p.setBasis(rs.getString("basis"));
+                            p.setPosition(rs.getInt("position"));
+                            p.setProteinId(rs.getString("protein_id"));
+                            p.setScore1(rs.getString("score1"));
+                            p.setScore2(rs.getString("score2"));
+                            p.setId(rs.getInt("polyphen_id"));
+                            p.setNumObserved(rs.getString("num_observ"));
+                            p.setInvertedFlag(rs.getString("inverted_flag"));
+                            p.setDiff(rs.getString("SCORE_DELTA"));
+                            p.setEffect(rs.getString("EFFECT"));
+                            p.setSite(rs.getString("SITE"));
+                            p.setNumStructureFilt(rs.getString("NUM_STRUCT_FILT"));
+                            p.setPdbId(rs.getString("PDB_ID"));
+                            polyPredictions.add(p);
+                            obj.setPolyPhenPredictions(polyPredictions);
+                        }
+
                         variants.put(variant_id, obj);
                     }
                 }catch (Exception e){
