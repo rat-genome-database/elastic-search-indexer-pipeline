@@ -54,22 +54,25 @@ public class VariantDao extends VariantDAO {
                 "left outer join maps_data md on (md.chromosome=v.chromosome and md.rgd_id=t.gene_rgd_id and md.map_key=?) " +
                 "left outer join genes g on (g.rgd_id=t.gene_rgd_id) " +
                 "left outer join rgd_ids r on (r.rgd_id=md.rgd_id and r.object_status='ACTIVE') " +
-                "where v.chromosome=? " +
+                "where " +
+              " v.chromosome=? " +
              //   "and v.total_depth>8 " +
-                "and v.sample_id=?";
+                " and  v.sample_id=?";
         List<VariantIndex> vrList = new ArrayList<>();
         java.util.Map<Long, VariantIndex> variants= new HashMap<>();
         Set<Long> variantIds= new HashSet<>();
-        ResultSet rs= null;
-        Connection connection= null;
+        Connection  connection=null;
         PreparedStatement stmt=null;
-        try{
-            connection=this.getDataSource().getConnection();
-            stmt=connection.prepareStatement(sql);
+        ResultSet rs= null;
+       try
+       {
+          connection=DataSourceFactory.getInstance().getCarpeNovoDataSource().getConnection();
+          stmt=connection.prepareStatement(sql);
+          //  stmt=connection.prepareStatement(sql);
             stmt.setInt(1, mapKey);
             stmt.setInt(2, mapKey);
             stmt.setInt(3, mapKey);
-            stmt.setString(4, chr);
+          stmt.setString(4, chr);
             stmt.setInt(5, sampleId);
             rs=  stmt.executeQuery();
 
@@ -309,19 +312,23 @@ public class VariantDao extends VariantDAO {
                 }
             }
 
-                rs.close();
-                stmt.close();
-               connection.close();
+           rs.close();
+           stmt.close();
+           connection.close();
+
 
         } catch (Exception e) {
             e.printStackTrace();
             try {
                 if(rs!=null)
                     rs.close();
-                if(stmt!=null)
+                if (stmt != null) {
                     stmt.close();
-                if(connection!=null)
+                }
+                if (connection != null) {
                     connection.close();
+                }
+
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }
@@ -330,11 +337,13 @@ public class VariantDao extends VariantDAO {
              try {
                     if(rs!=null)
                     rs.close();
-                    if(stmt!=null)
-                    stmt.close();
-                    if(connection!=null)
-                    connection.close();
-                } catch (SQLException e) {
+                 if (stmt != null) {
+                     stmt.close();
+                 }
+                 if (connection != null) {
+                     connection.close();
+                 }
+             } catch (SQLException e) {
                     e.printStackTrace();
                 }
 

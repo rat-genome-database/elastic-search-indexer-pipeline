@@ -6,6 +6,7 @@ import edu.mcw.rgd.dao.impl.OntologyXDAO;
 
 import edu.mcw.rgd.dao.impl.SampleDAO;
 
+import edu.mcw.rgd.dao.impl.VariantDAO;
 import edu.mcw.rgd.datamodel.*;
 import edu.mcw.rgd.datamodel.Map;
 import edu.mcw.rgd.datamodel.ontologyx.Ontology;
@@ -20,11 +21,13 @@ import edu.mcw.rgd.indexer.dao.IndexerDAO;
 import edu.mcw.rgd.indexer.dao.ObjectIndexerThread;
 
 
+import edu.mcw.rgd.indexer.dao.variants.VariantDao;
 import edu.mcw.rgd.indexer.dao.variants.VariantIndexer;
 
 
 import edu.mcw.rgd.indexer.model.RgdIndex;
 
+import edu.mcw.rgd.indexer.model.variants.VariantIndex;
 import edu.mcw.rgd.process.Utils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
@@ -314,6 +317,7 @@ public class Manager {
 
                                     break;
                                 case 6:
+                                    VariantDao variantDao=new VariantDao();
                                     admin.createIndex("variant_mappings", "variant");
                                     List<Map> maps=mapDAO.getMaps(species);
                                     System.out.println("DOG MAPS SIZE: "+ maps.size());
@@ -332,8 +336,9 @@ public class Manager {
                                              for (Chromosome chr : chromosomes) {
                                                     //    Chromosome chr=mapDAO.getChromosome(360,"10");
                                         // Chromosome chr=chromosomes.get(0);
-                                                    workerThread = new VariantIndexer(sampleId, chr.getChromosome(), mapKey, species, RgdIndex.getNewAlias());
-                                                    executor.execute(workerThread);
+                                                 List<VariantIndex> vrs=variantDao.getVariantResults(sampleId,chr.getChromosome() , mapKey, SpeciesType.getCommonName(species));
+                                                 Runnable   workerThread1 = new VariantIndexer(vrs, RgdIndex.getNewAlias());
+                                                 executor.execute(workerThread1);
                                                }
                                         }
                                       }
