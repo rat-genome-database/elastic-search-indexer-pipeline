@@ -39,22 +39,19 @@ public class VariantIndexer  implements  Runnable{
     private String index;
     private List<VariantIndex> vrs;
 
-    public VariantIndexer(int sampleId, String chromosome, int mapKey, int speciesTypeKey, String index){
+    public VariantIndexer(int sampleId, String chromosome, int mapKey, int speciesTypeKey, String index ,List<VariantIndex> vrs){
         this.mapKey=mapKey;
         this.speciesTypeKey=speciesTypeKey;
         this.chromosome=chromosome;
         this.sampleId=sampleId;
         this.index=index;
     }
-    public VariantIndexer(List<VariantIndex> vrs, String index){
-       this.vrs=vrs;
-        this.index=index;
-    }
+
 
     @Override
     public void run() {
 
-      System.out.println("Variants Size:"+vrs.size()+"\tMapKey:"+mapKey+"\tChr:"+chromosome+"\tSampleId:"+sampleId );
+        System.out.println("Variants Size:"+vrs.size()+"\tMapKey:"+mapKey+"\tChr:"+chromosome+"\tSampleId:"+sampleId );
        if(vrs.size()>0){
 
            BulkProcessor.Listener listener = new BulkProcessor.Listener() {

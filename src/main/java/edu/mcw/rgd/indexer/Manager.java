@@ -307,7 +307,7 @@ public class Manager {
                                                 //   int sampleId=911;
                                                 for (Chromosome chr : chromosomes) {
                                                     //    Chromosome chr=mapDAO.getChromosome(360,"10");
-                                                    workerThread = new VariantIndexer(sampleId, chr.getChromosome(), mapKey, species, RgdIndex.getNewAlias());
+                                                    workerThread = new VariantIndexer(sampleId, chr.getChromosome(), mapKey, species, RgdIndex.getNewAlias(),null);
                                                     executor.execute(workerThread);
                                                 }
                                             }
@@ -337,7 +337,7 @@ public class Manager {
                                                     //    Chromosome chr=mapDAO.getChromosome(360,"10");
                                         // Chromosome chr=chromosomes.get(0);
                                                  List<VariantIndex> vrs=variantDao.getVariantResults(sampleId,chr.getChromosome() , mapKey, SpeciesType.getCommonName(species));
-                                                 Runnable   workerThread1 = new VariantIndexer(vrs, RgdIndex.getNewAlias());
+                                                 Runnable   workerThread1 = new VariantIndexer(sampleId, chr.getChromosome(),  mapKey,  species,  RgdIndex.getNewAlias(),vrs);
                                                  executor.execute(workerThread1);
                                                }
                                         }
