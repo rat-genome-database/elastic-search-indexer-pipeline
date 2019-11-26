@@ -45,6 +45,7 @@ public class VariantIndexer  implements  Runnable{
         this.chromosome=chromosome;
         this.sampleId=sampleId;
         this.index=index;
+        this.vrs=vrs;
     }
 
 
