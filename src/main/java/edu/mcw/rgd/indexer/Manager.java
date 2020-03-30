@@ -18,9 +18,11 @@ import edu.mcw.rgd.indexer.dao.GenomeInfoThread;
 import edu.mcw.rgd.indexer.dao.IndexerDAO;
 import edu.mcw.rgd.indexer.dao.ObjectIndexerThread;
 
+import edu.mcw.rgd.indexer.dao.findModels.FullAnnotDao;
 import edu.mcw.rgd.indexer.dao.variants.*;
 import edu.mcw.rgd.indexer.dao.variants.VariantIndexer;
 import edu.mcw.rgd.indexer.model.RgdIndex;
+import edu.mcw.rgd.indexer.model.findModels.ModelIndexObject;
 import edu.mcw.rgd.indexer.model.genomeInfo.ChromosomeIndexObject;
 import edu.mcw.rgd.process.Utils;
 import org.apache.commons.lang.ArrayUtils;
@@ -197,6 +199,17 @@ public class Manager {
                                }
                            }
                       }
+                        break;
+                    case "Models":
+                        System.out.println("Indexing models...");
+                        admin.createIndex("models", "models");
+                        FullAnnotDao dao= new FullAnnotDao();
+                        List<String> aspects= new ArrayList<>(Arrays.asList("D", "B", "N"));
+                      //  for(String aspect:aspects) {
+                            List<ModelIndexObject> models = dao.getAnnotationsBySpeciesNObjectKey(3,5);
+                            dao.indexModels(models);
+                       // }
+                        System.out.println("Indexing models is DONE!!");
                         break;
                     case "Variant":
 
