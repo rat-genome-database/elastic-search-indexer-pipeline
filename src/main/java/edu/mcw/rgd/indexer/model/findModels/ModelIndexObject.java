@@ -1,6 +1,7 @@
 package edu.mcw.rgd.indexer.model.findModels;
 
 import edu.mcw.rgd.datamodel.Reference;
+import edu.mcw.rgd.datamodel.annotation.Evidence;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
 
 import java.util.List;
@@ -22,6 +23,15 @@ public class ModelIndexObject {
     private List<Integer> refRgdIds;
     private String withInfo;
     private String withInfoTerms;
+    private List<Evidence> evidences;
+
+    public List<Evidence> getEvidences() {
+        return evidences;
+    }
+
+    public void setEvidences(List<Evidence> evidences) {
+        this.evidences = evidences;
+    }
 
     public String getWithInfoTerms() {
         return withInfoTerms;

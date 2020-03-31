@@ -69,7 +69,8 @@ public class Manager {
         new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new FileSystemResource("properties/AppConfigure.xml"));
 
        Manager manager = (Manager) bf.getBean("manager");
-       ESClient es= (ESClient) bf.getBean("client");
+       System.out.println(manager.getVersion());
+      ESClient es= (ESClient) bf.getBean("client");
        RgdIndex rgdIndex= (RgdIndex) bf.getBean("rgdIndex");
         log.info("LEVEL:" +log.getLevel());
         log.info(manager.getVersion());

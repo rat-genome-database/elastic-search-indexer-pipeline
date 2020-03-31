@@ -7,10 +7,9 @@ import edu.mcw.rgd.dao.impl.AnnotationDAO;
 import edu.mcw.rgd.dao.impl.AssociationDAO;
 import edu.mcw.rgd.dao.impl.OntologyXDAO;
 import edu.mcw.rgd.dao.impl.RGDManagementDAO;
-import edu.mcw.rgd.datamodel.Reference;
-import edu.mcw.rgd.datamodel.RgdId;
-import edu.mcw.rgd.datamodel.SpeciesType;
-import edu.mcw.rgd.datamodel.Strain;
+import edu.mcw.rgd.dao.spring.EvidenceQuery;
+import edu.mcw.rgd.datamodel.*;
+import edu.mcw.rgd.datamodel.annotation.Evidence;
 import edu.mcw.rgd.datamodel.ontology.Annotation;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.ontologyx.TermDagEdge;
@@ -29,6 +28,7 @@ import org.elasticsearch.common.xcontent.XContentType;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.Map;
 
 /**
  * Created by jthota on 3/3/2020.
@@ -36,6 +36,7 @@ import java.util.*;
 public class FullAnnotDao {
     AnnotationDAO adao= new AnnotationDAO();
     OntologyXDAO xdao= new OntologyXDAO();
+    EvidenceCode evidenceCode=new EvidenceCode();
     public List<ModelIndexObject> getAnnotationsBySpeciesNObjectKey(int speciesTypeKey, int objectKey) throws Exception {
      List<Annotation>  models= adao.getAnnotationsBySpecies(speciesTypeKey, objectKey);
    //List<Annotation>  models= adao.getAnnotations(60997);
@@ -48,7 +49,7 @@ public class FullAnnotDao {
 
             if(m.getAspect().equalsIgnoreCase("D") || m.getAspect().equalsIgnoreCase("N")) {
                 List<Integer> refRgdIds=new ArrayList<>();
-                List<String> evidenceCodes=new ArrayList<>();
+                List<String> evidenceCodes=new ArrayList<>();List<Evidence>evidences=new ArrayList<>();
                 List<String> qualifiers= new ArrayList<>();
                 List<ModelIndexObject> indexObjects=new ArrayList<>();
                 ModelIndexObject object = new ModelIndexObject();
@@ -99,6 +100,13 @@ public class FullAnnotDao {
                     object.setQualifiers(qualifiers);
                     evidenceCodes.add(m.getEvidence());
                     object.setEvidenceCodes(evidenceCodes);
+
+                    Evidence evidence=new Evidence();
+                     evidence.setEvidence(m.getEvidence());
+                     evidence.setName(EvidenceCode.getName(m.getEvidence()));
+                 evidences.add(evidence);
+                 object.setEvidences(evidences);
+
                     refRgdIds.add(m.getRefRgdId());
                     object.setRefRgdIds(refRgdIds);
                     object.setTerm(m.getTerm());
@@ -118,12 +126,20 @@ public class FullAnnotDao {
                      }
 
                      String[] tokens= str1.trim().split(",");
+                     boolean first=true;
                      try {
                          for (String token : tokens) {
                              //   System.out.println(token);
                              if (!token.equals("")) {
-                                 sb.append(xdao.getTermByAccId(token.trim()).getTerm());
-                                 sb.append(" || ");
+                                 if(first) {
+                                     sb.append(xdao.getTermByAccId(token.trim()).getTerm());
+                                     first=false;
+                                 }else{
+                                     sb.append(" || ");
+                                     sb.append(xdao.getTermByAccId(token.trim()).getTerm());
+                                 }
+
+
                              }
                          }
                      }catch (Exception e){
