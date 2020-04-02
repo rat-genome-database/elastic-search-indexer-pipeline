@@ -43,7 +43,6 @@ public class FullAnnotDao {
         System.out.println("MODELS SIZE: "+ models.size());
         List<ModelIndexObject> objects= new ArrayList<>();
 
-
         Map<Integer, List<ModelIndexObject>> indexedMap=new HashMap<>();
       for(Annotation m:models){
 
@@ -70,11 +69,29 @@ public class FullAnnotDao {
 
                              }
                              o.setRefRgdIds(refRgdIds);
-                             evidenceCodes = loadedObject.getEvidenceCodes();
+                           /*  evidenceCodes = loadedObject.getEvidenceCodes();
                              if (!evidenceCodes.contains(m.getEvidence())) {
                                  evidenceCodes.add(m.getEvidence());
                              }
-                             o.setEvidenceCodes(evidenceCodes);
+                             o.setEvidenceCodes(evidenceCodes);*/
+                            evidences=loadedObject.getEvidences();
+                            if(evidences.size()>0){
+                                boolean flag=false;
+                                for(Evidence e:evidences){
+                                    if(e.getEvidence().equalsIgnoreCase(m.getEvidence())){
+                                        flag=true;
+                                    }
+                                }
+                                if(!flag){
+                                    Evidence evidence=new Evidence();
+                                    evidence.setEvidence(m.getEvidence());
+                                    evidence.setName(EvidenceCode.getName(m.getEvidence()));
+                                    evidences.add(evidence);
+                                    object.setEvidences(evidences);
+                                }
+                            }
+
+
                              qualifiers = loadedObject.getQualifiers();
                              if (!qualifiers.contains(m.getQualifier())) {
                                  qualifiers.add(m.getQualifier());
@@ -98,8 +115,8 @@ public class FullAnnotDao {
                     object.setAspect(m.getAspect());
                     qualifiers.add(m.getQualifier());
                     object.setQualifiers(qualifiers);
-                    evidenceCodes.add(m.getEvidence());
-                    object.setEvidenceCodes(evidenceCodes);
+                //    evidenceCodes.add(m.getEvidence());
+                //    object.setEvidenceCodes(evidenceCodes);
 
                     Evidence evidence=new Evidence();
                      evidence.setEvidence(m.getEvidence());
@@ -124,13 +141,14 @@ public class FullAnnotDao {
                      if(str1.contains(";")){
                         str1= str1.replace(";", ",");
                      }
-
+                     List<Term> infoTerms=new ArrayList<>();
                      String[] tokens= str1.trim().split(",");
                      boolean first=true;
                      try {
                          for (String token : tokens) {
                              //   System.out.println(token);
                              if (!token.equals("")) {
+                                 Term info= new Term();
                                  if(first) {
                                      sb.append(xdao.getTermByAccId(token.trim()).getTerm());
                                      first=false;
@@ -138,7 +156,9 @@ public class FullAnnotDao {
                                      sb.append(" || ");
                                      sb.append(xdao.getTermByAccId(token.trim()).getTerm());
                                  }
-
+                                    info.setAccId(token.trim());
+                                    info.setTerm(xdao.getTermByAccId(token.trim()).getTerm());
+                                    infoTerms.add(info);
 
                              }
                          }
@@ -146,9 +166,11 @@ public class FullAnnotDao {
                          System.out.println("Annotated Object RGD ID:"+m.getAnnotatedObjectRgdId() +"\tWITH INFO:"+ m.getWithInfo());
                         // e.printStackTrace();
                      }
+                     object.setInfoTerms(infoTerms);
+                     object.setWithInfo(m.getWithInfo());
+                     object.setWithInfoTerms(sb.toString());
                  }
-                 object.setWithInfo(m.getWithInfo());
-                 object.setWithInfoTerms(sb.toString());
+
                     List<Term> parentTerms = new ArrayList<>();
                     for (TermDagEdge e : getALLParentTerms(m.getTermAcc())) {
                         Term pt = new Term();

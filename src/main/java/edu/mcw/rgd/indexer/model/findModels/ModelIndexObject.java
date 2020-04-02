@@ -23,6 +23,7 @@ public class ModelIndexObject {
     private List<Integer> refRgdIds;
     private String withInfo;
     private String withInfoTerms;
+    private List<Term> infoTerms;
     private List<Evidence> evidences;
 
     public List<Evidence> getEvidences() {
@@ -48,9 +49,15 @@ public class ModelIndexObject {
         this.withInfo = withInfo;
     }
 
+    public List<Term> getInfoTerms() {
+        return infoTerms;
+    }
 
+    public void setInfoTerms(List<Term> infoTerms) {
+        this.infoTerms = infoTerms;
+    }
 
-  /*  private List<Integer> references;
+/*  private List<Integer> references;
 
     public List<Integer> getReferences() {
         return references;
