@@ -147,8 +147,9 @@ public class IndexAdmin {
                 .put("index.number_of_shards",5)
                 .put("index.number_of_replicas", 1)
         .loadFromSource(analyzers,XContentType.JSON));
-        request.mapping(mappings, XContentType.JSON);
-        org.elasticsearch.client.indices.CreateIndexResponse createIndexResponse = ESClient.getClient().indices().create(request, RequestOptions.DEFAULT);
+       request.mapping(mappings, XContentType.JSON);
+       org.elasticsearch.client.indices.CreateIndexResponse createIndexResponse = ESClient.getClient().indices().create(request, RequestOptions.DEFAULT);
+
         log.info(index + " created on  " + new Date());
 
         RgdIndex.setNewAlias(index);

@@ -3,10 +3,7 @@ package edu.mcw.rgd.indexer.dao.findModels;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import edu.mcw.rgd.dao.impl.AnnotationDAO;
-import edu.mcw.rgd.dao.impl.AssociationDAO;
-import edu.mcw.rgd.dao.impl.OntologyXDAO;
-import edu.mcw.rgd.dao.impl.RGDManagementDAO;
+import edu.mcw.rgd.dao.impl.*;
 import edu.mcw.rgd.dao.spring.EvidenceQuery;
 import edu.mcw.rgd.datamodel.*;
 import edu.mcw.rgd.datamodel.annotation.Evidence;
@@ -36,6 +33,7 @@ import java.util.Map;
 public class FullAnnotDao {
     AnnotationDAO adao= new AnnotationDAO();
     OntologyXDAO xdao= new OntologyXDAO();
+    StrainDAO strainDAO=new StrainDAO();
     EvidenceCode evidenceCode=new EvidenceCode();
     public List<ModelIndexObject> getAnnotationsBySpeciesNObjectKey(int speciesTypeKey, int objectKey) throws Exception {
      List<Annotation>  models= adao.getAnnotationsBySpecies(speciesTypeKey, objectKey);
@@ -94,7 +92,8 @@ public class FullAnnotDao {
 
                              qualifiers = loadedObject.getQualifiers();
                              if (!qualifiers.contains(m.getQualifier())) {
-                                 qualifiers.add(m.getQualifier());
+                                 if(m.getQualifier()!=null)
+                                 qualifiers.add(m.getQualifier().trim());
                              }
                              o.setQualifiers(qualifiers);
                              indexedMap.put(m.getAnnotatedObjectRgdId(), indexObjects);
@@ -111,9 +110,12 @@ public class FullAnnotDao {
                     object.setAnnotatedObjectRgdId(m.getAnnotatedObjectRgdId());
                     object.setAnnotatedObjectName(m.getObjectName());
                     object.setAnnotatedObjectSymbol(m.getObjectSymbol());
+                    String strainType= strainDAO.getStrain(m.getAnnotatedObjectRgdId()).getStrainTypeName();
+                    object.setAnnotatedObjectType(strainType);
                     object.setSpecies(this.getSpecies(m.getAnnotatedObjectRgdId()));
                     object.setAspect(m.getAspect());
-                    qualifiers.add(m.getQualifier());
+                    if(m.getQualifier()!=null)
+                    qualifiers.add(m.getQualifier().trim());
                     object.setQualifiers(qualifiers);
                 //    evidenceCodes.add(m.getEvidence());
                 //    object.setEvidenceCodes(evidenceCodes);

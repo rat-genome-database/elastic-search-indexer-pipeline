@@ -13,6 +13,7 @@ public class ModelIndexObject {
     private int annotatedObjectRgdId;
     private String annotatedObjectName;
     private String annotatedObjectSymbol;
+    private String annotatedObjectType;
     private String term;
     private String termAcc;
     private List<Term> parentTerms;
@@ -25,6 +26,14 @@ public class ModelIndexObject {
     private String withInfoTerms;
     private List<Term> infoTerms;
     private List<Evidence> evidences;
+
+    public String getAnnotatedObjectType() {
+        return annotatedObjectType;
+    }
+
+    public void setAnnotatedObjectType(String annotatedObjectType) {
+        this.annotatedObjectType = annotatedObjectType;
+    }
 
     public List<Evidence> getEvidences() {
         return evidences;
