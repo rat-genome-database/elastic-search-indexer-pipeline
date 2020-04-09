@@ -26,6 +26,33 @@ public class ModelIndexObject {
     private String withInfoTerms;
     private List<Term> infoTerms;
     private List<Evidence> evidences;
+    private List<String> aliases;
+    private List<String> termSynonyms;
+    private List<String> associations;
+
+    public List<String> getAliases() {
+        return aliases;
+    }
+
+    public void setAliases(List<String> aliases) {
+        this.aliases = aliases;
+    }
+
+    public List<String> getTermSynonyms() {
+        return termSynonyms;
+    }
+
+    public void setTermSynonyms(List<String> termSynonyms) {
+        this.termSynonyms = termSynonyms;
+    }
+
+    public List<String> getAssociations() {
+        return associations;
+    }
+
+    public void setAssociations(List<String> associations) {
+        this.associations = associations;
+    }
 
     public String getAnnotatedObjectType() {
         return annotatedObjectType;

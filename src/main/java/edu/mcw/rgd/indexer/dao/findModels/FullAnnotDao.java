@@ -10,6 +10,7 @@ import edu.mcw.rgd.datamodel.annotation.Evidence;
 import edu.mcw.rgd.datamodel.ontology.Annotation;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.ontologyx.TermDagEdge;
+import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
 import edu.mcw.rgd.indexer.client.ESClient;
 import edu.mcw.rgd.indexer.model.RgdIndex;
 import edu.mcw.rgd.indexer.model.findModels.ModelIndexObject;
@@ -34,10 +35,13 @@ public class FullAnnotDao {
     AnnotationDAO adao= new AnnotationDAO();
     OntologyXDAO xdao= new OntologyXDAO();
     StrainDAO strainDAO=new StrainDAO();
+    AliasDAO aliasDAO=new AliasDAO();
+    AssociationDAO associationDAO=new AssociationDAO();
+
     EvidenceCode evidenceCode=new EvidenceCode();
     public List<ModelIndexObject> getAnnotationsBySpeciesNObjectKey(int speciesTypeKey, int objectKey) throws Exception {
-     List<Annotation>  models= adao.getAnnotationsBySpecies(speciesTypeKey, objectKey);
-   //List<Annotation>  models= adao.getAnnotations(60997);
+    List<Annotation>  models= adao.getAnnotationsBySpecies(speciesTypeKey, objectKey);
+  // List<Annotation>  models= adao.getAnnotations(731194);
         System.out.println("MODELS SIZE: "+ models.size());
         List<ModelIndexObject> objects= new ArrayList<>();
 
@@ -112,6 +116,18 @@ public class FullAnnotDao {
                     object.setAnnotatedObjectSymbol(m.getObjectSymbol());
                     String strainType= strainDAO.getStrain(m.getAnnotatedObjectRgdId()).getStrainTypeName();
                     object.setAnnotatedObjectType(strainType);
+                    /************aliases*******************************/
+                 List<Alias> aliases=aliasDAO.getAliases(m.getAnnotatedObjectRgdId());
+                        List<String> aValues= new ArrayList<>();
+                        for(Alias a: aliases){
+                            aValues.add(a.getValue().toLowerCase().trim());
+                        }
+
+                        object.setAliases(aValues);
+                    /*****************associations************************/
+                    object.setAssociations(this.getAssociations(m.getAnnotatedObjectRgdId()));
+
+                    /*************************************************************/
                     object.setSpecies(this.getSpecies(m.getAnnotatedObjectRgdId()));
                     object.setAspect(m.getAspect());
                     if(m.getQualifier()!=null)
@@ -130,7 +146,7 @@ public class FullAnnotDao {
                     object.setRefRgdIds(refRgdIds);
                     object.setTerm(m.getTerm());
                     object.setTermAcc(m.getTermAcc());
-
+                    object.setTermSynonyms(this.getSynonyms(m.getTermAcc()));
                  StringBuffer sb= new StringBuffer();
             //     System.out.println(m.getAnnotatedObjectRgdId()+"\t"+ m.getWithInfo());
                  if(m.getWithInfo()!=null){
@@ -314,5 +330,37 @@ public class FullAnnotDao {
             }
         }
         return null;
+    }
+    public List<String> getAssociations(int annotatedObjectRgdId) throws Exception {
+        List<String> assocs= new ArrayList<>();
+        List associations=associationDAO.getStrainAssociations(annotatedObjectRgdId);
+        for(Object a:associations){
+            if(a instanceof Gene){
+                assocs.add(((Gene) a).getSymbol());
+            } else
+            if(a instanceof Strain){
+
+                assocs.add(((Strain) a).getSymbol());
+            }else
+            if(a instanceof SSLP){
+
+                assocs.add(((SSLP) a).getName());
+            }else{
+
+                assocs.add(a.toString());
+            }
+        }
+        return assocs;
+    }
+    public List<String> getSynonyms(String termAcc) throws Exception {
+
+        List<TermSynonym> termSynonyms= xdao.getTermSynonyms(termAcc);
+        List<String> synonyms=new ArrayList<>();
+        System.out.println("TERM AC:"+ termAcc+"\tSynonyms SIZE:"+ termSynonyms.size());
+        for(TermSynonym s: termSynonyms){
+            synonyms.add(s.getName());
+           System.out.println(s.getName());
+        }
+        return synonyms;
     }
 }
