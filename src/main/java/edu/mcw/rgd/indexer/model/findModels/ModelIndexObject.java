@@ -19,7 +19,7 @@ public class ModelIndexObject {
     private List<Term> parentTerms;
     private String species;
     private String aspect;
-    private List<String> qualifiers;
+    private String qualifiers;
     private List<String> evidenceCodes;
     private List<Integer> refRgdIds;
     private String withInfo;
@@ -169,11 +169,11 @@ public class ModelIndexObject {
         this.aspect = aspect;
     }
 
-    public List<String> getQualifiers() {
+    public String getQualifiers() {
         return qualifiers;
     }
 
-    public void setQualifiers(List<String> qualifiers) {
+    public void setQualifiers(String qualifiers) {
         this.qualifiers = qualifiers;
     }
 
