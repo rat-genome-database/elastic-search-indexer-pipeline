@@ -728,7 +728,9 @@ public class IndexDAO extends AbstractDAO {
                    g.setSpecies(species);
                    g.setTerm_acc(String.valueOf(rgdId));
                    g.setSymbol(symbol);
+                   g.setName(ge.getName());
                    g.setCategory(category);
+                   g.setDescription(ge.getObjectType());
                    g.setSuggest(this.getSuggest(symbol, null, category.toLowerCase()));
                    List<AliasData> aliases = this.getAliases(rgdId);
                    List<String> synonyms = new ArrayList<>();

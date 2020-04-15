@@ -40,7 +40,7 @@ public class ESClient {
     }
 
     public static RestHighLevelClient getClient() {
-        return client;
+        return getInstance();
     }
 
     public static void setClient(RestHighLevelClient client) {
@@ -87,8 +87,8 @@ public class ESClient {
 
 
         try{
-       //     fis=new FileInputStream("C:/Apps/properties.properties");
-            fis=new FileInputStream("/data/pipelines/properties/es_properties.properties");
+      //   fis=new FileInputStream("C:/Apps/properties.properties");
+          fis=new FileInputStream("/data/pipelines/properties/es_properties.properties");
             props.load(fis);
 
         }catch (Exception e){
