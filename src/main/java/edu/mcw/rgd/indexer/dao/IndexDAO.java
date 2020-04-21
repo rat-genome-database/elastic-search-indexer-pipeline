@@ -186,6 +186,7 @@ public class IndexDAO extends AbstractDAO {
              obj.setXdbIdentifiers(this.getExternalIdentifiers(rgdId));
              //   obj.setXdbIdentifiers(getXdbIds(objects, rgdId));
              obj.setPromoters(this.getPromotersByGeneRgdId(rgdId));
+
              //  obj.setPromoters(getPromoersByRgdId(rgdId, associations, genomicElements));
              obj.setMapDataList(this.getMapData(rgdId));
              obj.setTranscriptIds(this.getTranscriptIds(rgdId));
@@ -707,12 +708,18 @@ public class IndexDAO extends AbstractDAO {
     public List<IndexObject> getGenomicElements(int objectKey) throws Exception {
         List<IndexObject> objList= new ArrayList<>();
         String category=new String();
+
         if(objectKey==11){
             category="Cell line";
+
+
+
         }
         if(objectKey==16){
             category="Promoter";
         }
+
+        Map<Integer, List<String>> associations=this.getAssociationsByObjectKey(objectKey);
      for(GenomicElement ge: gedao.getActiveElements(objectKey)) {
        //    GenomicElement ge= gedao.getElement(8655626);
            try {
@@ -745,6 +752,10 @@ public class IndexDAO extends AbstractDAO {
                    }
 
                    g.setAnnotationsCount(this.getAnnotsCount(rgdId));
+                   g.setGenomicAlteration(ge.getGenomicAlteration());
+                   List<String> assocs= associations.get(ge.getRgdId());
+                   if(assocs!=null && assocs.size()>0)
+                       g.setAssociations(assocs);
                    objList.add(g);
                }else{
                    if(speciesTypeKey==3 || speciesTypeKey==2 || speciesTypeKey==1 || speciesTypeKey==4 || speciesTypeKey==5
@@ -758,6 +769,34 @@ public class IndexDAO extends AbstractDAO {
            }
       }
         return objList;
+    }
+    public Map<Integer, List<String>> getAssociationsByObjectKey(int objectKey) throws Exception {
+        AssociationDAO associationDAO=new AssociationDAO();
+        RGDManagementDAO managementDAO=new RGDManagementDAO();
+       Map<Integer, List<String>> associationsMap=new HashMap<>();
+       for(Association a : associationDAO.getAssociationsByObjectKey(objectKey)){
+           Object o=managementDAO.getObject(a.getDetailRgdId());
+           List<String> associations=new ArrayList<>();
+           associations= associationsMap.get(a.getMasterRgdId());
+           String symbol=new String();
+           if(o instanceof Gene) {
+              symbol=((Gene) o).getSymbol();
+           }
+           if(o instanceof Strain) {
+               symbol=((Strain) o).getSymbol();
+           }
+           if(!symbol.equals("")) {
+               if (associations != null && !associations.contains(symbol))
+                   associations.add(symbol);
+               else {
+                   associations = new ArrayList<>();
+                   associations.add(symbol);
+               }
+           }
+           if(associations!=null && associations.size()>0)
+           associationsMap.put(a.getMasterRgdId(), associations);
+           }
+       return associationsMap;
     }
     public List<IndexObject> getVariants() throws Exception{
         List<IndexObject> objList= new ArrayList<>();
@@ -1327,8 +1366,11 @@ public class IndexDAO extends AbstractDAO {
     }
     public static void main(String[] args) throws Exception {
           IndexDAO dao= new IndexDAO();
-    List<IndexObject> strains=dao.getStrains();
-        System.out.println("Strains Size: "+strains.size()+"DONE!!!!");
+       Map<Integer,  List<String>> associations=   dao.getAssociationsByObjectKey(11);
+      for(Map.Entry e:associations.entrySet()){
+          System.out.println(e.getKey() +"\t"+ e.getValue().toString());
+      }
+        System.out.println("DONE!!");
     }
 
 

@@ -55,9 +55,17 @@ public class IndexObject {
     private String title;
     private String refAbstract;
 
-
+private String genomicAlteration;
 
     private Suggest suggest;
+
+    public String getGenomicAlteration() {
+        return genomicAlteration;
+    }
+
+    public void setGenomicAlteration(String genomicAlteration) {
+        this.genomicAlteration = genomicAlteration;
+    }
 
     public List<String> getAssociations() {
         return associations;
