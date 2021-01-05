@@ -35,46 +35,46 @@ public class GenomeDAO extends AbstractDAO{
             switch (speciesTypeKey){
                 case 1:
                     if(mapKey==38) {
-                        info.setBasePairs("3,554,996,726");
-                        info.setTotalLength("3,209,286,105");
-                        info.setGapLength("159,970,007");
+                      //  info.setBasePairs("3,554,996,726");
+                        info.setTotalSeqLength("3,099,706,404");
+                        info.setTotalUngappedLength("2,948,583,725");
                         info.setGapBetweenScaffolds("349");
-                        info.setScaffolds("735");
+                        info.setScaffolds("472");
                         info.setScaffoldN50("67,794,873");
                         info.setScaffoldL50("16");
-                        info.setContigs("1,385");
-                        info.setContigN50("56,413,054");
-                        info.setContigL50("19");
-                        info.setChromosome("25");
+                        info.setContigs("998");
+                        info.setContigN50("57,879,411");
+                        info.setContigL50("18");
+                        info.setChromosome("24");
                         info.setNcbiLink("https://www.ncbi.nlm.nih.gov/assembly/GCF_000001405.37/");
                         info.setRefSeqAssemblyAccession("GCF_000001405.37");
                     }
                     if(mapKey==17) {
-                        info.setBasePairs("3,326,743,047");
-                        info.setTotalLength("3,234,834,689");
-                        info.setGapLength("243,146,473");
+                   //     info.setBasePairs("3,326,743,047");
+                        info.setTotalSeqLength("3,101,788,170");
+                        info.setTotalUngappedLength("2,867,437,753");
                         info.setGapBetweenScaffolds("271");
-                        info.setScaffolds("463");
-                        info.setScaffoldN50("44,983,201");
-                        info.setScaffoldL50("22");
-                        info.setContigs("705");
-                        info.setContigN50("38,440,852");
-                        info.setContigL50("25");
-                        info.setChromosome("25");
+                        info.setScaffolds("249");
+                        info.setScaffoldN50("46,395,641");
+                        info.setScaffoldL50("21");
+                        info.setContigs("350");
+                        info.setContigN50("38,508,932");
+                        info.setContigL50("24");
+                        info.setChromosome("24");
                         info.setNcbiLink("https://www.ncbi.nlm.nih.gov/assembly/GCF_000001405.25/");
                         info.setRefSeqAssemblyAccession("GCF_000001405.25");
                     }
                     if(mapKey==13) {
-                        info.setBasePairs("3,253,037,807");
-                        info.setTotalLength("3,104,054,490");
-                        info.setGapLength("222,487,605");
+                   //     info.setBasePairs("3,253,037,807");
+                        info.setTotalSeqLength("3,093,104,542");
+                        info.setTotalUngappedLength("2,870,620,296");
                         info.setGapBetweenScaffolds("301");
-                        info.setScaffolds("378");
+                        info.setScaffolds("367");
                         info.setScaffoldN50("38,509,590");
                         info.setScaffoldL50("25");
-                        info.setContigs("1,037");
+                        info.setContigs("1,006");
                         info.setContigN50("38,509,590");
-                        info.setContigL50("26");
+                        info.setContigL50("25");
                         info.setChromosome("24");
                         info.setNcbiLink("https://www.ncbi.nlm.nih.gov/assembly/GCF_000001405.12/");
                         info.setRefSeqAssemblyAccession("GCF_000001405.12");
@@ -82,58 +82,73 @@ public class GenomeDAO extends AbstractDAO{
                     break;
                 case 2:
                     if(mapKey==35) {
-                        info.setBasePairs("3,482,409,794");
-                        info.setTotalLength("2,818,974,548");
-                        info.setGapLength("79,435,572");
+                    //    info.setBasePairs("3,482,409,794");
+                        info.setTotalSeqLength("2,730,855,475");
+                        info.setTotalUngappedLength("2,652,767,259");
                         info.setGapBetweenScaffolds("191");
-                        info.setScaffolds("336");
-                        info.setScaffoldN50("52,589,046");
-                        info.setScaffoldL50("18");
-                        info.setContigs("885");
-                        info.setContigN50("32,273,079");
-                        info.setContigL50("26");
-                        info.setChromosome("22");
+                        info.setScaffolds("162");
+                        info.setScaffoldN50("54,517,951");
+                        info.setScaffoldL50("17");
+                        info.setContigs("605");
+                        info.setContigN50("32,813,180");
+                        info.setContigL50("25");
+                        info.setChromosome("21");
                         info.setNcbiLink("https://www.ncbi.nlm.nih.gov/assembly/GCF_000001635.26/");
                         info.setRefSeqAssemblyAccession("GCF_000001635.26");
                     }
 
                     if(mapKey==18) {
-                        info.setBasePairs("3,420,842,930");
-                        info.setTotalLength("2,745,142,291");
-                        info.setGapLength("96,621,235");
+                    //    info.setBasePairs("3,420,842,930");
+                        info.setTotalSeqLength("2,716,949,182");
+                        info.setTotalUngappedLength("2,620,329,768");
                         info.setGapBetweenScaffolds("126");
-                        info.setScaffolds("410");
-                        info.setScaffoldN50("37,678,470");
-                        info.setScaffoldL50("21");
-                        info.setContigs("1,141");
+                        info.setScaffolds("315");
+                        info.setScaffoldN50("39,293,786");
+                        info.setScaffoldL50("20");
+                        info.setContigs("1,029");
                         info.setContigN50("25,603,741");
                         info.setContigL50("30");
-                        info.setChromosome("22");
+                        info.setChromosome("21");
                         info.setNcbiLink("https://www.ncbi.nlm.nih.gov/assembly/GCF_000001635.18/");
                         info.setRefSeqAssemblyAccession("GCF_000001635.18");
                     }
                     if(mapKey==14) {
-                        info.setBasePairs("");
-                        info.setTotalLength("2,716,519,436");
-                        info.setGapLength("93,935,318");
+                    //    info.setBasePairs("");
+                        info.setTotalSeqLength("2,661,188,789");
+                        info.setTotalUngappedLength("2,567,267,557");
                         info.setGapBetweenScaffolds("123");
-                        info.setScaffolds("483");
-                        info.setScaffoldN50("39,075,365");
-                        info.setScaffoldL50("20");
-                        info.setContigs("1,822");
-                        info.setContigN50("17,098,953");
-                        info.setContigL50("36");
+                        info.setScaffolds("200");
+                        info.setScaffoldN50("40,319,553");
+                        info.setScaffoldL50("19");
+                        info.setContigs("1,427");
+                        info.setContigN50("17,840,746");
+                        info.setContigL50("35");
                         info.setChromosome("21");
                         info.setNcbiLink("https://www.ncbi.nlm.nih.gov/assembly/GCF_000001635.15/");
                         info.setRefSeqAssemblyAccession("GCF_000001635.15");
+                    }
+                    if(mapKey==239) {
+                        //    info.setBasePairs("");
+                        info.setTotalSeqLength("2,728,222,451");
+                        info.setTotalUngappedLength("2,654,621,837");
+                        info.setGapBetweenScaffolds("143");
+                        info.setScaffolds("102");
+                        info.setScaffoldN50("106,145,001");
+                        info.setScaffoldL50("11");
+                        info.setContigs("306");
+                        info.setContigN50("59,462,871");
+                        info.setContigL50("15");
+                        info.setChromosome("22");
+                        info.setNcbiLink("https://www.ncbi.nlm.nih.gov/assembly/GCF_000001635.27/");
+                        info.setRefSeqAssemblyAccession("GCF_000001635.27");
                     }
                     break;
                 case 3:
 
                         if(mapKey==360) {
-                            info.setBasePairs("3,042,335,753");
-                            info.setTotalLength("2,870,184,193");
-                            info.setGapLength("140,198,789");
+                     //       info.setBasePairs("3,042,335,753");
+                            info.setTotalSeqLength("2,870,184,193");
+                            info.setTotalUngappedLength("2,729,985,504");
                             info.setGapBetweenScaffolds("440");
                             info.setScaffolds("1,395");
                             info.setScaffoldN50("14,986,627");
@@ -146,9 +161,9 @@ public class GenomeDAO extends AbstractDAO{
                             info.setRefSeqAssemblyAccession("GCF_000001895.5");
                       }
                         if(mapKey==60) {
-                            info.setBasePairs("2,507,066,667");
-                            info.setTotalLength("2,826,224,306");
-                            info.setGapLength("258,270,786");
+                      //      info.setBasePairs("2,507,066,667");
+                            info.setTotalSeqLength("2,826,224,306");
+                            info.setTotalUngappedLength("2,567,953,008");
                             info.setGapBetweenScaffolds("270");
                             info.setScaffolds("741");
                             info.setScaffoldN50("18,621,810");
@@ -156,15 +171,15 @@ public class GenomeDAO extends AbstractDAO{
                             info.setContigs("238,325");
                             info.setContigN50("36,847");
                             info.setContigL50("18,984");
-                            info.setChromosome("21");
+                            info.setChromosome("22");
                             info.setNcbiLink("https://www.ncbi.nlm.nih.gov/assembly/GCF_000001895.3/");
                             info.setRefSeqAssemblyAccession("GCF_000001895.3");
 
                         }
                         if(mapKey==70) {
-                            info.setBasePairs("");
-                            info.setTotalLength("2,909,698,938");
-                            info.setGapLength("336,599,514");
+                      //      info.setBasePairs("");
+                            info.setTotalSeqLength("2,909,698,938");
+                            info.setTotalUngappedLength("2,573,099,424");
                             info.setGapBetweenScaffolds("8,109");
                             info.setScaffolds("10,848");
                             info.setScaffoldN50("2,178,346");
@@ -181,9 +196,9 @@ public class GenomeDAO extends AbstractDAO{
                     break;
                 case 4:
                     if(mapKey==44) {
-                        info.setBasePairs("");
-                        info.setTotalLength("2,390,868,971");
-                        info.setGapLength("106,575,991");
+                    //    info.setBasePairs("");
+                        info.setTotalSeqLength("2,390,868,971");
+                        info.setTotalUngappedLength("2,284,292,980");
                         info.setGapBetweenScaffolds("0");
                         info.setScaffolds("2,839");
                         info.setScaffoldN50("21,893,125");
@@ -199,9 +214,9 @@ public class GenomeDAO extends AbstractDAO{
                     break;
                 case 5:
                     if(mapKey==511){
-                        info.setBasePairs("2,725,937,399");
-                        info.setTotalLength("3,286,643,896");
-                        info.setGapLength("560,706,734");
+                   //     info.setBasePairs("2,725,937,399");
+                        info.setTotalSeqLength("3,286,643,938");
+                        info.setTotalUngappedLength("2,725,937,204");
                         info.setGapBetweenScaffolds("734");
                         info.setScaffolds("10,984");
                         info.setScaffoldN50("8,197,324");
@@ -213,12 +228,27 @@ public class GenomeDAO extends AbstractDAO{
                         info.setNcbiLink("https://www.ncbi.nlm.nih.gov/assembly/GCF_000258655.2/");
                         info.setRefSeqAssemblyAccession("GCF_000258655.2");
                     }
+                    if(mapKey==513){ //bonobo new assembly
+                   //     info.setBasePairs("");
+                        info.setTotalSeqLength("3,051,901,337");
+                        info.setTotalUngappedLength("3,015,350,297");
+                        info.setGapBetweenScaffolds("64");
+                        info.setScaffolds("4,357");
+                        info.setScaffoldN50("68,246,502");
+                        info.setScaffoldL50("16");
+                        info.setContigs("4,976");
+                        info.setContigN50("16,579,680");
+                        info.setContigL50("48");
+                        info.setChromosome("25");
+                        info.setNcbiLink("https://www.ncbi.nlm.nih.gov/assembly/GCF_013052645.1/");
+                        info.setRefSeqAssemblyAccession("GCF_013052645.1");
+                    }
                     break;
                 case 6:
                     if(mapKey==631){
-                        info.setBasePairs("2,392,715,236");
-                        info.setTotalLength("2,410,976,875");
-                        info.setGapLength("18,261,639");
+                    //    info.setBasePairs("2,392,715,236");
+                        info.setTotalSeqLength("2,410,976,875");
+                        info.setTotalUngappedLength("2,392,715,236");
                         info.setGapBetweenScaffolds("80");
                         info.setScaffolds("3,310");
                         info.setScaffoldN50("45,876,610");
@@ -233,9 +263,9 @@ public class GenomeDAO extends AbstractDAO{
                     break;
                 case 7:
                     if(mapKey==720){
-                        info.setBasePairs("2,311,076,758");
-                        info.setTotalLength("2,478,393,770");
-                        info.setGapLength("167,333,470");
+                   //     info.setBasePairs("2,311,076,758");
+                        info.setTotalSeqLength("2,478,393,770");
+                        info.setTotalUngappedLength("167,333,470");
                         info.setGapBetweenScaffolds("0");
                         info.setScaffolds("12,483");
                         info.setScaffoldN50("8,192,786");
@@ -254,9 +284,9 @@ public class GenomeDAO extends AbstractDAO{
 
                     }
                     if(mapKey==910){
-                        info.setBasePairs("3,024,658,544");
-                        info.setTotalLength("2,808,525,991");
-                        info.setGapLength("");
+                  //      info.setBasePairs("3,024,658,544");
+                        info.setTotalSeqLength("2,808,525,991");
+                        info.setTotalUngappedLength("2,519,152,092");
                         info.setGapBetweenScaffolds("5,323");
                         info.setScaffolds("9,906");
                         info.setScaffoldN50("576,008");
@@ -269,9 +299,9 @@ public class GenomeDAO extends AbstractDAO{
                         info.setRefSeqAssemblyAccession("GCF_000003025.5");
                     }
                     if(mapKey==911){
-                        info.setBasePairs("2,478,444,698");
-                        info.setTotalLength("2,501,912,388");
-                        info.setGapLength("");
+                   //     info.setBasePairs("2,478,444,698");
+                        info.setTotalSeqLength("2,501,912,388");
+                        info.setTotalUngappedLength("2,472,047,747");
                         info.setGapBetweenScaffolds("93");
                         info.setScaffolds("706");
                         info.setScaffoldN50("88,231,837");

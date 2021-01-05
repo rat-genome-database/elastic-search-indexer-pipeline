@@ -91,8 +91,8 @@ public class IndexDAO extends AbstractDAO {
                     info = genomeDAO.getAssemblyInfo(speciesTypeKey, m.getKey());
                     //    info=genomeDAO.getAssemblyInfo(3, 70);
                     obj.setBasePairs(info.getBasePairs());
-                    obj.setTotalLength(info.getTotalLength());
-                    obj.setGapLength(info.getGapLength());
+                    obj.setTotalSeqLength(info.getTotalSeqLength());
+                    obj.setTotalUngappedLength(info.getTotalUngappedLength());
                     obj.setGapBetweenScaffolds(info.getGapBetweenScaffolds());
                     obj.setScaffolds(info.getScaffolds());
                     obj.setScaffoldN50(info.getScaffoldN50());

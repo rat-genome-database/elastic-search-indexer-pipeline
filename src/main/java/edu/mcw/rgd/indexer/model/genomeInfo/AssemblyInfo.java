@@ -8,8 +8,8 @@ public class AssemblyInfo {
     private String refSeqAssemblyAccession;
     private String ncbiLink;
     private String basePairs;
-    private String totalLength;
-    private String gapLength;
+    private String totalSeqLength;
+    private String totalUngappedLength;
     private String  gapBetweenScaffolds;
     private String scaffolds;
     private String scaffoldN50;
@@ -27,20 +27,20 @@ public class AssemblyInfo {
         this.basePairs = basePairs;
     }
 
-    public String getTotalLength() {
-        return totalLength;
+    public String getTotalSeqLength() {
+        return totalSeqLength;
     }
 
-    public void setTotalLength(String totalLength) {
-        this.totalLength = totalLength;
+    public void setTotalSeqLength(String totalSeqLength) {
+        this.totalSeqLength = totalSeqLength;
     }
 
-    public String getGapLength() {
-        return gapLength;
+    public String getTotalUngappedLength() {
+        return totalUngappedLength;
     }
 
-    public void setGapLength(String gapLength) {
-        this.gapLength = gapLength;
+    public void setTotalUngappedLength(String totalUngappedLength) {
+        this.totalUngappedLength = totalUngappedLength;
     }
 
     public String getGapBetweenScaffolds() {
