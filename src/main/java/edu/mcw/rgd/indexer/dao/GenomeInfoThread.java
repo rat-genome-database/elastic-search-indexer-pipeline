@@ -73,8 +73,8 @@ public class GenomeInfoThread implements Runnable {
                 info = genomeDAO.getAssemblyInfo(key, mapKey);
                 //    info=genomeDAO.getAssemblyInfo(3, 70);
                 obj.setBasePairs(info.getBasePairs());
-                obj.setTotalLength(info.getTotalLength());
-                obj.setGapLength(info.getGapLength());
+                obj.setTotalSeqLength(info.getTotalSeqLength());
+                obj.setTotalUngappedLength(info.getTotalUngappedLength());
                 obj.setGapBetweenScaffolds(info.getGapBetweenScaffolds());
                 obj.setScaffolds(info.getScaffolds());
                 obj.setScaffoldN50(info.getScaffoldN50());
@@ -168,7 +168,7 @@ public class GenomeInfoThread implements Runnable {
                 }
                 if (key == 3) {
                     if (mapKey == 360 || mapKey == 70 || mapKey == 60) {
-                        String strainVairantMatrix[][] = variants.getStrainVariants(mapKey, null);
+                        String[][] strainVairantMatrix = variants.getStrainVariants(mapKey, null);
                         obj.setVariantsMatrix(strainVairantMatrix);
                     }
                 }
@@ -194,20 +194,9 @@ public class GenomeInfoThread implements Runnable {
                 }
                 bulkRequest.add(new IndexRequest(index).source(json, XContentType.JSON));
 
-                if(docCount%100==0){
-                  //  BulkResponse response=       bulkRequestBuilder.execute().get();
-                    BulkResponse response=      ESClient.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
-                    bulkRequest= new BulkRequest();
-                }else{
-                    if(docCount>objects.size()-100 && docCount==objects.size()){
-                      /*  BulkResponse response=       bulkRequestBuilder.execute().get();
-                        bulkRequestBuilder= ESClient.getClient().prepareBulk();*/
-                        BulkResponse response=      ESClient.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
-                        bulkRequest= new BulkRequest();
-                    }
-                }
-
             }
+         BulkResponse response=      ESClient.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
+         bulkRequest= new BulkRequest();
           //   BulkResponse response=       bulkRequestBuilder.get();
          //  ESClient.getClient().admin().indices().refresh(refreshRequest()).actionGet();
          RefreshRequest refreshRequest=new RefreshRequest();
