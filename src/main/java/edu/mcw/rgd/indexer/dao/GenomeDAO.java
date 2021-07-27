@@ -294,10 +294,7 @@ public class GenomeDAO extends AbstractDAO{
                     }
                     break;
                 case 9:
-                    if(mapKey==900){
 
-
-                    }
                     if(mapKey==910){
                   //      info.setBasePairs("3,024,658,544");
                         info.setTotalSeqLength("2,808,525,991");
@@ -328,6 +325,58 @@ public class GenomeDAO extends AbstractDAO{
                         info.setNcbiLink("https://www.ncbi.nlm.nih.gov/assembly/GCF_000003025.6/");
                         info.setRefSeqAssemblyAccession("GCF_000003025.6");
                     }
+                    break;
+                case 13://green monkey
+
+                    if(mapKey==1311){
+                        //      info.setBasePairs("3,024,658,544");
+                        info.setTotalSeqLength("2,789,639,778");
+                        info.setTotalUngappedLength("2,752,002,658");
+                        info.setGapBetweenScaffolds("29");
+                        info.setScaffolds("2,021");
+                        info.setScaffoldN50("81,825,804");
+                        info.setScaffoldL50("14");
+                        info.setContigs("162,723");
+                        info.setContigN50("90,449");
+                        info.setContigL50("7,735");
+                        info.setChromosome("31");
+                        info.setNcbiLink("https://www.ncbi.nlm.nih.gov/assembly/GCF_000409795.2/");
+                        info.setRefSeqAssemblyAccession("GCF_000409795.2");
+                    }
+                    if(mapKey==1313){
+                        //     info.setBasePairs("2,478,444,698");
+                        info.setTotalSeqLength("2,937,827,970");
+                        info.setTotalUngappedLength("2,930,550,240");
+                        info.setGapBetweenScaffolds("0");
+                        info.setScaffolds("6,872");
+                        info.setScaffoldN50("81,790,585");
+                        info.setScaffoldL50("12");
+                        info.setContigs("15,291");
+                        info.setContigN50("839,654");
+                        info.setContigL50("1,032");
+                        info.setChromosome("0");
+                        info.setNcbiLink("https://www.ncbi.nlm.nih.gov/assembly/GCF_015252025.1/");
+                        info.setRefSeqAssemblyAccession("GCF_015252025.1");
+                    }
+                    break;
+                case 14://Naked Mole-rat
+
+                    if(mapKey==1410){
+                        //      info.setBasePairs("3,024,658,544");
+                        info.setTotalSeqLength("2,618,204,639");
+                        info.setTotalUngappedLength("2,314,771,103");
+                        info.setGapBetweenScaffolds("0");
+                        info.setScaffolds("4,229");
+                        info.setScaffoldN50("20,532,749");
+                        info.setScaffoldL50("42");
+                        info.setContigs("114,653");
+                        info.setContigN50("47,778");
+                        info.setContigL50("13,150");
+                        info.setChromosome("1");
+                        info.setNcbiLink("https://www.ncbi.nlm.nih.gov/assembly/GCF_000247695.1/");
+                        info.setRefSeqAssemblyAccession("GCF_000247695.1");
+                    }
+                    break ;
                 default:
             }
 
