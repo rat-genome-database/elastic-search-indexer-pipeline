@@ -186,7 +186,8 @@ public class Manager {
                                         for (Map m : maps) {
                                             int mapKey = m.getKey();
                                             String assembly = m.getName();
-                                            if (mapKey != 6 && mapKey != 36 && mapKey != 8 && mapKey != 21 && mapKey != 19 && mapKey != 7 && mapKey != 720 && mapKey != 44) {
+                                            if (mapKey != 6 && mapKey != 36 && mapKey != 8 && mapKey != 21 && mapKey != 19 && mapKey != 7 && mapKey != 720 && mapKey != 44
+                                            && mapKey!=722 && mapKey!=1410) {
                                                /* workerThread = new ChromosomeThread(key, RgdIndex.getNewAlias(), mapKey, assembly);
                                                 executor.execute(workerThread);*/
                                                 try {
