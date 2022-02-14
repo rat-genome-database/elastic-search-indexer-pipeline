@@ -1,0 +1,174 @@
+{
+  "properties" : {
+    "category" : {
+      "type" : "text",
+      "fields" : {
+        "keyword" : {
+          "type" : "keyword",
+          "ignore_above" : 256
+        }
+      }
+    },
+    "chromosome" : {
+      "type" : "text",
+      "fields" : {
+        "keyword" : {
+          "type" : "keyword",
+          "ignore_above" : 256
+        }
+      }
+    },
+    "endPos" : {
+      "type" : "long"
+    },
+    "geneRgdId" : {
+      "type" : "long"
+    },
+    "geneSymbol" : {
+      "type" : "text",
+      "fields" : {
+        "keyword" : {
+          "type" : "keyword",
+          "ignore_above" : 256
+        }
+      }
+    },
+    "genicStatus" : {
+      "type" : "text",
+      "fields" : {
+        "keyword" : {
+          "type" : "keyword",
+          "ignore_above" : 256
+        }
+      }
+    },
+    "mapKey" : {
+      "type" : "long"
+    },
+    "paddingBase" : {
+      "type" : "text",
+      "fields" : {
+        "keyword" : {
+          "type" : "keyword",
+          "ignore_above" : 256
+        }
+      }
+    },
+    "qualityScore" : {
+      "type" : "long"
+    },
+    "refNuc" : {
+      "type" : "text",
+      "fields" : {
+        "keyword" : {
+          "type" : "keyword",
+          "ignore_above" : 256
+        }
+      }
+    },
+    "regionName" : {
+      "type" : "text",
+      "fields" : {
+        "keyword" : {
+          "type" : "keyword",
+          "ignore_above" : 256
+        }
+      }
+    },
+    "regionNameLc" : {
+      "type" : "text",
+      "fields" : {
+        "keyword" : {
+          "type" : "keyword",
+          "ignore_above" : 256
+        }
+      }
+    },
+    "sampleId" : {
+      "type" : "long"
+    },
+    "analysisName" : {
+      "type" : "text",
+      "fields" : {
+        "keyword" : {
+          "type" : "keyword",
+          "ignore_above" : 256
+        }
+      }
+    },
+    "startPos" : {
+      "type" : "long"
+    },
+    "strand" : {
+      "type" : "text",
+      "fields" : {
+        "keyword" : {
+          "type" : "keyword",
+          "ignore_above" : 256
+        }
+      }
+    },
+    "locationName" : {
+      "type" : "text",
+      "fields" : {
+        "keyword" : {
+          "type" : "keyword",
+          "ignore_above" : 256
+        }
+      }
+    },
+    "polyphenStatus" : {
+      "type" : "text",
+      "fields" : {
+        "keyword" : {
+          "type" : "keyword",
+          "ignore_above" : 256
+        }
+      }
+    },
+    "synStatus" : {
+      "type" : "text",
+      "fields" : {
+        "keyword" : {
+          "type" : "keyword",
+          "ignore_above" : 256
+        }
+      }
+    },
+    "transcriptRgdId" : {
+      "type" : "long"
+    },
+
+    "variantType" : {
+      "type" : "text",
+      "fields" : {
+        "keyword" : {
+          "type" : "keyword",
+          "ignore_above" : 256
+        }
+      }
+    },
+    "variant_id" : {
+      "type" : "long"
+    },
+    "zygosityInPseudo" : {
+      "type" : "text",
+      "fields" : {
+        "keyword" : {
+          "type" : "keyword",
+          "ignore_above" : 256
+        }
+      }
+    },
+
+    "zygosityStatus" : {
+      "type" : "text",
+      "fields" : {
+        "keyword" : {
+          "type" : "keyword",
+          "ignore_above" : 256
+        }
+      }
+    }
+  }
+}

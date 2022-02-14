@@ -13,10 +13,7 @@ import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
 import edu.mcw.rgd.indexer.client.ESClient;
 import edu.mcw.rgd.indexer.client.IndexAdmin;
 
-import edu.mcw.rgd.indexer.dao.ChromosomeThread;
-import edu.mcw.rgd.indexer.dao.GenomeInfoThread;
-import edu.mcw.rgd.indexer.dao.IndexerDAO;
-import edu.mcw.rgd.indexer.dao.ObjectIndexerThread;
+import edu.mcw.rgd.indexer.dao.*;
 
 import edu.mcw.rgd.indexer.dao.findModels.FullAnnotDao;
 import edu.mcw.rgd.indexer.dao.variants.*;
@@ -60,7 +57,8 @@ public class Manager {
     private OntologySynonyms ontSynonyms;
     private RgdIndex rgdIndex;
     private boolean reindex;
-
+    BulkIndexProcessor bulkIndexProcessor;
+    IndexDAO indexDAO=new IndexDAO();
     private static final Logger log = Logger.getLogger("main");
 
     public static void main(String[] args) throws Exception {
@@ -72,6 +70,7 @@ public class Manager {
        System.out.println(manager.getVersion());
       ESClient es= (ESClient) bf.getBean("client");
        RgdIndex rgdIndex= (RgdIndex) bf.getBean("rgdIndex");
+        manager.bulkIndexProcessor=BulkIndexProcessor.getInstance();
         log.info("LEVEL:" +log.getLevel());
         log.info(manager.getVersion());
 
@@ -91,10 +90,13 @@ public class Manager {
             es.destroy();
             e.printStackTrace();
           manager.printUsage();
+            manager.bulkIndexProcessor.destroy();
+
             log.info(e);
         }
         if(es!=null)
         es.destroy();
+        manager.bulkIndexProcessor.destroy();
 
     }
     private void run(String[] args) throws Exception {
@@ -214,67 +216,22 @@ public class Manager {
                         break;
                     case "Variant":
 
-                        MapDAO mapDAO= new MapDAO();
-                        SampleDAO sdao= new SampleDAO();
-                        sdao.setDataSource(DataSourceFactory.getInstance().getCarpeNovoDataSource());
                      //   List<Integer> speciesTypeKeys= new ArrayList<>(Arrays.asList(1,3, 6));
-                     //   List<Integer> speciesTypeKeys= new ArrayList<>(Arrays.asList(3));
-                        List<Integer> speciesTypeKeys= new ArrayList<>(Arrays.asList(6));
+                       List<Integer> speciesTypeKeys= new ArrayList<>(Arrays.asList(3));
+
                         for(int species:speciesTypeKeys){
                             switch (species){
                                 case 1:
-                                    break;
+                                case 6:
                                 case 3:
                                     admin.createIndex("variant_mappings", "variant");
-                                    if(SpeciesType.isSearchable(species)) {
-                                        List<Map> maps=mapDAO.getMaps(species);
-                                        for(Map m:maps) {
-                                            int mapKey = m.getKey();
-                                            //    int mapKey=360;
-                                            List<Sample> samples = sdao.getSamplesByMapKey(mapKey);
-                                            if (samples != null && samples.size() > 0){
-                                                List<Chromosome> chromosomes = mapDAO.getChromosomes(mapKey);
 
-                                            for (Sample s : samples) {
-                                                int sampleId = s.getId();
-                                                //   int sampleId=911;
-                                                for (Chromosome chr : chromosomes) {
-                                                    //    Chromosome chr=mapDAO.getChromosome(360,"10");
-                                                    workerThread = new VariantIndexer(sampleId, chr.getChromosome(), mapKey, species, RgdIndex.getNewAlias());
-                                                    executor.execute(workerThread);
-                                                }
-                                            }
-                                        }
-                                        }
-                                    }
+                                      indexDAO.indexVariantsFromCarpenovoNewTableStructure();
+
 
                                     break;
-                                case 6:
-                                    admin.createIndex("variant_mappings", "variant");
-                                    List<Map> maps=mapDAO.getMaps(species);
-                                    System.out.println("DOG MAPS SIZE: "+ maps.size());
-                                for(Map m:maps) {
-                                      int mapKey = m.getKey();
-                                    //   int mapKey=631;
-                                        List<Sample> samples = sdao.getSamplesByMapKey(mapKey);
 
-                                       if (samples.size() > 0){
-                                            List<Chromosome> chromosomes = mapDAO.getChromosomes(mapKey);
 
-                                           for (Sample s : samples) {
-                                          // Sample s=samples.get(0);
-                                                int sampleId = s.getId();
-                                                //   int sampleId=911;
-                                               for (Chromosome chr : chromosomes) {
-                                                    //    Chromosome chr=mapDAO.getChromosome(360,"10");
-                                          // Chromosome chr=chromosomes.get(0);
-                                                    workerThread = new VariantIndexer(sampleId, chr.getChromosome(), mapKey, species, RgdIndex.getNewAlias());
-                                                    executor.execute(workerThread);
-                                                }
-                                          }
-                                        }
-                                }
-                                    break;
                                 default:
                                     break;
                             }

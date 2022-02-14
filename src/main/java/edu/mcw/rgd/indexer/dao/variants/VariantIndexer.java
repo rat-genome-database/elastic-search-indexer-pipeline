@@ -46,7 +46,7 @@ public class VariantIndexer  implements  Runnable{
     public void run() {
         VariantDao variantDao= new VariantDao();
         try {
-            variantDao.setDataSource(DataSourceFactory.getInstance().getCarpeNovoDataSource());
+          //  variantDao.setDataSource(DataSourceFactory.getInstance().getCarpeNovoDataSource());
         } catch (Exception e) {
             e.printStackTrace();
         }

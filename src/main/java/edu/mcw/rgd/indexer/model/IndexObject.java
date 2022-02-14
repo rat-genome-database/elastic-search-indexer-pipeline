@@ -55,7 +55,7 @@ public class IndexObject {
     private String title;
     private String refAbstract;
 
-private String genomicAlteration;
+    private String genomicAlteration;
 
     private Suggest suggest;
 

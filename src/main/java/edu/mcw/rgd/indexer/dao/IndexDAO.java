@@ -16,11 +16,14 @@ import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
 import edu.mcw.rgd.datamodel.ontologyx.TermWithStats;
 import edu.mcw.rgd.indexer.AnnotationFormatter;
+import edu.mcw.rgd.indexer.MyThreadPoolExecutor;
 import edu.mcw.rgd.indexer.client.ESClient;
+import edu.mcw.rgd.indexer.dao.variants.VariantIndexerThread;
 import edu.mcw.rgd.indexer.model.*;
 import edu.mcw.rgd.indexer.model.genomeInfo.AssemblyInfo;
 import edu.mcw.rgd.indexer.model.genomeInfo.GeneCounts;
 import edu.mcw.rgd.indexer.model.genomeInfo.GenomeIndexObject;
+import edu.mcw.rgd.indexer.model.variants.VariantIndex;
 import edu.mcw.rgd.indexer.spring.XdbObjectQuery;
 import edu.mcw.rgd.process.Utils;
 
@@ -45,6 +48,9 @@ import java.sql.Statement;
 import java.util.*;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import static org.elasticsearch.client.Requests.refreshRequest;
 
@@ -844,7 +850,31 @@ public class IndexDAO extends AbstractDAO {
         }
         return objList;
     }
+    public void indexVariantsFromCarpenovoNewTableStructure() throws Exception{
+        ExecutorService executor2 = new MyThreadPoolExecutor(3, 3, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+        Runnable variantIndexerThread = null;
 
+        for(int speciesTypeKey:Arrays.asList(3)) {
+            String species = SpeciesType.getCommonName(speciesTypeKey);
+            System.out.println("Processing " + species + " variants...");
+
+        //    for( edu.mcw.rgd.datamodel.Map map : mapDAO.getMaps(speciesTypeKey)) {
+                 //   for (Chromosome chr : mapDAO.getChromosomes(map.getKey())) {
+            String chr="12";
+            int mapKey=360;
+                     //   variantIndexerThread = new VariantIndexerThread(chr.getChromosome(), map.getKey(), speciesTypeKey);
+            variantIndexerThread = new VariantIndexerThread(chr,mapKey, speciesTypeKey);
+
+            executor2.execute(variantIndexerThread);
+                  //  }
+
+
+       //     }
+
+        }
+        executor2.shutdown();
+        while (!executor2.isTerminated()) {}
+    }
     public List<IndexObject> getReference() throws Exception{
 
         List<IndexObject> objList= new ArrayList<>();

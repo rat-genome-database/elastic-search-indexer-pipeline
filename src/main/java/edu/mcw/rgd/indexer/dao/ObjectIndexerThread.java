@@ -32,7 +32,6 @@ public class ObjectIndexerThread implements  Runnable {
         objectType=object;
         index=indexName;
 
-
     }
     @Override
     public void run(){
