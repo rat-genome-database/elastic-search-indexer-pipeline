@@ -19,6 +19,7 @@ import edu.mcw.rgd.indexer.dao.IndexerDAO;
 import edu.mcw.rgd.indexer.dao.ObjectIndexerThread;
 
 import edu.mcw.rgd.indexer.dao.findModels.FullAnnotDao;
+import edu.mcw.rgd.indexer.dao.phenominer.PhenominerThread;
 import edu.mcw.rgd.indexer.dao.variants.*;
 import edu.mcw.rgd.indexer.dao.variants.VariantIndexer;
 import edu.mcw.rgd.indexer.model.RgdIndex;
@@ -200,6 +201,14 @@ public class Manager {
                                }
                            }
                       }
+                        break;
+                    case "Phenominer":
+
+                        admin.createIndex("phenominer_mappings", "genome");
+                        System.out.println("INDEXING phenominer records...");
+                        workerThread = new PhenominerThread(RgdIndex.getNewAlias(), log);
+                                    executor.execute(workerThread);
+
                         break;
                     case "Models":
                         System.out.println("Indexing models...");
