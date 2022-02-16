@@ -81,7 +81,7 @@ public class PhenominerThread implements Runnable {
         List<PhenominerIndexObject> indexObjects=new ArrayList<>();
 
         Term parentTerm=rsTerm;
-
+        Map<String, String > heirarcyMap=new HashMap<>();
         if(rsTopLevelTerms.size()>0){
             for(StringMapQuery.MapPair topLevelPair: rsTopLevelTerms) {
                     for (Term parentTerm0 :xdao.getParentTerm(parentTerm.getAccId())) {
@@ -93,7 +93,6 @@ public class PhenominerThread implements Runnable {
                     }
 
             }
-
         }
         if(rsTopLevelTerms.size()>0){
             for(StringMapQuery.MapPair topLevelPair: rsTopLevelTerms) {
