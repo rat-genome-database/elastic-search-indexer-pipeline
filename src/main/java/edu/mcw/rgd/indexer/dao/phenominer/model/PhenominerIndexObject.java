@@ -2,6 +2,7 @@ package edu.mcw.rgd.indexer.dao.phenominer.model;
 
 import edu.mcw.rgd.dao.spring.StringMapQuery;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class PhenominerIndexObject {
@@ -17,7 +18,15 @@ public class PhenominerIndexObject {
     private String rsParentTerm;
     private String rsParentTermAcc;
 
+    private  Map<String, String > hierarchyMap;
 
+    public Map<String, String> getHierarchyMap() {
+        return hierarchyMap;
+    }
+
+    public void setHierarchyMap(Map<String, String> hierarchyMap) {
+        this.hierarchyMap = hierarchyMap;
+    }
 
     public int getRecordId() {
         return recordId;
