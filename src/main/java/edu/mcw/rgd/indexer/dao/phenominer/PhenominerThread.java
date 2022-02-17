@@ -47,13 +47,18 @@ public class PhenominerThread implements Runnable {
         try {
             List<Record> records= phenominerDAO.getFullRecords();
             List<PhenominerIndexObject> indexObjects=new ArrayList<>();
-          /*  Set<Integer> depth=new HashSet<>();
+        /*    Set<Integer> depth=new HashSet<>();
+            List<Integer> depthList=new ArrayList<>();
             for(Record record:records){
-                Map<String, Relation> ancestors=xdao.getTermAncestors(record.getSample().getStrainAccId());
+                List<Term> ancestors=xdao.getAllActiveTermAncestors(record.getSample().getStrainAccId());
                 depth.add(ancestors.size());
+                depthList.add(ancestors.size());
             }
-            System.out.println("MAX DEPTH:"+ Collections.max(depth));*/
-            for(Record record:records){
+            System.out.println("MAX DEPTH:"+ Collections.max(depth));
+            for(int d:depthList)
+            System.out.println(d);*/
+
+          for(Record record:records){
                /* Term cmoTerm=xdao.getTerm(record.getClinicalMeasurement().getAccId());
                 String cmoRootTerm =xdao.getRootTerm("CMO");
                List<StringMapQuery.MapPair> cmoTopLevelMap= xdao.getTopLevelTerms(cmoTerm.getAccId());
@@ -67,7 +72,7 @@ public class PhenominerThread implements Runnable {
                    Term conditionTerm=xdao.getTerm(condition.getOntologyId());
                    conditions.add(conditionTerm);
                }*/
-               indexObjects.addAll( mapRS(record, xdao.getRootTerm("RS"),4));
+               indexObjects.addAll( mapRS(record, xdao.getRootTerm("RS"),10));
 
             }
             indexObjects(indexObjects,index,"");
@@ -86,15 +91,21 @@ public class PhenominerThread implements Runnable {
         String rootTerm= xdao.getTerm(rsRootTermAcc).getTerm();
         List<StringMapQuery.MapPair> rsTopLevelTerms= xdao.getTopLevelTerms(rsTerm.getAccId());
         List<PhenominerIndexObject> indexObjects=new ArrayList<>();
-        Map<String, Relation> ancestors=xdao.getTermAncestors(rsTerm.getAccId());
+        List<Term> ancestors=xdao.getAllActiveTermAncestors(rsTerm.getAccId());
 
         if(rsTopLevelTerms.size()>0){
             for(StringMapQuery.MapPair topLevelPair: rsTopLevelTerms) {
                 Term parentTerm=rsTerm;
                 Map<String, String > hierarchyMap=new HashMap<>();
-                int i=maxAncestorDepth-ancestors.size();
                 List<Term> terms= xdao.getParentTerm(parentTerm.getAccId());
+                int i=0; //level
+                if(ancestors.size()==1)
+                    i=3;
                 if(ancestors.size()==2)
+                    i=3;
+                if(ancestors.size()==3)
+                    i=2;
+                if(ancestors.size()==4)
                     i=1;
                     for (Term parentTerm0 :terms) {
                             if(!parentTerm0.getAccId().equalsIgnoreCase(topLevelPair.keyValue.toString())) {
