@@ -8,6 +8,7 @@ import edu.mcw.rgd.dao.impl.OntologyXDAO;
 import edu.mcw.rgd.dao.impl.PhenominerDAO;
 import edu.mcw.rgd.dao.impl.StrainDAO;
 import edu.mcw.rgd.dao.spring.StringMapQuery;
+import edu.mcw.rgd.datamodel.ontologyx.Relation;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.ontologyx.TermWithStats;
 import edu.mcw.rgd.datamodel.pheno.Condition;
@@ -46,6 +47,12 @@ public class PhenominerThread implements Runnable {
         try {
             List<Record> records= phenominerDAO.getFullRecords();
             List<PhenominerIndexObject> indexObjects=new ArrayList<>();
+          /*  Set<Integer> depth=new HashSet<>();
+            for(Record record:records){
+                Map<String, Relation> ancestors=xdao.getTermAncestors(record.getSample().getStrainAccId());
+                depth.add(ancestors.size());
+            }
+            System.out.println("MAX DEPTH:"+ Collections.max(depth));*/
             for(Record record:records){
                /* Term cmoTerm=xdao.getTerm(record.getClinicalMeasurement().getAccId());
                 String cmoRootTerm =xdao.getRootTerm("CMO");
@@ -60,7 +67,7 @@ public class PhenominerThread implements Runnable {
                    Term conditionTerm=xdao.getTerm(condition.getOntologyId());
                    conditions.add(conditionTerm);
                }*/
-               indexObjects.addAll( mapRS(record, xdao.getRootTerm("RS")));
+               indexObjects.addAll( mapRS(record, xdao.getRootTerm("RS"),4));
 
             }
             indexObjects(indexObjects,index,"");
@@ -69,33 +76,39 @@ public class PhenominerThread implements Runnable {
             e.printStackTrace();
         }
     }
-    public List<PhenominerIndexObject> mapRS(Record record, String rsRootTermAcc) throws Exception {
+    public List<PhenominerIndexObject> mapRS(Record record, String rsRootTermAcc, int maxAncestorDepth) throws Exception {
         Term rsTerm= xdao.getTerm(record.getSample().getStrainAccId());
-        List<String> termAncestors=new ArrayList<>();
+    /*    List<String> termAncestors=new ArrayList<>();
 
         for(Term term: xdao.getAllActiveTermAncestors(rsTerm.getAccId())){
             termAncestors.add(term.getAccId());
-        }
+        }*/
         String rootTerm= xdao.getTerm(rsRootTermAcc).getTerm();
         List<StringMapQuery.MapPair> rsTopLevelTerms= xdao.getTopLevelTerms(rsTerm.getAccId());
         List<PhenominerIndexObject> indexObjects=new ArrayList<>();
+        Map<String, Relation> ancestors=xdao.getTermAncestors(rsTerm.getAccId());
 
-        Term parentTerm=rsTerm;
-        Map<String, String > heirarcyMap=new HashMap<>();
         if(rsTopLevelTerms.size()>0){
             for(StringMapQuery.MapPair topLevelPair: rsTopLevelTerms) {
-                    for (Term parentTerm0 :xdao.getParentTerm(parentTerm.getAccId())) {
+                Term parentTerm=rsTerm;
+                Map<String, String > hierarchyMap=new HashMap<>();
+                int i=maxAncestorDepth-ancestors.size();
+                List<Term> terms= xdao.getParentTerm(parentTerm.getAccId());
+                if(ancestors.size()==2)
+                    i=1;
+                    for (Term parentTerm0 :terms) {
                             if(!parentTerm0.getAccId().equalsIgnoreCase(topLevelPair.keyValue.toString())) {
                                 parentTerm=parentTerm0;
+                                hierarchyMap.put("level"+ i, parentTerm.getTerm());
+                                i++;
+
                             }else{
+                                parentTerm=rsTerm;
                                 break;
                             }
-                    }
 
-            }
-        }
-        if(rsTopLevelTerms.size()>0){
-            for(StringMapQuery.MapPair topLevelPair: rsTopLevelTerms) {
+                    }
+                    System.out.println(hierarchyMap);
                 PhenominerIndexObject obj = new PhenominerIndexObject();
                 obj.setRecordId(record.getId());
                 obj.setRsRootTermAcc(rsRootTermAcc);
@@ -106,8 +119,11 @@ public class PhenominerThread implements Runnable {
                 obj.setRsParentTermAcc(parentTerm.getAccId());
                 obj.setRsTopLevelTerm(topLevelPair.stringValue);
                 obj.setRsTopLevelTermAcc(topLevelPair.keyValue);
+                obj.setHierarchyMap(hierarchyMap);
                 indexObjects.add(obj);
-            }}
+            }
+        }
+
         return indexObjects;
 
     }
