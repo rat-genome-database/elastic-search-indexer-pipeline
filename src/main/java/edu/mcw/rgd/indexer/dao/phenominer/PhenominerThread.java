@@ -265,6 +265,7 @@ public class PhenominerThread implements Runnable  {
 
 
             for(int key:keySet){
+                List<LinkedHashMap<String, String>> tmpMap=new ArrayList<>();
 
                 for(Map.Entry e:hierarchyMap1.get(key).entrySet()) {
                     String parent = (String) e.getKey();
@@ -272,24 +273,22 @@ public class PhenominerThread implements Runnable  {
                     if (!parent.equals("")) {
                         Set<String> children = (Set<String>) e.getValue();
                         LinkedHashMap<String, String> map2 = new LinkedHashMap<>();
-                        List<Map<String, String>> tmpMap=new ArrayList<>();
                         //   Iterator hmapsIterator=hmaps.iterator();
                      //   for(Map<String, String> map3:hmaps)
                      //   for(int i=0;i<hmaps.size();i++){
                         for(int i=0;i<hmaps.size();i++){
                             LinkedHashMap<String, String> map3= hmaps.get(i);
-                           for(Map.Entry entry:map3.entrySet()){
-                               String k= (String) entry.getKey();
-                               if(k.equalsIgnoreCase(parent)){
-                                   map2=map3;
-                                   tmpMap.add(map3);
-                                   break;
-                               }
-                           }
+                            if(new ArrayList(map3.keySet()).get(map3.size()-1).equals(parent) && !map3.keySet().contains(rsTermAcc)) {
+                                map2 = map3;
+                                tmpMap.add(map3);
+                                break;
+                            }
 
 
                         }
-
+                        if(tmpMap.size()>0 ){
+                            t.removeMapEntries(hmaps, tmpMap);
+                        }
                         if(map2.size()>0)
                         for (String child : children) {
                             LinkedHashMap<String, String> hMap1 = new LinkedHashMap<>(map2);
@@ -305,16 +304,18 @@ public class PhenominerThread implements Runnable  {
      //  System.out.println(gson.toJson(hierarchyMap));
         System.out.println(gson.toJson(hmaps));
     }
-    public void removeMapEntries(List<Map<String, String>> maps, List<Map<String,String>> tmpMaps){
-        Iterator<Map<String, String>> mapIterator=maps.iterator();
-        while(mapIterator.hasNext()){
+    public void removeMapEntries(List<LinkedHashMap<String, String>> maps, List<LinkedHashMap<String,String>> tmpMaps){
+        Iterator<LinkedHashMap<String, String>> tmpIterator=tmpMaps.iterator();
+        Gson gson=new Gson();
+        while(tmpIterator.hasNext()){
+            Map<String, String> tmpMap=tmpIterator.next();
+            Iterator<LinkedHashMap<String, String>> mapIterator=maps.iterator();
+
+            while(mapIterator.hasNext()){
             Map<String, String> map=mapIterator.next();
-            Iterator<Map<String, String>> tmpIterator=tmpMaps.iterator();
-            while(tmpIterator.hasNext()){
-                Map<String, String> tmpMap=tmpIterator.next();
-                if(map.equals(tmpMap)){
-                    mapIterator.remove();
-                }
+            if(map.equals(tmpMap) ){
+                  mapIterator.remove();
+            }
             }
         }
     }
