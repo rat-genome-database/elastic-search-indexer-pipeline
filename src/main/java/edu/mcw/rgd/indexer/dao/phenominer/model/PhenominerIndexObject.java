@@ -3,6 +3,8 @@ package edu.mcw.rgd.indexer.dao.phenominer.model;
 import edu.mcw.rgd.dao.spring.StringMapQuery;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 public class PhenominerIndexObject {
@@ -17,15 +19,78 @@ public class PhenominerIndexObject {
 
     private String rsParentTerm;
     private String rsParentTermAcc;
+    private List<String> rsTerms;
+    private List<String> cmoTerms;
+    private List<String> mmoTerms;
+    private List<String> xcoTerms;
 
-    private  Map<String, String > hierarchyMap;
+    private LinkedHashMap<String, String > rsHierarchyMap;
+    private LinkedHashMap<String, String > cmoHierarchyMap;
+    private LinkedHashMap<String, String > mmoHierarchyMap;
+    private LinkedHashMap<String, String > xcoHierarchyMap;
 
-    public Map<String, String> getHierarchyMap() {
-        return hierarchyMap;
+    public List<String> getRsTerms() {
+        return rsTerms;
     }
 
-    public void setHierarchyMap(Map<String, String> hierarchyMap) {
-        this.hierarchyMap = hierarchyMap;
+    public void setRsTerms(List<String> rsTerms) {
+        this.rsTerms = rsTerms;
+    }
+
+    public List<String> getCmoTerms() {
+        return cmoTerms;
+    }
+
+    public void setCmoTerms(List<String> cmoTerms) {
+        this.cmoTerms = cmoTerms;
+    }
+
+    public List<String> getMmoTerms() {
+        return mmoTerms;
+    }
+
+    public void setMmoTerms(List<String> mmoTerms) {
+        this.mmoTerms = mmoTerms;
+    }
+
+    public List<String> getXcoTerms() {
+        return xcoTerms;
+    }
+
+    public void setXcoTerms(List<String> xcoTerms) {
+        this.xcoTerms = xcoTerms;
+    }
+
+    public LinkedHashMap<String, String> getCmoHierarchyMap() {
+        return cmoHierarchyMap;
+    }
+
+    public void setCmoHierarchyMap(LinkedHashMap<String, String> cmoHierarchyMap) {
+        this.cmoHierarchyMap = cmoHierarchyMap;
+    }
+
+    public LinkedHashMap<String, String> getMmoHierarchyMap() {
+        return mmoHierarchyMap;
+    }
+
+    public void setMmoHierarchyMap(LinkedHashMap<String, String> mmoHierarchyMap) {
+        this.mmoHierarchyMap = mmoHierarchyMap;
+    }
+
+    public LinkedHashMap<String, String> getXcoHierarchyMap() {
+        return xcoHierarchyMap;
+    }
+
+    public void setXcoHierarchyMap(LinkedHashMap<String, String> xcoHierarchyMap) {
+        this.xcoHierarchyMap = xcoHierarchyMap;
+    }
+
+    public LinkedHashMap<String, String> getRsHierarchyMap() {
+        return rsHierarchyMap;
+    }
+
+    public void setRsHierarchyMap(LinkedHashMap<String, String> rsHierarchyMap) {
+        this.rsHierarchyMap = rsHierarchyMap;
     }
 
     public int getRecordId() {
