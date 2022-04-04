@@ -58,14 +58,16 @@ public class StrainVariants extends AbstractDAO{
         Connection conn=null;
         PreparedStatement ps=null;
         ResultSet rs=null;
-        String sql="select count(variant_type) tot, variant_type from variant " +
-                "   where " +
-                "   sample_id=? " ;
+        String sql="select count(variant_type) tot, variant_type from variant v " +
+                " inner join variant_sample_detail vsd on vsd.rgd_id=v.rgd_id " +
+                " inner join variant_map_data vmd on v.rgd_id=vmd.rgd_id " +
+                "                  where " +
+                "                 vsd.sample_id=? " ;
 
         if(chr!=null){
-            sql=sql+"and chromosome=?";
+            sql=sql+"and vmd.chromosome=?";
         }
-        sql=sql+ "   group by variant_type";
+        sql=sql+ "   group by v.variant_type";
         try{
             conn= DataSourceFactory.getInstance().getCarpeNovoDataSource().getConnection();
          //   System.out.println("SAMPLE SIZE: "+ samples.size());

@@ -167,7 +167,7 @@ public class GenomeInfoThread implements Runnable {
                     }
                 }
                 if (key == 3) {
-                    if (mapKey == 360 || mapKey == 70 || mapKey == 60) {
+                    if (mapKey == 360 || mapKey == 70 || mapKey == 60 || mapKey == 372 || mapKey==38) {
                         String[][] strainVairantMatrix = variants.getStrainVariants(mapKey, null);
                         obj.setVariantsMatrix(strainVairantMatrix);
                     }

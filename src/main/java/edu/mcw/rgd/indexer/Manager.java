@@ -1,5 +1,6 @@
 package edu.mcw.rgd.indexer;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.mcw.rgd.dao.DataSourceFactory;
 import edu.mcw.rgd.dao.impl.MapDAO;
 import edu.mcw.rgd.dao.impl.OntologyXDAO;
@@ -64,7 +65,8 @@ public class Manager {
     private boolean reindex;
 
     private static final Logger log = Logger.getLogger("main");
-
+    MapDAO mapDAO= new MapDAO();
+    SampleDAO sdao= new SampleDAO();
     public static void main(String[] args) throws Exception {
 
         DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
@@ -120,8 +122,15 @@ public class Manager {
         }
 
         args= (String[]) ArrayUtils.remove(args, 0);
-
-        ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+        int corePoolsize=10;
+        int maxPoolSize=10;
+        for(String a:args){
+            if(a.equalsIgnoreCase("chromosomes")){
+                corePoolsize=5;
+                maxPoolSize=5;
+            }
+        }
+        ExecutorService executor= new MyThreadPoolExecutor(corePoolsize,maxPoolSize,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
             boolean searchIndexCreated=false;
             int runningThreadsCount=0;
             for (String arg : args) {
@@ -167,10 +176,11 @@ public class Manager {
 
                     case "Chromosomes":
                          admin.createIndex("chromosome_mappings", "chromosome");
-                        if(arg.equalsIgnoreCase("chromosomes")){
-                            MapDAO mapDAO= new MapDAO();
-                            System.out.println("INDEXING Chromosomes...");
-                            for(int key : SpeciesType.getSpeciesTypeKeys()) {
+                     //   if(arg.equalsIgnoreCase("chromosomes")) {
+                        ObjectMapper mapper = new ObjectMapper();
+
+                        System.out.println("INDEXING Chromosomes...");
+                            for (int key : SpeciesType.getSpeciesTypeKeys()) {
                                 if (SpeciesType.isSearchable(key)) {
                                     //   int key=3;
                                     if (key != 0) {
@@ -178,16 +188,26 @@ public class Manager {
                                         for (Map m : maps) {
                                             int mapKey = m.getKey();
                                             String assembly = m.getName();
-                                            if (mapKey != 6 && mapKey != 36 && mapKey != 8 && mapKey != 21 && mapKey != 19 && mapKey != 7) {
-                                                workerThread = new ChromosomeThread(key, RgdIndex.getNewAlias(), mapKey, assembly);
-                                                executor.execute(workerThread);
-                                            }
-                                        }
+                                            if (mapKey != 6 && mapKey != 36 && mapKey != 8 && mapKey != 21 && mapKey != 19 && mapKey != 7 && mapKey != 720 && mapKey != 44
+                                            && mapKey!=722 && mapKey!=1410) {
+                                               /* workerThread = new ChromosomeThread(key, RgdIndex.getNewAlias(), mapKey, assembly);
+                                                executor.execute(workerThread);*/
+                                                try {
+                                                    List<Chromosome> chromosomes = mapDAO.getChromosomes(mapKey);
+                                                    for (Chromosome c : chromosomes) {
+                                                        workerThread = new ChromosomeIndexer(key, RgdIndex.getNewAlias(), mapKey, assembly,c, mapper);
+                                                        executor.execute(workerThread);
+                                                    }
+                                                } catch (Exception e) {
 
+                                                }
+                                            }
+
+                                        }
                                     }
                                 }
                             }
-                        }
+                      //  }
                         break;
                     case "GenomeInfo":
 
@@ -227,8 +247,7 @@ public class Manager {
                         break;
                     case "Variant":
 
-                        MapDAO mapDAO= new MapDAO();
-                        SampleDAO sdao= new SampleDAO();
+
                         sdao.setDataSource(DataSourceFactory.getInstance().getCarpeNovoDataSource());
                      //   List<Integer> speciesTypeKeys= new ArrayList<>(Arrays.asList(1,3, 6));
                      //   List<Integer> speciesTypeKeys= new ArrayList<>(Arrays.asList(3));
