@@ -19,6 +19,7 @@ import edu.mcw.rgd.indexer.dao.IndexerDAO;
 import edu.mcw.rgd.indexer.dao.ObjectIndexerThread;
 
 import edu.mcw.rgd.indexer.dao.findModels.FullAnnotDao;
+import edu.mcw.rgd.indexer.dao.phenominer.PhenominerNormalizedThread;
 import edu.mcw.rgd.indexer.dao.phenominer.PhenominerThread;
 import edu.mcw.rgd.indexer.dao.variants.*;
 import edu.mcw.rgd.indexer.dao.variants.VariantIndexer;
@@ -206,9 +207,12 @@ public class Manager {
 
                         admin.createIndex("phenominer_mappings", "genome");
                         System.out.println("INDEXING phenominer records...");
-                        workerThread = new PhenominerThread(RgdIndex.getNewAlias(), log);
-                                    executor.execute(workerThread);
+                      //  workerThread = new PhenominerThread(RgdIndex.getNewAlias(), log);
+                      //              executor.execute(workerThread);
 
+                  //      PhenominerThread thread=new PhenominerThread(RgdIndex.getNewAlias(), log);//to index denormalized way with hierarchy maps
+                        PhenominerNormalizedThread thread=new PhenominerNormalizedThread(RgdIndex.getNewAlias(), log);
+                        thread.run();
                         break;
                     case "Models":
                         System.out.println("Indexing models...");
