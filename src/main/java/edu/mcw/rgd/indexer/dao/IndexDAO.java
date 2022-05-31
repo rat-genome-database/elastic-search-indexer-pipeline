@@ -859,7 +859,9 @@ public class IndexDAO extends AbstractDAO {
             System.out.println("Processing " + species + " variants...");
 
            for( edu.mcw.rgd.datamodel.Map map : mapDAO.getMaps(speciesTypeKey)) {
+               if(map.getKey()!=372)
                    for (Chromosome chr : mapDAO.getChromosomes(map.getKey())) {
+
           //  String chr="12";
          //   int mapKey=360;
                      variantIndexerThread = new VariantIndexerThread(chr.getChromosome(), map.getKey(), speciesTypeKey);
