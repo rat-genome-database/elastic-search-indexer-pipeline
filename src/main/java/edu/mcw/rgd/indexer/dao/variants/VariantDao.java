@@ -1,11 +1,13 @@
 package edu.mcw.rgd.indexer.dao.variants;
 
+import edu.mcw.rgd.dao.AbstractDAO;
 import edu.mcw.rgd.dao.DataSourceFactory;
 import edu.mcw.rgd.dao.impl.GeneDAO;
 import edu.mcw.rgd.dao.impl.TranscriptDAO;
 import edu.mcw.rgd.dao.impl.VariantDAO;
 import edu.mcw.rgd.dao.spring.VariantMapper;
 import edu.mcw.rgd.datamodel.*;
+import edu.mcw.rgd.indexer.model.IndexObject;
 import edu.mcw.rgd.indexer.model.variants.VariantIndex;
 import org.springframework.jdbc.core.SqlParameter;
 
@@ -17,35 +19,27 @@ import java.util.Map;
 /**
  * Created by jthota on 6/26/2019.
  */
-public class VariantDao extends VariantDAO {
+public class VariantDao extends AbstractDAO {
     GeneDAO geneDAO=new GeneDAO();
 
-    public List<Variant> getVariants(int sampleId, String chr) {
+    public List<Variant> getVariants(int sampleId, String chr) throws Exception {
         String sql = "SELECT * FROM Variant where sample_id=? and chromosome=?" ;
         VariantMapper q = new VariantMapper(this.getDataSource(), sql);
         q.declareParameter(new SqlParameter(4));
         q.declareParameter(new SqlParameter(12));
         return q.execute(new Object[]{sampleId, chr});
     }
-    public List<VariantIndex> getVariantResults(int sampleId, String chr, int mapKey) {
+    public List<IndexObject> getVariantResults(int sampleId, String chr, int mapKey) throws Exception {
 
 
-        String sql="select v.*, vt.*,t.*,  cs.*,dbs.* , dbs.snp_name as MCW_DBS_SNP_NAME, md.*, gl.gene_symbols as region_name, g.gene_symbol as symbol, g.gene_symbol_lc as symbol_lc , s.analysis_name from variant_dog v " +
-                "left outer join gene_loci gl on (gl.map_key=? and gl.chromosome=v.chromosome and gl.pos=v.start_pos) " +
-                "left outer join variant_transcript vt on v.variant_id=vt.variant_id " +
-                "left outer join transcripts t on vt.transcript_rgd_id=t.transcript_rgd_id " +
+        String sql="select * from variant v left outer join variant_map_data vmd on v.rgd_id=vmd.rgd_id " +
+                "where vmd.map_key=? "
+                 ;
+        edu.mcw.rgd.indexer.dao.variants.VariantMapper variantMapper=
+                new edu.mcw.rgd.indexer.dao.variants.VariantMapper(DataSourceFactory.getInstance().getCarpeNovoDataSource(), sql);
 
-                "left outer JOIN sample s on (v.sample_id=s.sample_id and s.map_key=?)" +
-                "left outer JOIN  db_snp dbs  ON  " +
-                "( v.START_POS = dbs.POSITION     AND v.CHROMOSOME = dbs.CHROMOSOME      AND v.VAR_NUC = dbs.ALLELE      AND dbs.MAP_KEY = s.MAP_KEY AND dbs.source=s.dbsnp_source) " +
-                "left outer join CONSERVATION_SCORE cs on (cs.chr=v.chromosome and cs.position=v.start_pos) " +
-                "left outer join maps_data md on (md.chromosome=v.chromosome and md.rgd_id=t.gene_rgd_id and md.map_key=?) " +
-                "left outer join genes g on (g.rgd_id=t.gene_rgd_id) " +
-                "left outer join rgd_ids r on (r.rgd_id=md.rgd_id and r.object_status='ACTIVE') " +
-                "where v.chromosome=? " +
-                "and v.total_depth>8 " +
-                "and v.sample_id=?";
-        List<VariantIndex> vrList = new ArrayList<>();
+        return execute(variantMapper,mapKey);
+      /*  List<VariantIndex> vrList = new ArrayList<>();
         java.util.Map<Long, VariantIndex> variants= new HashMap<>();
         Set<Long> variantIds= new HashSet<>();
         ResultSet rs= null;
@@ -55,10 +49,7 @@ public class VariantDao extends VariantDAO {
             connection=this.getDataSource().getConnection();
             stmt=connection.prepareStatement(sql);
             stmt.setInt(1, mapKey);
-            stmt.setInt(2, mapKey);
-            stmt.setInt(3, mapKey);
-            stmt.setString(4, chr);
-            stmt.setInt(5, sampleId);
+
             rs=  stmt.executeQuery();
 
         //   System.out.println("RESULT SET SIZE: "+ rs.getFetchSize());
@@ -93,7 +84,7 @@ public class VariantDao extends VariantDAO {
                         /***************Variant Transcript****************************/
                         //   vi.setVariantTranscriptId(rs.getInt("variant_transcript_id"));
                         //  vi.setTranscriptRgdId(rs.getInt("transcript_rgd_id"));
-                        List<Long> vtIds=new ArrayList<>();
+           /*             List<Long> vtIds=new ArrayList<>();
                         vtIds.add(rs.getLong("variant_transcript_id"));
                         vi.setVariantTranscriptIds(vtIds);
                         List<Long> tIds= new ArrayList<>();
@@ -118,9 +109,9 @@ public class VariantDao extends VariantDAO {
 
 //                        vi.setPolyphenPrediction(rs.getString("prediction"));
                         /**************************dbs_snp****************************/
-                        vi.setDbsSnpName(rs.getString("MCW_DBS_SNP_NAME"));
+             /*           vi.setDbsSnpName(rs.getString("MCW_DBS_SNP_NAME"));
                         /******************region_name*******************/
-                        String regionName=rs.getString("region_name");
+            /*            String regionName=rs.getString("region_name");
                         vi.setRegionName(regionName);
                         vi.setRegionNameLc(regionName.toLowerCase());
                         List<BigDecimal> conScores = new ArrayList<>();
@@ -234,7 +225,7 @@ public class VariantDao extends VariantDAO {
         for(Map.Entry e:variants.entrySet()){
             vrList.add((VariantIndex) e.getValue());
         }
-        return vrList;
+        return vrList;*/
     }
 
     public List<MappedGene> getMappedGenes(String chr,long startPos, long endPos, int mapKey)  {
@@ -248,33 +239,9 @@ public class VariantDao extends VariantDAO {
         return mappedGenes;
     }
 
-    public static void main(String[] args) throws Exception {
-        VariantDao dao= new VariantDao();
-        GeneDAO gdao=new GeneDAO();
-        TranscriptDAO tdao = new TranscriptDAO();
-        dao.setDataSource(DataSourceFactory.getInstance().getCarpeNovoDataSource());
-        List<VariantIndex> variantResults= dao.getVariantResults(911,"10", 360);
-        List<SNPlotyper> snps=new ArrayList<>();
-        for (VariantIndex v: variantResults) {
-         List<MappedGene> mappedGenes = gdao.getActiveMappedGenes(v.getChromosome(), v.getStartPos(), v.getEndPos(), 360);
-     //    List<MapData> mapData = tdao.getFeaturesByGenomicPos(60,v.getVariant().getChromosome(), (int) (long) v.getVariant().getStartPos(), (int) (long) v.getVariant().getEndPos(),15);
-
-            System.out.print(v.getVariant_id()+"\t"+v.getSampleId()+"\t"+v.getChromosome()+"\t"+v.getStartPos()+
-                    "\t"+ v.getEndPos()+"\t"+ v.getConScores().toString()+"\t"+ v.getRegionName());
-         /*   for(ConservationScore s:v.getVariant().getConservationScore()){
-                System.out.print(s.getScore() +",");
-            }
-            System.out.print("\t"+v.getVariant().getReferenceNucleotide()+"\t"+v.getVariant().getVariantNucleotide()+"\t"+v.getVariant().getVariantType()+
-                    "\t"+ v.getVariant().getDepth()+"\t"+v.getVariant().getZygosityPossibleError()+"\t"+ v.getVariant().getGenicStatus()+"\t");
-
-            for(MappedGene g:mappedGenes){
-                System.out.print(g.getGene().getSymbol()+"|"+g.getGene().getRgdId()+"|");
-            }*/
-            System.out.print("\n");
-        }
 
 
 
-    }
+
 
 }

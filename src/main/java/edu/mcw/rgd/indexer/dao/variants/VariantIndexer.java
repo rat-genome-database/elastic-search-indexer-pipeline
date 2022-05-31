@@ -1,11 +1,14 @@
 package edu.mcw.rgd.indexer.dao.variants;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.mcw.rgd.dao.DataSourceFactory;
 import edu.mcw.rgd.dao.impl.GeneDAO;
 import edu.mcw.rgd.datamodel.*;
+import edu.mcw.rgd.datamodel.variants.VariantObject;
 import edu.mcw.rgd.indexer.client.ESClient;
+import edu.mcw.rgd.indexer.model.IndexObject;
 import edu.mcw.rgd.indexer.model.variants.VariantIndex;
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.elasticsearch.action.bulk.BulkRequest;
@@ -46,23 +49,30 @@ public class VariantIndexer  implements  Runnable{
     public void run() {
         VariantDao variantDao= new VariantDao();
         try {
-            variantDao.setDataSource(DataSourceFactory.getInstance().getCarpeNovoDataSource());
+       //     variantDao.setDataSource(DataSourceFactory.getInstance().getCarpeNovoDataSource());
         } catch (Exception e) {
             e.printStackTrace();
         }
 
 
-        List<VariantIndex> vrs=variantDao.getVariantResults(sampleId, chromosome, mapKey);
-      //  System.out.println("Variants Size:"+vrs.size()+"\tMapKey:"+mapKey+"\tChr:"+chromosome+"\tSampleId:"+sampleId );
-       if(vrs.size()>0){
+        List<IndexObject> vrs= null;
+        try {
+            vrs = variantDao.getVariantResults(sampleId, chromosome, mapKey);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        //  System.out.println("Variants Size:"+vrs.size()+"\tMapKey:"+mapKey+"\tChr:"+chromosome+"\tSampleId:"+sampleId );
+       if(vrs!=null && vrs.size()>0){
            BulkRequest bulkRequest=new BulkRequest();
            bulkRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
 
            int docCount=1;
+           ObjectMapper mapper = new ObjectMapper();
+            mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+           mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
 
-            for (VariantIndex o : vrs) {
+           for (IndexObject o : vrs) {
                 docCount++;
-                ObjectMapper mapper = new ObjectMapper();
                 byte[] json = new byte[0];
                 try {
                     json = mapper.writeValueAsBytes(o);
