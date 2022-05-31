@@ -20,7 +20,7 @@ public class PhenominerIndexObject {
     private String mmoTerm;
 
     private List<String> xcoTermAcc;
-    private List<String> xcoTerm;
+    private String xcoTerm;
 
     private String rsRootTerm;
     private String rsRootTermAcc;
@@ -63,6 +63,15 @@ public class PhenominerIndexObject {
     private String postInsultType;
     private int postInsultTimeValue;
     private String postInsultTimeUnit;
+    private int refRgdId;
+
+    public int getRefRgdId() {
+        return refRgdId;
+    }
+
+    public void setRefRgdId(int refRgdId) {
+        this.refRgdId = refRgdId;
+    }
 
     public String getCmoTermWithUnits() {
         return cmoTermWithUnits;
@@ -240,11 +249,11 @@ public class PhenominerIndexObject {
         this.xcoTermAcc = xcoTermAcc;
     }
 
-    public List<String> getXcoTerm() {
+    public String getXcoTerm() {
         return xcoTerm;
     }
 
-    public void setXcoTerm(List<String> xcoTerm) {
+    public void setXcoTerm(String xcoTerm) {
         this.xcoTerm = xcoTerm;
     }
 

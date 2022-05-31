@@ -2,6 +2,8 @@ package edu.mcw.rgd.indexer.dao.phenominer;
 
 import edu.mcw.rgd.dao.impl.OntologyXDAO;
 import edu.mcw.rgd.dao.impl.PhenominerDAO;
+import edu.mcw.rgd.dao.impl.StrainDAO;
+import edu.mcw.rgd.datamodel.Strain;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.pheno.Condition;
 import edu.mcw.rgd.datamodel.pheno.Record;
@@ -22,6 +24,7 @@ public class PhenominerNormalizedThread implements Runnable {
     private Logger log;
     PhenominerDAO phenominerDAO = new PhenominerDAO();
     OntologyXDAO xdao = new OntologyXDAO();
+    StrainDAO strainDAO=new StrainDAO();
     PhenominerProcess process=new PhenominerProcess();
     public PhenominerNormalizedThread() {
     }
@@ -34,8 +37,8 @@ public class PhenominerNormalizedThread implements Runnable {
     public void run() {
         List<Record> records = new ArrayList<>();
         try {
-           records = phenominerDAO.getFullRecords();
-         //   records = phenominerDAO.getFullRecordsByCMO("CMO:0000709");
+       records = phenominerDAO.getFullRecords();
+        //    records = phenominerDAO.getFullRecordsByCMO("CMO:0000709");
             System.out.println("RECORDSSIZE:"+ records.size());
         } catch (Exception e) {
             e.printStackTrace();
@@ -80,6 +83,7 @@ public class PhenominerNormalizedThread implements Runnable {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+
                 object.setCmoTermAcc(record.getClinicalMeasurement().getAccId());
                 try {
                     String cmoTerm=xdao.getTerm(record.getClinicalMeasurement().getAccId()).getTerm();
@@ -98,6 +102,7 @@ public class PhenominerNormalizedThread implements Runnable {
                 }
                 Set<String> xcoAccId = new HashSet<>();
                 Set<String> xcoTerm = new HashSet<>();
+                String concatenatedXcoTerm=new String();
                 for (Condition condition : record.getConditions()) {
                     xcoAccId.add(condition.getOntologyId());
                     try {
@@ -108,13 +113,40 @@ public class PhenominerNormalizedThread implements Runnable {
                 }
                 try {
                     object.setXcoTermAcc(xcoAccId.stream().collect(Collectors.toList()));
-                    object.setXcoTerm(xcoTerm.stream().collect(Collectors.toList()));
+                 /*   if(xcoTerm.size()==0 || (xcoTerm.size()==1 && xcoTerm.iterator().next().equals(""))){
+                        object.setXcoTerm("No condition");
+                    }else*/
+                 //   object.setXcoTerm(xcoTerm.stream().collect(Collectors.joining(" and ")));
+                    if(record.getConditionDescription().equals("")){
+                        object.setXcoTerm("No Condition");
+                    }else
+                    object.setXcoTerm(record.getConditionDescription());
                 }catch (Exception e){System.err.println("No XCO term " + record.getId());}
 
                 Set<String> cmoSynonyms = new HashSet<>(synomyms.get("CMO"));
                 Set<String> mmoSynonyms = new HashSet<>(synomyms.get("MMO"));
                 Set<String> rsSynonyms = new HashSet<>(synomyms.get("RS"));
-                Set<String> xcoSynonyms = new HashSet<>(synomyms.get("XCO"));
+                String strainRgdId=new String();
+                for(String rsSynonym:rsSynonyms){
+                    if(rsSynonym.contains("RGD")){
+                        strainRgdId=rsSynonym;
+                    }
+                }
+                int rgdId=0;
+                if(!strainRgdId.equals("")){
+                    rgdId=Integer.parseInt(strainRgdId.substring(strainRgdId.indexOf(":")+1).trim());
+                    if(rgdId>0){
+                        try {
+                          Strain strain=  strainDAO.getStrain(rgdId);
+                          object.setRsTopLevelTerm(strain.getStrain());
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                } else
+                    System.out.println("NO STRAIN RGD ID:"+ record.getSample().getStrainAccId());
+                System.out.println("RGD ID:"+ rgdId);
+            Set<String> xcoSynonyms = new HashSet<>(synomyms.get("XCO"));
                 object.setCmoTerms(new ArrayList<>(cmoSynonyms));
                 object.setMmoTerms(new ArrayList<>(mmoSynonyms));
                 object.setRsTerms(new ArrayList<>(rsSynonyms));
@@ -180,11 +212,14 @@ public class PhenominerNormalizedThread implements Runnable {
                     object.setExperimentNotes(record.getExperimentNotes());
                 }catch (Exception e){}
                 try {
-                    object.setExperimentName(record.getExperimentName());
+                    object.setExperimentName(record.getExperimentName().trim());
                 }catch (Exception e){}
                 try {
                     object.setClinicalMeasurementNotes(record.getClinicalMeasurement().getNotes());
                 }catch (Exception e){}
+            try {
+                object.setRefRgdId(record.getRefRgdId());
+            }catch (Exception e){}
                 indexObjects.add(object);
 
          //   }
