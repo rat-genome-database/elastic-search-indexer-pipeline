@@ -858,18 +858,18 @@ public class IndexDAO extends AbstractDAO {
             String species = SpeciesType.getCommonName(speciesTypeKey);
             System.out.println("Processing " + species + " variants...");
 
-        //    for( edu.mcw.rgd.datamodel.Map map : mapDAO.getMaps(speciesTypeKey)) {
-                 //   for (Chromosome chr : mapDAO.getChromosomes(map.getKey())) {
-            String chr="12";
-            int mapKey=360;
-                     //   variantIndexerThread = new VariantIndexerThread(chr.getChromosome(), map.getKey(), speciesTypeKey);
-            variantIndexerThread = new VariantIndexerThread(chr,mapKey, speciesTypeKey);
+           for( edu.mcw.rgd.datamodel.Map map : mapDAO.getMaps(speciesTypeKey)) {
+                   for (Chromosome chr : mapDAO.getChromosomes(map.getKey())) {
+          //  String chr="12";
+         //   int mapKey=360;
+                     variantIndexerThread = new VariantIndexerThread(chr.getChromosome(), map.getKey(), speciesTypeKey);
+          //  variantIndexerThread = new VariantIndexerThread(chr,mapKey, speciesTypeKey);
 
             executor2.execute(variantIndexerThread);
-                  //  }
+                   }
 
 
-       //     }
+       }
 
         }
         executor2.shutdown();
