@@ -23,6 +23,7 @@ public class VariantIndex extends IndexObject {
     private String zygosityStatus;
     private String genicStatus;
     private String HGVSNAME;
+    private String rsId;
     private String regionName;
     private String regionNameLc;
     /*****************Sample******************/
@@ -52,6 +53,15 @@ public class VariantIndex extends IndexObject {
     private String dbsSnpName;
 
     private String clinicalSignificance;
+
+
+    public String getRsId() {
+        return rsId;
+    }
+
+    public void setRsId(String rsId) {
+        this.rsId = rsId;
+    }
 
     public String getClinicalSignificance() {
         return clinicalSignificance;

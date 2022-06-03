@@ -1,13 +1,18 @@
 package edu.mcw.rgd.indexer.dao.variants;
 
+import edu.mcw.rgd.dao.impl.MapDAO;
+import edu.mcw.rgd.datamodel.MapData;
 import edu.mcw.rgd.datamodel.SpeciesType;
+import edu.mcw.rgd.indexer.model.MapInfo;
 import edu.mcw.rgd.indexer.model.variants.VariantIndex;
 import org.springframework.jdbc.object.MappingSqlQuery;
 
 import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class VariantIndexQuery extends MappingSqlQuery {
     public VariantIndexQuery(DataSource ds, String query){
@@ -18,6 +23,7 @@ public class VariantIndexQuery extends MappingSqlQuery {
         VariantIndex vi = new VariantIndex();
         vi.setCategory("Variant");
         vi.setName(rs.getString("rs_id"));
+        vi.setRsId(rs.getString("rs_id"));
         vi.setSymbol(String.valueOf(rs.getLong("rgd_id")));
         vi.setTerm_acc(String.valueOf(rs.getLong("rgd_id")));
         vi.setSpecies(SpeciesType.getCommonName(rs.getInt("species_type_key")));
@@ -58,8 +64,31 @@ public class VariantIndexQuery extends MappingSqlQuery {
                 vi.setGeneSymbols(Arrays.asList( rs.getString("gene_symbol_lc")));
             }
         }catch (Exception e){}
-
+        try {
+            vi.setMapDataList(this.getMapData(vi));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         return vi;
+    }
+    public List<MapInfo> getMapData(VariantIndex vi) throws Exception {
+        List<MapInfo> mapList= new ArrayList<>();
+
+            MapInfo map= new MapInfo();
+            map.setChromosome(vi.getChromosome());
+            map.setStartPos(vi.getStartPos());
+            map.setStopPos(vi.getEndPos());
+            map.setMap(this.getMapofMapkey(vi.getMapKey()));
+            mapList.add(map);
+
+        return mapList;
+    }
+    public String getMapofMapkey(int mapkey) throws Exception {
+
+        MapDAO mapDAO = new MapDAO();
+        edu.mcw.rgd.datamodel.Map m = mapDAO.getMapByKey(mapkey);
+        return m.getDescription();
+
     }
 }

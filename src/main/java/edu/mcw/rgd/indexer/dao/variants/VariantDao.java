@@ -334,6 +334,7 @@ public class VariantDao extends AbstractDAO {
 
         for(Map.Entry e:sortedVariants.entrySet()){
             vrList.add((VariantIndex) e.getValue());
+
         }
         System.out.println("varaiants size: "+ vrList.size());
 
