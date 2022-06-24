@@ -9,11 +9,9 @@ import edu.mcw.rgd.datamodel.pheno.Condition;
 import edu.mcw.rgd.datamodel.pheno.Record;
 import edu.mcw.rgd.indexer.dao.phenominer.model.PhenominerIndexObject;
 import edu.mcw.rgd.indexer.dao.phenominer.utils.PhenominerProcess;
-import javafx.animation.ScaleTransition;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
-import java.nio.channels.ScatteringByteChannel;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
