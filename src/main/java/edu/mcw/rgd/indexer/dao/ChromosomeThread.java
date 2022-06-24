@@ -124,7 +124,7 @@ public class ChromosomeThread implements  Runnable {
 
                     //ADD STRAIN VARIANTS IF SPECIES_TYPE_KEY=3 (RAT SPECIES)
                     if(key==3) {
-                        String strainVairantMatrix[][] = variants.getStrainVariants(mapKey, c.getChromosome());
+                        String[][] strainVairantMatrix = variants.getStrainVariants(mapKey, c.getChromosome());
                         obj.setVariantsMatrix(strainVairantMatrix);
                     }
                     objects.add(obj);

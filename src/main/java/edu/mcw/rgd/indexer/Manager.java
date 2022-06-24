@@ -16,6 +16,8 @@ import edu.mcw.rgd.indexer.client.IndexAdmin;
 import edu.mcw.rgd.indexer.dao.*;
 
 import edu.mcw.rgd.indexer.dao.findModels.FullAnnotDao;
+import edu.mcw.rgd.indexer.dao.phenominer.PhenominerNormalizedThread;
+import edu.mcw.rgd.indexer.dao.phenominer.PhenominerThread;
 import edu.mcw.rgd.indexer.dao.variants.*;
 import edu.mcw.rgd.indexer.dao.variants.VariantIndexer;
 import edu.mcw.rgd.indexer.model.RgdIndex;
@@ -60,7 +62,8 @@ public class Manager {
     BulkIndexProcessor bulkIndexProcessor;
     IndexDAO indexDAO=new IndexDAO();
     private static final Logger log = Logger.getLogger("main");
-
+    MapDAO mapDAO= new MapDAO();
+    SampleDAO sdao= new SampleDAO();
     public static void main(String[] args) throws Exception {
 
         DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
@@ -202,6 +205,17 @@ public class Manager {
                                }
                            }
                       }
+                        break;
+                    case "Phenominer":
+
+                        admin.createIndex("phenominer_mappings", "genome");
+                        System.out.println("INDEXING phenominer records...");
+                      //  workerThread = new PhenominerThread(RgdIndex.getNewAlias(), log);
+                      //              executor.execute(workerThread);
+
+                  //      PhenominerThread thread=new PhenominerThread(RgdIndex.getNewAlias(), log);//to index denormalized way with hierarchy maps
+                        PhenominerNormalizedThread thread=new PhenominerNormalizedThread(RgdIndex.getNewAlias(), log);
+                        thread.run();
                         break;
                     case "Models":
                         System.out.println("Indexing models...");
