@@ -102,7 +102,7 @@ public class PhenominerNormalizedThread implements Runnable {
                 }
                 Set<String> xcoAccId = new HashSet<>();
                 Set<String> xcoTerm = new HashSet<>();
-                String concatenatedXcoTerm=new String();
+
                 for (Condition condition : record.getConditions()) {
                     xcoAccId.add(condition.getOntologyId());
                     try {
@@ -164,16 +164,20 @@ public class PhenominerNormalizedThread implements Runnable {
                     object.setUnits(record.getMeasurementUnits());
                 } catch (Exception e){System.out.println("No measurement units for record "+ record.getId());}
                 try {
-                    object.setSd(record.getMeasurementSD());
+                    double roundOffSD = Math.round(Double.parseDouble(record.getMeasurementSD()) * 100.0) / 100.0;
+                    object.setSd(String.valueOf(roundOffSD));
+
                 }catch (Exception e){System.err.println("No SD for record "+ record.getId());}
                 try {
-                    object.setSem(record.getMeasurementSem());
+                    double roundOffSem = Math.round(Double.parseDouble(record.getMeasurementSem()) * 100.0) / 100.0;
+                    object.setSem(String.valueOf(roundOffSem));
                 }catch (Exception e){}
                 try {
                     object.setAverageType(record.getClinicalMeasurement().getAverageType());
                 }catch (Exception e){}
                 try {
-                    object.setValue(record.getMeasurementValue());
+                    double roundOffValue = Math.round(Double.parseDouble(record.getMeasurementValue()) * 100.0) / 100.0;
+                    object.setValue(String.valueOf(roundOffValue));
                 }catch (Exception e){}
                 try {
                     object.setStudyId(record.getStudyId());
