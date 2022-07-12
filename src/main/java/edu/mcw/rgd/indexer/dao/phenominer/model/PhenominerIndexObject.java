@@ -1,6 +1,7 @@
 package edu.mcw.rgd.indexer.dao.phenominer.model;
 
 import edu.mcw.rgd.dao.spring.StringMapQuery;
+import edu.mcw.rgd.datamodel.pheno.IndividualRecord;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -64,6 +65,15 @@ public class PhenominerIndexObject {
     private int postInsultTimeValue;
     private String postInsultTimeUnit;
     private int refRgdId;
+    private List<IndividualRecord> individualRecords;
+
+    public List<IndividualRecord> getIndividualRecords() {
+        return individualRecords;
+    }
+
+    public void setIndividualRecords(List<IndividualRecord> individualRecords) {
+        this.individualRecords = individualRecords;
+    }
 
     public int getRefRgdId() {
         return refRgdId;

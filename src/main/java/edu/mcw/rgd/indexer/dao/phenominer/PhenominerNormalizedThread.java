@@ -6,6 +6,7 @@ import edu.mcw.rgd.dao.impl.StrainDAO;
 import edu.mcw.rgd.datamodel.Strain;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.pheno.Condition;
+import edu.mcw.rgd.datamodel.pheno.IndividualRecord;
 import edu.mcw.rgd.datamodel.pheno.Record;
 import edu.mcw.rgd.indexer.dao.phenominer.model.PhenominerIndexObject;
 import edu.mcw.rgd.indexer.dao.phenominer.utils.PhenominerProcess;
@@ -221,6 +222,15 @@ public class PhenominerNormalizedThread implements Runnable {
                 }catch (Exception e){}
             try {
                 object.setRefRgdId(record.getRefRgdId());
+            }catch (Exception e){}
+            try{
+               if( record.getHasIndividualRecord()){
+                   System.out.print(record.getId());
+                  List<IndividualRecord> individualRecords= phenominerDAO.getIndividualRecords(record.getId());
+                  System.out.print("\t"+ individualRecords.size());
+                  object.setIndividualRecords(individualRecords);
+               }
+
             }catch (Exception e){}
                 indexObjects.add(object);
 
