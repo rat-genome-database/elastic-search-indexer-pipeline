@@ -3,11 +3,15 @@ package edu.mcw.rgd.indexer.dao;
 
 import edu.mcw.rgd.dao.impl.*;
 
+import edu.mcw.rgd.datamodel.Alias;
+import edu.mcw.rgd.datamodel.RgdId;
 import edu.mcw.rgd.datamodel.SpeciesType;
+import edu.mcw.rgd.datamodel.Strain;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
 import edu.mcw.rgd.datamodel.ontologyx.TermWithStats;
 import edu.mcw.rgd.indexer.model.IndexObject;
+import edu.mcw.rgd.process.mapping.ObjectMapper;
 import org.apache.log4j.Logger;
 
 import java.util.*;
@@ -24,6 +28,9 @@ public class IndexerDAO extends IndexDAO implements Runnable {
     private AnnotationDAO annotationDAO = new AnnotationDAO();
     private OntologyXDAO ontologyXDAO = new OntologyXDAO();
     private IndexDAO indexDAO= new IndexDAO();
+    RGDManagementDAO rgdManagementDAO=new RGDManagementDAO();
+    StrainDAO strainDAO=new StrainDAO();
+    AliasDAO aliasDAO=new AliasDAO();
     private Thread t;
     private String ont_id;
     private String ont_name;
@@ -46,6 +53,7 @@ public class IndexerDAO extends IndexDAO implements Runnable {
     }
     public void run() {
         Logger log= Logger.getLogger("ontology");
+
         try {
 
             System.out.println(Thread.currentThread().getName() + ": " + ont_id + " started " + new Date());
@@ -117,6 +125,19 @@ public class IndexerDAO extends IndexDAO implements Runnable {
                         for (TermSynonym s : this.synonyms) {
                             if (s.getTermAcc().equalsIgnoreCase(t.getAccId())) {
                                 termSynonyms.add(s.getName());
+                                if(s.getName().contains("RGD ID")){
+                                  String[] tokens=  s.getName().split(":");
+                                  int rgdId= Integer.parseInt(tokens[1].trim());
+                                    RgdId id = rgdManagementDAO.getRgdId(rgdId);
+                                  if(id.getObjectKey()==5){
+                                      List<Strain> strain= strainDAO.getStrains(Arrays.asList(rgdId));
+                                      for(Alias alias:aliasDAO.getAliases(strain.get(0).getRgdId())){
+                                          termSynonyms.add(alias.getValue());
+                                      }
+
+                                  }
+
+                                }
                             }
                         }
                         obj.setSynonyms(termSynonyms);
