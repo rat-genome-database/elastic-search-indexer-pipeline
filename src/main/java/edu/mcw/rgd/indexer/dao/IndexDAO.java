@@ -1,5 +1,6 @@
 package edu.mcw.rgd.indexer.dao;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.mcw.rgd.dao.AbstractDAO;
@@ -1360,9 +1361,12 @@ public class IndexDAO extends AbstractDAO {
         bulkRequest.timeout(TimeValue.timeValueMinutes(2));
         bulkRequest.timeout("2m");
         int docCount=0;
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+
         for (IndexObject o : objs) {
             docCount++;
-            ObjectMapper mapper = new ObjectMapper();
             byte[] json = new byte[0];
             try {
                 json = mapper.writeValueAsBytes(o);

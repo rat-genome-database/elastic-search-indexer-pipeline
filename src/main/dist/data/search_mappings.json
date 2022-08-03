@@ -136,12 +136,14 @@
       },
       "synonyms": {
         "type": "text",
-        "analyzer": "autocomplete_analyzer",
-        "search_analyzer":"standard",
         "fields": {
           "synonyms": {
             "type": "text",
             "analyzer": "english_analyzer"
+          },
+          "symbol": {
+            "type": "text",
+            "analyzer": "symbol_analyzer"
           }
         }
       },
