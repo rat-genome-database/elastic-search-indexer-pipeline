@@ -57,6 +57,8 @@ public class ESClient {
 
              try {
                  if(getHostName().contains("apollo") || getHostName().contains("booker") || getHostName().contains("reed")) {
+                     System.out.print("RUNNING IN PROD ENVIRONMENT....");
+
                      client = new RestHighLevelClient(RestClient.builder(
                              new HttpHost(props.get("HOST1").toString(), 9200, "http"),
                              new HttpHost(props.get("HOST2").toString(), 9200, "http"),
@@ -75,8 +77,9 @@ public class ESClient {
                      })
                      );
                  }else{
+                     System.out.print("RUNNING IN DEV ENVIRONMENT....");
                      client = new RestHighLevelClient(RestClient.builder(
-                             new HttpHost(props.get("VARIANTS_HOST").toString(), 9200, "http")
+                             new HttpHost("travis.rgd.mcw.edu", 9200, "http")
 
                      ).setRequestConfigCallback(new RestClientBuilder.RequestConfigCallback() {
 
@@ -104,8 +107,8 @@ public class ESClient {
 
 
         try{
-      //   fis=new FileInputStream("C:/Apps/elasticsearchProps.properties");
-         fis=new FileInputStream("/data/pipelines/properties/es_properties.properties");
+     //  fis=new FileInputStream("C:/Apps/elasticsearchProps.properties");
+        fis=new FileInputStream("/data/pipelines/properties/es_properties.properties");
             props.load(fis);
 
         }catch (Exception e){
@@ -135,9 +138,6 @@ public class ESClient {
         }
         System.out.println("hostname:"+hostname);
 
-        boolean isProduction = hostname.contains("apollo") || hostname.contains("booker");
-        boolean isPipelines = hostname.contains("reed");
-        boolean isDev = hostname.contains("hansen");
         return hostname;
     }
 }
