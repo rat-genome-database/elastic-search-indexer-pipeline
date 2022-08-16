@@ -323,6 +323,18 @@
         "type": "text",
         "analyzer": "english_analyzer"
       },
+      "strainsCrossed" : {
+        "type" : "text",
+        "fields" : {
+          "keyword" : {
+            "type" : "keyword"
+          },
+          "symbol": {
+            "type": "text",
+            "analyzer": "symbol_analyzer"
+          }
+        }
+      },
       "suggest":{
         "type":"completion",
         "analyzer":"standard",

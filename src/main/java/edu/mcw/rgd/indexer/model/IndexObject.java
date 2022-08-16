@@ -59,13 +59,13 @@ public class IndexObject {
     private String genomicAlteration;
 
     private Suggest suggest;
-    private Map<String, Integer> strainsCrossed ;
+    private List<String> strainsCrossed ;
 
-    public Map<String, Integer> getStrainsCrossed() {
+    public List<String> getStrainsCrossed() {
         return strainsCrossed;
     }
 
-    public void setStrainsCrossed(Map<String, Integer> strainsCrossed) {
+    public void setStrainsCrossed(List<String> strainsCrossed) {
         this.strainsCrossed = strainsCrossed;
     }
 

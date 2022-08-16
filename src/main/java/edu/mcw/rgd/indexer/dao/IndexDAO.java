@@ -618,10 +618,10 @@ public class IndexDAO extends AbstractDAO {
 
 
               List<Strain> sts = associationDAO.getStrainAssociationsForQTL(qtl.getRgdId());
-              Map<String, Integer> strainsCrossed =new HashMap<>();
+             List<String> strainsCrossed =new ArrayList<>();
               if(qtl.getSpeciesTypeKey() == SpeciesType.RAT){
                   for (Strain strain: sts) {
-                      strainsCrossed.put(strain.getSymbol(), strain.getRgdId());
+                      strainsCrossed.add(strain.getSymbol());
                   }
               }
 
