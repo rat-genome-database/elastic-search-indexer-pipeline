@@ -77,7 +77,7 @@ public class IndexDAO extends AbstractDAO {
     private ReferenceDAO referenceDAO=new ReferenceDAO();
     private GenomeDAO genomeDAO=new GenomeDAO();
     private GenomicElementDAO gdao= new GenomicElementDAO();
-
+    private AssociationDAO associationDAO=new AssociationDAO();
     private GenomicElementDAO gedao= new GenomicElementDAO();
     Logger log= Logger.getLogger("main");
 
@@ -615,6 +615,17 @@ public class IndexDAO extends AbstractDAO {
                 q.setCategory("QTL");
                 q.setMapDataList(this.getMapData(rgdId));
                 q.setAnnotationsCount(this.getAnnotsCount(rgdId));
+
+
+              List<Strain> sts = associationDAO.getStrainAssociationsForQTL(qtl.getRgdId());
+              Map<String, Integer> strainsCrossed =new HashMap<>();
+              if(qtl.getSpeciesTypeKey() == SpeciesType.RAT){
+                  for (Strain strain: sts) {
+                      strainsCrossed.put(strain.getSymbol(), strain.getRgdId());
+                  }
+              }
+
+              q.setStrainsCrossed(strainsCrossed);
                 objList.add(q);
 
             }else{

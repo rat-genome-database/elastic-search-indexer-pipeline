@@ -3,6 +3,7 @@ package edu.mcw.rgd.indexer.model;
 import edu.mcw.rgd.datamodel.Association;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by jthota on 3/23/2017.
@@ -58,6 +59,15 @@ public class IndexObject {
     private String genomicAlteration;
 
     private Suggest suggest;
+    private Map<String, Integer> strainsCrossed ;
+
+    public Map<String, Integer> getStrainsCrossed() {
+        return strainsCrossed;
+    }
+
+    public void setStrainsCrossed(Map<String, Integer> strainsCrossed) {
+        this.strainsCrossed = strainsCrossed;
+    }
 
     public String getGenomicAlteration() {
         return genomicAlteration;
