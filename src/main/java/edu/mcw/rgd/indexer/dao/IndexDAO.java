@@ -1408,8 +1408,8 @@ public class IndexDAO extends AbstractDAO {
         //   BulkResponse response=       bulkRequestBuilder.get();
 
       //  ESClient.getClient().admin().indices().refresh(refreshRequest()).actionGet();
-        RefreshRequest refreshRequest=new RefreshRequest();
-        ESClient.getClient().indices().refresh(refreshRequest, RequestOptions.DEFAULT);
+     //   RefreshRequest refreshRequest=new RefreshRequest();
+     //   ESClient.getClient().indices().refresh(refreshRequest, RequestOptions.DEFAULT);
     }
     public static void main(String[] args) throws Exception {
           IndexDAO dao= new IndexDAO();
