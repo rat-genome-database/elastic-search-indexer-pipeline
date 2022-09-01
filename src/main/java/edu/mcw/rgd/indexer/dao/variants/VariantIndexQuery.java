@@ -69,7 +69,13 @@ public class VariantIndexQuery extends MappingSqlQuery {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        try{
+            vi.setVarNuc(rs.getString("var_nuc"));
+            vi.setRefNuc(rs.getString("ref_nuc"));
 
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         return vi;
     }
     public List<MapInfo> getMapData(VariantIndex vi) throws Exception {

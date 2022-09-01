@@ -336,7 +336,7 @@ public class VariantDao extends AbstractDAO {
             vrList.add((VariantIndex) e.getValue());
 
         }
-        System.out.println("varaiants size: "+ vrList.size());
+   //     System.out.println("varaiants size: "+ vrList.size());
 
         Set<Long> variantIdsWithoutTranscripts=new HashSet<>();
         if(variantIdsList.size()>variantIdsWithTrancripts.size()){
@@ -345,13 +345,13 @@ public class VariantDao extends AbstractDAO {
                     variantIdsWithoutTranscripts.add((long) id);
                 }
             }
-            System.out.println("Queried IDS:"+variantIdsList.size()+"\nIds without transcripts:"+ variantIdsWithoutTranscripts.size());
+        //    System.out.println("Queried IDS:"+variantIdsList.size()+"\nIds without transcripts:"+ variantIdsWithoutTranscripts.size());
             if(variantIdsWithoutTranscripts.size()>0) {
                 List<VariantIndex> variantsWithoutTranscripts = getVariantsWithoutTranscripts(mapKey, variantIdsWithoutTranscripts);
                 vrList.addAll(variantsWithoutTranscripts);
             }
         }
-        System.out.println("varaiants size include no transcript variants: "+ vrList.size());
+      //  System.out.println("varaiants size include no transcript variants: "+ vrList.size());
         return vrList;
     }
 

@@ -56,7 +56,7 @@ public class FullAnnotDao {
               List<ModelIndexObject> indexObjects = new ArrayList<>();
               ModelIndexObject object = new ModelIndexObject();
          //     if (m.getTermAcc().equalsIgnoreCase("MP:0012046")) {
-                  System.out.println("QUALIFIER:"+m.getQualifier());
+                //  System.out.println("QUALIFIER:"+m.getQualifier());
                   ModelIndexObject loadedObject = this.getLoadedObject(m.getAnnotatedObjectRgdId(), m.getTermAcc(), m.getWithInfo(), m.getQualifier(), indexedMap);
 
                   if (loadedObject != null) {
@@ -369,10 +369,10 @@ public class FullAnnotDao {
 
         List<TermSynonym> termSynonyms= xdao.getTermSynonyms(termAcc);
         List<String> synonyms=new ArrayList<>();
-        System.out.println("TERM AC:"+ termAcc+"\tSynonyms SIZE:"+ termSynonyms.size());
+     //   System.out.println("TERM AC:"+ termAcc+"\tSynonyms SIZE:"+ termSynonyms.size());
         for(TermSynonym s: termSynonyms){
             synonyms.add(s.getName());
-           System.out.println(s.getName());
+         //  System.out.println(s.getName());
         }
         return synonyms;
     }

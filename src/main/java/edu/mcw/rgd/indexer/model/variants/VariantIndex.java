@@ -54,6 +54,24 @@ public class VariantIndex extends IndexObject {
 
     private String clinicalSignificance;
 
+    private String varNuc;
+    private String refNuc;
+
+    public String getVarNuc() {
+        return varNuc;
+    }
+
+    public void setVarNuc(String varNuc) {
+        this.varNuc = varNuc;
+    }
+
+    public String getRefNuc() {
+        return refNuc;
+    }
+
+    public void setRefNuc(String refNuc) {
+        this.refNuc = refNuc;
+    }
 
     public String getRsId() {
         return rsId;
