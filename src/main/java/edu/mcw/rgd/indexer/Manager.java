@@ -236,12 +236,12 @@ public class Manager {
                         for(int species:speciesTypeKeys){
                             switch (species){
                                 case 1:
+                                    break;
                                 case 6:
+                                    break;
                                 case 3:
                                     admin.createIndex("variant_mappings", "variant");
-
-                                      indexDAO.indexVariantsFromCarpenovoNewTableStructure();
-
+                                    indexDAO.indexVariantsFromCarpenovoNewTableStructure();
 
                                     break;
 
