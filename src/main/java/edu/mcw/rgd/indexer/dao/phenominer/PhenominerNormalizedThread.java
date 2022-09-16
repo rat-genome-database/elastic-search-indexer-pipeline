@@ -7,6 +7,7 @@ import edu.mcw.rgd.datamodel.Strain;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.pheno.Condition;
 import edu.mcw.rgd.datamodel.pheno.IndividualRecord;
+import edu.mcw.rgd.datamodel.pheno.PhenominerUnitTable;
 import edu.mcw.rgd.datamodel.pheno.Record;
 import edu.mcw.rgd.indexer.dao.phenominer.model.PhenominerIndexObject;
 import edu.mcw.rgd.indexer.dao.phenominer.utils.PhenominerProcess;
@@ -46,6 +47,7 @@ public class PhenominerNormalizedThread implements Runnable {
         List<PhenominerIndexObject> indexObjects = new ArrayList<>();
 
         for (Record record : records) {
+            if(record.getId()==17881){
             //      Record record=records.get(0);
      //       if (record.getClinicalMeasurement().getAccId().equalsIgnoreCase("CMO:0000783")) {
                 Map<String, Set<String>> synomyms = new HashMap<>();
@@ -222,19 +224,33 @@ public class PhenominerNormalizedThread implements Runnable {
                 }catch (Exception e){}
             try {
                 object.setRefRgdId(record.getRefRgdId());
-            }catch (Exception e){}
+            }catch (Exception e){e.printStackTrace();}
             try{
                if( record.getHasIndividualRecord()){
-                   System.out.print(record.getId());
-                  List<IndividualRecord> individualRecords= phenominerDAO.getIndividualRecords(record.getId());
-                  System.out.print("\t"+ individualRecords.size());
+                   System.out.print("RECORD ID:"+record.getId());
+                  List<PhenominerUnitTable> unitTables= phenominerDAO.getConversionFactorToStandardUnits(record.getId());
+
+                  List<IndividualRecord> individualRecordsTmp= phenominerDAO.getIndividualRecords(record.getId());
+                    List<IndividualRecord> individualRecords=new ArrayList<>();
+                   if(unitTables!=null && unitTables.size()>0){
+                       PhenominerUnitTable unitTable=unitTables.get(0);
+                       for(IndividualRecord individualRecord:individualRecordsTmp){
+                         float indiVal=  Float.parseFloat(individualRecord.getMeasurementValue());
+                          float conversionFactor= unitTable.getTermSpecificScale();
+                          float val=indiVal*conversionFactor;
+                          individualRecord.setMeasurementValue(String.valueOf(val));
+                          individualRecords.add(individualRecord);
+                       }
+                   }
+
+                 // System.out.print("\t"+ individualRecords.size());
                   object.setIndividualRecords(individualRecords);
                }
 
-            }catch (Exception e){}
+            }catch (Exception e){e.printStackTrace();}
                 indexObjects.add(object);
-
-         //   }
+            break;
+           }
 
     }
         if (indexObjects.size() > 0) {
