@@ -47,7 +47,7 @@ public class PhenominerNormalizedThread implements Runnable {
         List<PhenominerIndexObject> indexObjects = new ArrayList<>();
 
         for (Record record : records) {
-            if(record.getId()==17881){
+       //     if(record.getId()==17881){
             //      Record record=records.get(0);
      //       if (record.getClinicalMeasurement().getAccId().equalsIgnoreCase("CMO:0000783")) {
                 Map<String, Set<String>> synomyms = new HashMap<>();
@@ -227,7 +227,7 @@ public class PhenominerNormalizedThread implements Runnable {
             }catch (Exception e){e.printStackTrace();}
             try{
                if( record.getHasIndividualRecord()){
-                   System.out.print("RECORD ID:"+record.getId());
+                 //  System.out.print("RECORD ID:"+record.getId());
                   List<PhenominerUnitTable> unitTables= phenominerDAO.getConversionFactorToStandardUnits(record.getId());
 
                   List<IndividualRecord> individualRecordsTmp= phenominerDAO.getIndividualRecords(record.getId());
@@ -249,8 +249,8 @@ public class PhenominerNormalizedThread implements Runnable {
 
             }catch (Exception e){e.printStackTrace();}
                 indexObjects.add(object);
-            break;
-           }
+        //    break;
+       //    }
 
     }
         if (indexObjects.size() > 0) {
