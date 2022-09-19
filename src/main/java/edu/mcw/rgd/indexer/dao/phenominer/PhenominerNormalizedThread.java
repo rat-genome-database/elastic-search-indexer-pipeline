@@ -47,7 +47,7 @@ public class PhenominerNormalizedThread implements Runnable {
         List<PhenominerIndexObject> indexObjects = new ArrayList<>();
 
         for (Record record : records) {
-       //     if(record.getId()==17881){
+       //     if(record.getId()==110611){
             //      Record record=records.get(0);
      //       if (record.getClinicalMeasurement().getAccId().equalsIgnoreCase("CMO:0000783")) {
                 Map<String, Set<String>> synomyms = new HashMap<>();
@@ -118,10 +118,10 @@ public class PhenominerNormalizedThread implements Runnable {
                         object.setXcoTerm("No condition");
                     }else*/
                  //   object.setXcoTerm(xcoTerm.stream().collect(Collectors.joining(" and ")));
-                    if(record.getConditionDescription().equals("")){
-                        object.setXcoTerm("No Condition");
-                    }else
-                    object.setXcoTerm(record.getConditionDescription());
+                    if(!record.getConditionDescription().equals("")){
+                        object.setXcoTerm(record.getConditionDescription());
+                    }
+
                 }catch (Exception e){System.err.println("No XCO term " + record.getId());}
 
                 Set<String> cmoSynonyms = new HashSet<>(synomyms.get("CMO"));
@@ -250,7 +250,7 @@ public class PhenominerNormalizedThread implements Runnable {
             }catch (Exception e){e.printStackTrace();}
                 indexObjects.add(object);
         //    break;
-       //    }
+        //  }
 
     }
         if (indexObjects.size() > 0) {
