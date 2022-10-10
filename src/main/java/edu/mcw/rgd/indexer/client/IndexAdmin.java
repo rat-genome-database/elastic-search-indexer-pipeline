@@ -85,7 +85,10 @@ public class IndexAdmin {
 
         String path="data/"+_mappings+".json";
         log.info("CREATING NEW INDEX..." + index);
-
+        int replicates=0;
+        if(!index.contains("dev") && !index.contains("test")){
+            replicates=1;
+        }
         String mappings=new String(Files.readAllBytes(Paths.get(path)));
         String analyzers=new String(Files.readAllBytes(Paths.get("data/analyzers.json")));
 
@@ -93,7 +96,7 @@ public class IndexAdmin {
         CreateIndexRequest request=new CreateIndexRequest(index);
         request.settings(Settings.builder()
                 .put("index.number_of_shards",5)
-                .put("index.number_of_replicas", 1)
+                .put("index.number_of_replicas", replicates)
         .loadFromSource(analyzers,XContentType.JSON));
        request.mapping(mappings, XContentType.JSON);
        org.elasticsearch.client.indices.CreateIndexResponse createIndexResponse = ESClient.getClient().indices().create(request, RequestOptions.DEFAULT);

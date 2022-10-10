@@ -71,7 +71,6 @@ public class Manager {
 
        Manager manager = (Manager) bf.getBean("manager");
        System.out.println(manager.getVersion());
-      ESClient es= (ESClient) bf.getBean("client");
        RgdIndex rgdIndex= (RgdIndex) bf.getBean("rgdIndex");
         manager.bulkIndexProcessor=BulkIndexProcessor.getInstance();
         log.info("LEVEL:" +log.getLevel());
@@ -89,17 +88,15 @@ public class Manager {
 
         manager.run(args);
         } catch (Exception e) {
-            if(es!=null)
-            es.destroy();
+            manager.bulkIndexProcessor.destroy();
+           ESClient.destroy();
             e.printStackTrace();
           manager.printUsage();
-            manager.bulkIndexProcessor.destroy();
 
             log.info(e);
         }
-        if(es!=null)
-        es.destroy();
         manager.bulkIndexProcessor.destroy();
+        ESClient.destroy();
 
     }
     private void run(String[] args) throws Exception {

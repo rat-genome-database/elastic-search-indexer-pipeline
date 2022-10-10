@@ -24,7 +24,7 @@ public class VariantIndexQuery extends MappingSqlQuery {
         vi.setCategory("Variant");
         vi.setName(rs.getString("rs_id"));
         vi.setRsId(rs.getString("rs_id"));
-        vi.setSymbol(String.valueOf(rs.getLong("rgd_id")));
+     //   vi.setSymbol(String.valueOf(rs.getLong("rgd_id")));
         vi.setTerm_acc(String.valueOf(rs.getLong("rgd_id")));
         vi.setSpecies(SpeciesType.getCommonName(rs.getInt("species_type_key")));
         vi.setType(rs.getString("variant_type"));

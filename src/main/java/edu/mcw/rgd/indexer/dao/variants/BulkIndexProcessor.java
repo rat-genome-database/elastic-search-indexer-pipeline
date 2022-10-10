@@ -61,7 +61,7 @@ public class BulkIndexProcessor {
     }
     public  void destroy(){
         try {
-            if(this.bulkProcessor!=null) {
+            if(bulkProcessor!=null) {
                 bulkProcessor.flush();
                 bulkProcessor.awaitClose(10, TimeUnit.MINUTES);
                 bulkProcessor=null;

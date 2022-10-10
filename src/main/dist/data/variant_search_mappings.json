@@ -54,6 +54,26 @@
         }
       }
     },
+    "mapDataList": {
+      "type": "nested",
+      "properties": {
+        "chromosome": {
+          "type": "keyword"
+        },
+        "experimentRecordCount": {
+          "type": "integer"
+        },
+        "map": {
+          "type": "keyword"
+        },
+        "startPos": {
+          "type": "long"
+        },
+        "stopPos": {
+          "type": "long"
+        }
+      }
+    },
     "qualityScore" : {
       "type" : "long"
     },
