@@ -28,7 +28,7 @@ public class ESClient {
         System.out.println("Initializing...");
         client=getInstance();
     }
-    public void destroy() throws IOException {
+    public static void destroy() throws IOException {
         System.out.println("destroying...");
         if(client!=null) {
             try{
@@ -79,7 +79,8 @@ public class ESClient {
                  }else{
                      System.out.print("RUNNING IN DEV ENVIRONMENT....");
                      client = new RestHighLevelClient(RestClient.builder(
-                             new HttpHost("travis.rgd.mcw.edu", 9200, "http")
+                             new HttpHost(props.get("VARIANTS_HOST").toString(), 9200, "http")
+
 
                      ).setRequestConfigCallback(new RestClientBuilder.RequestConfigCallback() {
 
@@ -107,8 +108,8 @@ public class ESClient {
 
 
         try{
-     //  fis=new FileInputStream("C:/Apps/elasticsearchProps.properties");
-        fis=new FileInputStream("/data/pipelines/properties/es_properties.properties");
+    //   fis=new FileInputStream("C:/Apps/elasticsearchProps.properties");
+     fis=new FileInputStream("/data/pipelines/properties/es_properties.properties");
             props.load(fis);
 
         }catch (Exception e){
