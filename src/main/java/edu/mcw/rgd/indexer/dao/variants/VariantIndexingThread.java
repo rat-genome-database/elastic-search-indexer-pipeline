@@ -15,7 +15,7 @@ public class VariantIndexingThread implements Runnable {
     @Override
     public void run() {
 
-        System.out.println("INDEX LSIT SIZE:"+indexList.size());
+      //  System.out.println("INDEX LSIT SIZE:"+indexList.size());
 
         for(VariantIndex vi:indexList) {
             try {

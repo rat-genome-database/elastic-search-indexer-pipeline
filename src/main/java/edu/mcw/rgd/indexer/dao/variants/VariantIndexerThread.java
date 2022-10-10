@@ -1,10 +1,13 @@
 package edu.mcw.rgd.indexer.dao.variants;
 
+import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.indexer.MyThreadPoolExecutor;
 import edu.mcw.rgd.indexer.model.IndexObject;
+import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -22,6 +25,7 @@ public class VariantIndexerThread implements Runnable {
     }
     @Override
     public void run() {
+        Logger log = Logger.getLogger("variant");
         ExecutorService executor2 = new MyThreadPoolExecutor(5, 5, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
         Runnable variantsNewTableThread= null;
         List<Integer> variantIds = null;
@@ -30,7 +34,9 @@ public class VariantIndexerThread implements Runnable {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        System.out.println("UNIQUE VAIANTS SIZE of CHR:" + chr + ":\t" + variantIds.size());
+        log.info(Thread.currentThread().getName() + ": " + SpeciesType.getCommonName(mapKey) + " ||  MapKey: "+mapKey+ " || CHROMOSOME: "+chr+ " started " + new Date());
+
+        //   System.out.println("UNIQUE VAIANTS SIZE of CHR:" + chr + ":\t" + variantIds.size());
         Collection[] collections = new Collection[0];
         try {
             collections = split(variantIds, 1000);
