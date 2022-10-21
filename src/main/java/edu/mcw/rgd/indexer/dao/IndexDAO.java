@@ -1090,7 +1090,7 @@ public class IndexDAO extends AbstractDAO {
     }
 
     public List<MapInfo> getMapData(int rgdId) throws Exception {
-        List<MapData> mapData = mapDAO.getMapData(rgdId);
+        List<MapData> mapData = mapDAO.getMapDataByRank(rgdId);
         List<MapInfo> mapList= new ArrayList<>();
         for(MapData m: mapData){
             MapInfo map= new MapInfo();
