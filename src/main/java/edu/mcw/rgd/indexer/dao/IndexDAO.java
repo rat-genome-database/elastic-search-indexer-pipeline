@@ -1389,7 +1389,7 @@ public class IndexDAO extends AbstractDAO {
             if(docCount%100==0){
                 ESClient.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
                 bulkRequest= new BulkRequest();
-                bulkRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.WAIT_UNTIL);
+             //   bulkRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.WAIT_UNTIL);
                 bulkRequest.timeout(TimeValue.timeValueMinutes(2));
                 bulkRequest.timeout("2m");
             }else{
@@ -1397,7 +1397,7 @@ public class IndexDAO extends AbstractDAO {
 
                   ESClient.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
                     bulkRequest= new BulkRequest();
-                    bulkRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.WAIT_UNTIL);
+                 //   bulkRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.WAIT_UNTIL);
                     bulkRequest.timeout(TimeValue.timeValueMinutes(2));
                     bulkRequest.timeout("2m");
                 }
