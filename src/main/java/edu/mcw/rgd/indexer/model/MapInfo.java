@@ -8,6 +8,15 @@ public class MapInfo {
     private String chromosome;
     private long startPos;
     private long stopPos;
+    private int rank;
+
+    public int getRank() {
+        return rank;
+    }
+
+    public void setRank(int rank) {
+        this.rank = rank;
+    }
 
     public long getStopPos() {
         return stopPos;

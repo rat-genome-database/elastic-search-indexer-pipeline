@@ -81,6 +81,7 @@ public class IndexDAO extends AbstractDAO {
     private GenomicElementDAO gedao= new GenomicElementDAO();
     Logger log= Logger.getLogger("main");
 
+    Map<Integer, edu.mcw.rgd.datamodel.Map> rgdMaps=new HashMap<>();
     public List<GenomeIndexObject> getGenomeInfo() throws Exception {
         List<GenomeIndexObject> objects= new ArrayList<>();
         for(int speciesTypeKey : SpeciesType.getSpeciesTypeKeys()) {
@@ -1098,15 +1099,33 @@ public class IndexDAO extends AbstractDAO {
             map.setStartPos(m.getStartPos());
             map.setStopPos(m.getStopPos());
             map.setMap(this.getMapofMapkey(m.getMapKey()));
+            map.setRank(this.getMapRank(m.getMapKey()));
             mapList.add(map);
         }
         return mapList;
     }
     public String getMapofMapkey(int mapkey) throws Exception {
 
-        MapDAO mapDAO = new MapDAO();
+     /*   MapDAO mapDAO = new MapDAO();
         edu.mcw.rgd.datamodel.Map m = mapDAO.getMapByKey(mapkey);
-        return m.getDescription();
+        return m.getDescription();*/
+     if(rgdMaps.get(mapkey)!=null){
+         return rgdMaps.get(mapkey).getDescription();
+     }else{
+         edu.mcw.rgd.datamodel.Map m = mapDAO.getMapByKey(mapkey);
+         rgdMaps.put(mapkey,m);
+         return m.getDescription();
+     }
+
+    }
+    public int getMapRank(int mapkey) throws Exception {
+        if(rgdMaps.get(mapkey)!=null){
+            return rgdMaps.get(mapkey).getRank();
+        }else{
+            edu.mcw.rgd.datamodel.Map m = mapDAO.getMapByKey(mapkey);
+            rgdMaps.put(mapkey,m);
+            return m.getRank();
+        }
 
     }
     public java.util.Map<String, List<Annotation>> getAnnotations(int rgdId) throws Exception {
