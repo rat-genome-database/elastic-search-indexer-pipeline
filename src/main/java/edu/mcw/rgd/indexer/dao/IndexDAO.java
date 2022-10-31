@@ -17,9 +17,13 @@ import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
 import edu.mcw.rgd.datamodel.ontologyx.TermWithStats;
 import edu.mcw.rgd.indexer.AnnotationFormatter;
+import edu.mcw.rgd.indexer.Manager;
 import edu.mcw.rgd.indexer.MyThreadPoolExecutor;
 import edu.mcw.rgd.indexer.client.ESClient;
+import edu.mcw.rgd.indexer.dao.variants.BulkIndexProcessor;
+import edu.mcw.rgd.indexer.dao.variants.JsonMapper;
 import edu.mcw.rgd.indexer.dao.variants.VariantIndexerThread;
+import edu.mcw.rgd.indexer.index.*;
 import edu.mcw.rgd.indexer.model.*;
 import edu.mcw.rgd.indexer.model.genomeInfo.AssemblyInfo;
 import edu.mcw.rgd.indexer.model.genomeInfo.GeneCounts;
@@ -153,64 +157,17 @@ public class IndexDAO extends AbstractDAO {
     }
 
 
-    public List<IndexObject> getGenes() throws Exception {
-
-        List<IndexObject> objList = new ArrayList<>();
+    public void getGenes() throws Exception {
         List<Gene> genes= geneDAO.getAllActiveGenes();
-        //System.out.println("Active Genes Size: " + genes.size());
-
-     for(Gene gene: genes) {
-         //  Gene gene= geneDAO.getGene(2004);
-         int speciesTypeKey = gene.getSpeciesTypeKey();
-         String species = SpeciesType.getCommonName(speciesTypeKey);
-            boolean isSearchable=SpeciesType.isSearchable(speciesTypeKey);
-         if (isSearchable) {
-
-             IndexObject obj = new IndexObject();
-             int rgdId = gene.getRgdId();
-             String symbol = gene.getSymbol();
-             String name = gene.getName();
-             String htmlStrippedSymbol = Jsoup.parse(symbol).text();
-             String description = Utils.getGeneDescription(gene);
-
-             String type = gene.getType();
-
-             obj.setTerm_acc(String.valueOf(rgdId));
-             obj.setSymbol(symbol);
-             obj.setHtmlStrippedSymbol(htmlStrippedSymbol);
-             obj.setDescription(description);
-             obj.setSpecies(species);
-             obj.setType(type);
-             obj.setCategory("Gene");
-             obj.setName(name);
-
-             List<AliasData> aliases = this.getAliases(gene.getRgdId());
-             List<String> synonyms = new ArrayList<>();
-             for (AliasData a : aliases) {
-                 synonyms.add(a.getAlias_name());
-             }
-             obj.setSynonyms(synonyms);
-             //    obj.setSynonyms(getAliasesByRgdId(aliases, rgdId));
-             obj.setXdbIdentifiers(this.getExternalIdentifiers(rgdId));
-             //   obj.setXdbIdentifiers(getXdbIds(objects, rgdId));
-             obj.setPromoters(this.getPromotersByGeneRgdId(rgdId));
-
-             //  obj.setPromoters(getPromoersByRgdId(rgdId, associations, genomicElements));
-             obj.setMapDataList(this.getMapData(rgdId));
-             obj.setTranscriptIds(this.getTranscriptIds(rgdId));
-             obj.setProtein_acc_ids(this.getTranscriptProteinIds(rgdId));
-             obj.setAnnotationsCount(this.getAnnotsCount(rgdId));
-             obj.setSuggest(this.getSuggest(symbol, null, "gene"));
-             objList.add(obj);
-
-         }else{
-             if(speciesTypeKey==3 || speciesTypeKey==2 || speciesTypeKey==1 || speciesTypeKey==4 || speciesTypeKey==5
-                     || speciesTypeKey==7 || speciesTypeKey==6 || speciesTypeKey==9){
-                 throw new Exception("Species Type Key: " +speciesTypeKey +"\tGene RGD ID: "+ gene.getRgdId()+"\t isSearchable: "+ isSearchable);
-             }
-         }
+        ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+        for(Gene gene: genes) {
+     //    Gene gene= geneDAO.getGene(2004);
+            Runnable workerThread= new IndexGene(gene);
+            executor.execute(workerThread);
      }
-        return objList;
+        executor.shutdown();
+        while (!executor.isTerminated()) {}
+
     }
     public int getAnnotsCount(int rgdId) throws Exception {
        List<Annotation> annots= annotationDAO.getAnnotations(rgdId);
@@ -360,70 +317,18 @@ public class IndexDAO extends AbstractDAO {
             }
 
     } return annotations;}
-   public List<IndexObject> getStrains() throws Exception{
-
-        List<IndexObject> objList= new ArrayList<>();
+   public void getStrains() throws Exception{
+       ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
         //  Strain strain=strainDAO.getStrain(7248453);
   //      List<Alias> aliases=aliasDAO.getActiveAliases(RgdId.OBJECT_KEY_STRAINS);
         List<Strain> strains= strainDAO.getActiveStrains();
         Map<Integer, Gene> genes=getStrainAssociations(strains);
         for(Strain strain: strains) {
-            int speciesTypeKey = strain.getSpeciesTypeKey();
-          boolean isSearchable=SpeciesType.isSearchable(speciesTypeKey);
-          //  System.out.println("isSearchable: "+isSearchable +"\tSpeciesTypeKey: "+ speciesTypeKey+"\tStrain RGDID: "+strain.getRgdId());
-           if (isSearchable) {
-                String species = SpeciesType.getCommonName(speciesTypeKey);
-
-                IndexObject s = new IndexObject();
-                String symbol = strain.getSymbol();
-                String source = strain.getSource();
-                String origin = strain.getOrigin();
-                String strainTypeName = strain.getStrainTypeName();
-                String name = strain.getName();
-
-                int rgdId = strain.getRgdId();
-                s.setSpecies(species);
-                s.setTerm_acc(String.valueOf(rgdId));
-                s.setSymbol(symbol);
-                s.setSource(source);
-                s.setOrigin(origin);
-                s.setType(strainTypeName);
-                s.setName(name);
-
-                String htmlStrippedSymbol = Jsoup.parse(symbol).text();
-                s.setHtmlStrippedSymbol(htmlStrippedSymbol);
-                s.setSuggest(this.getSuggest(symbol, null, "strain"));
-                List<AliasData> aliases = this.getAliases(rgdId);
-                List<String> synonyms = new ArrayList<>();
-                for (AliasData a : aliases) {
-                    synonyms.add(a.getAlias_name());
-                }
-                s.setSynonyms(synonyms);
-                //     s.setSynonyms(getAliasesByRgdId(aliases,  rgdId));
-                s.setXdbIdentifiers(this.getExternalIdentifiers(rgdId));
-                s.setCategory("Strain");
-                s.setExperimentRecordCount(this.getExperimentRecordCount(rgdId, "S"));
-                s.setSampleExists(this.sampleExists(rgdId, 600));
-                s.setMapDataList(this.getMapData(rgdId));
-                s.setAnnotationsCount(this.getAnnotsCount(rgdId));
-                Gene g=genes.get(rgdId);
-                if(g!=null){
-                    List<String> associations= new ArrayList<>();
-                    associations.add(g.getSymbol());
-                    associations.add(g.getName());
-                    s.setAssociations(associations);
-                }
-                objList.add(s);
-
-            }else{
-               if(speciesTypeKey==3 || speciesTypeKey==2 || speciesTypeKey==1 || speciesTypeKey==4 || speciesTypeKey==5
-                       || speciesTypeKey==7 || speciesTypeKey==6 || speciesTypeKey==9){
-                   throw new Exception("Species Type Key: " +speciesTypeKey +"\tStrain RGD ID: "+ strain.getRgdId()+"\t isSearchable: "+ isSearchable);
-               }
-           }
+            Runnable workerThread= new IndexStrain(strain, genes);
+            executor.execute(workerThread);
         }
-        System.out.println(objList.size());
-        return objList;
+       executor.shutdown();
+       while (!executor.isTerminated()) {}
     }
     public Map<Integer, Gene> getStrainAssociations(List<Strain> strains) throws Exception {
         Map<Integer, Gene> genes= new HashMap<>();
@@ -472,44 +377,6 @@ public class IndexDAO extends AbstractDAO {
         return genes;
     }
 
-  /*  public List<SearchIndex> getStrains() throws Exception{
-
-
-        List<Strain> strains= strainDAO.getActiveStrains();
-        List<SearchIndex> indexObjects= new ArrayList<>();
-        for(Strain strain: strains){
-
-
-            String symbol=strain.getSymbol();
-            String source= strain.getSource();
-            String origin= strain.getOrigin();
-            String strainTypeName= strain.getStrainTypeName();
-            String name= strain.getName();
-            int rgdId= strain.getRgdId();
-            int speciesTypeKey= strain.getSpeciesTypeKey();
-
-            String htmlStrippedSymbol= Jsoup.parse(symbol).text();
-
-            if(symbol!=null)
-            indexObjects.add(buildIndexObject(String.valueOf(rgdId), symbol, "STRAINS", "symbol", String.valueOf(speciesTypeKey)));
-            if(source!=null)
-            indexObjects.add(buildIndexObject(String.valueOf(rgdId), source, "STRAINS", "source", String.valueOf(speciesTypeKey)));
-            if(origin!=null)
-            indexObjects.add(buildIndexObject(String.valueOf(rgdId), origin, "STRAINS", "origin", String.valueOf(speciesTypeKey)));
-            if(strainTypeName!=null)
-            indexObjects.add(buildIndexObject(String.valueOf(rgdId), strainTypeName, "STRAINS", "type", String.valueOf(speciesTypeKey)));
-            if(name!=null)
-            indexObjects.add(buildIndexObject(String.valueOf(rgdId), name, "STRAINS", "name", String.valueOf(speciesTypeKey)));
-
-
-        }
-        List<Alias> aliases=aliasDAO.getActiveAliases(RgdId.OBJECT_KEY_STRAINS);
-        for(Alias a: aliases){
-            String aliasType=a.getTypeName()==null?"alias":a.getTypeName();
-            indexObjects.add(buildIndexObject(String.valueOf(a.getRgdId()), a.getValue(), "STRAINS", aliasType, String.valueOf(a.getSpeciesTypeKey())));
-        }
-        return indexObjects;
-    }*/
     public List<String> getAliasesByRgdId(List<Alias> aliases,int rgdid) throws Exception {
         List<String> synonyms = new ArrayList<>();
         for(Alias a: aliases){
@@ -575,77 +442,18 @@ public class IndexDAO extends AbstractDAO {
         return recordCount;
     }
 
-    public List<IndexObject> getQtls() throws Exception{
+    public void getQtls() throws Exception{
         List<IndexObject> objList= new ArrayList<>();
      //   List<Alias> aliases=aliasDAO.getActiveAliases(RgdId.OBJECT_KEY_QTLS);
         List<QTL> qtls=qtlDAO.getActiveQTLs();
-
+        ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
         for(QTL qtl: qtls) {
             // QTL qtl= qtlDAO.getQTL(61368);
-            int speciesTypeKey = qtl.getSpeciesTypeKey();
-            boolean isSearchable=SpeciesType.isSearchable(speciesTypeKey);
-
-          if (isSearchable) {
-                String species = SpeciesType.getCommonName(speciesTypeKey);
-                IndexObject q = new IndexObject();
-                String symbol = qtl.getSymbol();
-                String name = qtl.getName();
-                int rgdId = qtl.getRgdId();
-
-                String htmlStrippedSymbol = Jsoup.parse(symbol).text();
-
-                q.setTerm_acc(String.valueOf(rgdId));
-                q.setSymbol(symbol);
-                q.setTrait(this.getTraitSubTrait(qtl.getRgdId(), "V"));
-                q.setSubTrait(this.getTraitSubTrait(qtl.getRgdId(), "L"));
-                q.setSymbol(htmlStrippedSymbol);
-                q.setName(name);
-                q.setSpecies(species);
-                q.setSuggest(this.getSuggest(symbol, null, "qtl"));
-
-                Map<String, List<Annotation>> annotMap = this.getAnnotations(rgdId);
-                q.setXdata(this.getAnnotations(annotMap, "xdata", "qtl"));
-                //  q.setSynonyms(getAliasesByRgdId(aliases, rgdId));
-                List<AliasData> aliases = this.getAliases(rgdId);
-                List<String> synonyms = new ArrayList<>();
-                for (AliasData a : aliases) {
-                    synonyms.add(a.getAlias_name());
-                }
-                q.setSynonyms(synonyms);
-                q.setXdbIdentifiers(this.getExternalIdentifiers(rgdId));
-                q.setCategory("QTL");
-                q.setMapDataList(this.getMapData(rgdId));
-                q.setAnnotationsCount(this.getAnnotsCount(rgdId));
-
-
-              List<Strain> sts = associationDAO.getStrainAssociationsForQTL(qtl.getRgdId());
-             List<String> strainsCrossed =new ArrayList<>();
-              if(qtl.getSpeciesTypeKey() == SpeciesType.RAT){
-                  for (Strain strain: sts) {
-                      strainsCrossed.add(strain.getSymbol());
-                  }
-              }
-
-              q.setStrainsCrossed(strainsCrossed);
-                objList.add(q);
-
-            }else{
-              if(speciesTypeKey==3 || speciesTypeKey==2 || speciesTypeKey==1 || speciesTypeKey==4 || speciesTypeKey==5
-                      || speciesTypeKey==7 || speciesTypeKey==6 || speciesTypeKey==9){
-                  throw new Exception("Species Type Key: " +speciesTypeKey +"\tQTL RGD ID: "+ qtl.getRgdId()+"\t isSearchable: "+ isSearchable);
-              }
-          }
-
-         /*   Collections.sort(objList, new Comparator<IndexObject>() {
-                @Override
-                public int compare(IndexObject o1, IndexObject o2) {
-                  return   Utils.stringsCompareToIgnoreCase(o1.getSymbol(), o2.getSymbol());
-
-                }
-            });*/
-       }
-        System.out.println(objList.size());
-        return objList;
+            Runnable workerThread= new IndexQTL(qtl);
+            executor.execute(workerThread);
+        }
+        executor.shutdown();
+        while (!executor.isTerminated()) {}
 
     }
     public String getTraitSubTrait(int rgdid, String aspect) throws Exception {
@@ -672,122 +480,41 @@ public class IndexDAO extends AbstractDAO {
 
         return traitTerm;
     }
-    public List<IndexObject> getSslps() throws Exception{
-        List<IndexObject> objList= new ArrayList<>();
+    public void getSslps() throws Exception{
+        ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
      //   List<Alias> aliases=aliasDAO.getActiveAliases(RgdId.OBJECT_KEY_SSLPS);
         for(SSLP sslp: sslpdao.getActiveSSLPs()) {
             //  SSLP sslp= sslpdao.getSSLP(37320);
-            int speciesTypeKey = sslp.getSpeciesTypeKey();
-           boolean isSearchable=SpeciesType.isSearchable(speciesTypeKey);
-
-            if (isSearchable) {
-                String species = SpeciesType.getCommonName(speciesTypeKey);
-                IndexObject slp = new IndexObject();
-                int rgdId = sslp.getRgdId();
-                String name = sslp.getName();
-                slp.setTerm_acc(String.valueOf(rgdId));
-                slp.setSymbol(sslp.getName());
-                slp.setSuggest(this.getSuggest(name, null, "sslp"));
-                List<AliasData> aliases = this.getAliases(rgdId);
-                List<String> synonyms = new ArrayList<>();
-                for (AliasData a : aliases) {
-                    synonyms.add(a.getAlias_name());
-                }
-                slp.setSynonyms(synonyms);
-                //     slp.setSynonyms(getAliasesByRgdId(aliases,rgdId));
-                slp.setXdbIdentifiers(this.getExternalIdentifiers(rgdId));
-                slp.setCategory("SSLP");
-
-                slp.setSpecies(species);
-                slp.setMapDataList(this.getMapData(rgdId));
-                slp.setAnnotationsCount(this.getAnnotsCount(rgdId));
-                objList.add(slp);
-
-            }else{
-                if(speciesTypeKey==3 || speciesTypeKey==2 || speciesTypeKey==1 || speciesTypeKey==4 || speciesTypeKey==5
-                        || speciesTypeKey==7 || speciesTypeKey==6 || speciesTypeKey==9){
-                    throw new Exception("Species Type Key: " +speciesTypeKey +"\tSSLP RGD ID: "+ sslp.getRgdId()+"\t isSearchable: "+ isSearchable);
-                }
-            }
+            Runnable workerThread=new IndexSslp(sslp);
+            executor.execute(workerThread);
         }
-
-        return objList;
+        executor.shutdown();
+        while (!executor.isTerminated()){}
 
     }
 
-    public List<IndexObject> getGenomicElements() throws Exception{
-        List<IndexObject> objList= new ArrayList<>();
-        //System.out.println("Genomic Elements started.....");
-        objList.addAll(this.getGenomicElements(RgdId.OBJECT_KEY_CELL_LINES));
-        objList.addAll(this.getGenomicElements(RgdId.OBJECT_KEY_PROMOTERS));
-
-        return objList;
-
-            }
-    public List<IndexObject> getGenomicElements(int objectKey) throws Exception {
-        List<IndexObject> objList= new ArrayList<>();
+    public void getGenomicElements() throws Exception{
+        this.getGenomicElements(RgdId.OBJECT_KEY_CELL_LINES);
+       this.getGenomicElements(RgdId.OBJECT_KEY_PROMOTERS);
+    }
+    public void getGenomicElements(int objectKey) throws Exception {
+        ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
         String category=new String();
-
         if(objectKey==11){
             category="Cell line";
-
-
-
         }
         if(objectKey==16){
             category="Promoter";
         }
 
         Map<Integer, List<String>> associations=this.getAssociationsByObjectKey(objectKey);
-     for(GenomicElement ge: gedao.getActiveElements(objectKey)) {
+        for(GenomicElement ge: gedao.getActiveElements(objectKey)) {
        //    GenomicElement ge= gedao.getElement(8655626);
-           try {
-               int speciesTypeKey = ge.getSpeciesTypeKey();
-               boolean isSearchable= SpeciesType.isSearchable(speciesTypeKey);
-               String species = SpeciesType.getCommonName(speciesTypeKey);
-               if (isSearchable) {
-
-                   IndexObject g = new IndexObject();
-                   int rgdId = ge.getRgdId();
-                   String symbol = ge.getSymbol();
-
-                   g.setSpecies(species);
-                   g.setTerm_acc(String.valueOf(rgdId));
-                   g.setSymbol(symbol);
-                   g.setName(ge.getName());
-                   g.setCategory(category);
-                   g.setDescription(ge.getObjectType());
-                   g.setSuggest(this.getSuggest(symbol, null, category.toLowerCase()));
-                   List<AliasData> aliases = this.getAliases(rgdId);
-                   List<String> synonyms = new ArrayList<>();
-                   for (AliasData a : aliases) {
-                       synonyms.add(a.getAlias_name());
-                   }
-                   g.setSynonyms(synonyms);
-                   g.setXdbIdentifiers(this.getExternalIdentifiers(rgdId));
-                   if (species == null || species.equals("")) {
-                       //System.out.println(symbol + "\t" + rgdId);
-                       log.info(symbol + "\t" + rgdId);
-                   }
-
-                   g.setAnnotationsCount(this.getAnnotsCount(rgdId));
-                   g.setGenomicAlteration(ge.getGenomicAlteration());
-                   List<String> assocs= associations.get(ge.getRgdId());
-                   if(assocs!=null && assocs.size()>0)
-                       g.setAssociations(assocs);
-                   objList.add(g);
-               }else{
-                   if(speciesTypeKey==3 || speciesTypeKey==2 || speciesTypeKey==1 || speciesTypeKey==4 || speciesTypeKey==5
-                           || speciesTypeKey==7 || speciesTypeKey==6 || speciesTypeKey==9){
-                       throw new Exception("Species Type Key: " +speciesTypeKey +"\tGenomic Element RGD ID: "+ ge.getRgdId()+"\t isSearchable: "+ isSearchable);
-                   }
-               }
-           }catch (Exception e){
-               System.out.println(ge.getRgdId()+"\t"+ ge.getSpeciesTypeKey());
-               e.printStackTrace();
-           }
+            Runnable workerThread=new IndexGenomicElement(ge,category, associations);
+            executor.execute(workerThread);
       }
-        return objList;
+        executor.shutdown();
+        while (!executor.isTerminated()){}
     }
     public Map<Integer, List<String>> getAssociationsByObjectKey(int objectKey) throws Exception {
         AssociationDAO associationDAO=new AssociationDAO();
@@ -817,51 +544,16 @@ public class IndexDAO extends AbstractDAO {
            }
        return associationsMap;
     }
-    public List<IndexObject> getVariants() throws Exception{
-        List<IndexObject> objList= new ArrayList<>();
+    public void getVariants() throws Exception{
+        ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
      //   List<Alias> aliases=aliasDAO.getActiveAliases(RgdId.OBJECT_KEY_VARIANTS);
         List<VariantInfo> variants=vdao.getVariantsBySource("CLINVAR");
         for(VariantInfo obj: variants) {
-            //  VariantInfo obj= vdao.getVariant(8554914);
-            int speciesTypeKey = obj.getSpeciesTypeKey();
-            boolean isSearchable=SpeciesType.isSearchable(speciesTypeKey);
-            if (isSearchable) {
-                String species = (SpeciesType.getCommonName(speciesTypeKey));
-                IndexObject v = new IndexObject();
-                int rgdId = obj.getRgdId();
-                String symbol = obj.getSymbol();
-
-                Term term = ontologyXDAO.getTermByAccId(obj.getSoAccId());
-
-                v.setSpecies(species);
-                v.setSymbol(symbol);
-                v.setTerm_acc(String.valueOf(rgdId));
-                if (term != null)
-                    v.setType(term.getTerm());
-                v.setName(obj.getName());
-                v.setTrait(obj.getTraitName());
-                v.setCategory("Variant");
-                v.setSuggest(this.getSuggest(symbol, null, "variant"));
-                //   v.setSynonyms(getAliasesByRgdId(aliases, rgdId));
-                List<AliasData> aliases = this.getAliases(rgdId);
-                List<String> synonyms = new ArrayList<>();
-                for (AliasData a : aliases) {
-                    synonyms.add(a.getAlias_name());
-                }
-                v.setSynonyms(synonyms);
-                v.setXdbIdentifiers(this.getExternalIdentifiers(rgdId));
-
-                v.setMapDataList(this.getMapData(obj.getRgdId()));
-                v.setAnnotationsCount(this.getAnnotsCount(rgdId));
-                objList.add(v);
-            }else{
-                if(speciesTypeKey==3 || speciesTypeKey==2 || speciesTypeKey==1 || speciesTypeKey==4 || speciesTypeKey==5
-                        || speciesTypeKey==7 || speciesTypeKey==6 || speciesTypeKey==9){
-                    throw new Exception("Species Type Key: " +speciesTypeKey +"\tVariant RGD ID: "+ obj.getRgdId()+"\t isSearchable: "+ isSearchable);
-                }
-            }
+            Runnable workerThread=new IndexClinVar(obj);
+            executor.execute(workerThread);
         }
-        return objList;
+        executor.shutdown();
+        while (!executor.isTerminated()){}
     }
     public void indexVariantsFromCarpenovoNewTableStructure() throws Exception{
         ExecutorService executor2 = new MyThreadPoolExecutor(3, 3, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
@@ -890,60 +582,19 @@ public class IndexDAO extends AbstractDAO {
         executor2.shutdown();
         while (!executor2.isTerminated()) {}
     }
-    public List<IndexObject> getReference() throws Exception{
+    public void getReference() throws Exception{
 
-        List<IndexObject> objList= new ArrayList<>();
+        ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
     //    List<Alias> aliases=aliasDAO.getActiveAliases(RgdId.OBJECT_KEY_REFERENCES);
         for(Reference ref: referenceDAO.getActiveReferences()){
             // Reference ref=referenceDAO.getReference(1004);
-            int speciesTypeKey=ref.getSpeciesTypeKey();
-        //    boolean isSearchable=SpeciesType.isSearchable(speciesTypeKey);
-      //      if(isSearchable){
-            String species=SpeciesType.getCommonName(speciesTypeKey);
-
-            int rgdId= ref.getRgdId();
-            IndexObject r= new IndexObject();
-            r.setTerm_acc(String.valueOf(rgdId));
-            r.setCitation(ref.getCitation());
-            r.setTitle(ref.getTitle());
-            List<String> authors=this.getAuthors(ref.getKey());
-            r.setAuthor(authors);
-
-            List<String> input= new ArrayList<>();
-            Suggest sugg= new Suggest();
-            if(authors!=null)
-                input.addAll(authors);
-            if(ref.getTitle()!=null)
-                input.add(ref.getTitle());
-            sugg.setInput(input);
-
-            Contexts contexts= new Contexts();
-            contexts.setCategory(new ArrayList<String>(Arrays.asList("reference")));
-
-            sugg.setContexts(contexts);
-            r.setSuggest(sugg);
-            r.setCategory("Reference");
-
-            r.setSpecies(species);
-            List<AliasData> alist= this.getAliases(rgdId);
-      //      r.setAliasDatas(alist);
-            r.setRefAbstract(ref.getRefAbstract());
-         List<String> synonyms= new ArrayList<>();
-
-            for(AliasData a:alist ){
-                synonyms.add(a.getAlias_name());
-            }
-          r.setSynonyms(synonyms);
-            List<String> xids=this.getExternalIdentifiers(rgdId);
-
-            r.setXdbIdentifiers(xids);
-            if(ref.getPubDate()!=null)
-                r.setPub_year(Integer.toString(ref.getPubDate().getYear()+1900));
-            objList.add(r);
+            Runnable workerThread=new IndexRef(ref);
+            executor.execute(workerThread);
         }
     //}
+        executor.shutdown();
+        while (!executor.isTerminated()){}
 
-        return objList;
     }
 
     public List<String> getAuthors(int refkey) throws Exception {
@@ -1384,51 +1035,32 @@ public class IndexDAO extends AbstractDAO {
     }
 
     public void indexObjects(List<IndexObject> objs, String index, String type) throws ExecutionException, InterruptedException, IOException {
-       // BulkRequestBuilder bulkRequestBuilder= ESClient.getClient().prepareBulk().setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
-        BulkRequest bulkRequest=new BulkRequest();
-      //  bulkRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
-        bulkRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.WAIT_UNTIL);
-        bulkRequest.timeout(TimeValue.timeValueMinutes(2));
-        bulkRequest.timeout("2m");
-        int docCount=0;
+
         ObjectMapper mapper = new ObjectMapper();
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
 
         for (IndexObject o : objs) {
-            docCount++;
             byte[] json = new byte[0];
             try {
                 json = mapper.writeValueAsBytes(o);
+                BulkIndexProcessor.bulkProcessor.add(new IndexRequest(RgdIndex.getNewAlias()).source(json, XContentType.JSON));
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
             }
-       //     bulkRequestBuilder.add(new IndexRequest(index, type,o.getTerm_acc()).source(json, XContentType.JSON));
-            bulkRequest.add(new IndexRequest(index).source(json, XContentType.JSON));
-            if(docCount%100==0){
-                ESClient.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
-                bulkRequest= new BulkRequest();
-             //   bulkRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.WAIT_UNTIL);
-                bulkRequest.timeout(TimeValue.timeValueMinutes(2));
-                bulkRequest.timeout("2m");
-            }else{
-                if(docCount>objs.size()-100 && docCount==objs.size()){
-
-                  ESClient.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
-                    bulkRequest= new BulkRequest();
-                 //   bulkRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.WAIT_UNTIL);
-                    bulkRequest.timeout(TimeValue.timeValueMinutes(2));
-                    bulkRequest.timeout("2m");
-                }
-            }
         }
-     //   ESClient.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
 
-        //   BulkResponse response=       bulkRequestBuilder.get();
+    }
+    public void indexDocument(IndexObject document) {
+        byte[] json = new byte[0];
+            try {
+                json = JacksonConfiguration.MAPPER.writeValueAsBytes(document);
+                BulkIndexProcessor.bulkProcessor.add(new IndexRequest(RgdIndex.getNewAlias()).source(json, XContentType.JSON));
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+       
 
-      //  ESClient.getClient().admin().indices().refresh(refreshRequest()).actionGet();
-     //   RefreshRequest refreshRequest=new RefreshRequest();
-     //   ESClient.getClient().indices().refresh(refreshRequest, RequestOptions.DEFAULT);
     }
     public static void main(String[] args) throws Exception {
           IndexDAO dao= new IndexDAO();

@@ -26,12 +26,13 @@ public class ObjectIndexerThread implements  Runnable {
     private Thread t;
     private String objectType;
     private String index;
-
+    private List<IndexObject> objects;
+    IndexDAO indexDAO=new IndexDAO();
     public ObjectIndexerThread(){}
-    public ObjectIndexerThread(String object, String indexName, Logger log){
+    public ObjectIndexerThread(String object, String indexName,List<IndexObject> objectList, Logger log){
         objectType=object;
         index=indexName;
-
+        objects=objectList;
     }
     @Override
     public void run(){
@@ -40,15 +41,14 @@ public class ObjectIndexerThread implements  Runnable {
         log.info(Thread.currentThread().getName()  + ": " + objectType+ " started " + new Date() );
 
         try {
-            IndexDAO indexDao=new IndexDAO();
-            List<IndexObject> objs = (List<IndexObject>) indexDao.getClass().getMethod("get" + objectType).invoke(indexDao);
-            System.out.println(objectType + " size: " + objs.size());
-            if(objs.size()>0){
-                indexDao.indexObjects(objs, index, "search");
+
+            System.out.println(objectType + " size: " + objects.size());
+            if(objects.size()>0){
+                indexDAO.indexObjects(objects, index, "search");
             }
 
-                System.out.println("Indexed " + objectType + " objects Size: " + objs.size() + " Exiting thread.");
-                log.info("Indexed " + objectType + " objects Size: " + objs.size() + " Exiting thread.");
+                System.out.println("Indexed " + objectType + " objects Size: " + objects.size() + " Exiting thread.");
+                log.info("Indexed " + objectType + " objects Size: " + objects.size() + " Exiting thread.");
 
 
             System.out.println(Thread.currentThread().getName()  +  " " + objectType+ " END " + new Date() );
@@ -62,7 +62,7 @@ public class ObjectIndexerThread implements  Runnable {
 
     }
 
-    public static void main(String[] args) throws Exception {
+ /*   public static void main(String[] args) throws Exception {
         Logger log = Logger.getLogger("main");
 
         DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
@@ -86,5 +86,5 @@ public class ObjectIndexerThread implements  Runnable {
         indexer.run();
         es.destroy();
         System.out.println("DONE!!!");
-    }
+    }*/
 }

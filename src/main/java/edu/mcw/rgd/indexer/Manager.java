@@ -1,11 +1,12 @@
 package edu.mcw.rgd.indexer;
 
-import edu.mcw.rgd.dao.DataSourceFactory;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import edu.mcw.rgd.dao.impl.MapDAO;
 import edu.mcw.rgd.dao.impl.OntologyXDAO;
 
-import edu.mcw.rgd.dao.impl.SampleDAO;
-import edu.mcw.rgd.dao.impl.VariantDAO;
+
 import edu.mcw.rgd.datamodel.*;
 import edu.mcw.rgd.datamodel.ontologyx.Ontology;
 
@@ -17,12 +18,10 @@ import edu.mcw.rgd.indexer.dao.*;
 
 import edu.mcw.rgd.indexer.dao.findModels.FullAnnotDao;
 import edu.mcw.rgd.indexer.dao.phenominer.PhenominerNormalizedThread;
-import edu.mcw.rgd.indexer.dao.phenominer.PhenominerThread;
 import edu.mcw.rgd.indexer.dao.variants.*;
-import edu.mcw.rgd.indexer.dao.variants.VariantIndexer;
+import edu.mcw.rgd.indexer.model.IndexObject;
 import edu.mcw.rgd.indexer.model.RgdIndex;
 import edu.mcw.rgd.indexer.model.findModels.ModelIndexObject;
-import edu.mcw.rgd.indexer.model.genomeInfo.ChromosomeIndexObject;
 import edu.mcw.rgd.process.Utils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
@@ -62,8 +61,8 @@ public class Manager {
     BulkIndexProcessor bulkIndexProcessor;
     IndexDAO indexDAO=new IndexDAO();
     private static final Logger log = Logger.getLogger("main");
-    MapDAO mapDAO= new MapDAO();
-    SampleDAO sdao= new SampleDAO();
+    IndexDAO indexDao=new IndexDAO();
+
     public static void main(String[] args) throws Exception {
 
         DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
@@ -73,6 +72,8 @@ public class Manager {
        System.out.println(manager.getVersion());
        RgdIndex rgdIndex= (RgdIndex) bf.getBean("rgdIndex");
         manager.bulkIndexProcessor=BulkIndexProcessor.getInstance();
+
+
         log.info("LEVEL:" +log.getLevel());
         log.info(manager.getVersion());
 
@@ -125,7 +126,6 @@ public class Manager {
             boolean searchIndexCreated=false;
             int runningThreadsCount=0;
             for (String arg : args) {
-                List<String> indices= new ArrayList<>();
                 Runnable workerThread;
 
 
@@ -144,10 +144,7 @@ public class Manager {
                             searchIndexCreated=true;
                         }
                         if(!arg.equalsIgnoreCase("annotations")) {
-                            runningThreadsCount = runningThreadsCount + 1;
-                            workerThread = new ObjectIndexerThread(arg, RgdIndex.getNewAlias(), log);
-
-                            executor.execute(workerThread);
+                                     indexDao.getClass().getMethod("get" + arg).invoke(indexDao);
                         }else{
                             OntologyXDAO ontologyXDAO = new OntologyXDAO();
                             List<Ontology> ontologies = ontologyXDAO.getPublicOntologies();
@@ -412,4 +409,6 @@ public class Manager {
     public void setReindex(boolean reindex) {
         this.reindex = reindex;
     }
+
+
 }
