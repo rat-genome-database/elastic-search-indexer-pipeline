@@ -12,6 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 public class VariantIndexQuery extends MappingSqlQuery {
@@ -64,11 +65,7 @@ public class VariantIndexQuery extends MappingSqlQuery {
                 vi.setGeneSymbols(Arrays.asList( rs.getString("gene_symbol_lc")));
             }
         }catch (Exception e){}
-        try {
-            vi.setMapDataList(this.getMapData(vi));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
         try{
             vi.setVarNuc(rs.getString("var_nuc"));
             vi.setRefNuc(rs.getString("ref_nuc"));
@@ -78,23 +75,5 @@ public class VariantIndexQuery extends MappingSqlQuery {
         }
         return vi;
     }
-    public List<MapInfo> getMapData(VariantIndex vi) throws Exception {
-        List<MapInfo> mapList= new ArrayList<>();
 
-            MapInfo map= new MapInfo();
-            map.setChromosome(vi.getChromosome());
-            map.setStartPos(vi.getStartPos());
-            map.setStopPos(vi.getEndPos());
-            map.setMap(this.getMapofMapkey(vi.getMapKey()));
-            mapList.add(map);
-
-        return mapList;
-    }
-    public String getMapofMapkey(int mapkey) throws Exception {
-
-        MapDAO mapDAO = new MapDAO();
-        edu.mcw.rgd.datamodel.Map m = mapDAO.getMapByKey(mapkey);
-        return m.getDescription();
-
-    }
 }

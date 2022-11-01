@@ -17,32 +17,22 @@ import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
 import edu.mcw.rgd.datamodel.ontologyx.TermWithStats;
 import edu.mcw.rgd.indexer.AnnotationFormatter;
-import edu.mcw.rgd.indexer.Manager;
 import edu.mcw.rgd.indexer.MyThreadPoolExecutor;
-import edu.mcw.rgd.indexer.client.ESClient;
 import edu.mcw.rgd.indexer.dao.variants.BulkIndexProcessor;
-import edu.mcw.rgd.indexer.dao.variants.JsonMapper;
 import edu.mcw.rgd.indexer.dao.variants.VariantIndexerThread;
 import edu.mcw.rgd.indexer.index.*;
 import edu.mcw.rgd.indexer.model.*;
 import edu.mcw.rgd.indexer.model.genomeInfo.AssemblyInfo;
 import edu.mcw.rgd.indexer.model.genomeInfo.GeneCounts;
 import edu.mcw.rgd.indexer.model.genomeInfo.GenomeIndexObject;
-import edu.mcw.rgd.indexer.model.variants.VariantIndex;
 import edu.mcw.rgd.indexer.spring.XdbObjectQuery;
 import edu.mcw.rgd.process.Utils;
 
 import org.apache.log4j.Logger;
-import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
-import org.elasticsearch.action.bulk.BulkRequest;
-import org.elasticsearch.action.bulk.BulkRequestBuilder;
-import org.elasticsearch.action.bulk.BulkResponse;
+
 import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.support.WriteRequest;
-import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.common.unit.TimeValue;
+
 import org.elasticsearch.common.xcontent.XContentType;
-import org.jsoup.Jsoup;
 
 
 import java.io.IOException;

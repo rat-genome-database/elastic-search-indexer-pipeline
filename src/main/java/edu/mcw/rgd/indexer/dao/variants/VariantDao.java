@@ -2,13 +2,11 @@ package edu.mcw.rgd.indexer.dao.variants;
 
 import edu.mcw.rgd.dao.AbstractDAO;
 import edu.mcw.rgd.dao.DataSourceFactory;
-import edu.mcw.rgd.dao.impl.GeneDAO;
-import edu.mcw.rgd.dao.impl.TranscriptDAO;
-import edu.mcw.rgd.dao.impl.VariantDAO;
-import edu.mcw.rgd.dao.impl.VariantInfoDAO;
+import edu.mcw.rgd.dao.impl.*;
 import edu.mcw.rgd.dao.spring.IntListQuery;
 import edu.mcw.rgd.dao.spring.VariantMapper;
 import edu.mcw.rgd.datamodel.*;
+import edu.mcw.rgd.indexer.model.MapInfo;
 import edu.mcw.rgd.indexer.model.variants.VariantIndex;
 import org.springframework.jdbc.core.SqlParameter;
 
@@ -23,7 +21,8 @@ import java.util.stream.Collectors;
  */
 public class VariantDao extends AbstractDAO {
     GeneDAO geneDAO=new GeneDAO();
-
+    MapDAO mapDAO = new MapDAO();
+    Map<Integer, edu.mcw.rgd.datamodel.Map> rgdMaps=new HashMap<>();
     VariantInfoDAO variantInfoDAO=new VariantInfoDAO();
     public List<Variant> getVariants(int sampleId, String chr) throws Exception {
         String sql = "SELECT * FROM Variant where sample_id=? and chromosome=?" ;
@@ -352,6 +351,13 @@ public class VariantDao extends AbstractDAO {
             }
         }
       //  System.out.println("varaiants size include no transcript variants: "+ vrList.size());
+        for(VariantIndex vi: vrList){
+            try {
+                vi.setMapDataList(this.getMapData(vi));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
         return vrList;
     }
 
@@ -444,6 +450,24 @@ public class VariantDao extends AbstractDAO {
                 return "";
         }
     }
+    public List<MapInfo> getMapData(VariantIndex vi) throws Exception {
+        List<MapInfo> mapList= new ArrayList<>();
+        MapInfo map= new MapInfo();
+        map.setChromosome(vi.getChromosome());
+        map.setStartPos(vi.getStartPos());
+        map.setStopPos(vi.getEndPos());
+        if(rgdMaps.get(vi.getMapKey())==null){
+            edu.mcw.rgd.datamodel.Map m = mapDAO.getMapByKey(vi.getMapKey());
+            rgdMaps.put(vi.getMapKey(), m);
+        }
+        map.setMap(rgdMaps.get(vi.getMapKey()).getDescription());
+        map.setRank(rgdMaps.get(vi.getMapKey()).getRank());
+
+        mapList.add(map);
+
+        return mapList;
+    }
+
     public String getClinvarInfo(int variantRgdId) throws Exception {
 
         VariantInfo info=variantInfoDAO.getVariant(variantRgdId)  ;
