@@ -54,9 +54,9 @@ public class ESClient {
         if(client==null){
            // Settings settings=Settings.builder().put("cluster.name", "green").build();
             Properties props= getProperties();
-
+            String hostName=getHostName();
              try {
-                 if(getHostName().contains("apollo") || getHostName().contains("booker") || getHostName().contains("reed")) {
+                 if(hostName.contains("apollo") || hostName.contains("booker") || hostName.contains("reed")) {
                      System.out.print("RUNNING IN PROD ENVIRONMENT....");
 
                      client = new RestHighLevelClient(RestClient.builder(
@@ -108,8 +108,8 @@ public class ESClient {
 
 
         try{
-    //   fis=new FileInputStream("C:/Apps/elasticsearchProps.properties");
-     fis=new FileInputStream("/data/pipelines/properties/es_properties.properties");
+   // fis=new FileInputStream("C:/Apps/elasticsearchProps.properties");
+    fis=new FileInputStream("/data/pipelines/properties/es_properties.properties");
             props.load(fis);
 
         }catch (Exception e){
