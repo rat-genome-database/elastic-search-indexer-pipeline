@@ -12,10 +12,10 @@ import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
 import edu.mcw.rgd.datamodel.pheno.Condition;
 import edu.mcw.rgd.datamodel.pheno.Record;
-import edu.mcw.rgd.indexer.client.ESClient;
 import edu.mcw.rgd.indexer.dao.IndexDAO;
 import edu.mcw.rgd.indexer.dao.phenominer.model.PhenominerIndexObject;
 import edu.mcw.rgd.indexer.dao.phenominer.model.TreeNode;
+import edu.mcw.rgd.services.ClientInit;
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.index.IndexRequest;
@@ -345,7 +345,7 @@ public class PhenominerProcess {
             //     bulkRequestBuilder.add(new IndexRequest(index, type,o.getTerm_acc()).source(json, XContentType.JSON));
             bulkRequest.add(new IndexRequest(index).source(json, XContentType.JSON));
             if (docCount % 100 == 0) {
-                ESClient.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
+                ClientInit.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
                 bulkRequest = new BulkRequest();
                 bulkRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.WAIT_UNTIL);
                 bulkRequest.timeout(TimeValue.timeValueMinutes(2));
@@ -353,7 +353,7 @@ public class PhenominerProcess {
             } else {
                 if (docCount > objs.size() - 100 && docCount == objs.size()) {
 
-                    ESClient.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
+                    ClientInit.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
                     bulkRequest = new BulkRequest();
                     bulkRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.WAIT_UNTIL);
                     bulkRequest.timeout(TimeValue.timeValueMillis(2));
@@ -362,6 +362,6 @@ public class PhenominerProcess {
             }
         }
         RefreshRequest refreshRequest = new RefreshRequest();
-        ESClient.getClient().indices().refresh(refreshRequest, RequestOptions.DEFAULT);
+        ClientInit.getClient().indices().refresh(refreshRequest, RequestOptions.DEFAULT);
     }
 }

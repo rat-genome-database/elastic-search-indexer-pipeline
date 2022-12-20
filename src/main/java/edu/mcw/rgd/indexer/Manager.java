@@ -1,8 +1,5 @@
 package edu.mcw.rgd.indexer;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import edu.mcw.rgd.dao.impl.MapDAO;
 import edu.mcw.rgd.dao.impl.OntologyXDAO;
 
@@ -11,7 +8,6 @@ import edu.mcw.rgd.datamodel.*;
 import edu.mcw.rgd.datamodel.ontologyx.Ontology;
 
 import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
-import edu.mcw.rgd.indexer.client.ESClient;
 import edu.mcw.rgd.indexer.client.IndexAdmin;
 
 import edu.mcw.rgd.indexer.dao.*;
@@ -19,10 +15,10 @@ import edu.mcw.rgd.indexer.dao.*;
 import edu.mcw.rgd.indexer.dao.findModels.FullAnnotDao;
 import edu.mcw.rgd.indexer.dao.phenominer.PhenominerNormalizedThread;
 import edu.mcw.rgd.indexer.dao.variants.*;
-import edu.mcw.rgd.indexer.model.IndexObject;
 import edu.mcw.rgd.indexer.model.RgdIndex;
 import edu.mcw.rgd.indexer.model.findModels.ModelIndexObject;
 import edu.mcw.rgd.process.Utils;
+import edu.mcw.rgd.services.ClientInit;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.Logger;
 
@@ -90,14 +86,14 @@ public class Manager {
         manager.run(args);
         } catch (Exception e) {
             manager.bulkIndexProcessor.destroy();
-           ESClient.destroy();
+           ClientInit.destroy();
             e.printStackTrace();
           manager.printUsage();
 
             log.info(e);
         }
         manager.bulkIndexProcessor.destroy();
-        ESClient.destroy();
+        ClientInit.destroy();
 
     }
     private void run(String[] args) throws Exception {
@@ -303,7 +299,7 @@ public class Manager {
             log.info(rgdIndex.getIndex() + " pointed to " + RgdIndex.getNewAlias());
         }
         AcknowledgedResponse indicesAliasesResponse =
-                ESClient.getClient().indices().updateAliases(request, RequestOptions.DEFAULT);
+                ClientInit.getClient().indices().updateAliases(request, RequestOptions.DEFAULT);
     /*    if (RgdIndex.getOldAlias() != null) {
             ESClient.getClient().admin().indices().prepareAliases().removeAlias(RgdIndex.getOldAlias(), rgdIndex.getIndex())
                     .addAlias(RgdIndex.getNewAlias(), rgdIndex.getIndex()).execute().actionGet();
@@ -342,7 +338,7 @@ public class Manager {
     public String getClusterHealth(String index) throws Exception {
 
         ClusterHealthRequest request = new ClusterHealthRequest(index);
-        ClusterHealthResponse response = ESClient.getClient().cluster().health(request, RequestOptions.DEFAULT);
+        ClusterHealthResponse response = ClientInit.getClient().cluster().health(request, RequestOptions.DEFAULT);
       /*  ClusterHealthResponse response = ESClient.getClient().admin().cluster().prepareHealth(index).execute().actionGet();*/
         System.out.println(response.getStatus().name());
         log.info("CLUSTER STATE: " + response.getStatus().name());

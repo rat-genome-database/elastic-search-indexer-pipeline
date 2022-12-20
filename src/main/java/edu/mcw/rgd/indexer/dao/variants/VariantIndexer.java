@@ -2,28 +2,22 @@ package edu.mcw.rgd.indexer.dao.variants;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import edu.mcw.rgd.dao.DataSourceFactory;
 import edu.mcw.rgd.dao.impl.GeneDAO;
 import edu.mcw.rgd.datamodel.*;
-import edu.mcw.rgd.indexer.client.ESClient;
 import edu.mcw.rgd.indexer.model.variants.VariantIndex;
+import edu.mcw.rgd.services.ClientInit;
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.elasticsearch.action.bulk.BulkRequest;
-import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.support.WriteRequest;
+import org.elasticsearch.client.Client;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.common.xcontent.XContentType;
 
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-
-import static org.elasticsearch.client.Requests.refreshRequest;
 
 /**
  * Created by jthota on 6/26/2019.
@@ -74,7 +68,7 @@ public class VariantIndexer  implements  Runnable{
                 if(docCount%100==0){
 
                     try {
-                        BulkResponse response=      ESClient.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
+                        BulkResponse response=      ClientInit.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -84,7 +78,7 @@ public class VariantIndexer  implements  Runnable{
                 }else{
                     if(docCount>vrs.size()-100 && docCount==vrs.size()){
                         try {
-                            BulkResponse response=      ESClient.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
+                            BulkResponse response=      ClientInit.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -98,7 +92,7 @@ public class VariantIndexer  implements  Runnable{
 
            RefreshRequest refreshRequest=new RefreshRequest();
            try {
-               ESClient.getClient().indices().refresh(refreshRequest, RequestOptions.DEFAULT);
+               ClientInit.getClient().indices().refresh(refreshRequest, RequestOptions.DEFAULT);
            } catch (IOException e) {
                e.printStackTrace();
            }

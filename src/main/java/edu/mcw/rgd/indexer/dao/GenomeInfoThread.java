@@ -5,12 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.mcw.rgd.dao.impl.MapDAO;
 import edu.mcw.rgd.datamodel.Map;
 import edu.mcw.rgd.datamodel.SpeciesType;
-import edu.mcw.rgd.indexer.client.ESClient;
 
 import edu.mcw.rgd.indexer.model.genomeInfo.AssemblyInfo;
 import edu.mcw.rgd.indexer.model.genomeInfo.GeneCounts;
 import edu.mcw.rgd.indexer.model.genomeInfo.GenomeIndexObject;
 
+import edu.mcw.rgd.services.ClientInit;
 import org.apache.log4j.Logger;
 
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
@@ -24,8 +24,6 @@ import org.elasticsearch.common.xcontent.XContentType;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import static org.elasticsearch.client.Requests.refreshRequest;
 
 
 /**
@@ -195,12 +193,12 @@ public class GenomeInfoThread implements Runnable {
                 bulkRequest.add(new IndexRequest(index).source(json, XContentType.JSON));
 
             }
-         BulkResponse response=      ESClient.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
+         BulkResponse response=      ClientInit.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
          bulkRequest= new BulkRequest();
           //   BulkResponse response=       bulkRequestBuilder.get();
          //  ESClient.getClient().admin().indices().refresh(refreshRequest()).actionGet();
          RefreshRequest refreshRequest=new RefreshRequest();
-         ESClient.getClient().indices().refresh(refreshRequest, RequestOptions.DEFAULT);
+         ClientInit.getClient().indices().refresh(refreshRequest, RequestOptions.DEFAULT);
             System.out.println("Indexed " + species + "  genome objects Size: " + objects.size() + " Exiting thread.");
             System.out.println(Thread.currentThread().getName() + ": " + species + " End " + new Date());
             log.info("Indexed " + species + "  genome objects Size: " + objects.size() + " Exiting thread.");

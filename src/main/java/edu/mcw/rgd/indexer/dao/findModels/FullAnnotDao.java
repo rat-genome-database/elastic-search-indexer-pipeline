@@ -1,21 +1,19 @@
 package edu.mcw.rgd.indexer.dao.findModels;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.mcw.rgd.dao.impl.*;
-import edu.mcw.rgd.dao.spring.EvidenceQuery;
 import edu.mcw.rgd.datamodel.*;
 import edu.mcw.rgd.datamodel.annotation.Evidence;
 import edu.mcw.rgd.datamodel.ontology.Annotation;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.ontologyx.TermDagEdge;
 import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
-import edu.mcw.rgd.indexer.client.ESClient;
 import edu.mcw.rgd.indexer.model.RgdIndex;
 import edu.mcw.rgd.indexer.model.findModels.ModelIndexObject;
 
 import edu.mcw.rgd.process.Utils;
+import edu.mcw.rgd.services.ClientInit;
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
@@ -242,12 +240,12 @@ public class FullAnnotDao {
 
             if(docCount%100==0){
                 //  BulkResponse response=       bulkRequestBuilder.execute().get();
-                BulkResponse response=      ESClient.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
+                BulkResponse response=      ClientInit.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
                 bulkRequest= new BulkRequest();
             }else{
                 if(docCount>objects.size()-100 && docCount==objects.size()){
 
-                    BulkResponse response=      ESClient.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
+                    BulkResponse response=      ClientInit.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
                     bulkRequest= new BulkRequest();
                 }
             }
@@ -256,7 +254,7 @@ public class FullAnnotDao {
         //   BulkResponse response=       bulkRequestBuilder.get();
         //  ESClient.getClient().admin().indices().refresh(refreshRequest()).actionGet();
         RefreshRequest refreshRequest=new RefreshRequest();
-        ESClient.getClient().indices().refresh(refreshRequest, RequestOptions.DEFAULT);
+        ClientInit.getClient().indices().refresh(refreshRequest, RequestOptions.DEFAULT);
         System.out.println("Indexed " +  "  Model objects Size: " + objects.size() + " Exiting thread.");
         System.out.println(Thread.currentThread().getName() + ": " + " End " + new Date());
 

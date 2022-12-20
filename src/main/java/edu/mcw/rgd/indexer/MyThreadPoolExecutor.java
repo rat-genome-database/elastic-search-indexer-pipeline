@@ -1,9 +1,10 @@
 package edu.mcw.rgd.indexer;
 
-import edu.mcw.rgd.indexer.client.ESClient;
+import edu.mcw.rgd.services.ClientInit;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.concurrent.*;
 
@@ -34,12 +35,16 @@ public class MyThreadPoolExecutor extends ThreadPoolExecutor {
         if(t!=null){
             System.err.println("Uncaught exception! "+t +" STACKTRACE:"+ Arrays.toString(t.getStackTrace()));
             log.info("Uncaught exception! "+t +" STACKTRACE:"+ Arrays.toString(t.getStackTrace()));
-            if(ESClient.getClient()!=null)
-                try {
-                    ESClient.getClient().close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            try {
+                if(ClientInit.getClient()!=null)
+                    try {
+                        ClientInit.getClient().close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+            } catch (UnknownHostException e) {
+                e.printStackTrace();
+            }
             System.exit(1);
         }
     }

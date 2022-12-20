@@ -2,26 +2,20 @@ package edu.mcw.rgd.indexer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import edu.mcw.rgd.dao.impl.MapDAO;
 import edu.mcw.rgd.datamodel.Chromosome;
 import edu.mcw.rgd.datamodel.SpeciesType;
-import edu.mcw.rgd.indexer.client.ESClient;
 import edu.mcw.rgd.indexer.dao.GenomeDAO;
 import edu.mcw.rgd.indexer.dao.StrainVariants;
 import edu.mcw.rgd.indexer.model.genomeInfo.ChromosomeIndexObject;
 import edu.mcw.rgd.indexer.model.genomeInfo.DiseaseGeneObject;
 import edu.mcw.rgd.indexer.model.genomeInfo.GeneCounts;
+import edu.mcw.rgd.services.ClientInit;
 import org.apache.log4j.Logger;
-import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
-import org.elasticsearch.action.bulk.BulkRequest;
-import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
-import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.common.xcontent.XContentType;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -130,7 +124,7 @@ public class ChromosomeIndexer implements Runnable {
                         }
 
                         IndexRequest request=new IndexRequest(index).source(json, XContentType.JSON);
-                        IndexResponse response=      ESClient.getClient().index(request, RequestOptions.DEFAULT);
+                        IndexResponse response=      ClientInit.getClient().index(request, RequestOptions.DEFAULT);
 
                         log.info(Thread.currentThread().getName() + ": chromosomeThread" + mapKey+"_CHR:"+c.getChromosome() + " End " + new Date());
 

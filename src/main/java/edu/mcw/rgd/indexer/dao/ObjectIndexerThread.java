@@ -1,23 +1,12 @@
 package edu.mcw.rgd.indexer.dao;
 
 
-import edu.mcw.rgd.indexer.Manager;
-import edu.mcw.rgd.indexer.client.ESClient;
-import edu.mcw.rgd.indexer.client.IndexAdmin;
 import edu.mcw.rgd.indexer.model.IndexObject;
-import edu.mcw.rgd.indexer.model.RgdIndex;
 
 import org.apache.log4j.Logger;
 
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
-import org.springframework.core.io.FileSystemResource;
-
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import static org.elasticsearch.client.Requests.refreshRequest;
 
 /**
  * Created by jthota on 6/21/2017.

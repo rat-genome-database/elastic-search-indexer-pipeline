@@ -2,6 +2,7 @@ package edu.mcw.rgd.indexer.client;
 
 import edu.mcw.rgd.indexer.Manager;
 import edu.mcw.rgd.indexer.model.RgdIndex;
+import edu.mcw.rgd.services.ClientInit;
 import org.apache.log4j.Logger;
 
 import org.elasticsearch.action.admin.indices.alias.get.GetAliasesRequest;
@@ -42,20 +43,20 @@ public class IndexAdmin {
     public void createIndex(String mappings, String type) throws Exception {
 
         GetAliasesRequest aliasesRequest=new GetAliasesRequest(rgdIndex.getIndex());
-        boolean existsAlias = ESClient.getClient().indices().existsAlias(aliasesRequest, RequestOptions.DEFAULT);
+        boolean existsAlias = ClientInit.getClient().indices().existsAlias(aliasesRequest, RequestOptions.DEFAULT);
         if(existsAlias) {
             for (String index : rgdIndex.getIndices()) {
                 aliasesRequest.indices(index);
-                existsAlias = ESClient.getClient().indices().existsAlias(aliasesRequest, RequestOptions.DEFAULT);
+                existsAlias = ClientInit.getClient().indices().existsAlias(aliasesRequest, RequestOptions.DEFAULT);
                 if (!existsAlias) {
                     RgdIndex.setNewAlias(index);
                     GetIndexRequest request1 = new GetIndexRequest(index);
-                    boolean indexExists = ESClient.getClient().indices().exists(request1, RequestOptions.DEFAULT);
+                    boolean indexExists = ClientInit.getClient().indices().exists(request1, RequestOptions.DEFAULT);
 
                     if (indexExists) {   /**** delete index if exists ****/
 
                         DeleteIndexRequest deleteIndexRequest = new DeleteIndexRequest(index);
-                        ESClient.getClient().indices().delete(deleteIndexRequest, RequestOptions.DEFAULT);
+                        ClientInit.getClient().indices().delete(deleteIndexRequest, RequestOptions.DEFAULT);
                         log.info(index + " deleted");
                     }
                     createNewIndex(index, mappings, type);
@@ -66,11 +67,11 @@ public class IndexAdmin {
             }
         }else{
             GetIndexRequest request1=new GetIndexRequest(rgdIndex.getIndex()+"1");
-            boolean indexExists=ESClient.getClient().indices().exists(request1, RequestOptions.DEFAULT);
+            boolean indexExists=ClientInit.getClient().indices().exists(request1, RequestOptions.DEFAULT);
             if (indexExists) {   /**** delete index if exists ****/
 
                 DeleteIndexRequest deleteIndexRequest = new DeleteIndexRequest(rgdIndex.getIndex()+"1");
-                ESClient.getClient().indices().delete(deleteIndexRequest, RequestOptions.DEFAULT);
+                ClientInit.getClient().indices().delete(deleteIndexRequest, RequestOptions.DEFAULT);
                 log.info(rgdIndex.getIndex()+"1" + " deleted");
             }
             createNewIndex(rgdIndex.getIndex()+"1",mappings, type);
@@ -99,7 +100,7 @@ public class IndexAdmin {
                 .put("index.number_of_replicas", replicates)
         .loadFromSource(analyzers,XContentType.JSON));
        request.mapping(mappings, XContentType.JSON);
-       org.elasticsearch.client.indices.CreateIndexResponse createIndexResponse = ESClient.getClient().indices().create(request, RequestOptions.DEFAULT);
+       org.elasticsearch.client.indices.CreateIndexResponse createIndexResponse = ClientInit.getClient().indices().create(request, RequestOptions.DEFAULT);
 
         log.info(index + " created on  " + new Date());
 
@@ -109,7 +110,7 @@ public class IndexAdmin {
         if(rgdIndex.getIndex()!=null) {
             log.info("Updating " + rgdIndex.getIndex() + "...");
             GetIndexRequest request=new GetIndexRequest(rgdIndex.getIndex());
-            boolean indicesExists=ESClient.getClient().indices().exists(request, RequestOptions.DEFAULT);
+            boolean indicesExists=ClientInit.getClient().indices().exists(request, RequestOptions.DEFAULT);
             if (indicesExists) {  /* CHECK IF INDEX NAME PROVIDED EXISTS*/
 
                 RgdIndex.setNewAlias(rgdIndex.getIndex());
@@ -141,7 +142,7 @@ public class IndexAdmin {
         DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
         new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new FileSystemResource("properties/AppConfigure.xml"));
 
-        ESClient es= (ESClient) bf.getBean("client");
+        ClientInit es= (ClientInit) bf.getBean("client");
         admin.rgdIndex= (RgdIndex) bf.getBean("rgdIndex");
         List<String> indices= new ArrayList<>();
         admin.rgdIndex.setIndex("rgd_index_"+ "dev");
