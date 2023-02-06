@@ -11,7 +11,8 @@ import edu.mcw.rgd.indexer.model.genomeInfo.GeneCounts;
 import edu.mcw.rgd.indexer.model.genomeInfo.GenomeIndexObject;
 
 import edu.mcw.rgd.services.ClientInit;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.elasticsearch.action.bulk.BulkRequest;
@@ -46,8 +47,7 @@ public class GenomeInfoThread implements Runnable {
 
     @Override
     public void run() {
-        Logger log=Logger.getLogger("genome");
-        System.out.println(Thread.currentThread().getName() + ": " + SpeciesType.getCommonName(key) + " started " + new Date());
+        Logger log= LogManager.getLogger("genome");
         log.info(Thread.currentThread().getName() + ": " + SpeciesType.getCommonName(key) + " started " + new Date());
 
       MapDAO mapDAO= new MapDAO();
@@ -174,7 +174,6 @@ public class GenomeInfoThread implements Runnable {
                 objects.add(obj);
           }
        }
-            System.out.println("Objects List Size of " + species + " : " + objects.size());
            log.info("Objects List Size of " + species + " : " + objects.size());
     //     BulkRequestBuilder bulkRequestBuilder= ESClient.getClient().prepareBulk().setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
          BulkRequest bulkRequest=new BulkRequest();
@@ -199,10 +198,8 @@ public class GenomeInfoThread implements Runnable {
          //  ESClient.getClient().admin().indices().refresh(refreshRequest()).actionGet();
          RefreshRequest refreshRequest=new RefreshRequest();
          ClientInit.getClient().indices().refresh(refreshRequest, RequestOptions.DEFAULT);
-            System.out.println("Indexed " + species + "  genome objects Size: " + objects.size() + " Exiting thread.");
-            System.out.println(Thread.currentThread().getName() + ": " + species + " End " + new Date());
             log.info("Indexed " + species + "  genome objects Size: " + objects.size() + " Exiting thread.");
-           log.info(Thread.currentThread().getName() + ": " + species + " End " + new Date());
+            log.info(Thread.currentThread().getName() + ": " + species + " End " + new Date());
        }catch (Exception e){
             e.printStackTrace();
             log.info(e);
