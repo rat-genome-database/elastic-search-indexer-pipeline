@@ -117,7 +117,7 @@ public class Manager {
 
         ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
             boolean searchIndexCreated=false;
-            int runningThreadsCount=0;
+            //int runningThreadsCount=0;
             for (String arg : args) {
                 Runnable workerThread;
 
