@@ -11,6 +11,7 @@ import edu.mcw.rgd.datamodel.pheno.PhenominerUnitTable;
 import edu.mcw.rgd.datamodel.pheno.Record;
 import edu.mcw.rgd.indexer.dao.phenominer.model.PhenominerIndexObject;
 import edu.mcw.rgd.indexer.dao.phenominer.utils.PhenominerProcess;
+import edu.mcw.rgd.process.Utils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -38,11 +39,11 @@ public class PhenominerNormalizedThread implements Runnable {
     public void run() {
         List<Record> records = new ArrayList<>();
         try {
-       records = phenominerDAO.getFullRecords();
+            records = phenominerDAO.getFullRecords();
         //    records = phenominerDAO.getFullRecordsByCMO("CMO:0000709");
             log.info("RECORDSSIZE:"+ records.size());
         } catch (Exception e) {
-            e.printStackTrace();
+            Utils.printStackTrace(e, log);
         }
         List<String> ontologies = new ArrayList<>(Arrays.asList("RS", "CMO", "XCO", "MMO"));
         List<PhenominerIndexObject> indexObjects = new ArrayList<>();
@@ -128,7 +129,7 @@ public class PhenominerNormalizedThread implements Runnable {
                 Set<String> cmoSynonyms = new HashSet<>(synomyms.get("CMO"));
                 Set<String> mmoSynonyms = new HashSet<>(synomyms.get("MMO"));
                 Set<String> rsSynonyms = new HashSet<>(synomyms.get("RS"));
-                String strainRgdId=new String();
+                String strainRgdId="";
                 for(String rsSynonym:rsSynonyms){
                     if(rsSynonym.contains("RGD")){
                         strainRgdId=rsSynonym;
@@ -153,24 +154,32 @@ public class PhenominerNormalizedThread implements Runnable {
                 object.setMmoTerms(new ArrayList<>(mmoSynonyms));
                 object.setRsTerms(new ArrayList<>(rsSynonyms));
                 object.setXcoTerms(new ArrayList<>(xcoSynonyms));
+
                 try {
                     object.setSex(record.getSample().getSex());
-                }catch (Exception e){System.err.println("No sex for record "+ record.getId());}
+                }catch (Exception e){log.debug("No sex for record "+ record.getId());}
+
                 try {
                     object.setAgeLowBound(record.getSample().getAgeDaysFromLowBound());
-                }catch (Exception e){System.err.println("No age low bound for record "+ record.getId());}
+                }catch (Exception e){log.debug("No age low bound for record "+ record.getId());}
+
                 try {
                     object.setAgeHighBound(record.getSample().getAgeDaysFromHighBound());
-                }catch (Exception e){System.err.println("NO age high bound for record "+ record.getId());}
+                }catch (Exception e){log.debug("NO age high bound for record "+ record.getId());}
+
                 try {
                     object.setUnits(record.getMeasurementUnits());
                 } catch (Exception e){
-                    log.debug("No measurement units for record "+ record.getId());}
+                    log.debug("No measurement units for record "+ record.getId());
+                }
+
                 try {
                     double roundOffSD = Math.round(Double.parseDouble(record.getMeasurementSD()) * 100.0) / 100.0;
                     object.setSd(String.valueOf(roundOffSD));
+                }catch (Exception e){
+                    log.debug("No SD for record "+ record.getId());
+                }
 
-                }catch (Exception e){System.err.println("No SD for record "+ record.getId());}
                 try {
                     double roundOffSem = Math.round(Double.parseDouble(record.getMeasurementSem()) * 100.0) / 100.0;
                     object.setSem(String.valueOf(roundOffSem));
