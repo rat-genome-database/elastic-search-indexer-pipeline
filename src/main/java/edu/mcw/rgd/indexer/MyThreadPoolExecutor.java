@@ -1,9 +1,7 @@
 package edu.mcw.rgd.indexer;
 
-import edu.mcw.rgd.process.Utils;
 import edu.mcw.rgd.services.ClientInit;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
@@ -14,7 +12,7 @@ import java.util.concurrent.*;
  * Created by jthota on 11/14/2018.
  */
 public class MyThreadPoolExecutor extends ThreadPoolExecutor {
-    Logger log= LogManager.getLogger(Manager.class);
+    Logger log=Logger.getLogger(Manager.class);
     public MyThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue) {
         super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue);
     }
@@ -35,16 +33,17 @@ public class MyThreadPoolExecutor extends ThreadPoolExecutor {
             }
         }
         if(t!=null){
-            log.error("Uncaught exception! "+t +" STACKTRACE:"+ Arrays.toString(t.getStackTrace()));
+            System.err.println("Uncaught exception! "+t +" STACKTRACE:"+ Arrays.toString(t.getStackTrace()));
+            log.info("Uncaught exception! "+t +" STACKTRACE:"+ Arrays.toString(t.getStackTrace()));
             try {
                 if(ClientInit.getClient()!=null)
                     try {
                         ClientInit.getClient().close();
                     } catch (IOException e) {
-                        Utils.printStackTrace(e, log);
+                        e.printStackTrace();
                     }
             } catch (UnknownHostException e) {
-                Utils.printStackTrace(e, log);
+                e.printStackTrace();
             }
             System.exit(1);
         }

@@ -4,9 +4,11 @@ import edu.mcw.rgd.dao.AbstractDAO;
 import edu.mcw.rgd.dao.DataSourceFactory;
 import edu.mcw.rgd.dao.impl.*;
 import edu.mcw.rgd.dao.spring.IntListQuery;
+import edu.mcw.rgd.dao.spring.VariantMapper;
 import edu.mcw.rgd.datamodel.*;
 import edu.mcw.rgd.indexer.model.MapInfo;
 import edu.mcw.rgd.indexer.model.variants.VariantIndex;
+import org.springframework.jdbc.core.SqlParameter;
 
 import java.math.BigDecimal;
 import java.sql.*;
@@ -18,9 +20,17 @@ import java.util.stream.Collectors;
  * Created by jthota on 6/26/2019.
  */
 public class VariantDao extends AbstractDAO {
+    GeneDAO geneDAO=new GeneDAO();
     MapDAO mapDAO = new MapDAO();
     Map<Integer, edu.mcw.rgd.datamodel.Map> rgdMaps=new HashMap<>();
     VariantInfoDAO variantInfoDAO=new VariantInfoDAO();
+    public List<Variant> getVariants(int sampleId, String chr) throws Exception {
+        String sql = "SELECT * FROM Variant where sample_id=? and chromosome=?" ;
+        VariantMapper q = new VariantMapper(this.getDataSource(), sql);
+        q.declareParameter(new SqlParameter(4));
+        q.declareParameter(new SqlParameter(12));
+        return q.execute(new Object[]{sampleId, chr});
+    }
     public List<VariantIndex> getVariantResults(int sampleId, String chr, int mapKey) {
 
 
@@ -42,9 +52,11 @@ public class VariantDao extends AbstractDAO {
         List<VariantIndex> vrList = new ArrayList<>();
         java.util.Map<Long, VariantIndex> variants= new HashMap<>();
         Set<Long> variantIds= new HashSet<>();
-        try( Connection connection=this.getDataSource().getConnection() ){
-            ResultSet rs= null;
-            PreparedStatement stmt=null;
+        ResultSet rs= null;
+        Connection connection= null;
+        PreparedStatement stmt=null;
+        try{
+            connection=this.getDataSource().getConnection();
             stmt=connection.prepareStatement(sql);
             stmt.setInt(1, mapKey);
             stmt.setInt(2, mapKey);
@@ -55,115 +67,145 @@ public class VariantDao extends AbstractDAO {
 
         //   System.out.println("RESULT SET SIZE: "+ rs.getFetchSize());
             while(rs.next()) {
-                VariantIndex vi = new VariantIndex();
-                long variant_id = rs.getLong("variant_id");
-                if (!variantIds.contains(variant_id)) {
-                    variantIds.add(variant_id);
-                    vi.setVariant_id(variant_id);
-                    vi.setChromosome(rs.getString("chromosome"));
-                    vi.setEndPos(rs.getLong("end_pos"));
-                    vi.setSampleId(rs.getInt("sample_id"));
-                    vi.setStartPos(rs.getLong("start_pos"));
-                    vi.setVariantType(rs.getString("variant_type"));
-                    vi.setZygosityStatus(rs.getString("zygosity_status"));
-                    vi.setGenicStatus(rs.getString("genic_status"));
-                    vi.setHGVSNAME(rs.getString("hgvs_name"));
-              //      vi.setAnalysisName(rs.getString("analysis_name"));
+                try {
+                    VariantIndex vi = new VariantIndex();
+                    long variant_id = rs.getLong("variant_id");
+                    if (!variantIds.contains(variant_id)) {
+                        variantIds.add(variant_id);
+                        vi.setVariant_id(variant_id);
+                        vi.setChromosome(rs.getString("chromosome"));
+                        vi.setEndPos(rs.getLong("end_pos"));
+                        vi.setSampleId(rs.getInt("sample_id"));
+                        vi.setStartPos(rs.getLong("start_pos"));
+                        vi.setVariantType(rs.getString("variant_type"));
+                        vi.setZygosityStatus(rs.getString("zygosity_status"));
+                        vi.setGenicStatus(rs.getString("genic_status"));
+                        vi.setHGVSNAME(rs.getString("hgvs_name"));
+                  //      vi.setAnalysisName(rs.getString("analysis_name"));
 
-                    /***************Variant Transcript****************************/
-                    //   vi.setVariantTranscriptId(rs.getInt("variant_transcript_id"));
-                    //  vi.setTranscriptRgdId(rs.getInt("transcript_rgd_id"));
-                    List<Long> vtIds=new ArrayList<>();
-                    vtIds.add(rs.getLong("variant_transcript_id"));
+                        /***************Variant Transcript****************************/
+                        //   vi.setVariantTranscriptId(rs.getInt("variant_transcript_id"));
+                        //  vi.setTranscriptRgdId(rs.getInt("transcript_rgd_id"));
+                        List<Long> vtIds=new ArrayList<>();
+                        vtIds.add(rs.getLong("variant_transcript_id"));
 
-                    List<Long> tIds= new ArrayList<>();
-                    tIds.add(rs.getLong("transcript_rgd_id"));
-           /*         vi.setPolyphenStatus(rs.getString("polyphen_status"));
-                    vi.setSynStatus(rs.getString("syn_status"));
-                    vi.setLocationName(rs.getString("location_name"));
-                    vi.setUniprotId(rs.getString("uniprot_id"));
+                        List<Long> tIds= new ArrayList<>();
+                        tIds.add(rs.getLong("transcript_rgd_id"));
+               /*         vi.setPolyphenStatus(rs.getString("polyphen_status"));
+                        vi.setSynStatus(rs.getString("syn_status"));
+                        vi.setLocationName(rs.getString("location_name"));
+                        vi.setUniprotId(rs.getString("uniprot_id"));
 
-                    /**************************dbs_snp****************************/
-                    vi.setDbsSnpName(rs.getString("MCW_DBS_SNP_NAME"));
-                    /******************region_name*******************/
-                    String regionName=rs.getString("region_name");
-                    vi.setRegionName(regionName);
-                    vi.setRegionNameLc(regionName.toLowerCase());
-                    List<BigDecimal> conScores = new ArrayList<>();
-                    conScores.add(rs.getBigDecimal("score"));
+                        /**************************dbs_snp****************************/
+                        vi.setDbsSnpName(rs.getString("MCW_DBS_SNP_NAME"));
+                        /******************region_name*******************/
+                        String regionName=rs.getString("region_name");
+                        vi.setRegionName(regionName);
+                        vi.setRegionNameLc(regionName.toLowerCase());
+                        List<BigDecimal> conScores = new ArrayList<>();
+                        conScores.add(rs.getBigDecimal("score"));
 
-                    int geneRgdId = rs.getInt("gene_rgd_id");
-                    if(geneRgdId!=0) {
-                        List<Integer> gIds = new ArrayList<>();
-                        gIds.add(geneRgdId);
-                        vi.setGeneRgdIds(gIds);
-                        List<String> gSymbols = new ArrayList<>();
-                        String geneSymbol=rs.getString("symbol");
-                        String geneSymbolLc= rs.getString("symbol_lc");
-                        if(geneSymbol!=null){
-                            gSymbols.add(geneSymbol);
-                        }
-                        if(geneSymbolLc!=null){
-                            gSymbols.add(geneSymbolLc);
-                         }
-                     vi.setGeneSymbols(gSymbols);
-                    }
-                    variants.put(variant_id, vi);
-
-                } else {
-                    VariantIndex obj = variants.get(variant_id);
-                    Long vtId=rs.getLong("variant_transcript_id");
-                    Long tId=rs.getLong("transcript_rgd_id");
-
-
-                    int geneRgdId = rs.getInt("gene_rgd_id");
-                     if(geneRgdId!=0) {
-                         List<Integer> gRgdIds=new ArrayList<>();
-                         if(obj.getGeneRgdIds()!=null){
-                             gRgdIds.addAll(obj.getGeneRgdIds());
-                         }
-                        if(!gRgdIds.contains(geneRgdId)) {
-                            gRgdIds.add(geneRgdId);
-
-                        }
-                         obj.setGeneRgdIds(gRgdIds);
-                        try{
+                        int geneRgdId = rs.getInt("gene_rgd_id");
+                        if(geneRgdId!=0) {
+                            List<Integer> gIds = new ArrayList<>();
+                            gIds.add(geneRgdId);
+                            vi.setGeneRgdIds(gIds);
+                            List<String> gSymbols = new ArrayList<>();
                             String geneSymbol=rs.getString("symbol");
                             String geneSymbolLc= rs.getString("symbol_lc");
-                            List<String> gSymbols=new ArrayList<>();
-                            if(obj.getGeneSymbols()!=null){
-                                gSymbols.addAll(obj.getGeneSymbols());
-                            }
                             if(geneSymbol!=null){
-                              if(!gSymbols.contains(geneSymbol) ) {
-                                  gSymbols.add(geneSymbol);
-
-                              }
+                                gSymbols.add(geneSymbol);
                             }
                             if(geneSymbolLc!=null){
-                                if(!gSymbols.contains(geneSymbolLc) ) {
-                                    gSymbols.add(geneSymbolLc);
+                                gSymbols.add(geneSymbolLc);
+                             }
+                         vi.setGeneSymbols(gSymbols);
+                        }
+                        variants.put(variant_id, vi);
 
-                                }
+                    } else {
+                        VariantIndex obj = variants.get(variant_id);
+                        Long vtId=rs.getLong("variant_transcript_id");
+                        Long tId=rs.getLong("transcript_rgd_id");
+
+
+                        int geneRgdId = rs.getInt("gene_rgd_id");
+                         if(geneRgdId!=0) {
+                             List<Integer> gRgdIds=new ArrayList<>();
+                             if(obj.getGeneRgdIds()!=null){
+                                 gRgdIds.addAll(obj.getGeneRgdIds());
+                             }
+                            if(!gRgdIds.contains(geneRgdId)) {
+                                gRgdIds.add(geneRgdId);
 
                             }
-                            obj.setGeneSymbols(gSymbols);
-                        }catch (Exception e){
-                            System.err.print("GENE RGD ID: "+ geneRgdId);
-                            throw new Exception("GENE RGD _ID" + geneRgdId);
+                             obj.setGeneRgdIds(gRgdIds);
+                            try{
+                                String geneSymbol=rs.getString("symbol");
+                                String geneSymbolLc= rs.getString("symbol_lc");
+                                List<String> gSymbols=new ArrayList<>();
+                                if(obj.getGeneSymbols()!=null){
+                                    gSymbols.addAll(obj.getGeneSymbols());
+                                }
+                                if(geneSymbol!=null){
+                                  if(!gSymbols.contains(geneSymbol) ) {
+                                      gSymbols.add(geneSymbol);
+
+                                  }
+                                }
+                                if(geneSymbolLc!=null){
+                                    if(!gSymbols.contains(geneSymbolLc) ) {
+                                        gSymbols.add(geneSymbolLc);
+
+                                    }
+
+                                }
+                                obj.setGeneSymbols(gSymbols);
+                            }catch (Exception e){
+                                System.err.print("GENE RGD ID: "+ geneRgdId);
+                                throw new Exception("GENE RGD _ID" + geneRgdId);
+
+                            }
 
                         }
-
+                        variants.put(variant_id, obj);
                     }
-                    variants.put(variant_id, obj);
+                }catch (Exception e){
+
+                    e.printStackTrace();
                 }
             }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
 
+                rs.close();
+                stmt.close();
+               connection.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            try {
+                if(rs!=null)
+                    rs.close();
+                if(stmt!=null)
+                    stmt.close();
+                if(connection!=null)
+                    connection.close();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+
+        }finally {
+             try {
+                    if(rs!=null)
+                    rs.close();
+                    if(stmt!=null)
+                    stmt.close();
+                    if(connection!=null)
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
+        }
         for(Map.Entry e:variants.entrySet()){
             vrList.add((VariantIndex) e.getValue());
         }
@@ -180,6 +222,7 @@ public class VariantDao extends AbstractDAO {
         }
         return mappedGenes;
     }
+
 
     public List<Integer> getUniqueVariantsIds( String chr, int mapKey, int speciesTypeKey) throws Exception {
         String sql ="select v.rgd_id from variant v, variant_map_data vmd  " +

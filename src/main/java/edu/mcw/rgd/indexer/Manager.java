@@ -20,8 +20,7 @@ import edu.mcw.rgd.indexer.model.findModels.ModelIndexObject;
 import edu.mcw.rgd.process.Utils;
 import edu.mcw.rgd.services.ClientInit;
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.log4j.Logger;
 
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthRequest;
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
@@ -57,7 +56,7 @@ public class Manager {
     private boolean reindex;
     BulkIndexProcessor bulkIndexProcessor;
     IndexDAO indexDAO=new IndexDAO();
-    private final Logger log = LogManager.getLogger("main");
+    private static final Logger log = Logger.getLogger("main");
     IndexDAO indexDao=new IndexDAO();
 
     public static void main(String[] args) throws Exception {
@@ -65,11 +64,14 @@ public class Manager {
         DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
         new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new FileSystemResource("properties/AppConfigure.xml"));
 
-        Manager manager = (Manager) bf.getBean("manager");
-        manager.log.info(manager.getVersion());
-        RgdIndex rgdIndex= (RgdIndex) bf.getBean("rgdIndex");
+       Manager manager = (Manager) bf.getBean("manager");
+       System.out.println(manager.getVersion());
+       RgdIndex rgdIndex= (RgdIndex) bf.getBean("rgdIndex");
         manager.bulkIndexProcessor=BulkIndexProcessor.getInstance();
 
+
+        log.info("LEVEL:" +log.getLevel());
+        log.info(manager.getVersion());
 
         try {
 
@@ -81,13 +83,14 @@ public class Manager {
                 rgdIndex.setIndices(indices);
             }
 
-            manager.run(args);
+        manager.run(args);
         } catch (Exception e) {
             manager.bulkIndexProcessor.destroy();
-            ClientInit.destroy();
-            manager.printUsage();
+           ClientInit.destroy();
+            e.printStackTrace();
+          manager.printUsage();
 
-            Utils.printStackTrace(e, manager.log);
+            log.info(e);
         }
         manager.bulkIndexProcessor.destroy();
         ClientInit.destroy();
@@ -117,7 +120,7 @@ public class Manager {
 
         ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
             boolean searchIndexCreated=false;
-            //int runningThreadsCount=0;
+            int runningThreadsCount=0;
             for (String arg : args) {
                 Runnable workerThread;
 
@@ -159,7 +162,7 @@ public class Manager {
                          admin.createIndex("chromosome_mappings", "chromosome");
                         if(arg.equalsIgnoreCase("chromosomes")){
                             MapDAO mapDAO= new MapDAO();
-                            log.info("INDEXING Chromosomes...");
+                            System.out.println("INDEXING Chromosomes...");
                             for(int key : SpeciesType.getSpeciesTypeKeys()) {
                                 if (SpeciesType.isSearchable(key)) {
                                     //   int key=3;
@@ -201,7 +204,7 @@ public class Manager {
                       //              executor.execute(workerThread);
 
                   //      PhenominerThread thread=new PhenominerThread(RgdIndex.getNewAlias(), log);//to index denormalized way with hierarchy maps
-                        PhenominerNormalizedThread thread=new PhenominerNormalizedThread(RgdIndex.getNewAlias());
+                        PhenominerNormalizedThread thread=new PhenominerNormalizedThread(RgdIndex.getNewAlias(), log);
                         thread.run();
                         break;
                     case "Models":

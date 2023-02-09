@@ -8,8 +8,7 @@ import edu.mcw.rgd.datamodel.*;
 import edu.mcw.rgd.indexer.model.genomeInfo.*;
 
 import edu.mcw.rgd.services.ClientInit;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.log4j.Logger;
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
@@ -41,7 +40,7 @@ public class ChromosomeThread implements  Runnable {
 
     @Override
     public void run()  {
-        Logger log = LogManager.getLogger("chromosome");
+        Logger log = Logger.getLogger("chromosome");
         log.info(Thread.currentThread().getName() + ": " + SpeciesType.getCommonName(key) + " || ChromosomeThread MapKey "+mapKey+ " started " + new Date());
         MapDAO mapDAO= new MapDAO();
         GenomeDAO genomeDAO= new GenomeDAO();

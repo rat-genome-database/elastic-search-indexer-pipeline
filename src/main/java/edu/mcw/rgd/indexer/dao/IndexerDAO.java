@@ -14,8 +14,7 @@ import edu.mcw.rgd.indexer.MyThreadPoolExecutor;
 import edu.mcw.rgd.indexer.index.IndexOntTerm;
 import edu.mcw.rgd.indexer.model.IndexObject;
 import edu.mcw.rgd.process.mapping.ObjectMapper;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.log4j.Logger;
 
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -47,7 +46,7 @@ public class IndexerDAO extends IndexDAO implements Runnable {
 
     }
     public void run() {
-        Logger log= LogManager.getLogger("ontology");
+        Logger log= Logger.getLogger("ontology");
 
         try {
 

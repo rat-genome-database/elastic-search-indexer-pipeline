@@ -2,7 +2,7 @@
 
 <beans>
     <bean id="manager" class="edu.mcw.rgd.indexer.Manager" >
-        <property name="version" value="Elastic Search Indexer  build Feb 06, 2023" />
+        <property name="version" value="Indexer v. 0.1.0 Feb 9, 2017" />
         <property name="threadCount" value="10"/>
         <property name="admin" ref="admin"/>
         <property name="ontSynonyms" ref="ontologySynonyms"/>

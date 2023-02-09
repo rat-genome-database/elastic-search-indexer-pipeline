@@ -30,11 +30,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 public class PhenominerProcess {
-    //PhenominerDAO phenominerDAO = new PhenominerDAO();
+    PhenominerDAO phenominerDAO = new PhenominerDAO();
     OntologyXDAO xdao = new OntologyXDAO();
-    //StrainDAO strainDAO = new StrainDAO();
-    //AssociationDAO associationDAO = new AssociationDAO();
-    //IndexDAO indexDAO = new IndexDAO();
+    StrainDAO strainDAO = new StrainDAO();
+    AssociationDAO associationDAO = new AssociationDAO();
+    IndexDAO indexDAO = new IndexDAO();
     public Set<String> mapSynonyms(Record record, Term rootTerm) throws Exception {
         List<String> accIds=new ArrayList<>();
 
@@ -144,6 +144,7 @@ public class PhenominerProcess {
                 }
         }catch (Exception e){
             System.out.println("TERM ACC WHERE TERM NOT FOUND:"+termAcc);
+
         }
         return rootNode;
     }

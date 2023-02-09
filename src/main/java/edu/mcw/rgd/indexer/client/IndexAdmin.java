@@ -1,10 +1,9 @@
 package edu.mcw.rgd.indexer.client;
 
+import edu.mcw.rgd.indexer.Manager;
 import edu.mcw.rgd.indexer.model.RgdIndex;
-import edu.mcw.rgd.process.Utils;
 import edu.mcw.rgd.services.ClientInit;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.log4j.Logger;
 
 import org.elasticsearch.action.admin.indices.alias.get.GetAliasesRequest;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
@@ -36,7 +35,7 @@ import java.util.List;
 public class IndexAdmin {
 
 
-    private static Logger log= LogManager.getLogger("main");
+    private static Logger log=Logger.getLogger(Manager.class);
     private RgdIndex rgdIndex;
 
 
@@ -141,8 +140,6 @@ public class IndexAdmin {
 
         DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
         new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new FileSystemResource("properties/AppConfigure.xml"));
-
-        ClientInit es= (ClientInit) bf.getBean("client");
         admin.rgdIndex= (RgdIndex) bf.getBean("rgdIndex");
         List<String> indices= new ArrayList<>();
         admin.rgdIndex.setIndex("rgd_index_"+ "dev");
@@ -150,12 +147,15 @@ public class IndexAdmin {
         indices.add("rgd_index_"+"dev"+"2");
         admin.rgdIndex.setIndices(indices);
 
+
+        Logger log= Logger.getLogger(IndexAdmin.class);
         try {
             admin.createIndex("","");
         } catch (Exception e) {
-            Utils.printStackTrace(e, log);
+
+            e.printStackTrace();
         }
 
-        es.destroy();
+        ClientInit.destroy();
     }
 }

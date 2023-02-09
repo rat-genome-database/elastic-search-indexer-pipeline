@@ -3,8 +3,7 @@ package edu.mcw.rgd.indexer.dao.variants;
 import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.indexer.MyThreadPoolExecutor;
 import edu.mcw.rgd.indexer.model.IndexObject;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,7 +25,7 @@ public class VariantIndexerThread implements Runnable {
     }
     @Override
     public void run() {
-        Logger log = LogManager.getLogger("variant");
+        Logger log = Logger.getLogger("variant");
         ExecutorService executor2 = new MyThreadPoolExecutor(5, 5, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
         Runnable variantsNewTableThread= null;
         List<Integer> variantIds = null;
