@@ -14,8 +14,8 @@ import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.GetIndexRequest;
 
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.xcontent.XContentType;
 
+import org.elasticsearch.xcontent.XContentType;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.FileSystemResource;
@@ -98,7 +98,7 @@ public class IndexAdmin {
         request.settings(Settings.builder()
                 .put("index.number_of_shards",5)
                 .put("index.number_of_replicas", replicates)
-        .loadFromSource(analyzers,XContentType.JSON));
+        .loadFromSource(analyzers, XContentType.JSON));
        request.mapping(mappings, XContentType.JSON);
        org.elasticsearch.client.indices.CreateIndexResponse createIndexResponse = ClientInit.getClient().indices().create(request, RequestOptions.DEFAULT);
 
