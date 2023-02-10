@@ -13,7 +13,7 @@ import edu.mcw.rgd.indexer.dao.IndexDAO;
 import edu.mcw.rgd.indexer.dao.phenominer.model.PhenominerIndexObject;
 import edu.mcw.rgd.indexer.dao.phenominer.utils.PhenominerProcess;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
@@ -122,7 +122,7 @@ public class PhenominerThread implements Runnable {
                     }
                 }
             }
-            System.out.println("INDEX OBJeCTS SIZE:" + indexObjects.size());
+            log.info("INDEX OBJECTS SIZE:" + indexObjects.size());
 
             if (indexObjects.size() > 0)
                 process.indexObjects(indexObjects, index, "");

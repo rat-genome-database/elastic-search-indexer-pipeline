@@ -3,7 +3,8 @@ package edu.mcw.rgd.indexer.dao;
 
 import edu.mcw.rgd.indexer.model.IndexObject;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Date;
 import java.util.List;
@@ -25,7 +26,7 @@ public class ObjectIndexerThread implements  Runnable {
     }
     @Override
     public void run(){
-        Logger log=Logger.getLogger("search");
+        Logger log= LogManager.getLogger("search");
         System.out.println(Thread.currentThread().getName()  + ": " + objectType+ " started " + new Date() );
         log.info(Thread.currentThread().getName()  + ": " + objectType+ " started " + new Date() );
 
