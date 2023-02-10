@@ -32,8 +32,21 @@ dependencies {
     implementation 'org.elasticsearch.client:elasticsearch-rest-client:7.4.0'
     implementation 'org.elasticsearch.client:elasticsearch-rest-high-level-client:7.4.0'
     implementation 'org.apache.lucene:lucene-core:8.2.0'
+// https://mvnrepository.com/artifact/org.elasticsearch/elasticsearch
+ /*   implementation group: 'org.elasticsearch', name: 'elasticsearch', version: '7.17.9'
+    // https://mvnrepository.com/artifact/org.elasticsearch.client/elasticsearch-rest-client
+// https://mvnrepository.com/artifact/org.elasticsearch.client/elasticsearch-rest-client
+    implementation group: 'org.elasticsearch.client', name: 'elasticsearch-rest-client', version: '7.17.9'
+// https://mvnrepository.com/artifact/org.elasticsearch.client/elasticsearch-rest-high-level-client
+    implementation group: 'org.elasticsearch.client', name: 'elasticsearch-rest-high-level-client', version: '7.17.9'
 
-    implementation 'org.apache.commons:commons-dbcp2:2.9.0'
+// https://mvnrepository.com/artifact/io.netty/netty-all
+    implementation group: 'io.netty', name: 'netty-all', version: '4.1.87.Final'
+
+*/
+
+// https://mvnrepository.com/artifact/commons-dbcp/commons-dbcp
+    implementation group: 'commons-dbcp', name: 'commons-dbcp', version: '1.4'
     implementation 'commons-lang:commons-lang:2.6'
     implementation 'commons-logging:commons-logging:1.2'
     implementation 'org.apache.logging.log4j:log4j-api:2.19.0'
