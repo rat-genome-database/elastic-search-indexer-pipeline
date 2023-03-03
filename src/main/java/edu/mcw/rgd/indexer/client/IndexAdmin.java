@@ -142,7 +142,6 @@ public class IndexAdmin {
         DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
         new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new FileSystemResource("properties/AppConfigure.xml"));
 
-        ClientInit es= (ClientInit) bf.getBean("client");
         admin.rgdIndex= (RgdIndex) bf.getBean("rgdIndex");
         List<String> indices= new ArrayList<>();
         admin.rgdIndex.setIndex("rgd_index_"+ "dev");
@@ -156,6 +155,6 @@ public class IndexAdmin {
             Utils.printStackTrace(e, log);
         }
 
-        es.destroy();
+        ClientInit.destroy();
     }
 }
