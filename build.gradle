@@ -27,7 +27,7 @@ dependencies {
     testImplementation group: 'junit', name: 'junit', version: '4.11'
     implementation fileTree(dir: 'lib', include: '*.jar')
 
-    implementation 'co.elastic.clients:elasticsearch-java:8.6.1'
+    implementation group: 'org.elasticsearch', name: 'elasticsearch', version: '7.17.4'
     implementation 'org.elasticsearch.client:elasticsearch-rest-high-level-client:7.17.4'
     implementation 'org.apache.lucene:lucene-core:8.2.0'
     implementation group: 'io.netty', name: 'netty-all', version: '4.1.87.Final'
