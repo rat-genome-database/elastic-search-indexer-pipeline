@@ -31,8 +31,6 @@ dependencies {
     implementation 'org.elasticsearch.client:elasticsearch-rest-high-level-client:7.17.4'
     implementation 'org.apache.lucene:lucene-core:8.2.0'
     implementation group: 'io.netty', name: 'netty-all', version: '4.1.87.Final'
-// https://mvnrepository.com/artifact/org.apache.commons/commons-dbcp2
-    implementation group: 'org.apache.commons', name: 'commons-dbcp2', version: '2.9.0'
 
     implementation group: 'commons-dbcp', name: 'commons-dbcp', version: '1.4'
     implementation 'commons-lang:commons-lang:2.6'
