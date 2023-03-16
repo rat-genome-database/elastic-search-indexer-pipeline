@@ -31,8 +31,7 @@ import edu.mcw.rgd.process.Utils;
 import org.apache.log4j.Logger;
 
 import org.elasticsearch.action.index.IndexRequest;
-
-import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.xcontent.XContentType;
 
 
 import java.io.IOException;
