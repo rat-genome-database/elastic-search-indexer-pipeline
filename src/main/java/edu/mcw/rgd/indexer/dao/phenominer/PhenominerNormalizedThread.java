@@ -11,7 +11,9 @@ import edu.mcw.rgd.datamodel.pheno.PhenominerUnitTable;
 import edu.mcw.rgd.datamodel.pheno.Record;
 import edu.mcw.rgd.indexer.dao.phenominer.model.PhenominerIndexObject;
 import edu.mcw.rgd.indexer.dao.phenominer.utils.PhenominerProcess;
-import org.apache.log4j.Logger;
+import edu.mcw.rgd.process.Utils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.util.*;
@@ -20,8 +22,9 @@ import java.util.stream.Collectors;
 
 public class PhenominerNormalizedThread implements Runnable {
 
+    private final Logger log = LogManager.getLogger("phenominer");
+
     private String index;
-    private Logger log;
     PhenominerDAO phenominerDAO = new PhenominerDAO();
     OntologyXDAO xdao = new OntologyXDAO();
     StrainDAO strainDAO=new StrainDAO();
@@ -29,19 +32,18 @@ public class PhenominerNormalizedThread implements Runnable {
     public PhenominerNormalizedThread() {
     }
 
-    public PhenominerNormalizedThread(String index, Logger log) {
+    public PhenominerNormalizedThread(String index) {
         this.index = index;
-        this.log = log;
     }
     @Override
     public void run() {
         List<Record> records = new ArrayList<>();
         try {
-       records = phenominerDAO.getFullRecords();
+            records = phenominerDAO.getFullRecords();
         //    records = phenominerDAO.getFullRecordsByCMO("CMO:0000709");
-            System.out.println("RECORDSSIZE:"+ records.size());
+            log.info("RECORDSSIZE:"+ records.size());
         } catch (Exception e) {
-            e.printStackTrace();
+            Utils.printStackTrace(e, log);
         }
         List<String> ontologies = new ArrayList<>(Arrays.asList("RS", "CMO", "XCO", "MMO"));
         List<PhenominerIndexObject> indexObjects = new ArrayList<>();
@@ -127,7 +129,7 @@ public class PhenominerNormalizedThread implements Runnable {
                 Set<String> cmoSynonyms = new HashSet<>(synomyms.get("CMO"));
                 Set<String> mmoSynonyms = new HashSet<>(synomyms.get("MMO"));
                 Set<String> rsSynonyms = new HashSet<>(synomyms.get("RS"));
-                String strainRgdId=new String();
+                String strainRgdId="";
                 for(String rsSynonym:rsSynonyms){
                     if(rsSynonym.contains("RGD")){
                         strainRgdId=rsSynonym;
@@ -145,30 +147,39 @@ public class PhenominerNormalizedThread implements Runnable {
                         }
                     }
                 } else
-                    System.out.println("NO STRAIN RGD ID:"+ record.getSample().getStrainAccId());
-                System.out.println("RGD ID:"+ rgdId);
+                    log.debug("NO STRAIN RGD ID:"+ record.getSample().getStrainAccId());
+                    log.debug("RGD ID:"+ rgdId);
             Set<String> xcoSynonyms = new HashSet<>(synomyms.get("XCO"));
                 object.setCmoTerms(new ArrayList<>(cmoSynonyms));
                 object.setMmoTerms(new ArrayList<>(mmoSynonyms));
                 object.setRsTerms(new ArrayList<>(rsSynonyms));
                 object.setXcoTerms(new ArrayList<>(xcoSynonyms));
+
                 try {
                     object.setSex(record.getSample().getSex());
-                }catch (Exception e){System.err.println("No sex for record "+ record.getId());}
+                }catch (Exception e){log.debug("No sex for record "+ record.getId());}
+
                 try {
                     object.setAgeLowBound(record.getSample().getAgeDaysFromLowBound());
-                }catch (Exception e){System.err.println("No age low bound for record "+ record.getId());}
+                }catch (Exception e){log.debug("No age low bound for record "+ record.getId());}
+
                 try {
                     object.setAgeHighBound(record.getSample().getAgeDaysFromHighBound());
-                }catch (Exception e){System.err.println("NO age high bound for record "+ record.getId());}
+                }catch (Exception e){log.debug("NO age high bound for record "+ record.getId());}
+
                 try {
                     object.setUnits(record.getMeasurementUnits());
-                } catch (Exception e){System.out.println("No measurement units for record "+ record.getId());}
+                } catch (Exception e){
+                    log.debug("No measurement units for record "+ record.getId());
+                }
+
                 try {
                     double roundOffSD = Math.round(Double.parseDouble(record.getMeasurementSD()) * 100.0) / 100.0;
                     object.setSd(String.valueOf(roundOffSD));
+                }catch (Exception e){
+                    log.debug("No SD for record "+ record.getId());
+                }
 
-                }catch (Exception e){System.err.println("No SD for record "+ record.getId());}
                 try {
                     double roundOffSem = Math.round(Double.parseDouble(record.getMeasurementSem()) * 100.0) / 100.0;
                     object.setSem(String.valueOf(roundOffSem));
@@ -195,7 +206,7 @@ public class PhenominerNormalizedThread implements Runnable {
                         object.setPostInsultTimeValue(record.getMeasurementMethod().getPiTimeValue());
                         object.setPostInsultTimeUnit(record.getMeasurementMethod().getPiTypeUnit());
                     }catch (Exception e){
-                        System.err.println("No measurement method PI for RECORD ID:"+ record.getId());
+                        log.debug("No measurement method PI for RECORD ID:"+ record.getId());
                     }
                 }
                 try {

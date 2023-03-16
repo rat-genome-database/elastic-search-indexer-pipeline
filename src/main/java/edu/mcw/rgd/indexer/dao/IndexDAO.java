@@ -28,7 +28,8 @@ import edu.mcw.rgd.indexer.model.genomeInfo.GenomeIndexObject;
 import edu.mcw.rgd.indexer.spring.XdbObjectQuery;
 import edu.mcw.rgd.process.Utils;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.xcontent.XContentType;
@@ -72,7 +73,7 @@ public class IndexDAO extends AbstractDAO {
     private GenomicElementDAO gdao= new GenomicElementDAO();
     private AssociationDAO associationDAO=new AssociationDAO();
     private GenomicElementDAO gedao= new GenomicElementDAO();
-    Logger log= Logger.getLogger("main");
+    Logger log= LogManager.getLogger("main");
 
     Map<Integer, edu.mcw.rgd.datamodel.Map> rgdMaps=new HashMap<>();
     public List<GenomeIndexObject> getGenomeInfo() throws Exception {

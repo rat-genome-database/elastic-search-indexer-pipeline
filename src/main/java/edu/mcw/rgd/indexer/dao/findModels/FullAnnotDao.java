@@ -14,6 +14,8 @@ import edu.mcw.rgd.indexer.model.findModels.ModelIndexObject;
 
 import edu.mcw.rgd.process.Utils;
 import edu.mcw.rgd.services.ClientInit;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
@@ -30,13 +32,15 @@ import java.util.Map;
  * Created by jthota on 3/3/2020.
  */
 public class FullAnnotDao {
+    private final Logger log = LogManager.getLogger("main");
     AnnotationDAO adao= new AnnotationDAO();
     OntologyXDAO xdao= new OntologyXDAO();
     StrainDAO strainDAO=new StrainDAO();
     AliasDAO aliasDAO=new AliasDAO();
     AssociationDAO associationDAO=new AssociationDAO();
 
-    EvidenceCode evidenceCode=new EvidenceCode();
+    //EvidenceCode evidenceCode=new EvidenceCode();
+
     public List<ModelIndexObject> getAnnotationsBySpeciesNObjectKey(int speciesTypeKey, int objectKey) throws Exception {
     List<Annotation>  models= adao.getAnnotationsBySpecies(speciesTypeKey, objectKey);
    //    List<Annotation>  models= adao.getAnnotations(734760);
@@ -48,9 +52,9 @@ public class FullAnnotDao {
 
           if (m.getAspect().equalsIgnoreCase("D") || m.getAspect().equalsIgnoreCase("N")) {
               List<Integer> refRgdIds = new ArrayList<>();
-              List<String> evidenceCodes = new ArrayList<>();
+              //List<String> evidenceCodes = new ArrayList<>();
               List<Evidence> evidences = new ArrayList<>();
-              List<String> qualifiers = new ArrayList<>();
+              //List<String> qualifiers = new ArrayList<>();
               List<ModelIndexObject> indexObjects = new ArrayList<>();
               ModelIndexObject object = new ModelIndexObject();
          //     if (m.getTermAcc().equalsIgnoreCase("MP:0012046")) {
