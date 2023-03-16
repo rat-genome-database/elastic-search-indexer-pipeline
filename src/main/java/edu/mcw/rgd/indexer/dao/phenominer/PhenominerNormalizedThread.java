@@ -183,23 +183,23 @@ public class PhenominerNormalizedThread implements Runnable {
                 try {
                     double roundOffSem = Math.round(Double.parseDouble(record.getMeasurementSem()) * 100.0) / 100.0;
                     object.setSem(String.valueOf(roundOffSem));
-                }catch (Exception e){}
+                }catch (Exception ignored){}
                 try {
                     object.setAverageType(record.getClinicalMeasurement().getAverageType());
-                }catch (Exception e){}
+                }catch (Exception ignored){}
                 try {
                     double roundOffValue = Math.round(Double.parseDouble(record.getMeasurementValue()) * 100.0) / 100.0;
                     object.setValue(String.valueOf(roundOffValue));
-                }catch (Exception e){}
+                }catch (Exception ignored){}
                 try {
                     object.setStudyId(record.getStudyId());
-                }catch (Exception e){}
+                }catch (Exception ignored){}
                 try {
                     object.setStudy(record.getStudyName());
-                }catch ( Exception e){}
+                }catch ( Exception ignored){}
                 try {
                     object.setSampleNotes(record.getSample().getNotes());
-                }catch (Exception e){}
+                }catch (Exception ignored){}
                 if(record.getMeasurementMethod()!=null) {
                     try {
                         object.setPostInsultType(record.getMeasurementMethod().getPiType());
@@ -211,28 +211,28 @@ public class PhenominerNormalizedThread implements Runnable {
                 }
                 try {
                     object.setNumberOfAnimals(record.getSample().getNumberOfAnimals());
-                }catch ( Exception e){}
+                }catch ( Exception ignored){}
                 try {
                     object.setMethodSite(record.getMeasurementMethod().getSite());
-                }catch (Exception e){}
+                }catch (Exception ignored){}
                 try {
                     object.setMethodNotes(record.getMeasurementMethod().getNotes());
-                }catch (Exception e){}
+                }catch (Exception ignored){}
                 try {
                     object.setMethodDuration(record.getMeasurementMethod().getDuration());
-                }catch ( Exception e){}
+                }catch ( Exception ignored){}
                 try {
                     object.setFormula(record.getClinicalMeasurement().getFormula());
-                }catch (Exception e){}
+                }catch (Exception ignored){}
                 try {
                     object.setExperimentNotes(record.getExperimentNotes());
-                }catch (Exception e){}
+                }catch (Exception ignored){}
                 try {
                     object.setExperimentName(record.getExperimentName().trim());
-                }catch (Exception e){}
+                }catch (Exception ignored){}
                 try {
                     object.setClinicalMeasurementNotes(record.getClinicalMeasurement().getNotes());
-                }catch (Exception e){}
+                }catch (Exception ignored){}
             try {
                 object.setRefRgdId(record.getRefRgdId());
             }catch (Exception e){e.printStackTrace();}
