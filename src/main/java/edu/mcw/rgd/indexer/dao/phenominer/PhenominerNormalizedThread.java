@@ -39,7 +39,8 @@ public class PhenominerNormalizedThread implements Runnable {
     public void run() {
         List<Record> records = new ArrayList<>();
         try {
-            records = phenominerDAO.getFullRecords();
+            records.addAll(phenominerDAO.getFullRecords());
+            records.addAll(phenominerDAO.getChincillaFullRecords());
         //    records = phenominerDAO.getFullRecordsByCMO("CMO:0000709");
             log.info("RECORDSSIZE:"+ records.size());
         } catch (Exception e) {
@@ -81,6 +82,13 @@ public class PhenominerNormalizedThread implements Runnable {
                 PhenominerIndexObject object = new PhenominerIndexObject();
                 object.setRecordId(record.getId());
                 object.setRsTermAcc(record.getSample().getStrainAccId());
+                if(object.getRsTermAcc().contains("CS")){
+                    object.setSpeciesTypeKey(4);
+                    object.setSpecies("Chinchilla");
+                }else{
+                    object.setSpeciesTypeKey(3);
+                    object.setSpecies("Rat");
+                }
                 try {
                     object.setRsTerm(xdao.getTerm(record.getSample().getStrainAccId()).getTerm());
                 } catch (Exception e) {
