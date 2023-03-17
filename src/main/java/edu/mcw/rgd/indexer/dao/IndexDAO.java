@@ -536,7 +536,6 @@ public class IndexDAO extends AbstractDAO {
     }
     public void getVariants() throws Exception{
         ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
-     //   List<Alias> aliases=aliasDAO.getActiveAliases(RgdId.OBJECT_KEY_VARIANTS);
         List<VariantInfo> variants=vdao.getVariantsBySource("CLINVAR");
         for(VariantInfo obj: variants) {
             Runnable workerThread=new IndexClinVar(obj);
@@ -554,19 +553,11 @@ public class IndexDAO extends AbstractDAO {
             System.out.println("Processing " + species + " variants...");
 
            for( edu.mcw.rgd.datamodel.Map map : mapDAO.getMaps(speciesTypeKey)) {
-
-                   for (Chromosome chr : mapDAO.getChromosomes(map.getKey())) {
-
-          //  String chr="12";
-         //   int mapKey=360;
+               for (Chromosome chr : mapDAO.getChromosomes(map.getKey())) {
                      variantIndexerThread = new VariantIndexerThread(chr.getChromosome(), map.getKey(), speciesTypeKey);
-          //  variantIndexerThread = new VariantIndexerThread(chr,mapKey, speciesTypeKey);
-
-            executor2.execute(variantIndexerThread);
+                     executor2.execute(variantIndexerThread);
                    }
-
-
-       }
+           }
 
         }
         executor2.shutdown();
