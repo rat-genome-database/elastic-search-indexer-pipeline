@@ -128,9 +128,9 @@ public class Manager {
                     case "Genes" :
                     case "Sslps" :
                     case "GenomicElements" :
-                    case "Annotations" :
+                    case "Annotations" : // all public ontologies
                     case "Reference" :
-                    case "Variants" :
+                    case "Variants" : // these are only ClinVar variants
 
                         if(!searchIndexCreated) {
                             admin.createIndex("search_mappings", "search");
@@ -197,10 +197,6 @@ public class Manager {
 
                         admin.createIndex("phenominer_mappings", "genome");
                         System.out.println("INDEXING phenominer records...");
-                      //  workerThread = new PhenominerThread(RgdIndex.getNewAlias(), log);
-                      //              executor.execute(workerThread);
-
-                  //      PhenominerThread thread=new PhenominerThread(RgdIndex.getNewAlias(), log);//to index denormalized way with hierarchy maps
                         PhenominerNormalizedThread thread=new PhenominerNormalizedThread(RgdIndex.getNewAlias());
                         thread.run();
                         break;
@@ -215,31 +211,10 @@ public class Manager {
                        // }
                         System.out.println("Indexing models is DONE!!");
                         break;
-                    case "Variant":
-
-                     //   List<Integer> speciesTypeKeys= new ArrayList<>(Arrays.asList(1,3, 6));
-                       List<Integer> speciesTypeKeys= new ArrayList<>(Arrays.asList(3));
-
-                        for(int species:speciesTypeKeys){
-                            switch (species){
-                                case 1:
-                                    break;
-                                case 6:
-                                    break;
-                                case 3:
+                    case "Variant": // all species variants
                                     admin.createIndex("variant_mappings", "variant");
                                     indexDAO.indexVariantsFromCarpenovoNewTableStructure();
-
                                     break;
-
-
-                                default:
-                                    break;
-                            }
-                        }
-
-
-                        break;
                     default:
                         break;
 

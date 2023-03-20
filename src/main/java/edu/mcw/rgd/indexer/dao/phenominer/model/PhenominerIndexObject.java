@@ -67,6 +67,25 @@ public class PhenominerIndexObject {
     private int refRgdId;
     private List<IndividualRecord> individualRecords;
 
+    private int speciesTypeKey;
+    private String species;
+
+    public int getSpeciesTypeKey() {
+        return speciesTypeKey;
+    }
+
+    public void setSpeciesTypeKey(int speciesTypeKey) {
+        this.speciesTypeKey = speciesTypeKey;
+    }
+
+    public String getSpecies() {
+        return species;
+    }
+
+    public void setSpecies(String species) {
+        this.species = species;
+    }
+
     public List<IndividualRecord> getIndividualRecords() {
         return individualRecords;
     }
