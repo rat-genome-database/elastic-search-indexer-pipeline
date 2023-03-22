@@ -24,7 +24,9 @@ public class VariantProcessingThread implements Runnable{
         ExecutorService executor = new MyThreadPoolExecutor(10, 10, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
         Runnable workerThread= null;
         List<VariantIndex> indexList = new ArrayList<>();
+        if(variantIds.size()>0)
         try {
+
             indexList = variantDao.getVariantsNewTbaleStructure(mapKey, variantIds);
         } catch (Exception e) {
             e.printStackTrace();
