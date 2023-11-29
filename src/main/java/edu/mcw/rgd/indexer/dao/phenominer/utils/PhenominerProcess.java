@@ -49,6 +49,9 @@ public class PhenominerProcess {
             case "MMO":
                 accIds.add(record.getMeasurementMethod().getAccId());
                 break;
+            case "VT":
+                accIds.add(record.getTraitId());
+                break;
             case "XCO":
                 for(Condition condition:record.getConditions()) {
                     accIds.add(condition.getOntologyId());
