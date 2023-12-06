@@ -28,7 +28,8 @@ public class IndexStrain implements Runnable {
             IndexObject s = new IndexObject();
             String symbol = strain.getSymbol();
             String source = strain.getSource();
-            String origin = strain.getOrigin();
+            String origin = strain.getOrigination();
+            String description=strain.getDescription();
             String strainTypeName = strain.getStrainTypeName();
             String name = strain.getName();
 
@@ -38,6 +39,7 @@ public class IndexStrain implements Runnable {
             s.setSymbol(symbol);
             s.setSource(source);
             s.setOrigin(origin);
+            s.setDescription(description);
             s.setType(strainTypeName);
             s.setName(name);
 

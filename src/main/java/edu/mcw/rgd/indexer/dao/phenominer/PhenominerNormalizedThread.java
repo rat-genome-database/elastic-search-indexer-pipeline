@@ -46,7 +46,7 @@ public class PhenominerNormalizedThread implements Runnable {
         } catch (Exception e) {
             Utils.printStackTrace(e, log);
         }
-        List<String> ontologies = new ArrayList<>(Arrays.asList("RS", "CMO", "XCO", "MMO"));
+        List<String> ontologies = new ArrayList<>(Arrays.asList("RS", "CMO", "XCO", "MMO","VT"));
         List<PhenominerIndexObject> indexObjects = new ArrayList<>();
 
         for (Record record : records) {
@@ -111,6 +111,12 @@ public class PhenominerNormalizedThread implements Runnable {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                object.setVtTermAcc(record.getTraitId());
+            try {
+                object.setVtTerm(xdao.getTerm(record.getTraitId()).getTerm());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
                 Set<String> xcoAccId = new HashSet<>();
                 Set<String> xcoTerm = new HashSet<>();
 
@@ -137,6 +143,7 @@ public class PhenominerNormalizedThread implements Runnable {
                 Set<String> cmoSynonyms = new HashSet<>(synomyms.get("CMO"));
                 Set<String> mmoSynonyms = new HashSet<>(synomyms.get("MMO"));
                 Set<String> rsSynonyms = new HashSet<>(synomyms.get("RS"));
+            Set<String> vtSynonyms = new HashSet<>(synomyms.get("VT"));
                 String strainRgdId="";
                 for(String rsSynonym:rsSynonyms){
                     if(rsSynonym.contains("RGD")){
@@ -162,6 +169,7 @@ public class PhenominerNormalizedThread implements Runnable {
                 object.setMmoTerms(new ArrayList<>(mmoSynonyms));
                 object.setRsTerms(new ArrayList<>(rsSynonyms));
                 object.setXcoTerms(new ArrayList<>(xcoSynonyms));
+            object.setVtTerms(new ArrayList<>(vtSynonyms));
 
                 try {
                     object.setSex(record.getSample().getSex());

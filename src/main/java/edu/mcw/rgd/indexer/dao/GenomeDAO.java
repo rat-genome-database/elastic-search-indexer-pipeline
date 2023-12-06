@@ -33,7 +33,7 @@ public class GenomeDAO extends AbstractDAO{
 
 
             switch (speciesTypeKey){
-                case 1:
+                case 1: //HUMAN
                     if(mapKey==38) {
                       //  info.setBasePairs("3,554,996,726");
                         info.setTotalSeqLength("3,099,706,404");
@@ -80,7 +80,7 @@ public class GenomeDAO extends AbstractDAO{
                         info.setRefSeqAssemblyAccession("GCF_000001405.12");
                     }
                     break;
-                case 2:
+                case 2: //MOUSE
                     if(mapKey==35) {
                     //    info.setBasePairs("3,482,409,794");
                         info.setTotalSeqLength("2,730,855,475");
@@ -143,7 +143,7 @@ public class GenomeDAO extends AbstractDAO{
                         info.setRefSeqAssemblyAccession("GCF_000001635.27");
                     }
                     break;
-                case 3:
+                case 3: //RAT
                     if(mapKey==372) {
                         //       info.setBasePairs("3,042,335,753");
                         info.setTotalSeqLength("2,647,915,728");
@@ -209,7 +209,7 @@ public class GenomeDAO extends AbstractDAO{
                         }
 
                     break;
-                case 4:
+                case 4: //CHINCHILLA
                     if(mapKey==44) {
                     //    info.setBasePairs("");
                         info.setTotalSeqLength("2,390,868,971");
@@ -227,7 +227,7 @@ public class GenomeDAO extends AbstractDAO{
 
                     }
                     break;
-                case 5:
+                case 5: //BONOBO
                     if(mapKey==511){
                    //     info.setBasePairs("2,725,937,399");
                         info.setTotalSeqLength("3,286,643,938");
@@ -258,8 +258,23 @@ public class GenomeDAO extends AbstractDAO{
                         info.setNcbiLink("https://www.ncbi.nlm.nih.gov/assembly/GCF_013052645.1/");
                         info.setRefSeqAssemblyAccession("GCF_013052645.1");
                     }
+                    if(mapKey==514){ //bonobo new assembly
+                        //     info.setBasePairs("");
+                        info.setTotalSeqLength("3,271,621,005");
+                        info.setTotalUngappedLength("3,270,380,706");
+                        info.setGapBetweenScaffolds("0");
+                        info.setScaffolds("443");
+                        info.setScaffoldN50("141,811,947");
+                        info.setScaffoldL50("10");
+                        info.setContigs("451");
+                        info.setContigN50("141,811,947");
+                        info.setContigL50("10");
+                        info.setChromosome("25");
+                        info.setNcbiLink("https://www.ncbi.nlm.nih.gov/assembly/GCF_029289425.1/");
+                        info.setRefSeqAssemblyAccession("GCF_029289425.1");
+                    }
                     break;
-                case 6:
+                case 6: //DOG
                     if(mapKey==631){
                     //    info.setBasePairs("2,392,715,236");
                         info.setTotalSeqLength("2,410,976,875");
@@ -276,7 +291,7 @@ public class GenomeDAO extends AbstractDAO{
                         info.setRefSeqAssemblyAccession("GCF_000002285.3");
                     }
                     break;
-                case 7:
+                case 7: //SQUIRREL
                     if(mapKey==720){
                    //     info.setBasePairs("2,311,076,758");
                         info.setTotalSeqLength("2,478,393,770");
@@ -293,7 +308,7 @@ public class GenomeDAO extends AbstractDAO{
                         info.setRefSeqAssemblyAccession("GCF_000236235.1");
                     }
                     break;
-                case 9:
+                case 9: //PIG
 
                     if(mapKey==910){
                   //      info.setBasePairs("3,024,658,544");

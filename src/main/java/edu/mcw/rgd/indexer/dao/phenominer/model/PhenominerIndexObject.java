@@ -19,7 +19,8 @@ public class PhenominerIndexObject {
 
     private String mmoTermAcc;
     private String mmoTerm;
-
+    private String vtTermAcc;
+    private String vtTerm;
     private List<String> xcoTermAcc;
     private String xcoTerm;
 
@@ -40,6 +41,16 @@ public class PhenominerIndexObject {
     private List<String> cmoTerms;
     private List<String> mmoTerms;
     private List<String> xcoTerms;
+
+    public List<String> getVtTerms() {
+        return vtTerms;
+    }
+
+    public void setVtTerms(List<String> vtTerms) {
+        this.vtTerms = vtTerms;
+    }
+
+    private List<String> vtTerms;
 
     private LinkedHashMap<String, String > rsHierarchyMap;
     private LinkedHashMap<String, String > cmoHierarchyMap;
@@ -470,5 +481,21 @@ public class PhenominerIndexObject {
 
     public void setSd(String sd) {
         this.sd = sd;
+    }
+
+    public String getVtTermAcc() {
+        return vtTermAcc;
+    }
+
+    public void setVtTermAcc(String vtTermAcc) {
+        this.vtTermAcc = vtTermAcc;
+    }
+
+    public String getVtTerm() {
+        return vtTerm;
+    }
+
+    public void setVtTerm(String vtTerm) {
+        this.vtTerm = vtTerm;
     }
 }
