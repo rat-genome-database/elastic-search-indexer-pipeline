@@ -21,6 +21,10 @@ public class PhenominerIndexObject {
     private String mmoTerm;
     private String vtTermAcc;
     private String vtTerm;
+    private String vtTerm3Acc;
+    private String vtTerm3;
+    private String vtTerm2Acc;
+    private String vtTerm2;
     private List<String> xcoTermAcc;
     private String xcoTerm;
 
@@ -41,6 +45,38 @@ public class PhenominerIndexObject {
     private List<String> cmoTerms;
     private List<String> mmoTerms;
     private List<String> xcoTerms;
+
+    public String getVtTerm3Acc() {
+        return vtTerm3Acc;
+    }
+
+    public void setVtTerm3Acc(String vtTerm3Acc) {
+        this.vtTerm3Acc = vtTerm3Acc;
+    }
+
+    public String getVtTerm3() {
+        return vtTerm3;
+    }
+
+    public void setVtTerm3(String vtTerm3) {
+        this.vtTerm3 = vtTerm3;
+    }
+
+    public String getVtTerm2Acc() {
+        return vtTerm2Acc;
+    }
+
+    public void setVtTerm2Acc(String vtTerm2Acc) {
+        this.vtTerm2Acc = vtTerm2Acc;
+    }
+
+    public String getVtTerm2() {
+        return vtTerm2;
+    }
+
+    public void setVtTerm2(String vtTerm2) {
+        this.vtTerm2 = vtTerm2;
+    }
 
     public List<String> getVtTerms() {
         return vtTerms;

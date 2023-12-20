@@ -117,6 +117,18 @@ public class PhenominerNormalizedThread implements Runnable {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            object.setVtTerm3Acc(record.getTrait3Id());
+            try {
+                object.setVtTerm3(xdao.getTerm(record.getTrait3Id()).getTerm());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            object.setVtTerm2Acc(record.getTrait2Id());
+            try {
+                object.setVtTerm2(xdao.getTerm(record.getTrait2Id()).getTerm());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
                 Set<String> xcoAccId = new HashSet<>();
                 Set<String> xcoTerm = new HashSet<>();
 
