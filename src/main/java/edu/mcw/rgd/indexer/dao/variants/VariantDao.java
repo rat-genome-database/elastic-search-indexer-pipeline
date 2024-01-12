@@ -266,23 +266,23 @@ public class VariantDao extends AbstractDAO {
 
                     }
                 }
-             /*   if(variant.getAnalysisName()!=null){
+                if(variant.getAnalysisName()!=null){
                     List<String> sampleNames=new ArrayList<>();
                     for(String name:variant.getAnalysisName()) {
-                        if (obj != null) {
 
-                            sampleNames = obj.getAnalysisName();
-                            for (String str : sampleNames) {
-                                if (name.equals(str)) {
-                                    exists = true;
-                                }
+                        sampleNames = obj.getAnalysisName();
+                        for (String str : sampleNames) {
+                            if (name.equals(str)) {
+                                exists = true;
                             }
-                            if (!exists) {
-                                sampleNames.add(name);
-                                obj.setAnalysisName(sampleNames);
-                            }
-                        }   }
-                    }*/
+                        }
+                        if (!exists) {
+                            sampleNames.add(name);
+                            obj.setAnalysisName(sampleNames);
+                        }
+                    }
+                    }
+                obj.setSampleId(0);
                 sortedVariants.put(key, obj);
             }
         }

@@ -26,8 +26,17 @@ public class VariantIndex extends IndexObject {
     private String rsId;
     private String regionName;
     private String regionNameLc;
-    /*****************Sample******************/
 
+    public List<Integer> getSampleIds() {
+        return sampleIds;
+    }
+
+    public void setSampleIds(List<Integer> sampleIds) {
+        this.sampleIds = sampleIds;
+    }
+
+    /*****************Sample******************/
+    private List<Integer> sampleIds;
    private List<String>  analysisName;
    private int mapKey;
    private List<Integer> strainRgdId;
