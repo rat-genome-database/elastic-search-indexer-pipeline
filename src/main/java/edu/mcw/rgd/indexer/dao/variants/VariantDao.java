@@ -5,6 +5,7 @@ import edu.mcw.rgd.dao.DataSourceFactory;
 import edu.mcw.rgd.dao.impl.*;
 import edu.mcw.rgd.dao.spring.IntListQuery;
 import edu.mcw.rgd.datamodel.*;
+import edu.mcw.rgd.datamodel.variants.SampleManager;
 import edu.mcw.rgd.indexer.model.MapInfo;
 import edu.mcw.rgd.indexer.model.variants.VariantIndex;
 
@@ -243,6 +244,7 @@ public class VariantDao extends AbstractDAO {
             }
             if(!variantIds.contains(key)){
                 variantIds.add(key);
+                variant.setAnalysisName(Arrays.asList(SampleManager.getInstance().getSampleName(variant.getSampleId()).getAnalysisName()));
                 sortedVariants.put(key,variant);
             }else{
                 VariantIndex obj = sortedVariants.get(key);
