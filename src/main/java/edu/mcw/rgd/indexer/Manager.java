@@ -272,18 +272,6 @@ public class Manager {
         }
         AcknowledgedResponse indicesAliasesResponse =
                 ClientInit.getClient().indices().updateAliases(request, RequestOptions.DEFAULT);
-    /*    if (RgdIndex.getOldAlias() != null) {
-            ESClient.getClient().admin().indices().prepareAliases().removeAlias(RgdIndex.getOldAlias(), rgdIndex.getIndex())
-                    .addAlias(RgdIndex.getNewAlias(), rgdIndex.getIndex()).execute().actionGet();
-            System.out.println("Switched from " + RgdIndex.getOldAlias() + " to  " + RgdIndex.getNewAlias());
-           log.info("Switched from " + RgdIndex.getOldAlias() + " to  " + RgdIndex.getNewAlias());
-
-        } else {
-           ESClient.getClient().admin().indices().prepareAliases()
-                    .addAlias(RgdIndex.getNewAlias(), rgdIndex.getIndex()).execute().actionGet();
-            System.out.println(rgdIndex.getIndex() + " pointed to " + RgdIndex.getNewAlias());
-            log.info(rgdIndex.getIndex() + " pointed to " + RgdIndex.getNewAlias());
-        }*/
         return  true;
 
     }
