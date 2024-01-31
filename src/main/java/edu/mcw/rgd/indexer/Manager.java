@@ -131,7 +131,7 @@ public class Manager {
                     case "Annotations" : // all public ontologies
                     case "Reference" :
                     case "Variants" : // these are only ClinVar variants
-
+                    case "AlleleVariants" : // there are RGD allele variants
                         if(!searchIndexCreated) {
                             admin.createIndex("search_mappings", "search");
                             searchIndexCreated=true;
