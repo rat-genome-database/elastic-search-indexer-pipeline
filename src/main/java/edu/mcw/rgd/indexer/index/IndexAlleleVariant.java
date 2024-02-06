@@ -49,7 +49,7 @@ public class IndexAlleleVariant implements Runnable{
             v.setName(obj.getName());
 
             v.setCategory("Variant");
-            v.setSubcat("Phenotypic Variant");
+            v.setVariantCategory("Phenotypic Variant");
             v.setSuggest(indexDAO.getSuggest(symbol, null, "variant"));
             //   v.setSynonyms(getAliasesByRgdId(aliases, rgdId));
             List<AliasData> aliases = null;

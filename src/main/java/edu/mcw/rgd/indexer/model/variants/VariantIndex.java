@@ -13,7 +13,7 @@ public class VariantIndex extends IndexObject {
 
     private long variant_id;
     private String category;
-    private String subcat;
+    private String variantCategory;
     private String chromosome;
     private long endPos;
     private int sampleId;
@@ -306,6 +306,14 @@ public class VariantIndex extends IndexObject {
         this.category = category;
     }
 
+    public String getVariantCategory() {
+        return variantCategory;
+    }
+
+    public void setVariantCategory(String variantCategory) {
+        this.variantCategory = variantCategory;
+    }
+
     public List<String> getAnalysisName() {
         return analysisName;
     }
@@ -346,13 +354,4 @@ public class VariantIndex extends IndexObject {
         this.locationName = locationName;
     }
 
-    @Override
-    public String getSubcat() {
-        return subcat;
-    }
-
-    @Override
-    public void setSubcat(String subcat) {
-        this.subcat = subcat;
-    }
 }

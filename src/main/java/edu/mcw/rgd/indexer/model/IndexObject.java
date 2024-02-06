@@ -29,7 +29,7 @@ public class IndexObject {
     private String chromosome;
     private List<MapInfo> mapDataList;
     private List<String> promoters;
-    private String subcat;
+    private String variantCategory;
     private List<String> associations;
 
 
@@ -181,12 +181,12 @@ public class IndexObject {
         this.subTrait = subTrait;
     }
 
-    public String getSubcat() {
-        return subcat;
+    public String getVariantCategory() {
+        return variantCategory;
     }
 
-    public void setSubcat(String subcat) {
-        this.subcat = subcat;
+    public void setVariantCategory(String variantCategory) {
+        this.variantCategory = variantCategory;
     }
 
     public int getAnnotationsCount() {

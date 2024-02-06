@@ -23,7 +23,7 @@ public class VariantIndexQuery extends MappingSqlQuery {
     protected Object mapRow(ResultSet rs, int rowNum) throws SQLException {
         VariantIndex vi = new VariantIndex();
         vi.setCategory("Variant");
-        vi.setSubcat("Strain Specific Variant");
+        vi.setVariantCategory("Strain Specific Variant");
         vi.setName(rs.getString("rs_id"));
         vi.setRsId(rs.getString("rs_id"));
      //   vi.setSymbol(String.valueOf(rs.getLong("rgd_id")));
