@@ -73,6 +73,7 @@ public class IndexDAO extends AbstractDAO {
     private GenomicElementDAO gdao= new GenomicElementDAO();
     private AssociationDAO associationDAO=new AssociationDAO();
     private GenomicElementDAO gedao= new GenomicElementDAO();
+    private RgdVariantDAO rgdVariantDAO =new RgdVariantDAO();
     Logger log= LogManager.getLogger("main");
 
     Map<Integer, edu.mcw.rgd.datamodel.Map> rgdMaps=new HashMap<>();
@@ -539,6 +540,16 @@ public class IndexDAO extends AbstractDAO {
         List<VariantInfo> variants=vdao.getVariantsBySource("CLINVAR");
         for(VariantInfo obj: variants) {
             Runnable workerThread=new IndexClinVar(obj);
+            executor.execute(workerThread);
+        }
+        executor.shutdown();
+        while (!executor.isTerminated()){}
+    }
+    public void getAlleleVariants() throws Exception{
+        ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+        List<RgdVariant> variants= rgdVariantDAO.getVariantsForSpecies(3); //species type key 3 for RAT
+        for(RgdVariant obj: variants) {
+            Runnable workerThread=new IndexAlleleVariant(obj);
             executor.execute(workerThread);
         }
         executor.shutdown();
