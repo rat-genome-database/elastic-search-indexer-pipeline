@@ -12,8 +12,11 @@ public class IndexObject {
     private String term_acc;
     private String status;
     private String symbol;
-    private String htmlStrippedSymbol;
+    private List<String> oldSymbols;
+
     private String name;
+    private List<String> oldNames;
+    private String htmlStrippedSymbol;
     private String description;
     private List<String> xdbIdentifiers;
     private List<String> xdbNames;
@@ -479,6 +482,23 @@ public class IndexObject {
             this.cross_species_anatomy = cross_species_anatomy;
         }
     */
+
+    public List<String> getOldSymbols() {
+        return oldSymbols;
+    }
+
+    public void setOldSymbols(List<String> oldSymbols) {
+        this.oldSymbols = oldSymbols;
+    }
+
+    public List<String> getOldNames() {
+        return oldNames;
+    }
+
+    public void setOldNames(List<String> oldNames) {
+        this.oldNames = oldNames;
+    }
+
     public List<String> getAnnotated_objects() {
         return annotated_objects;
     }

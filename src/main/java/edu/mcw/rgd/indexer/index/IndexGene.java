@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 public class IndexGene implements Runnable {
     private Gene gene;
@@ -56,11 +57,16 @@ public class IndexGene implements Runnable {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            List<String> synonyms = new ArrayList<>();
-            for (AliasData a : aliases) {
-                synonyms.add(a.getAlias_name());
-            }
+            List<String> synonyms = aliases!=null && aliases.size()>0?aliases.stream().map(a->a.getAlias_name()).collect(Collectors.toList()) : null;
+            List<String> oldSymbols=aliases!=null && aliases.size()>0? aliases.stream()
+                    .filter(a -> a.getAlias_type().equalsIgnoreCase("old_gene_symbol"))
+                    .map(AliasData::getAlias_name).toList() : null;
+            List<String> oldNames=aliases!=null && aliases.size()>0? aliases.stream()
+                    .filter(a -> a.getAlias_type().equalsIgnoreCase("old_gene_name"))
+                    .map(AliasData::getAlias_name).toList() : null;
             obj.setSynonyms(synonyms);
+            obj.setOldSymbols(oldSymbols);
+            obj.setOldNames(oldNames);
             //    obj.setSynonyms(getAliasesByRgdId(aliases, rgdId));
             try {
                 obj.setXdbIdentifiers(indexDAO.getExternalIdentifiers(rgdId));
