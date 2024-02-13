@@ -4,15 +4,14 @@ import edu.mcw.rgd.dao.impl.AssociationDAO;
 import edu.mcw.rgd.datamodel.QTL;
 import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.datamodel.Strain;
-import edu.mcw.rgd.datamodel.ontology.Annotation;
 import edu.mcw.rgd.indexer.dao.IndexDAO;
 import edu.mcw.rgd.indexer.model.AliasData;
+import edu.mcw.rgd.indexer.model.Annotations;
 import edu.mcw.rgd.indexer.model.IndexObject;
 import org.jsoup.Jsoup;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class IndexQTL implements Runnable {
     private QTL qtl;
@@ -51,18 +50,17 @@ public class IndexQTL implements Runnable {
             q.setName(name);
             q.setSpecies(species);
             q.setSuggest(indexDAO.getSuggest(symbol, null, "qtl"));
+            try {
+                Annotations<QTL> annotations=new Annotations<>(qtl);
+                List<String> annots=annotations.getExperimentalAnnotations();
+             //   q.setXdata(indexDAO.getAnnotations(annotMap, "xdata", "qtl"));
+                q.setXdata(annots);
+                q.setStatus(annotations.getObjectStatus());
 
-            Map<String, List<Annotation>> annotMap = null;
-            try {
-                annotMap = indexDAO.getAnnotations(rgdId);
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            try {
-                q.setXdata(indexDAO.getAnnotations(annotMap, "xdata", "qtl"));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+
             //  q.setSynonyms(getAliasesByRgdId(aliases, rgdId));
             List<AliasData> aliases = null;
             try {
