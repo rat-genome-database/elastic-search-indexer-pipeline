@@ -10,9 +10,13 @@ import java.util.Map;
  */
 public class IndexObject {
     private String term_acc;
+    private String status;
     private String symbol;
-    private String htmlStrippedSymbol;
+    private List<String> oldSymbols;
+
     private String name;
+    private List<String> oldNames;
+    private String htmlStrippedSymbol;
     private String description;
     private List<String> xdbIdentifiers;
     private List<String> xdbNames;
@@ -398,78 +402,103 @@ public class IndexObject {
         this.htmlStrippedSymbol = htmlStrippedSymbol;
     }
 
- /*   public List<String> getDisease() {
-        return disease;
+    public String getStatus() {
+        return status;
     }
 
-    public void setDisease(List<String> disease) {
-        this.disease = disease;
+    public void setStatus(String status) {
+        this.status = status;
     }
 
-    public List<String> getBiological_process() {
-        return biological_process;
+    /*   public List<String> getDisease() {
+            return disease;
+        }
+
+        public void setDisease(List<String> disease) {
+            this.disease = disease;
+        }
+
+        public List<String> getBiological_process() {
+            return biological_process;
+        }
+
+        public void setBiological_process(List<String> biological_process) {
+            this.biological_process = biological_process;
+        }
+
+        public List<String> getCellular_component() {
+            return cellular_component;
+        }
+
+        public void setCellular_component(List<String> cellular_component) {
+            this.cellular_component = cellular_component;
+        }
+
+        public List<String> getMolecular_function() {
+            return molecular_function;
+        }
+
+        public void setMolecular_function(List<String> molecular_function) {
+            this.molecular_function = molecular_function;
+        }
+
+        public List<String> getPathway() {
+            return pathway;
+        }
+
+        public void setPathway(List<String> pathway) {
+            this.pathway = pathway;
+        }
+
+        public List<String> getPhenotype() {
+            return phenotype;
+        }
+
+        public void setPhenotype(List<String> phenotype) {
+            this.phenotype = phenotype;
+        }
+
+        public List<String> getGene_chem_interaction() {
+            return gene_chem_interaction;
+        }
+
+        public void setGene_chem_interaction(List<String> gene_chem_interaction) {
+            this.gene_chem_interaction = gene_chem_interaction;
+        }
+
+        public List<String> getNeuro_behavioural() {
+            return neuro_behavioural;
+        }
+
+        public void setNeuro_behavioural(List<String> neuro_behavioural) {
+            this.neuro_behavioural = neuro_behavioural;
+        }
+
+        public List<String> getCross_species_anatomy() {
+            return cross_species_anatomy;
+        }
+
+        public void setCross_species_anatomy(List<String> cross_species_anatomy) {
+            this.cross_species_anatomy = cross_species_anatomy;
+        }
+    */
+
+    public List<String> getOldSymbols() {
+        return oldSymbols;
     }
 
-    public void setBiological_process(List<String> biological_process) {
-        this.biological_process = biological_process;
+    public void setOldSymbols(List<String> oldSymbols) {
+        this.oldSymbols = oldSymbols;
     }
 
-    public List<String> getCellular_component() {
-        return cellular_component;
+    public List<String> getOldNames() {
+        return oldNames;
     }
 
-    public void setCellular_component(List<String> cellular_component) {
-        this.cellular_component = cellular_component;
+    public void setOldNames(List<String> oldNames) {
+        this.oldNames = oldNames;
     }
 
-    public List<String> getMolecular_function() {
-        return molecular_function;
-    }
-
-    public void setMolecular_function(List<String> molecular_function) {
-        this.molecular_function = molecular_function;
-    }
-
-    public List<String> getPathway() {
-        return pathway;
-    }
-
-    public void setPathway(List<String> pathway) {
-        this.pathway = pathway;
-    }
-
-    public List<String> getPhenotype() {
-        return phenotype;
-    }
-
-    public void setPhenotype(List<String> phenotype) {
-        this.phenotype = phenotype;
-    }
-
-    public List<String> getGene_chem_interaction() {
-        return gene_chem_interaction;
-    }
-
-    public void setGene_chem_interaction(List<String> gene_chem_interaction) {
-        this.gene_chem_interaction = gene_chem_interaction;
-    }
-
-    public List<String> getNeuro_behavioural() {
-        return neuro_behavioural;
-    }
-
-    public void setNeuro_behavioural(List<String> neuro_behavioural) {
-        this.neuro_behavioural = neuro_behavioural;
-    }
-
-    public List<String> getCross_species_anatomy() {
-        return cross_species_anatomy;
-    }
-
-    public void setCross_species_anatomy(List<String> cross_species_anatomy) {
-        this.cross_species_anatomy = cross_species_anatomy;
-    }
-*/
     public List<String> getAnnotated_objects() {
         return annotated_objects;
     }

@@ -1,10 +1,10 @@
 package edu.mcw.rgd.indexer.index;
 
 import edu.mcw.rgd.datamodel.Gene;
+import edu.mcw.rgd.datamodel.QTL;
 import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.indexer.dao.IndexDAO;
-import edu.mcw.rgd.indexer.model.AliasData;
-import edu.mcw.rgd.indexer.model.IndexObject;
+import edu.mcw.rgd.indexer.model.*;
 import edu.mcw.rgd.process.Utils;
 import org.jsoup.Jsoup;
 
@@ -12,10 +12,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 public class IndexGene implements Runnable {
     private Gene gene;
     IndexDAO indexDAO=new IndexDAO();
+
     public IndexGene(Gene gene){
         this.gene=gene;
     }
@@ -26,7 +28,7 @@ public class IndexGene implements Runnable {
         boolean isSearchable=SpeciesType.isSearchable(speciesTypeKey);
         if (isSearchable) {
 
-            IndexObject obj = new IndexObject();
+            GeneIndexObject obj = new GeneIndexObject();
             int rgdId = gene.getRgdId();
             String symbol = gene.getSymbol();
             String name = gene.getName();
@@ -55,11 +57,16 @@ public class IndexGene implements Runnable {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            List<String> synonyms = new ArrayList<>();
-            for (AliasData a : aliases) {
-                synonyms.add(a.getAlias_name());
-            }
+            List<String> synonyms = aliases!=null && aliases.size()>0?aliases.stream().map(a->a.getAlias_name()).collect(Collectors.toList()) : null;
+            List<String> oldSymbols=aliases!=null && aliases.size()>0? aliases.stream()
+                    .filter(a -> a.getAlias_type().equalsIgnoreCase("old_gene_symbol"))
+                    .map(AliasData::getAlias_name).toList() : null;
+            List<String> oldNames=aliases!=null && aliases.size()>0? aliases.stream()
+                    .filter(a -> a.getAlias_type().equalsIgnoreCase("old_gene_name"))
+                    .map(AliasData::getAlias_name).toList() : null;
             obj.setSynonyms(synonyms);
+            obj.setOldSymbols(oldSymbols);
+            obj.setOldNames(oldNames);
             //    obj.setSynonyms(getAliasesByRgdId(aliases, rgdId));
             try {
                 obj.setXdbIdentifiers(indexDAO.getExternalIdentifiers(rgdId));
@@ -94,6 +101,31 @@ public class IndexGene implements Runnable {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            try {
+                Annotations<Gene> annotations=new Annotations<>(gene);
+                obj.setGoAnnotations(annotations.getGoAnnotations());
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            try{
+                Associations<Gene> associations=new Associations<>(gene);
+                try {
+                    List<String> sslpAssociations = associations.getAssociatedSSLPs();
+                    if (sslpAssociations != null && sslpAssociations.size() > 0) {
+                        obj.setWithSSLPS(true);
+                    }
+                }catch (Exception e){e.printStackTrace();}
+                try {
+                    List<String> homologs = associations.getHomologs();
+                    if (homologs != null && homologs.size() > 0) {
+                        obj.setWithHomologs(true);
+                    }
+                }catch (Exception e){e.printStackTrace();}
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+
             obj.setSuggest(indexDAO.getSuggest(symbol, null, "gene"));
             indexDAO.indexDocument(obj);
 

@@ -152,10 +152,10 @@ public class IndexDAO extends AbstractDAO {
         List<Gene> genes= geneDAO.getAllActiveGenes();
         ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
         for(Gene gene: genes) {
-     //    Gene gene= geneDAO.getGene(2004);
+      // Gene gene= geneDAO.getGene(2493);
             Runnable workerThread= new IndexGene(gene);
             executor.execute(workerThread);
-     }
+   }
         executor.shutdown();
         while (!executor.isTerminated()) {}
 
@@ -1054,6 +1054,7 @@ public class IndexDAO extends AbstractDAO {
        
 
     }
+
     public static void main(String[] args) throws Exception {
           IndexDAO dao= new IndexDAO();
        Map<Integer,  List<String>> associations=   dao.getAssociationsByObjectKey(11);
