@@ -99,8 +99,15 @@ public class IndexAlleleVariant implements Runnable{
                 List<Strain> strainList = strainDAO.getAssociatedStrains(obj.getRgdId());
                 List<String> strains=strainList.stream().map(Strain::getName).collect(Collectors.toList());
                 v.setAnalysisName(strains);
-                v.setRefNuc(obj.getRefNuc());
-                v.setVarNuc(obj.getVarNuc());
+                if(obj.getRefNuc()!=null && obj.getRefNuc().length()>6)
+                v.setRefNuc(obj.getRefNuc().substring(0,6)+"...");
+                else
+                    v.setRefNuc(obj.getRefNuc());
+                if(obj.getVarNuc()!=null && obj.getVarNuc().length()>10)
+                    v.setVarNuc(obj.getVarNuc().substring(0,6)+"...");
+                else
+                    v.setRefNuc(obj.getVarNuc());
+
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
