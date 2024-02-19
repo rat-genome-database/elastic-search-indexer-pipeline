@@ -103,7 +103,7 @@ public class IndexAlleleVariant implements Runnable{
                     v.setRefNuc(obj.getRefNuc().substring(0,6)+"...");
                 else
                     v.setRefNuc(obj.getRefNuc());
-                if(obj.getVarNuc()!=null && obj.getVarNuc().length()>6)
+                if(obj.getVarNuc()!=null && obj.getVarNuc().length()>10)
                     v.setVarNuc(obj.getVarNuc().substring(0,6)+"...");
                 else
                     v.setVarNuc(obj.getVarNuc());
