@@ -68,8 +68,16 @@ public class VariantIndexQuery extends MappingSqlQuery {
         }catch (Exception e){}
 
         try{
-            vi.setVarNuc(rs.getString("var_nuc"));
-            vi.setRefNuc(rs.getString("ref_nuc"));
+            if(rs.getString("ref_nuc")!=null &&  rs.getString("ref_nuc").length()>10)
+                    vi.setRefNuc(rs.getString("ref_nuc").substring(0,6)+"...");
+                else
+                    vi.setRefNuc(rs.getString("ref_nuc"));
+            if(rs.getString("var_nuc")!=null &&  rs.getString("var_nuc").length()>10)
+                vi.setVarNuc(rs.getString("var_nuc").substring(0,6)+"...");
+            else
+                vi.setVarNuc(rs.getString("var_nuc"));
+//            vi.setVarNuc(rs.getString("var_nuc"));
+//            vi.setRefNuc(rs.getString("ref_nuc"));
 
         }catch (Exception e){
             e.printStackTrace();
