@@ -19,4 +19,4 @@ echo 'Phenominer Indexer .. Environment..'+ $1
 ### Search Indexer
 #
 echo 'Search Indexer.. Environment.. ' $1
-/home/rgddata/pipelines/ESIndexer/run.sh reindex $1 search Genes Qtls Strains Sslps Variants GenomicElements Reference Annotations 2>&1 | mailx -s "[REED] Search Indexer $1 ok" rgd.developers@mcw.edu
+/home/rgddata/pipelines/ESIndexer/run.sh reindex $1 search Genes Qtls Strains Sslps Variants GenomicElements Reference Annotations AlleleVariants 2>&1 | mailx -s "[REED] Search Indexer $1 ok" rgd.developers@mcw.edu
