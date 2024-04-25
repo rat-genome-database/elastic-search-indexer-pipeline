@@ -144,6 +144,21 @@ public class GenomeDAO extends AbstractDAO{
                     }
                     break;
                 case 3: //RAT
+                    if(mapKey==380) {
+                        //       info.setBasePairs("3,042,335,753");
+                        info.setTotalSeqLength("2,849,581,192");
+                        info.setTotalUngappedLength("2,845,450,615");
+                       info.setGapBetweenScaffolds("");
+                        info.setScaffolds("76");
+                        info.setScaffoldN50("137,014,596");
+                        info.setScaffoldL50("8");
+                        info.setContigs("296");
+                        info.setContigN50("64,250,101");
+                        info.setContigL50("15");
+                        info.setChromosome("22");
+                        info.setNcbiLink("https://www.ncbi.nlm.nih.gov/assembly/GCF_036323735.1/");
+                        info.setRefSeqAssemblyAccession("GCF_036323735.1");
+                    }
                     if(mapKey==372) {
                         //       info.setBasePairs("3,042,335,753");
                         info.setTotalSeqLength("2,647,915,728");
