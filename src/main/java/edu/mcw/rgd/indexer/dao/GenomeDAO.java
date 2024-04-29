@@ -1,13 +1,12 @@
 package edu.mcw.rgd.indexer.dao;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
+
 import edu.mcw.rgd.dao.AbstractDAO;
 import edu.mcw.rgd.dao.impl.*;
 import edu.mcw.rgd.dao.spring.CountQuery;
 
 import edu.mcw.rgd.datamodel.*;
+
 
 import edu.mcw.rgd.indexer.model.genomeInfo.*;
 import org.json.JSONArray;
@@ -16,14 +15,13 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.Map;
-
 
 
 /**
@@ -33,7 +31,8 @@ public class GenomeDAO extends AbstractDAO{
     MapDAO mapDAO=new MapDAO();
     public AssemblyStats loadAssemblyStats(String refSeqAccession){
         AssemblyStats stats=new AssemblyStats();
-        String API_KEY="119bb78b74c59987962bbf4d55fb4c55de09";
+        String API_KEY=getNCBIAPIKey();
+        System.out.println("NCBI API KEY:"+ API_KEY);
         String baseURI="https://www.ncbi.nlm.nih.gov/datasets/docs/v2/reference-docs/rest-api/";
         String fetchUri="https://api.ncbi.nlm.nih.gov/datasets/v2alpha/genome/accession/" ;
         fetchUri+= refSeqAccession;
@@ -79,7 +78,7 @@ public class GenomeDAO extends AbstractDAO{
 
         return stats;
     }
-    public AssemblyInfo getAssemblyInfo(edu.mcw.rgd.datamodel.Map map) throws Exception {
+       public AssemblyInfo getAssemblyInfo(edu.mcw.rgd.datamodel.Map map) throws Exception {
 
         AssemblyInfo info= new AssemblyInfo();
         int mapKey=map.getKey();
@@ -426,6 +425,29 @@ public class GenomeDAO extends AbstractDAO{
     public int getProteinCounts(int mapKey, String chr) throws Exception {
         ProteinDAO pdao=new ProteinDAO();
        return pdao.getProteinsCount(mapKey, chr);
+    }
+
+    public String getNCBIAPIKey(){
+        Properties props=new Properties();
+        FileInputStream fis=null;
+
+
+        try{
+
+            fis=new FileInputStream("/data/properties/ncbi_api.properties");
+            props.load(fis);
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        try {
+            if (fis != null) {
+                fis.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return props.getProperty("NCBI_API_KEY");
     }
     public static void main(String[] args) throws Exception {
         GenomeDAO genomeDAO= new GenomeDAO();
