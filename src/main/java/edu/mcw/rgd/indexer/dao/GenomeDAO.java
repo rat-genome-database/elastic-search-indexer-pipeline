@@ -31,23 +31,24 @@ public class GenomeDAO extends AbstractDAO{
     MapDAO mapDAO=new MapDAO();
     public AssemblyStats loadAssemblyStats(String refSeqAccession){
         AssemblyStats stats=new AssemblyStats();
-        String API_KEY=getNCBIAPIKey();
+        String API_KEY="6994481f9c0f101d5469a91e9b7b6017dc08";
         System.out.println("NCBI API KEY:"+ API_KEY);
         String baseURI="https://www.ncbi.nlm.nih.gov/datasets/docs/v2/reference-docs/rest-api/";
         String fetchUri="https://api.ncbi.nlm.nih.gov/datasets/v2alpha/genome/accession/" ;
-        fetchUri+= refSeqAccession;
+        fetchUri+= refSeqAccession.trim();
 //        fetchUri+= "/dataset_report?filters.reference_only=true&filters.assembly_source=refseq&filters.has_annotation=true" +
 //                "&filters.exclude_paired_reports=false&filters.exclude_atypical=false&filters.assembly_version=current" +
 //                "&filters.assembly_level=chromosome&filters.assembly_level=complete_genome" +
 //                "&filters.is_metagenome_derived=metagenome_derived_exclude" +
 //                "&table_fields=assminfo-accession&table_fields=assminfo-name" +
 //                "&api_key="+API_KEY;
-        fetchUri+="/dataset_report?filters.assembly_source=refseq&filters.has_annotation=true" +
+        fetchUri+="/dataset_report?filters.assembly_source=all&filters.has_annotation=false" +
                 "&filters.exclude_paired_reports=false&filters.exclude_atypical=false&filters.assembly_version=all_assemblies" +
                 "&filters.assembly_level=chromosome&filters.assembly_level=complete_genome" +
                 "&filters.is_metagenome_derived=metagenome_derived_exclude" +
                 "&table_fields=assminfo-accession&table_fields=assminfo-name"
                 + "&api_key="+API_KEY;
+
         RestClient restClient=RestClient.builder()
                 .requestFactory(new HttpComponentsClientHttpRequestFactory())
                 .baseUrl(baseURI)
@@ -59,11 +60,12 @@ public class GenomeDAO extends AbstractDAO{
                     .body(String.class);
             if(responseStr!=null){
                 JSONObject jsonObject = new JSONObject(responseStr);
+                System.out.println("JSONOBJECT"+ jsonObject.toString());
                 JSONArray array= (JSONArray) jsonObject.get("reports");
 
                 JSONObject object=array.getJSONObject(0);
                 JSONObject map= object.getJSONObject("assembly_stats");
-                System.out.println("ASSEMBLY STATS:"+ object.get("assembly_stats"));
+            //    System.out.println("ASSEMBLY STATS:"+ object.get("assembly_stats"));
                 stats.setContigL50(String.valueOf( map.get("contig_l50")));
                 stats.setContigN50(String.valueOf(map.get("contig_n50")));
               try {
@@ -78,6 +80,8 @@ public class GenomeDAO extends AbstractDAO{
                 stats.setTotalSequenceLength(String.valueOf(map.get("total_sequence_length")));
             }
         }catch (Exception e){
+            System.out.println("ACCESSION:" +refSeqAccession);
+            System.out.println("FETCH URL:"+ fetchUri);
             e.printStackTrace();
         }
 
@@ -85,7 +89,9 @@ public class GenomeDAO extends AbstractDAO{
         return stats;
     }
        public AssemblyInfo getAssemblyInfo(edu.mcw.rgd.datamodel.Map map) throws Exception {
-
+        if(map.getRefSeqAssemblyAcc()==null){
+            return null;
+        }
         AssemblyInfo info= new AssemblyInfo();
         int mapKey=map.getKey();
         AssemblyStats stats= mapDAO.getAssemblyStats(mapKey);
@@ -458,7 +464,8 @@ public class GenomeDAO extends AbstractDAO{
     public static void main(String[] args) throws Exception {
         GenomeDAO genomeDAO= new GenomeDAO();
         MapDAO dao=new MapDAO();
-        edu.mcw.rgd.datamodel.Map  map=dao.getMap(380);
+        List<edu.mcw.rgd.datamodel.Map>  maps=dao.getMaps(3);
+        for(edu.mcw.rgd.datamodel.Map map:maps)
         genomeDAO.getAssemblyInfo(map);
 
     }
