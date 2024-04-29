@@ -68,7 +68,7 @@ public class GenomeInfoThread implements Runnable {
                 GenomeIndexObject obj = new GenomeIndexObject();
                 obj.setSpecies(species);
                 AssemblyInfo info = new AssemblyInfo();
-                info = genomeDAO.getAssemblyInfo(key, mapKey);
+                info = genomeDAO.getAssemblyInfo(m);
                 //    info=genomeDAO.getAssemblyInfo(3, 70);
                 obj.setBasePairs(info.getBasePairs());
                 obj.setTotalSeqLength(info.getTotalSeqLength());
