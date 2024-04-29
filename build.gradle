@@ -49,6 +49,11 @@ dependencies {
     implementation group: 'org.springframework', name: 'spring-beans', version: '6.1.1'
 // https://mvnrepository.com/artifact/org.springframework/spring-jdbc
     implementation group: 'org.springframework', name: 'spring-jdbc', version: '6.1.1'
+    // https://mvnrepository.com/artifact/org.springframework/spring-web
+    implementation group: 'org.springframework', name: 'spring-web', version: '6.1.1'
+    implementation group: 'org.json', name: 'json', version: '20240303'
+    implementation group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version: '5.4-alpha2'
+
 }
 
 jar {
