@@ -36,12 +36,18 @@ public class GenomeDAO extends AbstractDAO{
         String baseURI="https://www.ncbi.nlm.nih.gov/datasets/docs/v2/reference-docs/rest-api/";
         String fetchUri="https://api.ncbi.nlm.nih.gov/datasets/v2alpha/genome/accession/" ;
         fetchUri+= refSeqAccession;
-        fetchUri+= "/dataset_report?filters.reference_only=true&filters.assembly_source=refseq&filters.has_annotation=true" +
-                "&filters.exclude_paired_reports=false&filters.exclude_atypical=false&filters.assembly_version=current" +
+//        fetchUri+= "/dataset_report?filters.reference_only=true&filters.assembly_source=refseq&filters.has_annotation=true" +
+//                "&filters.exclude_paired_reports=false&filters.exclude_atypical=false&filters.assembly_version=current" +
+//                "&filters.assembly_level=chromosome&filters.assembly_level=complete_genome" +
+//                "&filters.is_metagenome_derived=metagenome_derived_exclude" +
+//                "&table_fields=assminfo-accession&table_fields=assminfo-name" +
+//                "&api_key="+API_KEY;
+        fetchUri+="/dataset_report?filters.assembly_source=refseq&filters.has_annotation=true" +
+                "&filters.exclude_paired_reports=false&filters.exclude_atypical=false&filters.assembly_version=all_assemblies" +
                 "&filters.assembly_level=chromosome&filters.assembly_level=complete_genome" +
                 "&filters.is_metagenome_derived=metagenome_derived_exclude" +
-                "&table_fields=assminfo-accession&table_fields=assminfo-name" +
-                "&api_key="+API_KEY;
+                "&table_fields=assminfo-accession&table_fields=assminfo-name"
+                + "&api_key="+API_KEY;
         RestClient restClient=RestClient.builder()
                 .requestFactory(new HttpComponentsClientHttpRequestFactory())
                 .baseUrl(baseURI)
