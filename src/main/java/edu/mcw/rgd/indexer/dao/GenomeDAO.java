@@ -36,19 +36,15 @@ public class GenomeDAO extends AbstractDAO{
         String baseURI="https://www.ncbi.nlm.nih.gov/datasets/docs/v2/reference-docs/rest-api/";
         String fetchUri="https://api.ncbi.nlm.nih.gov/datasets/v2alpha/genome/accession/" ;
         fetchUri+= refSeqAccession.trim();
-//        fetchUri+= "/dataset_report?filters.reference_only=true&filters.assembly_source=refseq&filters.has_annotation=true" +
-//                "&filters.exclude_paired_reports=false&filters.exclude_atypical=false&filters.assembly_version=current" +
+
+//        fetchUri+="/dataset_report?filters.assembly_source=all&filters.has_annotation=false" +
+//                "&filters.exclude_paired_reports=false&filters.exclude_atypical=false&filters.assembly_version=all_assemblies" +
 //                "&filters.assembly_level=chromosome&filters.assembly_level=complete_genome" +
 //                "&filters.is_metagenome_derived=metagenome_derived_exclude" +
-//                "&table_fields=assminfo-accession&table_fields=assminfo-name" +
-//                "&api_key="+API_KEY;
-        fetchUri+="/dataset_report?filters.assembly_source=all&filters.has_annotation=false" +
-                "&filters.exclude_paired_reports=false&filters.exclude_atypical=false&filters.assembly_version=all_assemblies" +
-                "&filters.assembly_level=chromosome&filters.assembly_level=complete_genome" +
-                "&filters.is_metagenome_derived=metagenome_derived_exclude" +
-                "&table_fields=assminfo-accession&table_fields=assminfo-name"
-                + "&api_key="+API_KEY;
+//                "&table_fields=assminfo-accession&table_fields=assminfo-name"
+//                + "&api_key="+API_KEY;
 
+        fetchUri+="/dataset_report?filters.reference_only=false&filters.assembly_source=all&filters.has_annotation=false&filters.exclude_paired_reports=false&filters.exclude_atypical=false&filters.assembly_version=all_assemblies&filters.is_metagenome_derived=metagenome_derived_exclude&page_size=1000";
         RestClient restClient=RestClient.builder()
                 .requestFactory(new HttpComponentsClientHttpRequestFactory())
                 .baseUrl(baseURI)
@@ -75,7 +71,9 @@ public class GenomeDAO extends AbstractDAO{
                 stats.setScaffoldL50(String.valueOf(map.get("scaffold_l50")));
                 stats.setScaffoldN50(String.valueOf(map.get("scaffold_n50")));
                 stats.setNumberOfScaffolds(Integer.parseInt(String.valueOf(map.get("number_of_scaffolds"))));
-                stats.setTotalNumberOfChromosome(Integer.parseInt(map.get("total_number_of_chromosomes").toString()));
+                try {
+                    stats.setTotalNumberOfChromosome(Integer.parseInt(map.get("total_number_of_chromosomes").toString()));
+                }catch (Exception e){e.printStackTrace();}
                 stats.setTotalUngappedLength(String.valueOf(map.get("total_ungapped_length")));
                 stats.setTotalSequenceLength(String.valueOf(map.get("total_sequence_length")));
             }
@@ -464,7 +462,7 @@ public class GenomeDAO extends AbstractDAO{
     public static void main(String[] args) throws Exception {
         GenomeDAO genomeDAO= new GenomeDAO();
         MapDAO dao=new MapDAO();
-        List<edu.mcw.rgd.datamodel.Map>  maps=dao.getMaps(3);
+        List<edu.mcw.rgd.datamodel.Map>  maps=dao.getMaps(14);
         for(edu.mcw.rgd.datamodel.Map map:maps)
         genomeDAO.getAssemblyInfo(map);
 
