@@ -30,6 +30,7 @@ import java.util.Map;
 public class GenomeDAO extends AbstractDAO{
     MapDAO mapDAO=new MapDAO();
     public AssemblyStats loadAssemblyStats(String refSeqAccession){
+        System.out.println("loading ..."+ refSeqAccession);
         AssemblyStats stats=new AssemblyStats();
         String API_KEY="6994481f9c0f101d5469a91e9b7b6017dc08";
         System.out.println("NCBI API KEY:"+ API_KEY);
@@ -45,6 +46,7 @@ public class GenomeDAO extends AbstractDAO{
 //                + "&api_key="+API_KEY;
 
         fetchUri+="/dataset_report?filters.reference_only=false&filters.assembly_source=all&filters.has_annotation=false&filters.exclude_paired_reports=false&filters.exclude_atypical=false&filters.assembly_version=all_assemblies&filters.is_metagenome_derived=metagenome_derived_exclude&page_size=1000";
+       System.out.println("FETCH URI:"+ fetchUri);
         RestClient restClient=RestClient.builder()
                 .requestFactory(new HttpComponentsClientHttpRequestFactory())
                 .baseUrl(baseURI)
@@ -87,7 +89,7 @@ public class GenomeDAO extends AbstractDAO{
         return stats;
     }
        public AssemblyInfo getAssemblyInfo(edu.mcw.rgd.datamodel.Map map) throws Exception {
-        if(map.getRefSeqAssemblyAcc()==null){
+        if(map.getRefSeqAssemblyAcc()==null || Objects.equals(map.getRefSeqAssemblyAcc(), "")){
             return null;
         }
         AssemblyInfo info= new AssemblyInfo();
@@ -462,9 +464,11 @@ public class GenomeDAO extends AbstractDAO{
     public static void main(String[] args) throws Exception {
         GenomeDAO genomeDAO= new GenomeDAO();
         MapDAO dao=new MapDAO();
-        List<edu.mcw.rgd.datamodel.Map>  maps=dao.getMaps(14);
-        for(edu.mcw.rgd.datamodel.Map map:maps)
-        genomeDAO.getAssemblyInfo(map);
+        List<edu.mcw.rgd.datamodel.Map>  maps=dao.getMaps(6);
+        for(edu.mcw.rgd.datamodel.Map map:maps) {
+            System.out.println("MAP:"+ map.getKey());
+            genomeDAO.getAssemblyInfo(map);
+        }
 
     }
 }

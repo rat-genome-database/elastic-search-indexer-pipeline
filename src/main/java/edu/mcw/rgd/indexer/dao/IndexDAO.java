@@ -1043,6 +1043,22 @@ public class IndexDAO extends AbstractDAO {
         }
 
     }
+    public void indexAITermMappingDocument(IndexObject document) {
+      List<String> termSynonyms=document.getSynonyms();
+      IndexObject termObject=new IndexObject();
+      termObject.setTerm_acc(document.getTerm_acc());
+      termObject.setTerm(document.getTerm());
+      indexDocument(termObject);
+      if(termSynonyms!=null && termSynonyms.size()>0){
+          for(String synonym:termSynonyms){
+              IndexObject object=new IndexObject();
+              object.setTerm_acc(document.getTerm_acc());
+              object.setTerm(synonym);
+              indexDocument(object);
+          }
+      }
+
+    }
     public void indexDocument(IndexObject document) {
         byte[] json = new byte[0];
             try {

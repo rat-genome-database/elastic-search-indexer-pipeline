@@ -23,15 +23,17 @@ public class IndexOntTerm implements Runnable {
     private Term t;
     private String ontName;
     private List<TermSynonym> synonyms;
+    boolean isAITermMapping;
     IndexDAO indexDAO=new IndexDAO();
     OntologyXDAO ontologyXDAO=new OntologyXDAO();
     RGDManagementDAO rgdManagementDAO=new RGDManagementDAO();
     AliasDAO aliasDAO=new AliasDAO();
     StrainDAO strainDAO=new StrainDAO();
-    public IndexOntTerm(Term t,  String ontName, List<TermSynonym> synonyms) {
+    public IndexOntTerm(Term t,  String ontName, List<TermSynonym> synonyms, boolean isAITermMapping) {
         this.t=t;
         this.ontName=ontName;
         this.synonyms=synonyms;
+        this.isAITermMapping=isAITermMapping;
 
     }
     @Override
@@ -116,7 +118,9 @@ public class IndexOntTerm implements Runnable {
         }
         obj.setSubcat(this.ontName);
         obj.setCategory("Ontology");
-
+        if(!isAITermMapping)
         indexDAO.indexDocument(obj);
+        else
+            indexDAO.indexAITermMappingDocument(obj);
     }
 }

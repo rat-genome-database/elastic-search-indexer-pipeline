@@ -37,13 +37,15 @@ public class IndexerDAO extends IndexDAO implements Runnable {
     private String ontName;
     private String index;
     private List<TermSynonym> synonyms;
+    private boolean isAITermMapping;
 
-    public IndexerDAO(String ont_id, String ont_name, String indexName, List<TermSynonym> synonyms) {
+    public IndexerDAO(String ont_id, String ont_name, String indexName, List<TermSynonym> synonyms, boolean isAITermMapping) {
         this.ontId = ont_id;
         this.ontName = ont_name;
         this.synonyms = synonyms;
         this.index = indexName;
 
+        this.isAITermMapping=isAITermMapping;
 
     }
     public void run() {
@@ -66,7 +68,7 @@ public class IndexerDAO extends IndexDAO implements Runnable {
                 ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
 
                 for (Term t : terms) {
-                    Runnable workerThread=new IndexOntTerm(t,ontName, synonyms);
+                    Runnable workerThread=new IndexOntTerm(t,ontName, synonyms,isAITermMapping);
                     executor.execute(workerThread);
                 }
                 executor.shutdown();

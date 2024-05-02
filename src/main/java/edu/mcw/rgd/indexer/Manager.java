@@ -147,7 +147,7 @@ public class Manager {
                                 List<TermSynonym> termSynonyms = (List<TermSynonym>) ontSynonyms.getClass().getMethod("get" + ont_id).invoke(ontSynonyms);
                                 //     if(!ont_id.equalsIgnoreCase("CHEBI")) {
 
-                                workerThread = new IndexerDAO(ont_id, o.getName(), RgdIndex.getNewAlias(), termSynonyms);
+                                workerThread = new IndexerDAO(ont_id, o.getName(), RgdIndex.getNewAlias(), termSynonyms,false);
                                 executor.execute(workerThread);
                             }
                         }
@@ -215,6 +215,20 @@ public class Manager {
                                     admin.createIndex("variant_mappings", "variant");
                                     indexDAO.indexVariantsFromCarpenovoNewTableStructure();
                                     break;
+                    case "AITermMappings": // all species variants
+                        admin.createIndex("ai_mappings", "ai_mappings");
+                        OntologyXDAO ontologyXDAO = new OntologyXDAO();
+                        List<Ontology> ontologies = ontologyXDAO.getPublicOntologies();
+                        for (Ontology o : ontologies) {
+
+                            String ont_id = o.getId();
+                            List<TermSynonym> termSynonyms = (List<TermSynonym>) ontSynonyms.getClass().getMethod("get" + ont_id).invoke(ontSynonyms);
+                            //     if(!ont_id.equalsIgnoreCase("CHEBI")) {
+
+                            workerThread = new IndexerDAO(ont_id, o.getName(), RgdIndex.getNewAlias(), termSynonyms, true);
+                            executor.execute(workerThread);
+                        }
+                        break;
                     default:
                         break;
 
