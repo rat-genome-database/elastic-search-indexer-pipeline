@@ -21,6 +21,19 @@
           "analyzer": "symbol_analyzer"
         }
       }
+    },
+    "synonyms": {
+      "type": "text",
+      "fields": {
+        "synonyms": {
+          "type": "text",
+          "analyzer": "english_analyzer"
+        },
+        "symbol": {
+          "type": "text",
+          "analyzer": "symbol_analyzer"
+        }
+      }
     }
   }
 }

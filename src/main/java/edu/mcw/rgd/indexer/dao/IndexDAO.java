@@ -1048,12 +1048,19 @@ public class IndexDAO extends AbstractDAO {
       IndexObject termObject=new IndexObject();
       termObject.setTerm_acc(document.getTerm_acc());
       termObject.setTerm(document.getTerm());
+      termObject.setCategory(document.getCategory());
+      termObject.setSubcat(document.getSubcat());
+      termObject.setType("term");
       indexDocument(termObject);
       if(termSynonyms!=null && termSynonyms.size()>0){
           for(String synonym:termSynonyms){
               IndexObject object=new IndexObject();
               object.setTerm_acc(document.getTerm_acc());
-              object.setTerm(synonym);
+              object.setTerm(document.getTerm());
+              object.setSynonyms(Arrays.asList(synonym));
+              termObject.setCategory(document.getCategory());
+              termObject.setSubcat(document.getSubcat());
+              termObject.setType("synonym");
               indexDocument(object);
           }
       }
