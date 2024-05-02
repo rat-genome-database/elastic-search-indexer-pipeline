@@ -8,6 +8,8 @@ public class JacksonConfiguration {
     static{
         MAPPER.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         MAPPER.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        MAPPER.setSerializationInclusion(JsonInclude.Include.NON_DEFAULT);
+
     }
 
 }
