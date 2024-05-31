@@ -1056,11 +1056,11 @@ public class IndexDAO extends AbstractDAO {
           for(String synonym:termSynonyms){
               IndexObject object=new IndexObject();
               object.setTerm_acc(document.getTerm_acc());
-              object.setTerm(document.getTerm());
-              object.setSynonyms(Arrays.asList(synonym));
-              termObject.setCategory(document.getCategory());
-              termObject.setSubcat(document.getSubcat());
-              termObject.setType("synonym");
+              object.setTerm(synonym);
+          //    object.setSynonyms(Arrays.asList(synonym));
+              object.setCategory(document.getCategory());
+              object.setSubcat(document.getSubcat());
+              object.setType("synonym");
               indexDocument(object);
           }
       }

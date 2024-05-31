@@ -1,40 +1,6 @@
 {
   "properties": {
-    "term_acc": {
-      "type": "text",
-      "analyzer": "symbol_analyzer"
-    },
-    "term": {
-      "type": "text",
-      "analyzer": "autocomplete_analyzer",
-      "search_analyzer": "standard",
-      "fields": {
-        "term": {
-          "type": "text",
-          "analyzer": "english_analyzer"
-        },
-        "keyword": {
-          "type": "keyword"
-        },
-        "symbol": {
-          "type": "text",
-          "analyzer": "symbol_analyzer"
-        }
-      }
-    },
-    "synonyms": {
-      "type": "text",
-      "fields": {
-        "synonyms": {
-          "type": "text",
-          "analyzer": "english_analyzer"
-        },
-        "symbol": {
-          "type": "text",
-          "analyzer": "symbol_analyzer"
-        }
-      }
-    }
+
   }
 }
 

@@ -222,11 +222,13 @@ public class Manager {
                         for (Ontology o : ontologies) {
 
                             String ont_id = o.getId();
-                            List<TermSynonym> termSynonyms = (List<TermSynonym>) ontSynonyms.getClass().getMethod("get" + ont_id).invoke(ontSynonyms);
-                            //     if(!ont_id.equalsIgnoreCase("CHEBI")) {
+                          //  if(ont_id.equalsIgnoreCase("RDO")) {
+                                List<TermSynonym> termSynonyms = (List<TermSynonym>) ontSynonyms.getClass().getMethod("get" + ont_id).invoke(ontSynonyms);
+                                //     if(!ont_id.equalsIgnoreCase("CHEBI")) {
 
-                            workerThread = new IndexerDAO(ont_id, o.getName(), RgdIndex.getNewAlias(), termSynonyms, true);
-                            executor.execute(workerThread);
+                                workerThread = new IndexerDAO(ont_id, o.getName(), RgdIndex.getNewAlias(), termSynonyms, true);
+                                executor.execute(workerThread);
+                           // }
                         }
                         break;
                     default:
