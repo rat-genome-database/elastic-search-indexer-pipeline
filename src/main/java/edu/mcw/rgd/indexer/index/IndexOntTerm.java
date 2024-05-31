@@ -35,7 +35,7 @@ public class IndexOntTerm implements Runnable {
         this.ontName=ontName;
         this.synonyms=synonyms;
         this.isAITermMapping=isAITermMapping;
-
+        this.ontId=ontId;
     }
     @Override
     public void run() {
