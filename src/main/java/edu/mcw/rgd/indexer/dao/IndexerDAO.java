@@ -68,7 +68,7 @@ public class IndexerDAO extends IndexDAO implements Runnable {
                 ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
 
                 for (Term t : terms) {
-                    Runnable workerThread=new IndexOntTerm(t,ontName, synonyms,isAITermMapping);
+                    Runnable workerThread=new IndexOntTerm(t,ontName, synonyms,isAITermMapping, ontId);
                     executor.execute(workerThread);
                 }
                 executor.shutdown();

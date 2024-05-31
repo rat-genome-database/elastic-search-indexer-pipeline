@@ -22,6 +22,7 @@ import java.util.List;
 public class IndexOntTerm implements Runnable {
     private Term t;
     private String ontName;
+    private String ontId;
     private List<TermSynonym> synonyms;
     boolean isAITermMapping;
     IndexDAO indexDAO=new IndexDAO();
@@ -29,7 +30,7 @@ public class IndexOntTerm implements Runnable {
     RGDManagementDAO rgdManagementDAO=new RGDManagementDAO();
     AliasDAO aliasDAO=new AliasDAO();
     StrainDAO strainDAO=new StrainDAO();
-    public IndexOntTerm(Term t,  String ontName, List<TermSynonym> synonyms, boolean isAITermMapping) {
+    public IndexOntTerm(Term t,  String ontName, List<TermSynonym> synonyms, boolean isAITermMapping, String ontId) {
         this.t=t;
         this.ontName=ontName;
         this.synonyms=synonyms;
@@ -120,7 +121,9 @@ public class IndexOntTerm implements Runnable {
         obj.setCategory("Ontology");
         if(!isAITermMapping)
         indexDAO.indexDocument(obj);
-        else
+        else {
+            obj.setSubcat(ontId);
             indexDAO.indexAITermMappingDocument(obj);
+        }
     }
 }
