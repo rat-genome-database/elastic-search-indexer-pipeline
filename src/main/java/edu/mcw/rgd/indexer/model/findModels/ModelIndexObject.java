@@ -5,6 +5,8 @@ import edu.mcw.rgd.datamodel.annotation.Evidence;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by jthota on 3/3/2020.
@@ -29,6 +31,16 @@ public class ModelIndexObject {
     private List<String> aliases;
     private List<String> termSynonyms;
     private List<String> associations;
+
+    private Map<String, Set<String>> suggest;
+
+    public Map<String, Set<String>> getSuggest() {
+        return suggest;
+    }
+
+    public void setSuggest(Map<String, Set<String>> suggest) {
+        this.suggest = suggest;
+    }
 
     public List<String> getAliases() {
         return aliases;
@@ -92,6 +104,8 @@ public class ModelIndexObject {
     public void setInfoTerms(List<Term> infoTerms) {
         this.infoTerms = infoTerms;
     }
+
+
 
 /*  private List<Integer> references;
 

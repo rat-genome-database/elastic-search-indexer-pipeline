@@ -171,6 +171,9 @@
           "ignore_above": 256
         }
       }
+    },
+    "suggest": {
+      "type": "completion"
     }
   }
 }

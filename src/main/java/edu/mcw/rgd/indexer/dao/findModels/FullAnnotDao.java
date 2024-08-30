@@ -209,6 +209,20 @@ public class FullAnnotDao {
                       if (indexObjects == null)
                           indexObjects = new ArrayList<>();
 
+                      Set<String> suggestTerms=new HashSet<>();
+                      suggestTerms.add(object.getAnnotatedObjectName());
+                      suggestTerms.add(object.getAnnotatedObjectSymbol());
+                      suggestTerms.add(object.getTerm());
+                      suggestTerms.add(object.getSpecies());
+                      suggestTerms.addAll(object.getAliases());
+                      suggestTerms.add(object.getQualifiers());
+                      for(Term term:object.getParentTerms()) {
+                          suggestTerms.add(term.getTerm());
+                      }
+                      suggestTerms.addAll(object.getAssociations());
+                      Map<String, Set<String>> suggestions=new HashMap<>();
+                      suggestions.put("input", suggestTerms);
+                      object.setSuggest(suggestions);
                       indexObjects.add(object);
                       indexedMap.put(m.getAnnotatedObjectRgdId(), indexObjects);
 
