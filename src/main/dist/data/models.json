@@ -199,7 +199,28 @@
           "type": "completion"
         }
       }
+    },
+    "aliases": {
+      "type": "text",
+      "fields": {
+        "keyword": {
+          "type": "keyword"
+        },
+        "suggest": {
+          "type": "completion"
+        }
+      }
+    },
+    "termSynonyms": {
+      "type": "text",
+      "fields": {
+        "keyword": {
+          "type": "keyword"
+        },
+        "suggest": {
+          "type": "completion"
+        }
+      }
     }
-
   }
 }
