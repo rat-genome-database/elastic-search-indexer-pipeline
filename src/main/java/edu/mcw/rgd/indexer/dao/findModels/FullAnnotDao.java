@@ -21,6 +21,7 @@ import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.xcontent.XContentType;
@@ -270,8 +271,8 @@ public class FullAnnotDao {
         }
     }
     public void indexModels(List<ModelIndexObject> objects) throws IOException {
-        BulkRequest bulkRequest=new BulkRequest();
-        bulkRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
+//        BulkRequest bulkRequest=new BulkRequest();
+//        bulkRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
 
         int docCount=0;
         ObjectMapper mapper = new ObjectMapper();
@@ -289,24 +290,27 @@ public class FullAnnotDao {
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
             }
-            bulkRequest.add(new IndexRequest(RgdIndex.getNewAlias()).source(json, XContentType.JSON));
+            IndexRequest request=new IndexRequest(RgdIndex.getNewAlias()).source(json, XContentType.JSON);
+              ClientInit.getClient().index(request, RequestOptions.DEFAULT);
 
-            if(docCount%100==0){
-                BulkResponse response=      ClientInit.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
-                bulkRequest= new BulkRequest();
-            }else{
-                if(docCount>objects.size()-100 && docCount==objects.size()){
-
-                    BulkResponse response=      ClientInit.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
-                    bulkRequest= new BulkRequest();
-                }
-            }
+//            bulkRequest.add(new IndexRequest(RgdIndex.getNewAlias()).source(json, XContentType.JSON));
+//
+//            if(docCount%100==0){
+//                BulkResponse response=      ClientInit.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
+//                bulkRequest= new BulkRequest();
+//            }else{
+//                if(docCount>objects.size()-100 && docCount==objects.size()){
+//
+//                    BulkResponse response=      ClientInit.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
+//                    bulkRequest= new BulkRequest();
+//                }
+//            }
 
         }
 
         RefreshRequest refreshRequest=new RefreshRequest();
         ClientInit.getClient().indices().refresh(refreshRequest, RequestOptions.DEFAULT);
-        System.out.println("Indexed " +  "  Model objects Size: " + objects.size() + " Exiting thread.");
+        System.out.println("Indexed Model objects Size: " + objects.size() + " Exiting thread.");
         System.out.println(Thread.currentThread().getName() + ": " + " End " + new Date());
 
 
