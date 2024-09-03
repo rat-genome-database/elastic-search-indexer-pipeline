@@ -231,38 +231,75 @@ public class FullAnnotDao {
     public void addSuggestTerms(ModelIndexObject object){
         Set<String> suggestTerms=new HashSet<>();
         try {
+            if(object.getAnnotatedObjectName()!=null)
             suggestTerms.add(object.getAnnotatedObjectName());
-        }catch (Exception e){}
+        }catch (Exception e){
+            System.out.println("OBJECT ID:"+ object.getTermAcc());
+            e.printStackTrace();
+
+        }
         try {
+            if(object.getAnnotatedObjectSymbol()!=null)
         suggestTerms.add(object.getAnnotatedObjectSymbol());
-        }catch (Exception e){}
+        }catch (Exception e){
+            System.out.println("OBJECT ID:"+ object.getTermAcc());
+            e.printStackTrace();
+        }
             try {
+                if(object.getAnnotatedObjectType()!=null)
         suggestTerms.add(object.getAnnotatedObjectType());
-            }catch (Exception e){}
+            }catch (Exception e){
+                System.out.println("OBJECT ID:"+ object.getTermAcc());
+                e.printStackTrace();
+            }
                 try {
+                    if(object.getTerm()!=null)
         suggestTerms.add(object.getTerm());
-                }catch (Exception e){}
+                }catch (Exception e){
+                    System.out.println("OBJECT ID:"+ object.getTermAcc());
+                    e.printStackTrace();
+                }
                     try {
+                        if(object.getSpecies()!=null)
         suggestTerms.add(object.getSpecies());
-                    }catch (Exception e){}
+                    }catch (Exception e){    System.out.println("OBJECT ID:"+ object.getTermAcc());
+                        e.printStackTrace(); }
                         try {
-        suggestTerms.addAll(object.getAliases());
-                        }catch (Exception e){}
+                            if(object.getAliases()!=null && object.getAliases().size()>0) {
+                                for(String alias:object.getAliases()){
+                                    if(alias!=null)
+                                        suggestTerms.add(alias);
+
+                                }
+                            }
+                        }catch (Exception e){    System.out.println("OBJECT ID:"+ object.getTermAcc());
+                            e.printStackTrace(); }
                             try {
-        suggestTerms.addAll(object.getTermSynonyms());
-                            }catch (Exception e){}
+                                if(object.getTermSynonyms()!=null && object.getTermSynonyms().size()>0 ) {
+                                    for(String synonym:object.getTermSynonyms()){
+                                        if(synonym!=null){
+                                            suggestTerms.add(synonym);
+                                        }
+                                    }
+                                }
+                            }catch (Exception e){    System.out.println("OBJECT ID:"+ object.getTermAcc());
+                                e.printStackTrace(); }
                                 try {
         suggestTerms.add(object.getQualifiers());
-                                }catch (Exception e){}
+                                }catch (Exception e){    System.out.println("OBJECT ID:"+ object.getTermAcc());
+                                    e.printStackTrace(); }
 
                                 try {
                                     for (Term term : object.getParentTerms()) {
                                         try {
+                                            if(term.getTerm()!=null)
                                             suggestTerms.add(term.getTerm());
-                                        } catch (Exception e) {
+                                        } catch (Exception e) {    System.out.println("OBJECT ID:"+ object.getTermAcc());
+                                            e.printStackTrace();
                                         }
                                     }
-                                }catch (Exception exception){}
+                                }catch (Exception e){    System.out.println("OBJECT ID:"+ object.getTermAcc());
+                                    e.printStackTrace(); }
       //  suggestTerms.addAll(object.getAssociations());
         Map<String, Set<String>> suggestions=new HashMap<>();
         if(suggestTerms.size()>0) {
