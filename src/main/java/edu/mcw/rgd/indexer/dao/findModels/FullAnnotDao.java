@@ -254,12 +254,14 @@ public class FullAnnotDao {
         suggestTerms.add(object.getQualifiers());
                                 }catch (Exception e){}
 
-        for(Term term:object.getParentTerms()) {
-            try {
-
-                suggestTerms.add(term.getTerm());
-            }catch (Exception e){}
-        }
+                                try {
+                                    for (Term term : object.getParentTerms()) {
+                                        try {
+                                            suggestTerms.add(term.getTerm());
+                                        } catch (Exception e) {
+                                        }
+                                    }
+                                }catch (Exception exception){}
       //  suggestTerms.addAll(object.getAssociations());
         Map<String, Set<String>> suggestions=new HashMap<>();
         if(suggestTerms.size()>0) {
