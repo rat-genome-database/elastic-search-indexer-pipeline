@@ -245,13 +245,13 @@ public class FullAnnotDao {
             System.out.println("OBJECT ID:"+ object.getTermAcc());
             e.printStackTrace();
         }
-            try {
-                if(object.getAnnotatedObjectType()!=null)
-        suggestTerms.add(object.getAnnotatedObjectType());
-            }catch (Exception e){
-                System.out.println("OBJECT ID:"+ object.getTermAcc());
-                e.printStackTrace();
-            }
+//            try {
+//                if(object.getAnnotatedObjectType()!=null)
+//        suggestTerms.add(object.getAnnotatedObjectType());
+//            }catch (Exception e){
+//                System.out.println("OBJECT ID:"+ object.getTermAcc());
+//                e.printStackTrace();
+//            }
                 try {
                     if(object.getTerm()!=null)
         suggestTerms.add(object.getTerm());
@@ -264,16 +264,16 @@ public class FullAnnotDao {
         suggestTerms.add(object.getSpecies());
                     }catch (Exception e){    System.out.println("OBJECT ID:"+ object.getTermAcc());
                         e.printStackTrace(); }
-                        try {
-                            if(object.getAliases()!=null && object.getAliases().size()>0) {
-                                for(String alias:object.getAliases()){
-                                    if(alias!=null)
-                                        suggestTerms.add(alias);
-
-                                }
-                            }
-                        }catch (Exception e){    System.out.println("OBJECT ID:"+ object.getTermAcc());
-                            e.printStackTrace(); }
+//                        try {
+//                            if(object.getAliases()!=null && object.getAliases().size()>0) {
+//                                for(String alias:object.getAliases()){
+//                                    if(alias!=null)
+//                                        suggestTerms.add(alias);
+//
+//                                }
+//                            }
+//                        }catch (Exception e){    System.out.println("OBJECT ID:"+ object.getTermAcc());
+//                            e.printStackTrace(); }
                             try {
                                 if(object.getTermSynonyms()!=null && object.getTermSynonyms().size()>0 ) {
                                     for(String synonym:object.getTermSynonyms()){
@@ -284,10 +284,10 @@ public class FullAnnotDao {
                                 }
                             }catch (Exception e){    System.out.println("OBJECT ID:"+ object.getTermAcc());
                                 e.printStackTrace(); }
-                                try {
-        suggestTerms.add(object.getQualifiers());
-                                }catch (Exception e){    System.out.println("OBJECT ID:"+ object.getTermAcc());
-                                    e.printStackTrace(); }
+//                                try {
+//        suggestTerms.add(object.getQualifiers());
+//                                }catch (Exception e){    System.out.println("OBJECT ID:"+ object.getTermAcc());
+//                                    e.printStackTrace(); }
 
                                 try {
                                     for (Term term : object.getParentTerms()) {
@@ -324,12 +324,11 @@ public class FullAnnotDao {
             byte[] json = new byte[0];
             try {
                 json = mapper.writeValueAsBytes(o);
-                IndexRequest request=new IndexRequest(RgdIndex.getNewAlias()).source(json, XContentType.JSON);
-                ClientInit.getClient().index(request, RequestOptions.DEFAULT);
-
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
             }
+            IndexRequest request=new IndexRequest(RgdIndex.getNewAlias()).source(json, XContentType.JSON);
+              ClientInit.getClient().index(request, RequestOptions.DEFAULT);
 
 //            bulkRequest.add(new IndexRequest(RgdIndex.getNewAlias()).source(json, XContentType.JSON));
 //
