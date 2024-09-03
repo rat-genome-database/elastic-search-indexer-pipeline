@@ -207,7 +207,7 @@ public class FullAnnotDao {
                               parentTerms.add(pt);
                       }
                       object.setParentTerms(parentTerms);
-                //      addSuggestTerms(object);
+                      addSuggestTerms(object);
                       if (indexObjects == null)
                           indexObjects = new ArrayList<>();
 
