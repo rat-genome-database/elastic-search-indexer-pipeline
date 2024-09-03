@@ -324,11 +324,12 @@ public class FullAnnotDao {
             byte[] json = new byte[0];
             try {
                 json = mapper.writeValueAsBytes(o);
+                IndexRequest request=new IndexRequest(RgdIndex.getNewAlias()).source(json, XContentType.JSON);
+                ClientInit.getClient().index(request, RequestOptions.DEFAULT);
+
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
             }
-            IndexRequest request=new IndexRequest(RgdIndex.getNewAlias()).source(json, XContentType.JSON);
-              ClientInit.getClient().index(request, RequestOptions.DEFAULT);
 
 //            bulkRequest.add(new IndexRequest(RgdIndex.getNewAlias()).source(json, XContentType.JSON));
 //
