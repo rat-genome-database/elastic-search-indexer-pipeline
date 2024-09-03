@@ -1,5 +1,6 @@
 package edu.mcw.rgd.indexer.dao.findModels;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.mcw.rgd.dao.impl.*;
@@ -221,37 +222,65 @@ public class FullAnnotDao {
             }
             objects.addAll(modelIndexObjects);
         }
-
+        System.out.println("OBJECTS SIZE:"+ objects.size());
         return objects;
 
 
     }
     public void addSuggestTerms(ModelIndexObject object){
         Set<String> suggestTerms=new HashSet<>();
-        suggestTerms.add(object.getAnnotatedObjectName());
+        try {
+            suggestTerms.add(object.getAnnotatedObjectName());
+        }catch (Exception e){}
+        try {
         suggestTerms.add(object.getAnnotatedObjectSymbol());
+        }catch (Exception e){}
+            try {
         suggestTerms.add(object.getAnnotatedObjectType());
+            }catch (Exception e){}
+                try {
         suggestTerms.add(object.getTerm());
+                }catch (Exception e){}
+                    try {
         suggestTerms.add(object.getSpecies());
+                    }catch (Exception e){}
+                        try {
         suggestTerms.addAll(object.getAliases());
+                        }catch (Exception e){}
+                            try {
         suggestTerms.addAll(object.getTermSynonyms());
+                            }catch (Exception e){}
+                                try {
         suggestTerms.add(object.getQualifiers());
+                                }catch (Exception e){}
+
         for(Term term:object.getParentTerms()) {
-            suggestTerms.add(term.getTerm());
+            try {
+
+                suggestTerms.add(term.getTerm());
+            }catch (Exception e){}
         }
-        suggestTerms.addAll(object.getAssociations());
+      //  suggestTerms.addAll(object.getAssociations());
         Map<String, Set<String>> suggestions=new HashMap<>();
-        suggestions.put("input", suggestTerms);
-        object.setSuggest(suggestions);
+        if(suggestTerms.size()>0) {
+            suggestions.put("input", suggestTerms);
+            object.setSuggest(suggestions);
+        }
     }
     public void indexModels(List<ModelIndexObject> objects) throws IOException {
         BulkRequest bulkRequest=new BulkRequest();
         bulkRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
 
         int docCount=0;
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+
+
         for (ModelIndexObject o : objects) {
             docCount++;
-            ObjectMapper mapper = new ObjectMapper();
+
+
             byte[] json = new byte[0];
             try {
                 json = mapper.writeValueAsBytes(o);
