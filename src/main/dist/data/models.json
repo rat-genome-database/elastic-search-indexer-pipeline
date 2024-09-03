@@ -85,9 +85,6 @@
             "keyword": {
               "type": "keyword",
               "ignore_above": 256
-            },
-            "suggest": {
-              "type": "completion"
             }
           }
         }
@@ -113,9 +110,6 @@
             "keyword": {
               "type": "keyword",
               "ignore_above": 256
-            },
-            "suggest": {
-              "type": "completion"
             }
           }
         }
