@@ -9,6 +9,7 @@ import edu.mcw.rgd.datamodel.ontology.Annotation;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.ontologyx.TermDagEdge;
 import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
+import edu.mcw.rgd.indexer.model.IndexObject;
 import edu.mcw.rgd.indexer.model.RgdIndex;
 import edu.mcw.rgd.indexer.model.findModels.ModelIndexObject;
 
@@ -208,21 +209,8 @@ public class FullAnnotDao {
                       object.setParentTerms(parentTerms);
                       if (indexObjects == null)
                           indexObjects = new ArrayList<>();
+                      addSuggestTerms(object);
 
-                      Set<String> suggestTerms=new HashSet<>();
-                      suggestTerms.add(object.getAnnotatedObjectName());
-                      suggestTerms.add(object.getAnnotatedObjectSymbol());
-                      suggestTerms.add(object.getTerm());
-                      suggestTerms.add(object.getSpecies());
-                      suggestTerms.addAll(object.getAliases());
-                      suggestTerms.add(object.getQualifiers());
-                      for(Term term:object.getParentTerms()) {
-                          suggestTerms.add(term.getTerm());
-                      }
-                      suggestTerms.addAll(object.getAssociations());
-                      Map<String, Set<String>> suggestions=new HashMap<>();
-                      suggestions.put("input", suggestTerms);
-                      object.setSuggest(suggestions);
                       indexObjects.add(object);
                       indexedMap.put(m.getAnnotatedObjectRgdId(), indexObjects);
 
@@ -239,6 +227,24 @@ public class FullAnnotDao {
         return objects;
 
 
+    }
+    public void addSuggestTerms(ModelIndexObject object){
+        Set<String> suggestTerms=new HashSet<>();
+        suggestTerms.add(object.getAnnotatedObjectName());
+        suggestTerms.add(object.getAnnotatedObjectSymbol());
+        suggestTerms.add(object.getAnnotatedObjectType());
+        suggestTerms.add(object.getTerm());
+        suggestTerms.add(object.getSpecies());
+        suggestTerms.addAll(object.getAliases());
+        suggestTerms.addAll(object.getTermSynonyms());
+        suggestTerms.add(object.getQualifiers());
+        for(Term term:object.getParentTerms()) {
+            suggestTerms.add(term.getTerm());
+        }
+        suggestTerms.addAll(object.getAssociations());
+        Map<String, Set<String>> suggestions=new HashMap<>();
+        suggestions.put("input", suggestTerms);
+        object.setSuggest(suggestions);
     }
     public void indexModels(List<ModelIndexObject> objects) throws IOException {
         BulkRequest bulkRequest=new BulkRequest();
