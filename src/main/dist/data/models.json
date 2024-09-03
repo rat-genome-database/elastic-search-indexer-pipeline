@@ -95,10 +95,10 @@
             "keyword": {
               "type": "keyword",
               "ignore_above": 256
+            },
+            "suggest": {
+              "type": "completion"
             }
-          },
-          "suggest": {
-            "type": "completion"
           }
         }
       }
@@ -182,10 +182,10 @@
         "keyword": {
           "type": "keyword",
           "ignore_above": 256
+        },
+        "suggest": {
+          "type": "completion"
         }
-      },
-      "suggest": {
-        "type": "completion"
       }
     },
     "withInfoTerms": {
@@ -194,10 +194,10 @@
         "keyword": {
           "type": "keyword",
           "ignore_above": 256
+        },
+        "suggest": {
+          "type": "completion"
         }
-      },
-      "suggest": {
-        "type": "completion"
       }
     }
 
