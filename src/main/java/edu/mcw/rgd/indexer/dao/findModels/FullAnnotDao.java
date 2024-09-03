@@ -207,9 +207,10 @@ public class FullAnnotDao {
                               parentTerms.add(pt);
                       }
                       object.setParentTerms(parentTerms);
+                //      addSuggestTerms(object);
                       if (indexObjects == null)
                           indexObjects = new ArrayList<>();
-                      addSuggestTerms(object);
+
 
                       indexObjects.add(object);
                       indexedMap.put(m.getAnnotatedObjectRgdId(), indexObjects);

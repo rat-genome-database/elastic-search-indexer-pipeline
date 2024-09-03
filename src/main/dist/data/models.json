@@ -6,6 +6,9 @@
         "keyword": {
           "type": "keyword",
           "ignore_above": 256
+        },
+        "suggest": {
+          "type": "completion"
         }
       }
     },
@@ -22,6 +25,10 @@
         "lowercase": {
           "type": "text",
           "analyzer": "symbol_analyzer"
+        },
+
+        "suggest": {
+          "type": "completion"
         }
       }
     },
@@ -31,6 +38,9 @@
         "keyword": {
           "type": "keyword",
           "ignore_above": 256
+        },
+        "suggest": {
+          "type": "completion"
         }
       }
     },
@@ -86,6 +96,9 @@
               "type": "keyword",
               "ignore_above": 256
             }
+          },
+          "suggest": {
+            "type": "completion"
           }
         }
       }
@@ -110,6 +123,9 @@
             "keyword": {
               "type": "keyword",
               "ignore_above": 256
+            },
+            "suggest": {
+              "type": "completion"
             }
           }
         }
@@ -133,6 +149,9 @@
         "keyword": {
           "type": "keyword",
           "ignore_above": 256
+        },
+        "suggest": {
+          "type": "completion"
         }
       }
     },
@@ -142,6 +161,9 @@
         "keyword": {
           "type": "keyword",
           "ignore_above": 256
+        },
+        "suggest": {
+          "type": "completion"
         }
       }
     },
@@ -161,6 +183,9 @@
           "type": "keyword",
           "ignore_above": 256
         }
+      },
+      "suggest": {
+        "type": "completion"
       }
     },
     "withInfoTerms": {
@@ -170,10 +195,11 @@
           "type": "keyword",
           "ignore_above": 256
         }
+      },
+      "suggest": {
+        "type": "completion"
       }
-    },
-    "suggest": {
-      "type": "completion"
     }
+
   }
 }
