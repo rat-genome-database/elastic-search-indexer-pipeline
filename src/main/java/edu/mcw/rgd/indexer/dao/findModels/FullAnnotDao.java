@@ -216,12 +216,33 @@ public class FullAnnotDao {
         }
         for (Map.Entry e : indexedMap.entrySet()) {
             List<ModelIndexObject> modelIndexObjects = (List<ModelIndexObject>) e.getValue();
+            for(ModelIndexObject object:modelIndexObjects){
+               addSuggestTerms(object);
+            }
             objects.addAll(modelIndexObjects);
         }
 
         return objects;
 
 
+    }
+    public void addSuggestTerms(ModelIndexObject object){
+        Set<String> suggestTerms=new HashSet<>();
+        suggestTerms.add(object.getAnnotatedObjectName());
+        suggestTerms.add(object.getAnnotatedObjectSymbol());
+        suggestTerms.add(object.getAnnotatedObjectType());
+        suggestTerms.add(object.getTerm());
+        suggestTerms.add(object.getSpecies());
+        suggestTerms.addAll(object.getAliases());
+        suggestTerms.addAll(object.getTermSynonyms());
+        suggestTerms.add(object.getQualifiers());
+        for(Term term:object.getParentTerms()) {
+            suggestTerms.add(term.getTerm());
+        }
+        suggestTerms.addAll(object.getAssociations());
+        Map<String, Set<String>> suggestions=new HashMap<>();
+        suggestions.put("input", suggestTerms);
+        object.setSuggest(suggestions);
     }
     public void indexModels(List<ModelIndexObject> objects) throws IOException {
         BulkRequest bulkRequest=new BulkRequest();
