@@ -274,16 +274,16 @@ public class FullAnnotDao {
 //                            }
 //                        }catch (Exception e){    System.out.println("OBJECT ID:"+ object.getTermAcc());
 //                            e.printStackTrace(); }
-                            try {
-                                if(object.getTermSynonyms()!=null && object.getTermSynonyms().size()>0 ) {
-                                    for(String synonym:object.getTermSynonyms()){
-                                        if(synonym!=null){
-                                            suggestTerms.add(synonym);
-                                        }
-                                    }
-                                }
-                            }catch (Exception e){    System.out.println("OBJECT ID:"+ object.getTermAcc());
-                                e.printStackTrace(); }
+//                            try {
+//                                if(object.getTermSynonyms()!=null && object.getTermSynonyms().size()>0 ) {
+//                                    for(String synonym:object.getTermSynonyms()){
+//                                        if(synonym!=null){
+//                                            suggestTerms.add(synonym);
+//                                        }
+//                                    }
+//                                }
+//                            }catch (Exception e){    System.out.println("OBJECT ID:"+ object.getTermAcc());
+//                                e.printStackTrace(); }
 //                                try {
 //        suggestTerms.add(object.getQualifiers());
 //                                }catch (Exception e){    System.out.println("OBJECT ID:"+ object.getTermAcc());
