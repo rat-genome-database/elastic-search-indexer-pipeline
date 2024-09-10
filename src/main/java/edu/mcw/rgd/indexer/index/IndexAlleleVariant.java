@@ -50,7 +50,6 @@ public class IndexAlleleVariant implements Runnable{
 
             v.setCategory("Variant");
             v.setVariantCategory("Phenotypic Variant");
-            v.setSuggest(indexDAO.getSuggest(symbol, null, "variant"));
             //   v.setSynonyms(getAliasesByRgdId(aliases, rgdId));
             List<AliasData> aliases = null;
             try {
@@ -111,6 +110,7 @@ public class IndexAlleleVariant implements Runnable{
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
+            indexDAO.setSuggest(v);
             indexDAO.indexDocument(v);
         }
     }

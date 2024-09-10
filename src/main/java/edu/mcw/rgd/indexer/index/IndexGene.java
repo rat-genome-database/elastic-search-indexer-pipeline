@@ -126,7 +126,7 @@ public class IndexGene implements Runnable {
                 e.printStackTrace();
             }
 
-            obj.setSuggest(indexDAO.getSuggest(symbol, null, "gene"));
+            indexDAO.setSuggest(obj);
             indexDAO.indexDocument(obj);
 
         }else{

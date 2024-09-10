@@ -42,7 +42,6 @@ public class IndexClinVar implements Runnable{
             v.setName(obj.getName());
             v.setTrait(obj.getTraitName());
             v.setCategory("Variant");
-            v.setSuggest(indexDAO.getSuggest(symbol, null, "variant"));
             //   v.setSynonyms(getAliasesByRgdId(aliases, rgdId));
             List<AliasData> aliases = null;
             try {
@@ -71,6 +70,7 @@ public class IndexClinVar implements Runnable{
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            indexDAO.setSuggest(v);
             indexDAO.indexDocument(v);
         }else{
             if(speciesTypeKey==3 || speciesTypeKey==2 || speciesTypeKey==1 || speciesTypeKey==4 || speciesTypeKey==5

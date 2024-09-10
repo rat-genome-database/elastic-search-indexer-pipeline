@@ -32,6 +32,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.index.Index;
 import org.elasticsearch.xcontent.XContentType;
 
 
@@ -380,22 +381,51 @@ public class IndexDAO extends AbstractDAO {
     }
 
 
-    public Suggest getSuggest(String symbol, String name, String category ){
-        List<String> input= new ArrayList<>();
+    public void setSuggest(IndexObject object){
+        Set<String> input= new HashSet<>();
+        try{
+            input.add(object.getName());
+        }catch (Exception e){}
+        try{
+            input.add(object.getSymbol());
+        }catch (Exception e){}
+        try{
+            input.add(object.getTerm());
+        }catch (Exception e){}
+        try{
+            input.add(object.getTitle());
+        }catch (Exception e){}
+        try{
+            input.addAll(object.getAuthor());
+        }catch (Exception e){}
+        try{
+            for(String  synonym:object.getSynonyms())
+            input.add(synonym);
+        }catch (Exception e){}
+        try{
+            input.add(object.getHtmlStrippedSymbol());
+        }catch (Exception e){}
+        try{
+            input.add(object.getOrigin());
+        }catch (Exception e){}
+        try{
+            input.add(object.getType());
+        }catch (Exception e){}
+        try{
+            input.add(object.getTrait());
+        }catch (Exception e){}
 
-        Suggest sugg= new Suggest();
-        if(symbol!=null)
-            input.add(symbol);
-        if(name!=null)
-            input.add(name);
-        sugg.setInput(input);
 
-        Contexts contexts= new Contexts();
-        contexts.setCategory(new ArrayList<String>(Arrays.asList(category)));
 
-        sugg.setContexts(contexts);
-        return sugg;
+
+        Map<String, Set<String>> suggestions=new HashMap<>();
+        if(input.size()>0) {
+            suggestions.put("input", input);
+            object.setSuggest(suggestions);
+        }
+
     }
+
     public List<Annotation> getFilteredAnnotations(int rgdid) throws Exception {
         java.util.Map<String, List<Annotation>> annotMap= this.getAnnotations(rgdid);
         List<Annotation> distinctAnnots= new ArrayList<>();

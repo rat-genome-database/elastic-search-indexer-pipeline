@@ -37,7 +37,6 @@ public class IndexGenomicElement implements Runnable {
                 g.setName(ge.getName());
                 g.setCategory(category);
                 g.setDescription(ge.getObjectType());
-                g.setSuggest(indexDAO.getSuggest(symbol, null, category.toLowerCase()));
                 List<AliasData> aliases = indexDAO.getAliases(rgdId);
                 List<String> synonyms = new ArrayList<>();
                 for (AliasData a : aliases) {
@@ -55,6 +54,7 @@ public class IndexGenomicElement implements Runnable {
                 List<String> assocs= associations.get(ge.getRgdId());
                 if(assocs!=null && assocs.size()>0)
                     g.setAssociations(assocs);
+                indexDAO.setSuggest(g);
             indexDAO.indexDocument(g);
             }else{
                 if(speciesTypeKey==3 || speciesTypeKey==2 || speciesTypeKey==1 || speciesTypeKey==4 || speciesTypeKey==5

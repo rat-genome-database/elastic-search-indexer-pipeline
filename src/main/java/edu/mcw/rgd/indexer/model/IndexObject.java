@@ -4,6 +4,7 @@ import edu.mcw.rgd.datamodel.Association;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by jthota on 3/23/2017.
@@ -63,7 +64,7 @@ public class IndexObject {
 
     private String genomicAlteration;
 
-    private Suggest suggest;
+    private Map<String, Set<String>> suggest;
     private List<String> strainsCrossed ;
 
     public List<String> getStrainsCrossed() {
@@ -130,11 +131,11 @@ public class IndexObject {
         this.refAbstract = refAbstract;
     }
 
-    public Suggest getSuggest() {
+    public Map<String, Set<String>> getSuggest() {
         return suggest;
     }
 
-    public void setSuggest(Suggest suggest) {
+    public void setSuggest(Map<String, Set<String>> suggest) {
         this.suggest = suggest;
     }
 

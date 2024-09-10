@@ -45,7 +45,6 @@ public class IndexStrain implements Runnable {
 
             String htmlStrippedSymbol = Jsoup.parse(symbol).text();
             s.setHtmlStrippedSymbol(htmlStrippedSymbol);
-            s.setSuggest(indexDAO.getSuggest(symbol, null, "strain"));
             List<AliasData> aliases = null;
             try {
                 aliases = indexDAO.getAliases(rgdId);
@@ -91,6 +90,7 @@ public class IndexStrain implements Runnable {
                 associations.add(g.getName());
                 s.setAssociations(associations);
             }
+            indexDAO.setSuggest(s);
             indexDAO.indexDocument(s);
 
         }else{

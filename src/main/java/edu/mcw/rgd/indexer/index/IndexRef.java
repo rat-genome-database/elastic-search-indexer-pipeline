@@ -39,18 +39,12 @@ public class IndexRef implements Runnable {
         r.setAuthor(authors);
 
         List<String> input= new ArrayList<>();
-        Suggest sugg= new Suggest();
         if(authors!=null)
             input.addAll(authors);
         if(ref.getTitle()!=null)
             input.add(ref.getTitle());
-        sugg.setInput(input);
 
-        Contexts contexts= new Contexts();
-        contexts.setCategory(new ArrayList<String>(Arrays.asList("reference")));
 
-        sugg.setContexts(contexts);
-        r.setSuggest(sugg);
         r.setCategory("Reference");
 
         r.setSpecies(species);
@@ -78,5 +72,6 @@ public class IndexRef implements Runnable {
         r.setXdbIdentifiers(xids);
         if(ref.getPubDate()!=null)
             r.setPub_year(Integer.toString(ref.getPubDate().getYear()+1900));
+        indexDAO.setSuggest(r);
         indexDAO.indexDocument(r);    }
 }

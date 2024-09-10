@@ -27,7 +27,6 @@ public class IndexSslp implements Runnable {
             String name = sslp.getName();
             slp.setTerm_acc(String.valueOf(rgdId));
             slp.setSymbol(sslp.getName());
-            slp.setSuggest(indexDAO.getSuggest(name, null, "sslp"));
             List<AliasData> aliases = null;
             try {
                 aliases = indexDAO.getAliases(rgdId);
@@ -58,6 +57,7 @@ public class IndexSslp implements Runnable {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            indexDAO.setSuggest(slp);
             indexDAO.indexDocument(slp);
 
         }else{

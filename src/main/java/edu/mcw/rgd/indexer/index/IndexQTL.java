@@ -49,7 +49,6 @@ public class IndexQTL implements Runnable {
             q.setSymbol(htmlStrippedSymbol);
             q.setName(name);
             q.setSpecies(species);
-            q.setSuggest(indexDAO.getSuggest(symbol, null, "qtl"));
             try {
                 Annotations<QTL> annotations=new Annotations<>(qtl);
                 List<String> annots=annotations.getExperimentalAnnotations();
@@ -105,6 +104,7 @@ public class IndexQTL implements Runnable {
             }
 
             q.setStrainsCrossed(strainsCrossed);
+            indexDAO.setSuggest(q);
             indexDAO.indexDocument(q);
 
         }else{

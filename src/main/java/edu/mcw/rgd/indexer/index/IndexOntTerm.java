@@ -52,7 +52,6 @@ public class IndexOntTerm implements Runnable {
         obj.setTerm_acc(acc_id);
         obj.setTerm(term);
         obj.setTerm_def(t.getDefinition());
-        obj.setSuggest(indexDAO.getSuggest(term, null, "ontology"));
 
 
         int[][] annotsMatrix = new int[4][7];
@@ -119,8 +118,9 @@ public class IndexOntTerm implements Runnable {
         }
         obj.setSubcat(this.ontName);
         obj.setCategory("Ontology");
-        if(!isAITermMapping)
-        indexDAO.indexDocument(obj);
+        indexDAO.setSuggest(obj);
+        if(!isAITermMapping){
+           indexDAO.indexDocument(obj);}
         else {
             obj.setSubcat(ontId);
             indexDAO.indexAITermMappingDocument(obj);

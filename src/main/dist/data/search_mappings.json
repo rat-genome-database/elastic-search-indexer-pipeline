@@ -336,16 +336,7 @@
         }
       },
       "suggest":{
-        "type":"completion",
-        "analyzer":"standard",
-
-        "contexts":[
-          {
-            "name":"category",
-            "type":"category"
-
-          }
-        ]
+        "type":"completion"
       }
 
     }
