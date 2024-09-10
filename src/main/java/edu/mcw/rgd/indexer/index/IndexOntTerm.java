@@ -103,7 +103,6 @@ public class IndexOntTerm implements Runnable {
                             List<Strain> strain= strainDAO.getStrains(Arrays.asList(rgdId));
                             termSynonyms.add(strain.get(0).getName());
                             for(Alias alias:aliasDAO.getAliases(strain.get(0).getRgdId())){
-                                System.out.println("alias:"+alias.getValue());
                                 termSynonyms.add(alias.getValue());
                             }
 

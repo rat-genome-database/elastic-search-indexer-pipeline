@@ -381,37 +381,46 @@ public class IndexDAO extends AbstractDAO {
     }
 
 
-    public void setSuggest(IndexObject object){
+    public Set<String> setSuggest(IndexObject object){
         Set<String> input= new HashSet<>();
         try{
+            if(object.getName()!=null)
             input.add(object.getName());
         }catch (Exception e){}
         try{
+            if(object.getSymbol()!=null)
             input.add(object.getSymbol());
         }catch (Exception e){}
         try{
+            if(object.getTerm()!=null)
             input.add(object.getTerm());
         }catch (Exception e){}
         try{
+            if(object.getTitle()!=null)
             input.add(object.getTitle());
         }catch (Exception e){}
         try{
+            if(object.getAuthor()!=null)
             input.addAll(object.getAuthor());
         }catch (Exception e){}
         try{
-            for(String  synonym:object.getSynonyms())
-            input.add(synonym);
+            if(object.getSynonyms()!=null)
+            input.addAll(object.getSynonyms());
         }catch (Exception e){}
+//        try{
+//            if(object.getHtmlStrippedSymbol()!=null)
+//            input.add(object.getHtmlStrippedSymbol());
+//        }catch (Exception e){}
         try{
-            input.add(object.getHtmlStrippedSymbol());
-        }catch (Exception e){}
-        try{
+            if(object.getOrigin()!=null)
             input.add(object.getOrigin());
         }catch (Exception e){}
         try{
+            if(object.getType()!=null)
             input.add(object.getType());
         }catch (Exception e){}
         try{
+            if(object.getTrait()!=null)
             input.add(object.getTrait());
         }catch (Exception e){}
 
@@ -423,7 +432,7 @@ public class IndexDAO extends AbstractDAO {
             suggestions.put("input", input);
             object.setSuggest(suggestions);
         }
-
+    return input;
     }
 
     public List<Annotation> getFilteredAnnotations(int rgdid) throws Exception {
