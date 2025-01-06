@@ -57,7 +57,6 @@ public class Manager {
     BulkIndexProcessor bulkIndexProcessor;
     IndexDAO indexDAO=new IndexDAO();
     private final Logger log = LogManager.getLogger("main");
-    IndexDAO indexDao=new IndexDAO();
 
     public static void main(String[] args) throws Exception {
 
@@ -135,7 +134,7 @@ public class Manager {
                             searchIndexCreated=true;
                         }
                         if(!arg.equalsIgnoreCase("annotations")) {
-                                     indexDao.getClass().getMethod("get" + arg).invoke(indexDao);
+                                     indexDAO.getClass().getMethod("get" + arg).invoke(indexDAO);
                         }else{
                             OntologyXDAO ontologyXDAO = new OntologyXDAO();
                             List<Ontology> ontologies = ontologyXDAO.getPublicOntologies();
@@ -195,7 +194,7 @@ public class Manager {
 
                         admin.createIndex("phenominer_mappings", "genome");
                         System.out.println("INDEXING phenominer records...");
-                        PhenominerNormalizedThread thread=new PhenominerNormalizedThread(RgdIndex.getNewAlias(),bulkIndexProcessor);
+                        PhenominerNormalizedThread thread=new PhenominerNormalizedThread(RgdIndex.getNewAlias());
                         thread.run();
                         break;
                     case "Models":

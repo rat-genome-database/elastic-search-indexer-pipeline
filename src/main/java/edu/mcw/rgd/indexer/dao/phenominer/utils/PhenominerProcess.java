@@ -34,11 +34,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 public class PhenominerProcess {
-    //PhenominerDAO phenominerDAO = new PhenominerDAO();
+
     OntologyXDAO xdao = new OntologyXDAO();
-    //StrainDAO strainDAO = new StrainDAO();
-    //AssociationDAO associationDAO = new AssociationDAO();
-    //IndexDAO indexDAO = new IndexDAO();
     public Set<String> mapSynonyms(Record record, Term rootTerm) throws Exception {
         List<String> accIds=new ArrayList<>();
 
@@ -173,10 +170,6 @@ public class PhenominerProcess {
 
     // public static void main(String[] args) throws Exception {
     public List<LinkedHashMap<String, String>> getTermHierarchyMaps(String rsTermAcc, String rsRootTermAcc) throws Exception {
-        //   OntologyXDAO xdao=new OntologyXDAO();
-        //   PhenominerThread t=new PhenominerThread();
-        //   String rsTermAcc="RS:0001782";
-        //   String rsRootTermAcc=xdao.getRootTerm("RS");
         LinkedHashMap<String, List<String>> map = new LinkedHashMap<>();
         Gson gson = new Gson();
         List<LinkedHashMap<String, String>> hmaps = new ArrayList<>();
@@ -224,10 +217,6 @@ public class PhenominerProcess {
                 }
                 parentChildMap.put(rootKey, childAccIds);
             }
-
-        /*LinkedHashMap<Integer, Set<String>> hierarchyMap=new LinkedHashMap<>();
-        hierarchyMap.put(1,new HashSet<>(Arrays.asList(rsRootTermAcc)));
-        addChildren(hierarchyMap, parentChildMap);*/
             LinkedHashMap<Integer, Map<String, Set<String>>> hierarchyMap1 = new LinkedHashMap<>();
             Map<String, Set<String>> map1 = new HashMap<>();
             map1.put("", new HashSet<>(Arrays.asList(rsRootTermAcc)));
@@ -338,50 +327,5 @@ public class PhenominerProcess {
             }
             BulkIndexProcessor.bulkProcessor.add(new IndexRequest(RgdIndex.getNewAlias()).source(json, XContentType.JSON));
         }
-    }
-
-    public void indexObjects(List<PhenominerIndexObject> objs, String index, String type) throws ExecutionException, InterruptedException, IOException {
-        // BulkRequestBuilder bulkRequestBuilder= ESClient.getClient().prepareBulk().setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
-
-        BulkRequest bulkRequest = new BulkRequest();
-        //  bulkRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
-        bulkRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.WAIT_UNTIL);
-        bulkRequest.timeout(TimeValue.timeValueMinutes(2));
-        bulkRequest.timeout("2m");
-        int docCount = 0;
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        System.out.println("CREATED BULK REQUEST and INDEXING STARTED....");
-        for (PhenominerIndexObject o : objs) {
-            docCount++;
-
-            byte[] json = new byte[0];
-            try {
-                json = mapper.writeValueAsBytes(o);
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
-            }
-            //     bulkRequestBuilder.add(new IndexRequest(index, type,o.getTerm_acc()).source(json, XContentType.JSON));
-            bulkRequest.add(new IndexRequest(index).source(json, XContentType.JSON));
-            if (docCount % 100 == 0) {
-                ClientInit.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
-                bulkRequest = new BulkRequest();
-                bulkRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.WAIT_UNTIL);
-                bulkRequest.timeout(TimeValue.timeValueMinutes(2));
-                bulkRequest.timeout("2m");
-            } else {
-                if (docCount > objs.size() - 100 && docCount == objs.size()) {
-
-                    ClientInit.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
-                    bulkRequest = new BulkRequest();
-                    bulkRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.WAIT_UNTIL);
-                    bulkRequest.timeout(TimeValue.timeValueMillis(2));
-                    // bulkRequest.timeout("2m");
-                }
-            }
-        }
-        RefreshRequest refreshRequest = new RefreshRequest();
-        ClientInit.getClient().indices().refresh(refreshRequest, RequestOptions.DEFAULT);
     }
 }

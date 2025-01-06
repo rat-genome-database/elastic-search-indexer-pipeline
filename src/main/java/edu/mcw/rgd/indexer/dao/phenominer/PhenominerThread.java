@@ -124,8 +124,8 @@ public class PhenominerThread implements Runnable {
             }
             log.info("INDEX OBJECTS SIZE:" + indexObjects.size());
 
-            if (indexObjects.size() > 0)
-                process.indexObjects(indexObjects, index, "");
+            //if (indexObjects.size() > 0)
+             //   process.indexObjects(indexObjects, index, "");
 
         } catch (Exception e) {
             e.printStackTrace();
