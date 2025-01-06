@@ -52,7 +52,6 @@ public class Manager {
     private int threadCount;
     private IndexAdmin admin;
     private static List<String> envrionments;
-    private OntologySynonyms ontSynonyms;
     private RgdIndex rgdIndex;
     private boolean reindex;
     BulkIndexProcessor bulkIndexProcessor;
@@ -72,7 +71,6 @@ public class Manager {
 
 
         try {
-
             List<String> indices= new ArrayList<>();
             if (envrionments.contains(args[1])) {
                 rgdIndex.setIndex(args[2]+"_index" + "_" + args[1]);
@@ -144,7 +142,7 @@ public class Manager {
                             for (Ontology o : ontologies) {
 
                                 String ont_id = o.getId();
-                                List<TermSynonym> termSynonyms = (List<TermSynonym>) ontSynonyms.getClass().getMethod("get" + ont_id).invoke(ontSynonyms);
+                                List<TermSynonym> termSynonyms = (List<TermSynonym>) OntologySynonyms.ontSynonyms.get(ont_id);
                                 //     if(!ont_id.equalsIgnoreCase("CHEBI")) {
 
                                 workerThread = new IndexerDAO(ont_id, o.getName(), RgdIndex.getNewAlias(), termSynonyms,false);
@@ -197,7 +195,7 @@ public class Manager {
 
                         admin.createIndex("phenominer_mappings", "genome");
                         System.out.println("INDEXING phenominer records...");
-                        PhenominerNormalizedThread thread=new PhenominerNormalizedThread(RgdIndex.getNewAlias());
+                        PhenominerNormalizedThread thread=new PhenominerNormalizedThread(RgdIndex.getNewAlias(),bulkIndexProcessor);
                         thread.run();
                         break;
                     case "Models":
@@ -223,7 +221,7 @@ public class Manager {
 
                             String ont_id = o.getId();
                           //  if(ont_id.equalsIgnoreCase("RDO")) {
-                                List<TermSynonym> termSynonyms = (List<TermSynonym>) ontSynonyms.getClass().getMethod("get" + ont_id).invoke(ontSynonyms);
+                                List<TermSynonym> termSynonyms = (List<TermSynonym>) OntologySynonyms.ontSynonyms.get(ont_id);
                                 //     if(!ont_id.equalsIgnoreCase("CHEBI")) {
 
                                 workerThread = new IndexerDAO(ont_id, o.getName(), RgdIndex.getNewAlias(), termSynonyms, true);
@@ -348,14 +346,6 @@ public class Manager {
 
     public void setAdmin(IndexAdmin admin) {
         this.admin = admin;
-    }
-
-     public OntologySynonyms getOntSynonyms() {
-        return ontSynonyms;
-    }
-
-    public void setOntSynonyms(OntologySynonyms ontSynonyms) {
-        this.ontSynonyms = ontSynonyms;
     }
 
     public void setRgdIndex(RgdIndex rgdIndex) {

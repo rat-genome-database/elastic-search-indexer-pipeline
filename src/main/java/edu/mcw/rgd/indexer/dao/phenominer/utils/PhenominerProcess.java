@@ -12,9 +12,12 @@ import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
 import edu.mcw.rgd.datamodel.pheno.Condition;
 import edu.mcw.rgd.datamodel.pheno.Record;
+import edu.mcw.rgd.indexer.Manager;
 import edu.mcw.rgd.indexer.dao.IndexDAO;
 import edu.mcw.rgd.indexer.dao.phenominer.model.PhenominerIndexObject;
 import edu.mcw.rgd.indexer.dao.phenominer.model.TreeNode;
+import edu.mcw.rgd.indexer.dao.variants.BulkIndexProcessor;
+import edu.mcw.rgd.indexer.model.RgdIndex;
 import edu.mcw.rgd.services.ClientInit;
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.elasticsearch.action.bulk.BulkRequest;
@@ -321,7 +324,21 @@ public class PhenominerProcess {
         }
 
     }
+    public void indexObject(List<PhenominerIndexObject> objs, String index) throws ExecutionException, InterruptedException, IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        for (PhenominerIndexObject o : objs) {
 
+            byte[] json = new byte[0];
+            try {
+                json = mapper.writeValueAsBytes(o);
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+            BulkIndexProcessor.bulkProcessor.add(new IndexRequest(RgdIndex.getNewAlias()).source(json, XContentType.JSON));
+        }
+    }
 
     public void indexObjects(List<PhenominerIndexObject> objs, String index, String type) throws ExecutionException, InterruptedException, IOException {
         // BulkRequestBuilder bulkRequestBuilder= ESClient.getClient().prepareBulk().setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);

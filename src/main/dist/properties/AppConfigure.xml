@@ -5,7 +5,6 @@
         <property name="version" value="Elastic Search Indexer  build Feb 06, 2023" />
         <property name="threadCount" value="10"/>
         <property name="admin" ref="admin"/>
-        <property name="ontSynonyms" ref="ontologySynonyms"/>
         <property name="rgdIndex" ref="rgdIndex"/>
         <property name="envrionments">
             <list>
@@ -18,10 +17,10 @@
         </property>
 
      </bean>
-    <bean id="client" class="edu.mcw.rgd.indexer.client.ESClient" init-method="init" destroy-method="destroy"/>
+    <bean id="client" class="edu.mcw.rgd.services.ClientInit" init-method="init" destroy-method="destroy"/>
     <bean id="rdao" class="edu.mcw.rgd.indexer.dao.IndexDAO">
     </bean>
-    <bean id="ontologySynonyms" class="edu.mcw.rgd.indexer.OntologySynonyms"/>
+    <bean id="ontologySynonyms" class="edu.mcw.rgd.indexer.OntologySynonyms" init-method="load"/>
 
     <bean id="admin" class="edu.mcw.rgd.indexer.client.IndexAdmin">
             <property name="rgdIndex" ref="rgdIndex"/>

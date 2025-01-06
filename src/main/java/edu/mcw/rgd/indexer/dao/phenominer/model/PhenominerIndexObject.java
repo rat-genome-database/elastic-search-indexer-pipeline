@@ -3,10 +3,7 @@ package edu.mcw.rgd.indexer.dao.phenominer.model;
 import edu.mcw.rgd.dao.spring.StringMapQuery;
 import edu.mcw.rgd.datamodel.pheno.IndividualRecord;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class PhenominerIndexObject {
     private int recordId;
@@ -26,8 +23,9 @@ public class PhenominerIndexObject {
     private String vtTerm2Acc;
     private String vtTerm2;
     private List<String> xcoTermAcc;
-    private String xcoTerm;
+    private Set<String> xcoTerm;
 
+    private String xcoConditionDescription;
     private String rsRootTerm;
     private String rsRootTermAcc;
 
@@ -41,10 +39,10 @@ public class PhenominerIndexObject {
 
     private String rsParentTerm;
     private String rsParentTermAcc;
-    private List<String> rsTerms;
-    private List<String> cmoTerms;
-    private List<String> mmoTerms;
-    private List<String> xcoTerms;
+    private List<String> rsTerms; // terms and synonyms
+    private List<String> cmoTerms;// terms and synonyms
+    private List<String> mmoTerms;// terms and synonyms
+    private List<String> xcoTerms;// terms and synonyms
 
     public String getVtTerm3Acc() {
         return vtTerm3Acc;
@@ -325,12 +323,21 @@ public class PhenominerIndexObject {
         this.xcoTermAcc = xcoTermAcc;
     }
 
-    public String getXcoTerm() {
+
+    public Set<String> getXcoTerm() {
         return xcoTerm;
     }
 
-    public void setXcoTerm(String xcoTerm) {
+    public void setXcoTerm(Set<String> xcoTerm) {
         this.xcoTerm = xcoTerm;
+    }
+
+    public String getXcoConditionDescription() {
+        return xcoConditionDescription;
+    }
+
+    public void setXcoConditionDescription(String xcoConditionDescription) {
+        this.xcoConditionDescription = xcoConditionDescription;
     }
 
     public List<String> getRsTerms() {
