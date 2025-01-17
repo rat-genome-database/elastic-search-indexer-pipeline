@@ -1,7 +1,10 @@
 package edu.mcw.rgd.indexer.dao.phenominer;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.json.JsonReadFeature;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import edu.mcw.rgd.dao.impl.OntologyXDAO;
 import edu.mcw.rgd.dao.impl.PhenominerDAO;
 import edu.mcw.rgd.dao.impl.StrainDAO;
@@ -55,9 +58,14 @@ public class PhenominerNormalizedThread implements Runnable {
 
         List<PhenominerIndexObject> indexObjects = new ArrayList<>();
         ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = JsonMapper.builder().
+                enable( JsonReadFeature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER)
+                //.enable(JsonParser.Feature.INCLUDE_SOURCE_IN_LOCATION)
+                .build();;
         mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,false);
         for (Record record : records) {
                 Runnable workerThread=new RecordProcessingThread(record,mapper);
                 executor.execute(workerThread);
@@ -65,16 +73,5 @@ public class PhenominerNormalizedThread implements Runnable {
     }
         executor.shutdown();
         while (!executor.isTerminated()){}
-//        if (indexObjects.size() > 0) {
-//            try {
-//                process.indexObject(indexObjects, index);
-//            } catch (ExecutionException e) {
-//                e.printStackTrace();
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//      }
     }
 }
