@@ -67,7 +67,7 @@ public class GenomeDAO extends AbstractDAO{
                 stats.setContigL50(String.valueOf( map.get("contig_l50")));
                 stats.setContigN50(String.valueOf(map.get("contig_n50")));
               try {
-                  stats.setGapsBetweenScaffolds(String.valueOf(map.get("gaps_between_scaffolds")));
+                  stats.setGapsBetweenScaffolds(String.valueOf(map.get("gaps_between_scaffolds_count")));
               }catch (Exception e){e.printStackTrace();}
                 stats.setNumberOfContigs(Integer.parseInt(String.valueOf( map.get("number_of_contigs"))));
                 stats.setScaffoldL50(String.valueOf(map.get("scaffold_l50")));
