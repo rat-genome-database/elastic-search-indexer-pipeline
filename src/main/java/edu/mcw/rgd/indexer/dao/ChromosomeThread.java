@@ -1,10 +1,14 @@
 package edu.mcw.rgd.indexer.dao;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.mcw.rgd.dao.impl.MapDAO;
 import edu.mcw.rgd.datamodel.*;
+import edu.mcw.rgd.indexer.dao.phenominer.model.PhenominerIndexObject;
+import edu.mcw.rgd.indexer.dao.variants.BulkIndexProcessor;
+import edu.mcw.rgd.indexer.model.RgdIndex;
 import edu.mcw.rgd.indexer.model.genomeInfo.*;
 
 import edu.mcw.rgd.services.ClientInit;
@@ -19,7 +23,10 @@ import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.xcontent.XContentType;
 
+import java.io.IOException;
 import java.util.*;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by jthota on 11/7/2017.
@@ -31,28 +38,32 @@ public class ChromosomeThread implements  Runnable {
     private String assembly;
     private String index;
     private GenomeDAO genomeDAO= new GenomeDAO();
+    private Chromosome c;
+    private GeneCounts geneCounts;
+    private java.util.Map<String, Long> objectsCountsMap ;
+    private List<DiseaseGeneObject> diseaseGenes ;
+    private String[][] strainVairantMatrix ;
 
-    public ChromosomeThread(int speciestypeKey, String index, int mapKey, String assembly){
+
+    ObjectMapper mapper = new ObjectMapper();
+    public ChromosomeThread(Chromosome c, int speciestypeKey, String index, int mapKey, String assembly, GeneCounts geneCounts, Map<String, Long> objectsCountsMap,List<DiseaseGeneObject> diseaseGenes, String[][] strainVairantMatrix){
         this.key=speciestypeKey;
         this.index= index;
         this.mapKey=mapKey;
         this.assembly=assembly;
+        this.c=c;
+        this.geneCounts=geneCounts;
+        this.objectsCountsMap=objectsCountsMap;
+        this.diseaseGenes=diseaseGenes;
+        this.strainVairantMatrix=strainVairantMatrix;
     }
 
     @Override
     public void run()  {
-        Logger log = LogManager.getLogger("chromosome");
-        log.info(Thread.currentThread().getName() + ": " + SpeciesType.getCommonName(key) + " || ChromosomeThread MapKey "+mapKey+ " started " + new Date());
-        MapDAO mapDAO= new MapDAO();
-        GenomeDAO genomeDAO= new GenomeDAO();
-        StrainVariants variants= new StrainVariants();
-        List<ChromosomeIndexObject> objects= new ArrayList<>();
+//        Logger log = LogManager.getLogger("chromosome");
+//        log.info(Thread.currentThread().getName() + ": " + SpeciesType.getCommonName(key) + " || ChromosomeThread MapKey "+mapKey+ " started " + new Date());
         try {
-            if(mapKey!=720 && mapKey!=44) {
-                List<Chromosome> chromosomes = mapDAO.getChromosomes(mapKey);
 
-              for (Chromosome c : chromosomes) {
-                 //   Chromosome c=   mapDAO.getChromosome(360, "1");
                     ChromosomeIndexObject obj = new ChromosomeIndexObject();
                     obj.setMapKey(mapKey);
                     obj.setChromosome(c.getChromosome());
@@ -64,7 +75,6 @@ public class ChromosomeThread implements  Runnable {
                     obj.setGapCount(c.getGapCount());
                     obj.setContigCount(c.getContigCount());
 
-                    GeneCounts geneCounts = genomeDAO.getGeneCounts(mapKey, key, c.getChromosome());
                     obj.setProteinCoding(geneCounts.getProteinCoding());
                     obj.setNcrna(geneCounts.getNcrna());
                     obj.settRna(geneCounts.gettRna());
@@ -102,7 +112,6 @@ public class ChromosomeThread implements  Runnable {
                     obj.setPieData(pieData);
 
 
-                    java.util.Map<String, Long> objectsCountsMap = genomeDAO.getObjectCounts(mapKey, c.getChromosome());
                     obj.setExons(genomeDAO.getOtherObjectsCounts(objectsCountsMap, "exons"));
                     obj.setQtls(genomeDAO.getOtherObjectsCounts(objectsCountsMap, "qtls"));
                     obj.setTotalGenes((int) genomeDAO.getOtherObjectsCounts(objectsCountsMap, "genes"));
@@ -115,67 +124,41 @@ public class ChromosomeThread implements  Runnable {
 
                    obj.setProteinsCount(genomeDAO.getProteinCounts(mapKey, c.getChromosome()));
 
-                    List<DiseaseGeneObject> diseaseGenes = genomeDAO.getDiseaseGenes(mapKey, c.getChromosome(), key);
                     obj.setDiseaseGenes(diseaseGenes);
                     obj.setDiseaseGenechartData(this.getDiseaseGeneChartData(diseaseGenes));
 
                     //ADD STRAIN VARIANTS IF SPECIES_TYPE_KEY=3 (RAT SPECIES)
                     if(key==3) {
-                        String[][] strainVairantMatrix = variants.getStrainVariants(mapKey, c.getChromosome());
                         obj.setVariantsMatrix(strainVairantMatrix);
                     }
-                    objects.add(obj);
+                    BulkIndexProcessor.bulkProcessor.add(new IndexRequest(index, "chromosome").source(obj, XContentType.JSON));
 
-             }
-                if(objects.size()>0){
-
-
-                    BulkRequest bulkRequest=new BulkRequest();
-                    bulkRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
-
-                    int docCount=1;
-
-                for (ChromosomeIndexObject o : objects) {
-                        docCount++;
-                        ObjectMapper mapper = new ObjectMapper();
-                        byte[] json = new byte[0];
-                        try {
-                            json = mapper.writeValueAsBytes(o);
-                        } catch (JsonProcessingException e) {
-                            e.printStackTrace();
-                        }
-
-                   //   bulkRequestBuilder.add(new IndexRequest(index, "chromosome").source(json, XContentType.JSON));
-                    bulkRequest.add(new IndexRequest(index).source(json, XContentType.JSON));
-                        if(docCount%100==0){
-                          /*  BulkResponse response=       bulkRequestBuilder.execute().get();
-                            bulkRequestBuilder= ESClient.getClient().prepareBulk();*/
-                            BulkResponse response=      ClientInit.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
-                            bulkRequest= new BulkRequest();
-                        }else{
-                            if(docCount>objects.size()-100 && docCount==objects.size()){
-                                /*BulkResponse response=       bulkRequestBuilder.execute().get();
-                                bulkRequestBuilder= ESClient.getClient().prepareBulk();*/
-                                BulkResponse response=      ClientInit.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
-                                bulkRequest= new BulkRequest();
-                            }
-                        }
-
-                }
-                    RefreshRequest refreshRequest=new RefreshRequest();
-                    ClientInit.getClient().indices().refresh(refreshRequest, RequestOptions.DEFAULT);
-                log.info("Indexed mapKey " + mapKey + ",  chromosome objects Size: " + objects.size() + " Exiting thread.");
-                log.info(Thread.currentThread().getName() + ": chromosomeThread" + mapKey + " End " + new Date());
-            }
-            }
+            // }
+//              log.info("Indexed mapKey " + mapKey + ",  chromosome objects Size: " + objects.size() + " Exiting thread.");
+//              log.info(Thread.currentThread().getName() + ": chromosomeThread" + mapKey + " End " + new Date());
+//            }
+          //  }
         }catch (Exception e){
             e.printStackTrace();
-            log.info(e);
             throw new RuntimeException();
         }
 
     }
+    public void indexObject(ChromosomeIndexObject o) throws ExecutionException, InterruptedException, IOException {
 
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+
+
+            byte[] json = new byte[0];
+            try {
+                json = mapper.writeValueAsBytes(o);
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+            BulkIndexProcessor.bulkProcessor.add(new IndexRequest(RgdIndex.getNewAlias()).source(json, XContentType.JSON));
+
+    }
 public StringBuffer getDiseaseGeneChartData(List<DiseaseGeneObject> diseaseGenes){
     StringBuffer sb = new StringBuffer();
     sb.append("[");

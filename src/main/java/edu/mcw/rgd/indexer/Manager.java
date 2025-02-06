@@ -17,6 +17,8 @@ import edu.mcw.rgd.indexer.dao.phenominer.PhenominerNormalizedThread;
 import edu.mcw.rgd.indexer.dao.variants.*;
 import edu.mcw.rgd.indexer.model.RgdIndex;
 import edu.mcw.rgd.indexer.model.findModels.ModelIndexObject;
+import edu.mcw.rgd.indexer.model.genomeInfo.DiseaseGeneObject;
+import edu.mcw.rgd.indexer.model.genomeInfo.GeneCounts;
 import edu.mcw.rgd.process.Utils;
 import edu.mcw.rgd.services.ClientInit;
 import org.apache.commons.lang.ArrayUtils;
@@ -56,6 +58,7 @@ public class Manager {
     private boolean reindex;
     BulkIndexProcessor bulkIndexProcessor;
     IndexDAO indexDAO=new IndexDAO();
+    GenomeDAO genomeDAO=new GenomeDAO();
     private final Logger log = LogManager.getLogger("main");
 
     public static void main(String[] args) throws Exception {
@@ -153,7 +156,9 @@ public class Manager {
 
 
                     case "Chromosomes":
-                         admin.createIndex("chromosome_mappings", "chromosome");
+                        StrainVariants variants= new StrainVariants();
+
+                        admin.createIndex("chromosome_mappings", "chromosome");
                         if(arg.equalsIgnoreCase("chromosomes")){
                             MapDAO mapDAO= new MapDAO();
                             log.info("INDEXING Chromosomes...");
@@ -166,8 +171,24 @@ public class Manager {
                                             int mapKey = m.getKey();
                                             String assembly = m.getName();
                                             if (mapKey != 6 && mapKey != 36 && mapKey != 8 && mapKey != 21 && mapKey != 19 && mapKey != 7) {
-                                                workerThread = new ChromosomeThread(key, RgdIndex.getNewAlias(), mapKey, assembly);
-                                                executor.execute(workerThread);
+                                                if(mapKey!=720 && mapKey!=44) {
+                                                    List<Chromosome> chromosomes = mapDAO.getChromosomes(mapKey);
+
+                                                    for (Chromosome c : chromosomes) {
+                                                        log.info(Thread.currentThread().getName() + ": " + SpeciesType.getCommonName(key) + " || ChromosomeThread MapKey "+mapKey+ " started " + new Date());
+
+                                                        GeneCounts geneCounts = genomeDAO.getGeneCounts(mapKey, key, c.getChromosome());
+                                                        java.util.Map<String, Long> objectsCountsMap = genomeDAO.getObjectCounts(mapKey, c.getChromosome());
+                                                        List<DiseaseGeneObject> diseaseGenes = genomeDAO.getDiseaseGenes(mapKey, c.getChromosome(), key);
+                                                        String[][] strainVairantMatrix=null;
+                                                        if(key==3) {
+                                                         strainVairantMatrix = variants.getStrainVariants(mapKey, c.getChromosome());
+                                                        }
+                                                        workerThread = new ChromosomeThread(c,key, RgdIndex.getNewAlias(), mapKey, assembly,geneCounts,objectsCountsMap, diseaseGenes, strainVairantMatrix);
+                                                        executor.execute(workerThread);
+                                                    }
+                                                    }
+
                                             }
                                         }
 

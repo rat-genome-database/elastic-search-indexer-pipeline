@@ -38,12 +38,6 @@ public class GenomeDAO extends AbstractDAO{
         String fetchUri="https://api.ncbi.nlm.nih.gov/datasets/v2alpha/genome/accession/" ;
         fetchUri+= refSeqAccession.trim();
 
-//        fetchUri+="/dataset_report?filters.assembly_source=all&filters.has_annotation=false" +
-//                "&filters.exclude_paired_reports=false&filters.exclude_atypical=false&filters.assembly_version=all_assemblies" +
-//                "&filters.assembly_level=chromosome&filters.assembly_level=complete_genome" +
-//                "&filters.is_metagenome_derived=metagenome_derived_exclude" +
-//                "&table_fields=assminfo-accession&table_fields=assminfo-name"
-//                + "&api_key="+API_KEY;
 
         fetchUri+="/dataset_report?filters.reference_only=false&filters.assembly_source=all&filters.has_annotation=false&filters.exclude_paired_reports=false&filters.exclude_atypical=false&filters.assembly_version=all_assemblies&filters.is_metagenome_derived=metagenome_derived_exclude&page_size=1000";
        System.out.println("FETCH URI:"+ fetchUri);
@@ -63,7 +57,6 @@ public class GenomeDAO extends AbstractDAO{
 
                 JSONObject object=array.getJSONObject(0);
                 JSONObject map= object.getJSONObject("assembly_stats");
-            //    System.out.println("ASSEMBLY STATS:"+ object.get("assembly_stats"));
                 stats.setContigL50(String.valueOf( map.get("contig_l50")));
                 stats.setContigN50(String.valueOf(map.get("contig_n50")));
               try {
@@ -119,114 +112,6 @@ public class GenomeDAO extends AbstractDAO{
 
         return info;
     }
-    public void getPrimaryRef(int speciesTypeKey) throws Exception {
-
-    }
-  /*  public GeneCounts  getGeneCounts(int mapKey, int speciesTypeKey, String chr) throws Exception {
-
-        GeneDAO geneDAO= new GeneDAO();
-        MapDAO mapDAO= new MapDAO();
-
-        int proteninCoding=0;
-        int ncrna=0;
-        int trna=0;
-        int snrna=0;
-        int rrna=0;
-        int pseudo=0;
-
-        GeneCounts geneCounts = new GeneCounts();
-        List<MappedGene> filteredGenes= new ArrayList<>();
-        List<MappedGene> mGenes= geneDAO.getActiveMappedGenes(mapKey);
-        System.out.println("MapKey: "+ mapKey + "\t"+ mGenes.size());
-        if(chr!=null){
-            for(MappedGene m: mGenes){
-               if(m.getChromosome().equals(chr)){
-                   filteredGenes.add(m);
-               }
-            }
-        }else{
-            filteredGenes=mGenes;
-        }
-        if(filteredGenes.size()>0) {
-            for (MappedGene g : filteredGenes) {
-
-                Gene gene = g.getGene();
-                String type = gene.getType();
-
-                if (type.equalsIgnoreCase("protein-coding")) {
-                    proteninCoding++;
-                }
-                if (type.equalsIgnoreCase("ncrna")) {
-                    ncrna++;
-                }
-                if (type.equalsIgnoreCase("trna")) {
-                    trna++;
-                }
-                if (type.equalsIgnoreCase("snrna")) {
-                    snrna++;
-                }
-                if (type.equalsIgnoreCase("rrna")) {
-                    rrna++;
-                }
-                if (type.equalsIgnoreCase("pseudo")) {
-                    pseudo++;
-                }
-            }
-
-            geneCounts.setTotalGenes(filteredGenes.size());
-            geneCounts.setProteinCoding(proteninCoding);
-            geneCounts.setNcrna(ncrna);
-            geneCounts.setPseudo(pseudo);
-            geneCounts.setrRna(rrna);
-            geneCounts.setSnRna(snrna);
-            geneCounts.settRna(trna);
-            Map<String, Integer> mirTargetCount=  this.getMirnaTargetCount(mapKey, chr);
-            System.out.println("MIRTARGE COUNT: "+ mirTargetCount);
-            geneCounts.setMirnaTargets(mirTargetCount);
-
-
-        }
-        Map<String, Integer> orthCounts=new HashMap<>();
-        orthCounts = this.getOrthologCounts(mapKey, speciesTypeKey, chr);
-        System.out.println("ORTHOCOUNTS:"+ orthCounts);
-        for(Map.Entry e: orthCounts.entrySet()){
-            String key= (String) e.getKey();
-            int value= (int) e.getValue();
-
-            if(key.equals("1")){
-                geneCounts.setHumanOrthologs(value);
-            }
-            if(key.equals("2")){
-                geneCounts.setMouseOrthologs(value);
-            }
-            if(key.equals("3")){
-                geneCounts.setRatOrthologs(value);
-            }
-            if(key.equals("4")){
-                geneCounts.setChinchillaOrthologs(value);
-            }
-            if(key.equals("5")){
-                geneCounts.setBonoboOrthologs(value);
-            }
-            if(key.equals("6")){
-                geneCounts.setDogOrthologs(value);
-            }
-            if(key.equals("7")){
-                geneCounts.setSquirrelOrthologs(value);
-            }
-            if(key.equals("9")){
-                geneCounts.setSquirrelOrthologs(value);
-            }
-            if(key.equalsIgnoreCase("withOrthologs")){
-                geneCounts.setGenesWithOrthologs(value);
-            }
-            if(key.equalsIgnoreCase("withOutOrthologs")){
-                geneCounts.setGenesWithoutOrthologs(value);
-            }
-        }
-        return geneCounts;
-
-    }*/
     public GeneCounts  getGeneCounts(int mapKey, int speciesTypeKey, String chr) throws Exception {
 
         GeneDAO geneDAO= new GeneDAO();
@@ -242,7 +127,6 @@ public class GenomeDAO extends AbstractDAO{
         GeneCounts geneCounts = new GeneCounts();
         List<MappedGene> filteredGenes= new ArrayList<>();
         List<MappedGene> mGenes= geneDAO.getActiveMappedGenes(mapKey);
- //       System.out.println("MapKey: "+ mapKey + "\t"+ mGenes.size());
         if(chr!=null){
             for(MappedGene m: mGenes){
                 if(m.getChromosome().equals(chr)){
@@ -286,7 +170,6 @@ public class GenomeDAO extends AbstractDAO{
             geneCounts.setSnRna(snrna);
             geneCounts.settRna(trna);
             Map<String, Integer> mirTargetCount=  this.getMirnaTargetCount(mapKey, chr);
-      //      System.out.println("MIRTARGE COUNT: "+ mirTargetCount);
             geneCounts.setMirnaTargets(mirTargetCount);
 
 
@@ -294,7 +177,6 @@ public class GenomeDAO extends AbstractDAO{
         Map<String, Integer> orthCounts=new HashMap<>();
         orthCounts = this.getOrthologCounts(mapKey, speciesTypeKey, chr);
         geneCounts.setOrthologCountsMap(orthCounts);
-     //   System.out.println("ORTHOCOUNTS:"+ orthCounts);
 
         return geneCounts;
 
@@ -325,29 +207,32 @@ public class GenomeDAO extends AbstractDAO{
             sql=sql+" and m.chromosome=?";
         }
         sql=sql+"GROUP BY ro.object_name ORDER BY ro.object_name";
-      Connection conn=this.getConnection();
-        PreparedStatement preparedStatement= conn.prepareStatement(sql);
-        preparedStatement.setInt(1,mapKey);
-        if(chr!=null){
-            preparedStatement.setString(2, chr);
-        }
-        ResultSet rs= preparedStatement.executeQuery();
-        int count=0;
-      while(rs.next()){
-          if(rs.getString("object_name").equalsIgnoreCase("transcripts")){
-              count=rs.getInt("tot");
-              preparedStatement.close();
-              rs.close();
-              conn.close();
-            return count;
+        int count = 0;
+      try(Connection conn=this.getConnection();
+        PreparedStatement preparedStatement= conn.prepareStatement(sql);) {
+          preparedStatement.setInt(1, mapKey);
+          if (chr != null) {
+              preparedStatement.setString(2, chr);
           }
+          ResultSet rs = preparedStatement.executeQuery();
+
+          while (rs.next()) {
+              if (rs.getString("object_name").equalsIgnoreCase("transcripts")) {
+                  count = rs.getInt("tot");
+                  preparedStatement.close();
+                  rs.close();
+                  conn.close();
+                  return count;
+              }
+          }
+          preparedStatement.close();
+          rs.close();
+          conn.close();
       }
-        preparedStatement.close();
-        rs.close();
-        conn.close();
         return count;
     }
     public Map<String, Long> getObjectCounts(int mapKey, String chr) throws Exception {
+        Map<String, Long> objectCounts = new HashMap<>();
 
         String sql="SELECT count(distinct(ri.rgd_id)) as tot, ro.object_name from rgd_ids ri, rgd_objects ro , maps_data m where ri.object_key = ro.object_key " +
                 "AND m.rgd_id=ri.rgd_id and m.map_key=? and ri.object_status = 'ACTIVE' ";
@@ -355,23 +240,23 @@ public class GenomeDAO extends AbstractDAO{
            sql=sql+" and m.chromosome=?";
        }
         sql=sql+"GROUP BY ro.object_name ORDER BY ro.object_name";
-        Connection conn=this.getConnection();
-        PreparedStatement preparedStatement= conn.prepareStatement(sql);
-        preparedStatement.setInt(1,mapKey);
-        if(chr!=null){
-            preparedStatement.setString(2, chr);
-        }
-        ResultSet rs= preparedStatement.executeQuery();
+       try( Connection conn=this.getConnection();
+        PreparedStatement preparedStatement= conn.prepareStatement(sql);) {
+           preparedStatement.setInt(1, mapKey);
+           if (chr != null) {
+               preparedStatement.setString(2, chr);
+           }
+           ResultSet rs = preparedStatement.executeQuery();
 
-        Map<String, Long> objectCounts= new HashMap<>();
-        while(rs.next()){
-                String name=rs.getString("object_name");
-                long value= rs.getLong("tot");
-              objectCounts.put(name, value);
-        }
-        preparedStatement.close();
-        rs.close();
-        conn.close();
+           while (rs.next()) {
+               String name = rs.getString("object_name");
+               long value = rs.getLong("tot");
+               objectCounts.put(name, value);
+           }
+           preparedStatement.close();
+           rs.close();
+
+       }
 
         return objectCounts;
     }
