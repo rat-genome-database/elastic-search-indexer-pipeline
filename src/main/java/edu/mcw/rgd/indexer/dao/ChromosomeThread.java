@@ -131,7 +131,8 @@ public class ChromosomeThread implements  Runnable {
                     if(key==3) {
                         obj.setVariantsMatrix(strainVairantMatrix);
                     }
-                    BulkIndexProcessor.bulkProcessor.add(new IndexRequest(index, "chromosome").source(obj, XContentType.JSON));
+                    indexObject(obj);
+//                    BulkIndexProcessor.bulkProcessor.add(new IndexRequest(index, "chromosome").source(obj, XContentType.JSON));
 
             // }
 //              log.info("Indexed mapKey " + mapKey + ",  chromosome objects Size: " + objects.size() + " Exiting thread.");
