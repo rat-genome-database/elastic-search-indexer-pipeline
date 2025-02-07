@@ -115,7 +115,7 @@ public class GenomeDAO extends AbstractDAO{
     public GeneCounts  getGeneCounts(int mapKey, int speciesTypeKey, String chr) throws Exception {
 
         GeneDAO geneDAO= new GeneDAO();
-        MapDAO mapDAO= new MapDAO();
+
 
         int proteninCoding=0;
         int ncrna=0;

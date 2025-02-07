@@ -43,6 +43,7 @@ import java.util.List;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 
@@ -156,8 +157,6 @@ public class Manager {
 
 
                     case "Chromosomes":
-                        StrainVariants variants= new StrainVariants();
-
                         admin.createIndex("chromosome_mappings", "chromosome");
                         if(arg.equalsIgnoreCase("chromosomes")){
                             MapDAO mapDAO= new MapDAO();
@@ -166,36 +165,19 @@ public class Manager {
                                 if (SpeciesType.isSearchable(key)) {
                                     //   int key=3;
                                     if (key != 0) {
-                                        List<Map> maps = mapDAO.getMaps(key, "bp");
-                                        for (Map m : maps) {
-                                            int mapKey = m.getKey();
-                                            String assembly = m.getName();
-                                            if (mapKey != 6 && mapKey != 36 && mapKey != 8 && mapKey != 21 && mapKey != 19 && mapKey != 7) {
-                                                if(mapKey!=720 && mapKey!=44) {
-                                                    List<Chromosome> chromosomes = mapDAO.getChromosomes(mapKey);
-
-                                                    for (Chromosome c : chromosomes) {
-                                                        log.info(Thread.currentThread().getName() + ": " + SpeciesType.getCommonName(key) + " || ChromosomeThread MapKey "+mapKey+ " started " + new Date());
-
-                                                        GeneCounts geneCounts = genomeDAO.getGeneCounts(mapKey, key, c.getChromosome());
-                                                        java.util.Map<String, Long> objectsCountsMap = genomeDAO.getObjectCounts(mapKey, c.getChromosome());
-                                                        List<DiseaseGeneObject> diseaseGenes = genomeDAO.getDiseaseGenes(mapKey, c.getChromosome(), key);
-                                                        String[][] strainVairantMatrix=null;
-                                                        if(key==3) {
-                                                         strainVairantMatrix = variants.getStrainVariants(mapKey, c.getChromosome());
-                                                        }
-                                                        workerThread = new ChromosomeThread(c,key, RgdIndex.getNewAlias(), mapKey, assembly,geneCounts,objectsCountsMap, diseaseGenes, strainVairantMatrix);
-                                                        executor.execute(workerThread);
-                                                    }
-                                                    }
-
-                                            }
+                                        List<Map> maps = null;
+                                        try {
+                                            maps = mapDAO.getMaps(key, "bp");
+                                        } catch (Exception e) {
+                                            throw new RuntimeException(e);
                                         }
-
-                                    }
+                                        for(Map m:maps){
+                                             workerThread=new ChromosomeMapDataThread(key,m);
+                                             executor.execute(workerThread);
+                                        }
                                 }
                             }
-                        }
+                        }}
                         break;
                     case "GenomeInfo":
 
