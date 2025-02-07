@@ -93,7 +93,7 @@ public class StrainVariants extends AbstractDAO{
                 vc.setSnv(String.valueOf(snvAndSnps));
                 variantCounts.add(vc);
                 rs.close();
-                ps.close();
+
             }
         }catch (Exception e){
             e.printStackTrace();
