@@ -39,10 +39,10 @@ public class ChromosomeThread implements  Runnable {
     private String index;
     private GenomeDAO genomeDAO= new GenomeDAO();
     private Chromosome c;
-    private GeneCounts geneCounts;
-    private java.util.Map<String, Long> objectsCountsMap ;
-    private List<DiseaseGeneObject> diseaseGenes ;
-    private String[][] strainVairantMatrix ;
+//    private GeneCounts geneCounts;
+//    private java.util.Map<String, Long> objectsCountsMap ;
+//    private List<DiseaseGeneObject> diseaseGenes ;
+//    private String[][] strainVairantMatrix ;
 
     StrainVariants variants=new StrainVariants();
 
@@ -55,10 +55,10 @@ public class ChromosomeThread implements  Runnable {
         this.mapKey=mapKey;
         this.assembly=assembly;
         this.c=c;
-        this.geneCounts=geneCounts;
-        this.objectsCountsMap=objectsCountsMap;
-        this.diseaseGenes=diseaseGenes;
-        this.strainVairantMatrix=strainVairantMatrix;
+//        this.geneCounts=geneCounts;
+//        this.objectsCountsMap=objectsCountsMap;
+//        this.diseaseGenes=diseaseGenes;
+//        this.strainVairantMatrix=strainVairantMatrix;
     }
     Logger log = LogManager.getLogger("chromosome");
 
@@ -186,14 +186,14 @@ public class ChromosomeThread implements  Runnable {
 
             // }
 //              log.info("Indexed mapKey " + mapKey + ",  chromosome objects Size: " + objects.size() + " Exiting thread.");
-              log.info(Thread.currentThread().getName() + ": chromosomeThread" + mapKey +"\tCHR-"+c.getChromosome() + " End " + new Date());
+              log.info(Thread.currentThread().getName() + ":" + mapKey +"-CHR-"+c.getChromosome() + " End " + new Date());
 //            }
           //  }
         }catch (Exception e){
             e.printStackTrace();
             throw new RuntimeException();
         }
-        
+
 
     }
     public void indexObject(ChromosomeIndexObject o) throws ExecutionException, InterruptedException, IOException {

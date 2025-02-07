@@ -35,12 +35,14 @@ public class ChromosomeMapDataThread implements Runnable {
 
     @Override
     public void run() {
+        int mapKey = m.getKey();
 //     log.info(Thread.currentThread().getName() + ": " + SpeciesType.getCommonName(key) + " || ChromosomeThread MapKey "+key+ " started " + new Date());
+        log.info(Thread.currentThread().getName() + ": " + SpeciesType.getCommonName(key) + " || Mapkey- "+mapKey+ " STARTED " + new Date());
 
         ExecutorService executor = new MyThreadPoolExecutor(10, 10, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
 
         //   for (Map m : maps) {
-        int mapKey = m.getKey();
+
         String assembly = m.getName();
         if (mapKey != 6 && mapKey != 36 && mapKey != 8 && mapKey != 21 && mapKey != 19 && mapKey != 7) {
             if (mapKey != 720 && mapKey != 44 && mapKey != 722 && mapKey != 1313 && mapKey != 1410 && mapKey != 1701 && mapKey != 514) {
@@ -81,16 +83,14 @@ public class ChromosomeMapDataThread implements Runnable {
                         executor.execute(workerThread);
                     }
 
-                } catch (Exception e) {
-
-                }
+                } catch (Exception e) {}
 
 
             }
             // }
 
         }
-        log.info(Thread.currentThread().getName() + ": " + SpeciesType.getCommonName(key) + " || ChromosomeMapDataThread MapKey "+key+ " END " + new Date());
+        log.info(Thread.currentThread().getName() + ": " + SpeciesType.getCommonName(key) + " || Mapkey- "+mapKey+ " END " + new Date());
 
         executor.shutdown();
         while(!executor.isTerminated()){}
