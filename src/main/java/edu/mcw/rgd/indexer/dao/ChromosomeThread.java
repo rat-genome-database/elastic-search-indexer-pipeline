@@ -186,13 +186,14 @@ public class ChromosomeThread implements  Runnable {
 
             // }
 //              log.info("Indexed mapKey " + mapKey + ",  chromosome objects Size: " + objects.size() + " Exiting thread.");
-//              log.info(Thread.currentThread().getName() + ": chromosomeThread" + mapKey + " End " + new Date());
+              log.info(Thread.currentThread().getName() + ": chromosomeThread" + mapKey +"\tCHR-"+c.getChromosome() + " End " + new Date());
 //            }
           //  }
         }catch (Exception e){
             e.printStackTrace();
             throw new RuntimeException();
         }
+        
 
     }
     public void indexObject(ChromosomeIndexObject o) throws ExecutionException, InterruptedException, IOException {

@@ -24,8 +24,7 @@ public class ChromosomeMapDataThread implements Runnable {
     private Map m;
     private int key;
     MapDAO mapDAO = new MapDAO();
-    GenomeDAO genomeDAO = new GenomeDAO();
-    StrainVariants variants = new StrainVariants();
+
 
     public ChromosomeMapDataThread(int key, Map m) {
         this.m = m;
@@ -93,6 +92,8 @@ public class ChromosomeMapDataThread implements Runnable {
         }
         log.info(Thread.currentThread().getName() + ": " + SpeciesType.getCommonName(key) + " || ChromosomeMapDataThread MapKey "+key+ " END " + new Date());
 
+        executor.shutdown();
+        while(!executor.isTerminated()){}
     }
 }
 
