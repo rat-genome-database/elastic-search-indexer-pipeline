@@ -44,40 +44,41 @@ public class ChromosomeMapDataThread implements Runnable {
         int mapKey = m.getKey();
         String assembly = m.getName();
         if (mapKey != 6 && mapKey != 36 && mapKey != 8 && mapKey != 21 && mapKey != 19 && mapKey != 7) {
-            if (mapKey != 720 && mapKey != 44 && mapKey != 722 && mapKey != 1313 && mapKey != 1410 && mapKey != 1701) {
+            if (mapKey != 720 && mapKey != 44 && mapKey != 722 && mapKey != 1313 && mapKey != 1410 && mapKey != 1701 && mapKey != 514) {
                 try {
                     List<Chromosome>   chromosomes = mapDAO.getChromosomes(mapKey);
 
                     for (Chromosome c : chromosomes) {
-                        log.info(Thread.currentThread().getName() + ": " + SpeciesType.getCommonName(key) + " ||  MapKey " + mapKey + " CHR-"+ c.getChromosome()+" started " + new Date());
-
-                        GeneCounts geneCounts = null;
-                        try {
-                            geneCounts = genomeDAO.getGeneCounts(mapKey, key, c.getChromosome());
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
-                        }
-                        java.util.Map<String, Long> objectsCountsMap = null;
-                        try {
-                            objectsCountsMap = genomeDAO.getObjectCounts(mapKey, c.getChromosome());
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
-                        }
-                        List<DiseaseGeneObject> diseaseGenes = null;
-                        try {
-                            diseaseGenes = genomeDAO.getDiseaseGenes(mapKey, c.getChromosome(), key);
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
-                        }
-                        String[][] strainVairantMatrix = null;
-                        if (key == 3) {
-                            try {
-                                strainVairantMatrix = variants.getStrainVariants(mapKey, c.getChromosome());
-                            } catch (Exception e) {
-                                throw new RuntimeException(e);
-                            }
-                        }
-                        Runnable workerThread = new ChromosomeThread(c, key, RgdIndex.getNewAlias(), mapKey, assembly, geneCounts, objectsCountsMap, diseaseGenes, strainVairantMatrix);
+//                        log.info(Thread.currentThread().getName() + ": " + SpeciesType.getCommonName(key) + " ||  MapKey " + mapKey + " CHR-"+ c.getChromosome()+" started " + new Date());
+//
+//                        GeneCounts geneCounts = null;
+//                        try {
+//                            geneCounts = genomeDAO.getGeneCounts(mapKey, key, c.getChromosome());
+//                        } catch (Exception e) {
+//                            throw new RuntimeException(e);
+//                        }
+//                        java.util.Map<String, Long> objectsCountsMap = null;
+//                        try {
+//                            objectsCountsMap = genomeDAO.getObjectCounts(mapKey, c.getChromosome());
+//                        } catch (Exception e) {
+//                            throw new RuntimeException(e);
+//                        }
+//                        List<DiseaseGeneObject> diseaseGenes = null;
+//                        try {
+//                            diseaseGenes = genomeDAO.getDiseaseGenes(mapKey, c.getChromosome(), key);
+//                        } catch (Exception e) {
+//                            throw new RuntimeException(e);
+//                        }
+//                        String[][] strainVairantMatrix = null;
+//                        if (key == 3) {
+//                            try {
+//                                strainVairantMatrix = variants.getStrainVariants(mapKey, c.getChromosome());
+//                            } catch (Exception e) {
+//                                throw new RuntimeException(e);
+//                            }
+//                        }
+                        Runnable workerThread = new ChromosomeThread(c, key, RgdIndex.getNewAlias(), mapKey, assembly);
+                       // Runnable workerThread = new ChromosomeThread(c, key, RgdIndex.getNewAlias(), mapKey, assembly, geneCounts, objectsCountsMap, diseaseGenes, strainVairantMatrix);
                         executor.execute(workerThread);
                     }
 

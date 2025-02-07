@@ -44,10 +44,13 @@ public class ChromosomeThread implements  Runnable {
     private List<DiseaseGeneObject> diseaseGenes ;
     private String[][] strainVairantMatrix ;
 
+    StrainVariants variants=new StrainVariants();
 
     ObjectMapper mapper = new ObjectMapper();
-    public ChromosomeThread(Chromosome c, int speciestypeKey, String index, int mapKey, String assembly, GeneCounts geneCounts, Map<String, Long> objectsCountsMap,List<DiseaseGeneObject> diseaseGenes, String[][] strainVairantMatrix){
-        this.key=speciestypeKey;
+  //  public ChromosomeThread(Chromosome c, int speciestypeKey, String index, int mapKey, String assembly, GeneCounts geneCounts, Map<String, Long> objectsCountsMap,List<DiseaseGeneObject> diseaseGenes, String[][] strainVairantMatrix){
+          public ChromosomeThread(Chromosome c, int speciestypeKey, String index, int mapKey, String assembly){
+
+            this.key=speciestypeKey;
         this.index= index;
         this.mapKey=mapKey;
         this.assembly=assembly;
@@ -57,12 +60,41 @@ public class ChromosomeThread implements  Runnable {
         this.diseaseGenes=diseaseGenes;
         this.strainVairantMatrix=strainVairantMatrix;
     }
+    Logger log = LogManager.getLogger("chromosome");
 
     @Override
     public void run()  {
 //        Logger log = LogManager.getLogger("chromosome");
 //        log.info(Thread.currentThread().getName() + ": " + SpeciesType.getCommonName(key) + " || ChromosomeThread MapKey "+mapKey+ " started " + new Date());
         try {
+            log.info(Thread.currentThread().getName() + ": " + SpeciesType.getCommonName(key) + " ||  MapKey " + mapKey + " CHR-"+ c.getChromosome()+" started " + new Date());
+
+            GeneCounts geneCounts = null;
+            try {
+                geneCounts = genomeDAO.getGeneCounts(mapKey, key, c.getChromosome());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            java.util.Map<String, Long> objectsCountsMap = null;
+            try {
+                objectsCountsMap = genomeDAO.getObjectCounts(mapKey, c.getChromosome());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            List<DiseaseGeneObject> diseaseGenes = null;
+            try {
+                diseaseGenes = genomeDAO.getDiseaseGenes(mapKey, c.getChromosome(), key);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            String[][] strainVairantMatrix = null;
+            if (key == 3) {
+                try {
+                    strainVairantMatrix = variants.getStrainVariants(mapKey, c.getChromosome());
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
 
                     ChromosomeIndexObject obj = new ChromosomeIndexObject();
                     obj.setMapKey(mapKey);
@@ -95,38 +127,56 @@ public class ChromosomeThread implements  Runnable {
                             }
                         }
                     }
-                  java.util.Map<String, Integer> orthoCounts=geneCounts.getOrthologCountsMap();
-                  if(orthoCounts.get("1")!=null){obj.setHumanOrthologs(orthoCounts.get("1")); }
-                  if(orthoCounts.get("2")!=null){obj.setMouseOrthologs(orthoCounts.get("2"));}
-                  if(orthoCounts.get("3")!=null) {obj.setRatOrthologs(orthoCounts.get("3"));}
-                  if(orthoCounts.get("4")!=null) {obj.setChinchillaOrthologs(orthoCounts.get("4"));}
-                  if(orthoCounts.get("6")!=null){    obj.setDogOrthologs(orthoCounts.get("6"));}
-                  if(orthoCounts.get("7")!=null){    obj.setSquirrelOrthologs(orthoCounts.get("7"));}
-                  if(orthoCounts.get("5")!=null){    obj.setBonoboOrthologs(orthoCounts.get("5"));}
-                  if(orthoCounts.get("9")!=null){    obj.setPigOrthologs(orthoCounts.get("9"));}
+                    if(geneCounts!=null) {
+                        java.util.Map<String, Integer> orthoCounts = geneCounts.getOrthologCountsMap();
+                        if (orthoCounts.get("1") != null) {
+                            obj.setHumanOrthologs(orthoCounts.get("1"));
+                        }
+                        if (orthoCounts.get("2") != null) {
+                            obj.setMouseOrthologs(orthoCounts.get("2"));
+                        }
+                        if (orthoCounts.get("3") != null) {
+                            obj.setRatOrthologs(orthoCounts.get("3"));
+                        }
+                        if (orthoCounts.get("4") != null) {
+                            obj.setChinchillaOrthologs(orthoCounts.get("4"));
+                        }
+                        if (orthoCounts.get("6") != null) {
+                            obj.setDogOrthologs(orthoCounts.get("6"));
+                        }
+                        if (orthoCounts.get("7") != null) {
+                            obj.setSquirrelOrthologs(orthoCounts.get("7"));
+                        }
+                        if (orthoCounts.get("5") != null) {
+                            obj.setBonoboOrthologs(orthoCounts.get("5"));
+                        }
+                        if (orthoCounts.get("9") != null) {
+                            obj.setPigOrthologs(orthoCounts.get("9"));
+                        }
 
-                  obj.setGenesWithoutOrthologs(orthoCounts.get("WithOutOrthologs"));
-                  obj.setGenesWithOrthologs(orthoCounts.get("withOrthologs"));
+                        obj.setGenesWithoutOrthologs(orthoCounts.get("WithOutOrthologs"));
+                        obj.setGenesWithOrthologs(orthoCounts.get("withOrthologs"));
 
                     StringBuffer pieData = this.getPieData(geneCounts);
                     obj.setPieData(pieData);
-
-
-                    obj.setExons(genomeDAO.getOtherObjectsCounts(objectsCountsMap, "exons"));
-                    obj.setQtls(genomeDAO.getOtherObjectsCounts(objectsCountsMap, "qtls"));
-                    obj.setTotalGenes((int) genomeDAO.getOtherObjectsCounts(objectsCountsMap, "genes"));
-                    obj.setSslps(genomeDAO.getOtherObjectsCounts(objectsCountsMap, "sslps"));
-                    obj.setUtrs3(genomeDAO.getOtherObjectsCounts(objectsCountsMap, "3utrs"));
-                    obj.setUtrs5(genomeDAO.getOtherObjectsCounts(objectsCountsMap, "5utrs"));
-                    obj.setStrains(genomeDAO.getOtherObjectsCounts(objectsCountsMap, "strains"));
-                    obj.setTranscripts(genomeDAO.getOtherObjectsCounts(objectsCountsMap, "transcripts"));
-                    obj.setVariants(genomeDAO.getOtherObjectsCounts(objectsCountsMap, "variants"));
+                    }
+                    if(objectsCountsMap!=null) {
+                        obj.setExons(genomeDAO.getOtherObjectsCounts(objectsCountsMap, "exons"));
+                        obj.setQtls(genomeDAO.getOtherObjectsCounts(objectsCountsMap, "qtls"));
+                        obj.setTotalGenes((int) genomeDAO.getOtherObjectsCounts(objectsCountsMap, "genes"));
+                        obj.setSslps(genomeDAO.getOtherObjectsCounts(objectsCountsMap, "sslps"));
+                        obj.setUtrs3(genomeDAO.getOtherObjectsCounts(objectsCountsMap, "3utrs"));
+                        obj.setUtrs5(genomeDAO.getOtherObjectsCounts(objectsCountsMap, "5utrs"));
+                        obj.setStrains(genomeDAO.getOtherObjectsCounts(objectsCountsMap, "strains"));
+                        obj.setTranscripts(genomeDAO.getOtherObjectsCounts(objectsCountsMap, "transcripts"));
+                        obj.setVariants(genomeDAO.getOtherObjectsCounts(objectsCountsMap, "variants"));
+                    }
 
                    obj.setProteinsCount(genomeDAO.getProteinCounts(mapKey, c.getChromosome()));
-
-                    obj.setDiseaseGenes(diseaseGenes);
-                    obj.setDiseaseGenechartData(this.getDiseaseGeneChartData(diseaseGenes));
-
+                    if(diseaseGenes!=null) {
+                        obj.setDiseaseGenes(diseaseGenes);
+                        obj.setDiseaseGenechartData(this.getDiseaseGeneChartData(diseaseGenes));
+                    }
                     //ADD STRAIN VARIANTS IF SPECIES_TYPE_KEY=3 (RAT SPECIES)
                     if(key==3) {
                         obj.setVariantsMatrix(strainVairantMatrix);
