@@ -39,26 +39,26 @@ public class ChromosomeThread implements  Runnable {
     private String index;
     private GenomeDAO genomeDAO= new GenomeDAO();
     private Chromosome c;
-//    private GeneCounts geneCounts;
-//    private java.util.Map<String, Long> objectsCountsMap ;
-//    private List<DiseaseGeneObject> diseaseGenes ;
-//    private String[][] strainVairantMatrix ;
+    private GeneCounts geneCounts;
+    private java.util.Map<String, Long> objectsCountsMap ;
+    private List<DiseaseGeneObject> diseaseGenes ;
+    private String[][] strainVairantMatrix ;
 
     StrainVariants variants=new StrainVariants();
 
     ObjectMapper mapper = new ObjectMapper();
-  //  public ChromosomeThread(Chromosome c, int speciestypeKey, String index, int mapKey, String assembly, GeneCounts geneCounts, Map<String, Long> objectsCountsMap,List<DiseaseGeneObject> diseaseGenes, String[][] strainVairantMatrix){
-          public ChromosomeThread(Chromosome c, int speciestypeKey, String index, int mapKey, String assembly){
+    public ChromosomeThread(Chromosome c, int speciestypeKey, String index, int mapKey, String assembly, GeneCounts geneCounts, Map<String, Long> objectsCountsMap,List<DiseaseGeneObject> diseaseGenes, String[][] strainVairantMatrix){
+//          public ChromosomeThread(Chromosome c, int speciestypeKey, String index, int mapKey, String assembly){
 
             this.key=speciestypeKey;
         this.index= index;
         this.mapKey=mapKey;
         this.assembly=assembly;
         this.c=c;
-//        this.geneCounts=geneCounts;
-//        this.objectsCountsMap=objectsCountsMap;
-//        this.diseaseGenes=diseaseGenes;
-//        this.strainVairantMatrix=strainVairantMatrix;
+        this.geneCounts=geneCounts;
+        this.objectsCountsMap=objectsCountsMap;
+        this.diseaseGenes=diseaseGenes;
+        this.strainVairantMatrix=strainVairantMatrix;
     }
     Logger log = LogManager.getLogger("chromosome");
 
@@ -67,34 +67,34 @@ public class ChromosomeThread implements  Runnable {
 //        Logger log = LogManager.getLogger("chromosome");
 //        log.info(Thread.currentThread().getName() + ": " + SpeciesType.getCommonName(key) + " || ChromosomeThread MapKey "+mapKey+ " started " + new Date());
         try {
-            log.info(Thread.currentThread().getName() + ": " + SpeciesType.getCommonName(key) + " ||  MapKey " + mapKey + " CHR-"+ c.getChromosome()+" started " + new Date());
+            log.info(Thread.currentThread().getName() + ": " + SpeciesType.getCommonName(key) + " || " + mapKey + " -CHR-"+ c.getChromosome()+" started " + new Date());
 
-            GeneCounts geneCounts = null;
-            try {
-                geneCounts = genomeDAO.getGeneCounts(mapKey, key, c.getChromosome());
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-            java.util.Map<String, Long> objectsCountsMap = null;
-            try {
-                objectsCountsMap = genomeDAO.getObjectCounts(mapKey, c.getChromosome());
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-            List<DiseaseGeneObject> diseaseGenes = null;
-            try {
-                diseaseGenes = genomeDAO.getDiseaseGenes(mapKey, c.getChromosome(), key);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-            String[][] strainVairantMatrix = null;
-            if (key == 3) {
-                try {
-                    strainVairantMatrix = variants.getStrainVariants(mapKey, c.getChromosome());
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
+//            GeneCounts geneCounts = null;
+//            try {
+//                geneCounts = genomeDAO.getGeneCounts(mapKey, key, c.getChromosome());
+//            } catch (Exception e) {
+//                throw new RuntimeException(e);
+//            }
+//            java.util.Map<String, Long> objectsCountsMap = null;
+//            try {
+//                objectsCountsMap = genomeDAO.getObjectCounts(mapKey, c.getChromosome());
+//            } catch (Exception e) {
+//                throw new RuntimeException(e);
+//            }
+//            List<DiseaseGeneObject> diseaseGenes = null;
+//            try {
+//                diseaseGenes = genomeDAO.getDiseaseGenes(mapKey, c.getChromosome(), key);
+//            } catch (Exception e) {
+//                throw new RuntimeException(e);
+//            }
+//            String[][] strainVairantMatrix = null;
+//            if (key == 3) {
+//                try {
+//                    strainVairantMatrix = variants.getStrainVariants(mapKey, c.getChromosome());
+//                } catch (Exception e) {
+//                    throw new RuntimeException(e);
+//                }
+//            }
 
                     ChromosomeIndexObject obj = new ChromosomeIndexObject();
                     obj.setMapKey(mapKey);
