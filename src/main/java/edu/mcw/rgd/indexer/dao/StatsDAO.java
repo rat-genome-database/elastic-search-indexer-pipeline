@@ -23,14 +23,13 @@ public class StatsDAO extends StatisticsDAO {
                 "AND gene_rgd_id=m.rgd_id\n" +
                 "AND r.object_status='ACTIVE'\n" +
                 "AND m.map_key=?" ;
+        if(chr!=null){
+            sql=sql+" and m.chromosome=?";
+        }
+        sql=sql+ " GROUP BY target_type";
+
         try(  Connection conn=this.getConnection();
               PreparedStatement stmt=conn.prepareStatement(sql);){
-
-            if(chr!=null){
-                sql=sql+" and m.chromosome=?";
-            }
-            sql=sql+ " GROUP BY target_type";
-
 
             stmt.setInt(1,mapKey);
             if(chr!=null){
