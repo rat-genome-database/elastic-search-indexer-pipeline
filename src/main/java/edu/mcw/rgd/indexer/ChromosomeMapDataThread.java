@@ -38,7 +38,6 @@ public class ChromosomeMapDataThread implements Runnable {
     @Override
     public void run() {
         int mapKey = m.getKey();
-//     log.info(Thread.currentThread().getName() + ": " + SpeciesType.getCommonName(key) + " || ChromosomeThread MapKey "+key+ " started " + new Date());
         log.info(Thread.currentThread().getName() + ": " + SpeciesType.getCommonName(key) + " || Mapkey- "+mapKey+ " STARTED " + new Date());
 
         ExecutorService executor = new MyThreadPoolExecutor(10, 10, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
@@ -46,8 +45,8 @@ public class ChromosomeMapDataThread implements Runnable {
         //   for (Map m : maps) {
 
         String assembly = m.getName();
-        if (mapKey != 6 && mapKey != 36 && mapKey != 8 && mapKey != 21 && mapKey != 19 && mapKey != 7) {
-            if (mapKey != 720 && mapKey != 44 && mapKey != 722 && mapKey != 1313 && mapKey != 1410 && mapKey != 1701 && mapKey != 514) {
+        if (mapKey != 6 && mapKey != 36 && mapKey != 8 && mapKey != 21 && mapKey != 19 && mapKey != 7 &&
+                mapKey != 720 && mapKey != 44 && mapKey != 722 && mapKey != 1313 && mapKey != 1410 && mapKey != 1701 && mapKey != 514) {
                 try {
                     List<Chromosome>   chromosomes = mapDAO.getChromosomes(mapKey);
 
@@ -73,7 +72,7 @@ public class ChromosomeMapDataThread implements Runnable {
                             throw new RuntimeException(e);
                         }
                         String[][] strainVairantMatrix = null;
-                        if (key == 3) {
+                        if (key == 3 && (mapKey==372 || mapKey==70 || mapKey==60) ){
                             try {
                                 strainVairantMatrix = variants.getStrainVariants(mapKey, c.getChromosome());
                             } catch (Exception e) {
@@ -85,13 +84,15 @@ public class ChromosomeMapDataThread implements Runnable {
                         executor.execute(workerThread);
                     }
 
-                } catch (Exception e) {}
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
 
 
             }
             // }
 
-        }
+
         log.info(Thread.currentThread().getName() + ": " + SpeciesType.getCommonName(key) + " || Mapkey- "+mapKey+ " END " + new Date());
 
         executor.shutdown();
