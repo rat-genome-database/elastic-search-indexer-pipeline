@@ -4,23 +4,16 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import edu.mcw.rgd.dao.impl.MapDAO;
 import edu.mcw.rgd.datamodel.*;
-import edu.mcw.rgd.indexer.dao.phenominer.model.PhenominerIndexObject;
 import edu.mcw.rgd.indexer.dao.variants.BulkIndexProcessor;
 import edu.mcw.rgd.indexer.model.RgdIndex;
 import edu.mcw.rgd.indexer.model.genomeInfo.*;
 
-import edu.mcw.rgd.services.ClientInit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
-import org.elasticsearch.action.bulk.BulkRequest;
-import org.elasticsearch.action.bulk.BulkResponse;
+
 import org.elasticsearch.action.index.IndexRequest;
 
-import org.elasticsearch.action.support.WriteRequest;
-import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.xcontent.XContentType;
 
 import java.io.IOException;
@@ -44,7 +37,6 @@ public class ChromosomeThread implements  Runnable {
     private List<DiseaseGeneObject> diseaseGenes ;
     private String[][] strainVairantMatrix ;
 
-    StrainVariants variants=new StrainVariants();
 
     ObjectMapper mapper = new ObjectMapper();
     public ChromosomeThread(Chromosome c, int speciestypeKey, String index, int mapKey, String assembly, GeneCounts geneCounts, Map<String, Long> objectsCountsMap,List<DiseaseGeneObject> diseaseGenes, String[][] strainVairantMatrix){
@@ -67,7 +59,7 @@ public class ChromosomeThread implements  Runnable {
 //        Logger log = LogManager.getLogger("chromosome");
 //        log.info(Thread.currentThread().getName() + ": " + SpeciesType.getCommonName(key) + " || ChromosomeThread MapKey "+mapKey+ " started " + new Date());
         try {
-            log.info(Thread.currentThread().getName() + ": " + SpeciesType.getCommonName(key) + " || " + mapKey + " -CHR-"+ c.getChromosome()+" started " + new Date());
+//            log.info(Thread.currentThread().getName() + ": " + SpeciesType.getCommonName(key) + " || " + mapKey + " -CHR-"+ c.getChromosome()+" started " + new Date());
 
 //            GeneCounts geneCounts = null;
 //            try {
@@ -178,7 +170,7 @@ public class ChromosomeThread implements  Runnable {
                         obj.setDiseaseGenechartData(this.getDiseaseGeneChartData(diseaseGenes));
                     }
                     //ADD STRAIN VARIANTS IF SPECIES_TYPE_KEY=3 (RAT SPECIES)
-                    if(key==3) {
+                    if(key==3 && (mapKey==372 || mapKey==70 || mapKey==60)) {
                         obj.setVariantsMatrix(strainVairantMatrix);
                     }
                     indexObject(obj);
@@ -186,7 +178,7 @@ public class ChromosomeThread implements  Runnable {
 
             // }
 //              log.info("Indexed mapKey " + mapKey + ",  chromosome objects Size: " + objects.size() + " Exiting thread.");
-              log.info(Thread.currentThread().getName() + ":" + mapKey +"-CHR-"+c.getChromosome() + " End " + new Date());
+//              log.info(Thread.currentThread().getName() + ":" + mapKey +"-CHR-"+c.getChromosome() + " End " + new Date());
 //            }
           //  }
         }catch (Exception e){

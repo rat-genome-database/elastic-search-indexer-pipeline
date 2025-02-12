@@ -1,5 +1,6 @@
 package edu.mcw.rgd.indexer;
 
+import edu.mcw.rgd.dao.impl.GeneDAO;
 import edu.mcw.rgd.dao.impl.MapDAO;
 import edu.mcw.rgd.dao.impl.OntologyXDAO;
 
@@ -8,6 +9,7 @@ import edu.mcw.rgd.datamodel.*;
 import edu.mcw.rgd.datamodel.ontologyx.Ontology;
 
 import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
+import edu.mcw.rgd.datamodel.ontologyx.TermWithStats;
 import edu.mcw.rgd.indexer.client.IndexAdmin;
 
 import edu.mcw.rgd.indexer.dao.*;
@@ -17,8 +19,7 @@ import edu.mcw.rgd.indexer.dao.phenominer.PhenominerNormalizedThread;
 import edu.mcw.rgd.indexer.dao.variants.*;
 import edu.mcw.rgd.indexer.model.RgdIndex;
 import edu.mcw.rgd.indexer.model.findModels.ModelIndexObject;
-import edu.mcw.rgd.indexer.model.genomeInfo.DiseaseGeneObject;
-import edu.mcw.rgd.indexer.model.genomeInfo.GeneCounts;
+
 import edu.mcw.rgd.process.Utils;
 import edu.mcw.rgd.services.ClientInit;
 import org.apache.commons.lang.ArrayUtils;
@@ -59,7 +60,6 @@ public class Manager {
     private boolean reindex;
     BulkIndexProcessor bulkIndexProcessor;
     IndexDAO indexDAO=new IndexDAO();
-    GenomeDAO genomeDAO=new GenomeDAO();
     private final Logger log = LogManager.getLogger("main");
 
     public static void main(String[] args) throws Exception {
@@ -157,19 +157,28 @@ public class Manager {
 
 
                     case "Chromosomes":
+                        executor=new MyThreadPoolExecutor(3, 3,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>())
                         admin.createIndex("chromosome_mappings", "chromosome");
                         if(arg.equalsIgnoreCase("chromosomes")){
                             MapDAO mapDAO= new MapDAO();
+                            GeneDAO geneDAO=new GeneDAO();
+                            OntologyXDAO ontologyXDAO=new OntologyXDAO();
+
                             log.info("INDEXING Chromosomes...");
                             for(int speciesTypeKey : SpeciesType.getSpeciesTypeKeys()) {
                                 if (SpeciesType.isSearchable(speciesTypeKey)) {
                                     //   int key=3;
                                     if (speciesTypeKey != 0) {
-                                        List<Map> maps = null;
+                                        String rootTerm="DOID:4";
+                                        List<TermWithStats> topLevelDiseaseTerms=   ontologyXDAO.getActiveChildTerms(rootTerm,3);
+
                                         try {
-                                            maps = mapDAO.getMaps(speciesTypeKey, "bp");
+                                            List<Map>  maps = mapDAO.getMaps(speciesTypeKey, "bp");
                                             for(Map map:maps){
-                                                workerThread=new ChromosomeMapDataThread(speciesTypeKey,map);
+                                                List<MappedGene> mappedGenes=geneDAO.getActiveMappedGenes(map.getKey());
+                                                List<Chromosome>   chromosomes = mapDAO.getChromosomes(map.getKey());
+
+                                                workerThread=new ChromosomeMapDataThread(speciesTypeKey,map, mappedGenes, chromosomes,topLevelDiseaseTerms);
                                                 executor.execute(workerThread);
                                             }
                                         } catch (Exception e) {
@@ -178,7 +187,8 @@ public class Manager {
 
                                 }
                             }
-                        }}
+                        }
+                        }
                         break;
                     case "GenomeInfo":
 

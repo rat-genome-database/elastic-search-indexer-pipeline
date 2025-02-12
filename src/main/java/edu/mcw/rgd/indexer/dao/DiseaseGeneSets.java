@@ -26,13 +26,12 @@ public class DiseaseGeneSets extends AbstractDAO {
     GeneDAO geneDAO= new GeneDAO();
     OntologyXDAO ontologyXDAO= new OntologyXDAO();
 
-    public List<DiseaseGeneObject> getDiseaseGeneSets(int mapKey, String chr, int speciesTypeKey) throws Exception {
+    public List<DiseaseGeneObject> getDiseaseGeneSets(int mapKey, String chr, int speciesTypeKey, List<TermWithStats> topLevelDiseaseTerms) throws Exception {
 
-        String rootTerm=ontologyXDAO.getRootTerm("RDO");
-        List<TermWithStats> topLevelDiseaseTerms=   ontologyXDAO.getActiveChildTerms(rootTerm,speciesTypeKey);
+
         List<DiseaseGeneObject> diseaseGeneSets= new ArrayList<>();
-        Ontology ont= ontologyXDAO.getOntology("RDO");
-        String aspect=ont.getAspect();
+//        Ontology ont= ontologyXDAO.getOntology("RDO");
+        String aspect="D";
         for(TermWithStats t:topLevelDiseaseTerms){
             DiseaseGeneObject obj= new DiseaseGeneObject();
 
@@ -91,7 +90,10 @@ public class DiseaseGeneSets extends AbstractDAO {
     }
     public static void main(String[] args) throws Exception {
        DiseaseGeneSets ds= new DiseaseGeneSets();
-     List<DiseaseGeneObject> diseaseGeneSets=  ds.getDiseaseGeneSets(360, "1", 3);
+        String rootTerm="DOID:4";
+        OntologyXDAO ontologyXDAO=new OntologyXDAO();
+        List<TermWithStats> topLevelDiseaseTerms=   ontologyXDAO.getActiveChildTerms(rootTerm,3);
+     List<DiseaseGeneObject> diseaseGeneSets=  ds.getDiseaseGeneSets(360, "1", 3,topLevelDiseaseTerms);
         for(DiseaseGeneObject d:diseaseGeneSets){
             System.out.println(d.getOntTermAccId() + "  "+ d.getOntTerm() + "   "+ d.getGeneCount());
         }

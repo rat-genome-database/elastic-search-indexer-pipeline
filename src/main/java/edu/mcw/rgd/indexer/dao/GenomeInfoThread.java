@@ -2,8 +2,10 @@ package edu.mcw.rgd.indexer.dao;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.mcw.rgd.dao.impl.GeneDAO;
 import edu.mcw.rgd.dao.impl.MapDAO;
 import edu.mcw.rgd.datamodel.Map;
+import edu.mcw.rgd.datamodel.MappedGene;
 import edu.mcw.rgd.datamodel.SpeciesType;
 
 import edu.mcw.rgd.indexer.model.genomeInfo.AssemblyInfo;
@@ -36,7 +38,7 @@ public class GenomeInfoThread implements Runnable {
     private int key;
     private int mapKey;
     private String index;
-
+    GeneDAO geneDAO=new GeneDAO();
 
     public GenomeInfoThread(int speciestypeKey, String index, Logger log){
 
@@ -50,7 +52,7 @@ public class GenomeInfoThread implements Runnable {
         Logger log= LogManager.getLogger("genome");
         log.info(Thread.currentThread().getName() + ": " + SpeciesType.getCommonName(key) + " started " + new Date());
 
-      MapDAO mapDAO= new MapDAO();
+        MapDAO mapDAO= new MapDAO();
         GenomeDAO genomeDAO= new GenomeDAO();
         StrainVariants variants= new StrainVariants();
         List<GenomeIndexObject> objects= new ArrayList<>();
@@ -61,7 +63,7 @@ public class GenomeInfoThread implements Runnable {
             List<Map> maps = mapDAO.getMaps(key,"bp");
         for (edu.mcw.rgd.datamodel.Map m : maps) {
            //   Map m= mapDAO.getMap(360);
-
+            List<MappedGene> mappedGenes=geneDAO.getActiveMappedGenes(m.getKey());
                 int mapKey=m.getKey();
                 if(mapKey!=6 && mapKey!=36 && mapKey!=8 && mapKey!=21 && mapKey!=19 && mapKey!=7 && mapKey!=900) {
               //  System.out.println(key + " || " + mapKey);
@@ -91,7 +93,7 @@ public class GenomeInfoThread implements Runnable {
                 //      obj.setMapKey(70);
                 obj.setAssembly(m.getName());
                 GeneCounts geneCounts = new GeneCounts();
-                geneCounts = genomeDAO.getGeneCounts(mapKey, key, null);
+                geneCounts = genomeDAO.getGeneCounts( mapKey ,key, null,mappedGenes);
                 // geneCounts= genomeDAO.getGeneCounts(70);
              //   obj.setTotalGenes(geneCounts.getTotalGenes());
                 obj.setProteinCoding(geneCounts.getProteinCoding());

@@ -78,75 +78,75 @@ public class IndexDAO extends AbstractDAO {
     Logger log= LogManager.getLogger("main");
 
     Map<Integer, edu.mcw.rgd.datamodel.Map> rgdMaps=new HashMap<>();
-    public List<GenomeIndexObject> getGenomeInfo() throws Exception {
-        List<GenomeIndexObject> objects= new ArrayList<>();
-        for(int speciesTypeKey : SpeciesType.getSpeciesTypeKeys()) {
-            //  int key=3;
-            boolean isSearchable=SpeciesType.isSearchable(speciesTypeKey);
-            if (speciesTypeKey != 0 && isSearchable) {
-             //   System.out.println("SPECIES TYPE KEY: " + key);
-                String species = SpeciesType.getCommonName(speciesTypeKey);
-                List<edu.mcw.rgd.datamodel.Map> maps = mapDAO.getMaps(speciesTypeKey);
-                for (edu.mcw.rgd.datamodel.Map m : maps) {
-
-                    GenomeIndexObject obj = new GenomeIndexObject();
-                    obj.setSpecies(species);
-                    AssemblyInfo info = new AssemblyInfo();
-                    info = genomeDAO.getAssemblyInfo(m);
-                    //    info=genomeDAO.getAssemblyInfo(3, 70);
-                    obj.setBasePairs(info.getBasePairs());
-                    obj.setTotalSeqLength(info.getTotalSeqLength());
-                    obj.setTotalUngappedLength(info.getTotalUngappedLength());
-                    obj.setGapBetweenScaffolds(info.getGapBetweenScaffolds());
-                    obj.setScaffolds(info.getScaffolds());
-                    obj.setScaffoldN50(info.getScaffoldN50());
-                    obj.setScaffoldL50(info.getScaffoldL50());
-                    obj.setContigs(info.getContigs());
-                    obj.setContigN50(info.getContigN50());
-                    obj.setContigL50(info.getContigL50());
-                    obj.setChromosomes(info.getChromosome());
-                    obj.setNcbiLink(info.getNcbiLink());
-                    obj.setRefSeqAssemblyAccession(info.getRefSeqAssemblyAccession());
-                    obj.setMapKey(m.getKey());
-                    //      obj.setMapKey(70);
-
-                    GeneCounts geneCounts = new GeneCounts();
-                    geneCounts = genomeDAO.getGeneCounts(m.getKey(), speciesTypeKey, null);
-                    // geneCounts= genomeDAO.getGeneCounts(70);
-                    obj.setTotalGenes(geneCounts.getTotalGenes());
-                    obj.setProteinCoding(geneCounts.getProteinCoding());
-                    obj.setNcrna(geneCounts.getNcrna());
-                    obj.settRna(geneCounts.gettRna());
-                    obj.setSnRna(geneCounts.getSnRna());
-                    obj.setrRna(geneCounts.getrRna());
-                    obj.setPseudo(geneCounts.getPseudo());
-                    obj.setTranscripts(geneCounts.getTranscripts());
-
-                    Map<String, Integer> mirnaTargets = geneCounts.getMirnaTargets();
-                    for (Map.Entry entry : mirnaTargets.entrySet()) {
-                        String targetType = (String) entry.getKey();
-                        int value = (int) entry.getValue();
-                        if (targetType.equalsIgnoreCase("confirmed")) {
-                            obj.setMirnaTargetsConfirmed(value);
-                        }
-                        if (targetType.equalsIgnoreCase("predicted")) {
-                            obj.setMirnaTargetsPredicted(value);
-                        }
-                    }
-                    objects.add(obj);
-                }
-
-            }else{
-                if(speciesTypeKey==3 || speciesTypeKey==2 || speciesTypeKey==1 || speciesTypeKey==4 || speciesTypeKey==5
-                        || speciesTypeKey==7 || speciesTypeKey==6 || speciesTypeKey==9){
-                    throw new Exception("Species Type Key: " +speciesTypeKey +"\tin getGenomeInfo Method"+"\t isSearchable: "+ isSearchable);
-                }
-            }
-        }
-     //   System.out.println("GENOMEINFO OBJECTS SIZE: "+ objects.size());
-
-        return objects;
-    }
+//    public List<GenomeIndexObject> getGenomeInfo() throws Exception {
+//        List<GenomeIndexObject> objects= new ArrayList<>();
+//        for(int speciesTypeKey : SpeciesType.getSpeciesTypeKeys()) {
+//            //  int key=3;
+//            boolean isSearchable=SpeciesType.isSearchable(speciesTypeKey);
+//            if (speciesTypeKey != 0 && isSearchable) {
+//             //   System.out.println("SPECIES TYPE KEY: " + key);
+//                String species = SpeciesType.getCommonName(speciesTypeKey);
+//                List<edu.mcw.rgd.datamodel.Map> maps = mapDAO.getMaps(speciesTypeKey);
+//                for (edu.mcw.rgd.datamodel.Map m : maps) {
+//
+//                    GenomeIndexObject obj = new GenomeIndexObject();
+//                    obj.setSpecies(species);
+//                    AssemblyInfo info = new AssemblyInfo();
+//                    info = genomeDAO.getAssemblyInfo(m);
+//                    //    info=genomeDAO.getAssemblyInfo(3, 70);
+//                    obj.setBasePairs(info.getBasePairs());
+//                    obj.setTotalSeqLength(info.getTotalSeqLength());
+//                    obj.setTotalUngappedLength(info.getTotalUngappedLength());
+//                    obj.setGapBetweenScaffolds(info.getGapBetweenScaffolds());
+//                    obj.setScaffolds(info.getScaffolds());
+//                    obj.setScaffoldN50(info.getScaffoldN50());
+//                    obj.setScaffoldL50(info.getScaffoldL50());
+//                    obj.setContigs(info.getContigs());
+//                    obj.setContigN50(info.getContigN50());
+//                    obj.setContigL50(info.getContigL50());
+//                    obj.setChromosomes(info.getChromosome());
+//                    obj.setNcbiLink(info.getNcbiLink());
+//                    obj.setRefSeqAssemblyAccession(info.getRefSeqAssemblyAccession());
+//                    obj.setMapKey(m.getKey());
+//                    //      obj.setMapKey(70);
+//
+//                    GeneCounts geneCounts = new GeneCounts();
+//                    geneCounts = genomeDAO.getGeneCounts(m.getKey(), speciesTypeKey, null);
+//                    // geneCounts= genomeDAO.getGeneCounts(70);
+//                    obj.setTotalGenes(geneCounts.getTotalGenes());
+//                    obj.setProteinCoding(geneCounts.getProteinCoding());
+//                    obj.setNcrna(geneCounts.getNcrna());
+//                    obj.settRna(geneCounts.gettRna());
+//                    obj.setSnRna(geneCounts.getSnRna());
+//                    obj.setrRna(geneCounts.getrRna());
+//                    obj.setPseudo(geneCounts.getPseudo());
+//                    obj.setTranscripts(geneCounts.getTranscripts());
+//
+//                    Map<String, Integer> mirnaTargets = geneCounts.getMirnaTargets();
+//                    for (Map.Entry entry : mirnaTargets.entrySet()) {
+//                        String targetType = (String) entry.getKey();
+//                        int value = (int) entry.getValue();
+//                        if (targetType.equalsIgnoreCase("confirmed")) {
+//                            obj.setMirnaTargetsConfirmed(value);
+//                        }
+//                        if (targetType.equalsIgnoreCase("predicted")) {
+//                            obj.setMirnaTargetsPredicted(value);
+//                        }
+//                    }
+//                    objects.add(obj);
+//                }
+//
+//            }else{
+//                if(speciesTypeKey==3 || speciesTypeKey==2 || speciesTypeKey==1 || speciesTypeKey==4 || speciesTypeKey==5
+//                        || speciesTypeKey==7 || speciesTypeKey==6 || speciesTypeKey==9){
+//                    throw new Exception("Species Type Key: " +speciesTypeKey +"\tin getGenomeInfo Method"+"\t isSearchable: "+ isSearchable);
+//                }
+//            }
+//        }
+//     //   System.out.println("GENOMEINFO OBJECTS SIZE: "+ objects.size());
+//
+//        return objects;
+//    }
 
 
     public void getGenes() throws Exception {
@@ -473,12 +473,9 @@ public class IndexDAO extends AbstractDAO {
     }
 
     public void getQtls() throws Exception{
-        List<IndexObject> objList= new ArrayList<>();
-     //   List<Alias> aliases=aliasDAO.getActiveAliases(RgdId.OBJECT_KEY_QTLS);
         List<QTL> qtls=qtlDAO.getActiveQTLs();
         ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
         for(QTL qtl: qtls) {
-            // QTL qtl= qtlDAO.getQTL(61368);
             Runnable workerThread= new IndexQTL(qtl);
             executor.execute(workerThread);
         }

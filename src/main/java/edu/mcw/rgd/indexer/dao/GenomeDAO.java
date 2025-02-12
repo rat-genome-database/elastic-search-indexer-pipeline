@@ -8,6 +8,7 @@ import edu.mcw.rgd.dao.spring.CountQuery;
 import edu.mcw.rgd.datamodel.*;
 
 
+import edu.mcw.rgd.datamodel.ontologyx.TermWithStats;
 import edu.mcw.rgd.indexer.model.genomeInfo.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -112,10 +113,10 @@ public class GenomeDAO extends AbstractDAO{
 
         return info;
     }
-    public GeneCounts  getGeneCounts(int mapKey, int speciesTypeKey, String chr) throws Exception {
 
-        GeneDAO geneDAO= new GeneDAO();
 
+    public GeneCounts getGeneCounts(int mapKey, int speciesTypeKey, String chr,List<MappedGene> mGenes) throws Exception {
+        GeneCounts geneCounts = new GeneCounts();
 
         int proteninCoding=0;
         int ncrna=0;
@@ -123,19 +124,18 @@ public class GenomeDAO extends AbstractDAO{
         int snrna=0;
         int rrna=0;
         int pseudo=0;
-
-        GeneCounts geneCounts = new GeneCounts();
         List<MappedGene> filteredGenes= new ArrayList<>();
-        List<MappedGene> mGenes= geneDAO.getActiveMappedGenes(mapKey);
-        if(chr!=null){
-            for(MappedGene m: mGenes){
-                if(m.getChromosome().equals(chr)){
+
+        if(chr!=null) { // for chromosome only
+            for (MappedGene m : mGenes) {
+                if (m.getChromosome().equals(chr)) {
                     filteredGenes.add(m);
                 }
             }
-        }else{
+        }else{ // for genomeInfo entire map
             filteredGenes=mGenes;
         }
+
         if(filteredGenes.size()>0) {
             for (MappedGene g : filteredGenes) {
 
@@ -179,7 +179,6 @@ public class GenomeDAO extends AbstractDAO{
         geneCounts.setOrthologCountsMap(orthCounts);
 
         return geneCounts;
-
     }
     public Map<String, Integer> getOrthologCounts(int mapKey, int speciesTypeKey, String chr) throws Exception {
 
@@ -253,7 +252,6 @@ public class GenomeDAO extends AbstractDAO{
                long value = rs.getLong("tot");
                objectCounts.put(name, value);
            }
-           preparedStatement.close();
            rs.close();
 
        }
@@ -314,9 +312,9 @@ public class GenomeDAO extends AbstractDAO{
      return ((Integer)results.get(0)).intValue();
 
     }
-    public List<DiseaseGeneObject> getDiseaseGenes(int mapKey, String chr, int speciesTypeKey) throws Exception {
+    public List<DiseaseGeneObject> getDiseaseGenes(int mapKey, String chr, int speciesTypeKey, List<TermWithStats> topLevelDiseaseTerms) throws Exception {
         DiseaseGeneSets d= new DiseaseGeneSets();
-        return d.getDiseaseGeneSets(mapKey, chr, speciesTypeKey);
+        return d.getDiseaseGeneSets(mapKey, chr, speciesTypeKey,topLevelDiseaseTerms);
     }
 
     public int getProteinCounts(int mapKey, String chr) throws Exception {

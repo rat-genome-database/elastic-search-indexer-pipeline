@@ -3,7 +3,9 @@ package edu.mcw.rgd.indexer;
 import edu.mcw.rgd.dao.impl.MapDAO;
 import edu.mcw.rgd.datamodel.Chromosome;
 import edu.mcw.rgd.datamodel.Map;
+import edu.mcw.rgd.datamodel.MappedGene;
 import edu.mcw.rgd.datamodel.SpeciesType;
+import edu.mcw.rgd.datamodel.ontologyx.TermWithStats;
 import edu.mcw.rgd.indexer.dao.ChromosomeThread;
 import edu.mcw.rgd.indexer.dao.GenomeDAO;
 import edu.mcw.rgd.indexer.dao.StrainVariants;
@@ -23,14 +25,19 @@ public class ChromosomeMapDataThread implements Runnable {
 
     private Map m;
     private int key;
+    private List<MappedGene> mappedGenes;
     MapDAO mapDAO = new MapDAO();
-
+    List<Chromosome>   chromosomes ;
+    List<TermWithStats> topLevelDiseaseTerms;
     GenomeDAO genomeDAO=new GenomeDAO();
     StrainVariants variants=new StrainVariants();
 
-    public ChromosomeMapDataThread(int key, Map m) {
+    public ChromosomeMapDataThread(int key, Map m,List<MappedGene> mappedGenes, List<Chromosome>   chromosomes, List<TermWithStats> topLevelDiseaseTerms ) {
+        this.chromosomes=chromosomes;
         this.m = m;
         this.key = key;
+        this.mappedGenes=mappedGenes;
+        this.topLevelDiseaseTerms=topLevelDiseaseTerms;
     }
 
     Logger log = LogManager.getLogger("chromosomeMapDataThread");
@@ -38,7 +45,7 @@ public class ChromosomeMapDataThread implements Runnable {
     @Override
     public void run() {
         int mapKey = m.getKey();
-        log.info(Thread.currentThread().getName() + ": " + SpeciesType.getCommonName(key) + " || Mapkey- "+mapKey+ " STARTED " + new Date());
+        log.info(Thread.currentThread().getName() + ": " + SpeciesType.getCommonName(key) + " || Mapkey-"+mapKey+ " STARTED " + new Date());
 
         ExecutorService executor = new MyThreadPoolExecutor(10, 10, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
 
@@ -48,14 +55,14 @@ public class ChromosomeMapDataThread implements Runnable {
         if (mapKey != 6 && mapKey != 36 && mapKey != 8 && mapKey != 21 && mapKey != 19 && mapKey != 7 &&
                 mapKey != 720 && mapKey != 44 && mapKey != 722 && mapKey != 1313 && mapKey != 1410 && mapKey != 1701 && mapKey != 514) {
                 try {
-                    List<Chromosome>   chromosomes = mapDAO.getChromosomes(mapKey);
+
 
                     for (Chromosome c : chromosomes) {
 //                        log.info(Thread.currentThread().getName() + ": " + SpeciesType.getCommonName(key) + " ||  MapKey " + mapKey + " CHR-"+ c.getChromosome()+" started " + new Date());
 //
                         GeneCounts geneCounts = null;
                         try {
-                            geneCounts = genomeDAO.getGeneCounts(mapKey, key, c.getChromosome());
+                            geneCounts = genomeDAO.getGeneCounts( mapKey, key,c.getChromosome(), mappedGenes);
                         } catch (Exception e) {
                             throw new RuntimeException(e);
                         }
@@ -67,7 +74,7 @@ public class ChromosomeMapDataThread implements Runnable {
                         }
                         List<DiseaseGeneObject> diseaseGenes = null;
                         try {
-                            diseaseGenes = genomeDAO.getDiseaseGenes(mapKey, c.getChromosome(), key);
+                            diseaseGenes = genomeDAO.getDiseaseGenes(mapKey, c.getChromosome(), key,topLevelDiseaseTerms);
                         } catch (Exception e) {
                             throw new RuntimeException(e);
                         }
