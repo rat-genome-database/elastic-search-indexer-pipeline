@@ -9,11 +9,13 @@ import edu.mcw.rgd.indexer.dao.variants.BulkIndexProcessor;
 import edu.mcw.rgd.indexer.model.RgdIndex;
 import edu.mcw.rgd.indexer.model.genomeInfo.*;
 
+import edu.mcw.rgd.services.ClientInit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import org.elasticsearch.action.index.IndexRequest;
 
+import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.xcontent.XContentType;
 
 import java.io.IOException;
@@ -200,8 +202,10 @@ public class ChromosomeThread implements  Runnable {
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
             }
-            BulkIndexProcessor.bulkProcessor.add(new IndexRequest(RgdIndex.getNewAlias()).source(json, XContentType.JSON));
+//            BulkIndexProcessor.bulkProcessor.add(new IndexRequest(RgdIndex.getNewAlias()).source(json, XContentType.JSON));
 
+        IndexRequest indexRequest=new IndexRequest(index).source(json, XContentType.JSON);
+        ClientInit.getClient().index(indexRequest, RequestOptions.DEFAULT);
     }
 public StringBuffer getDiseaseGeneChartData(List<DiseaseGeneObject> diseaseGenes){
     StringBuffer sb = new StringBuffer();
