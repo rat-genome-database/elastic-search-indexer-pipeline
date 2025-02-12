@@ -26,18 +26,20 @@ public class ChromosomeMapDataThread implements Runnable {
     private Map m;
     private int key;
     private List<MappedGene> mappedGenes;
+    private Chromosome c;
     MapDAO mapDAO = new MapDAO();
-    List<Chromosome>   chromosomes ;
+//    List<Chromosome>   chromosomes ;
     List<TermWithStats> topLevelDiseaseTerms;
     GenomeDAO genomeDAO=new GenomeDAO();
     StrainVariants variants=new StrainVariants();
 
-    public ChromosomeMapDataThread(int key, Map m,List<MappedGene> mappedGenes, List<Chromosome>   chromosomes, List<TermWithStats> topLevelDiseaseTerms ) {
-        this.chromosomes=chromosomes;
+    public ChromosomeMapDataThread(int key, Map m,List<MappedGene> mappedGenes, List<Chromosome>   chromosomes, List<TermWithStats> topLevelDiseaseTerms, Chromosome c ) {
+//        this.chromosomes=chromosomes;
         this.m = m;
         this.key = key;
         this.mappedGenes=mappedGenes;
         this.topLevelDiseaseTerms=topLevelDiseaseTerms;
+        this.c=c;
     }
 
     Logger log = LogManager.getLogger("chromosomeMapDataThread");
@@ -47,17 +49,17 @@ public class ChromosomeMapDataThread implements Runnable {
         int mapKey = m.getKey();
         log.info(Thread.currentThread().getName() + ": " + SpeciesType.getCommonName(key) + " || Mapkey-"+mapKey+ " STARTED " + new Date());
 
-        ExecutorService executor = new MyThreadPoolExecutor(10, 10, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+//        ExecutorService executor = new MyThreadPoolExecutor(10, 10, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
 
         //   for (Map m : maps) {
 
         String assembly = m.getName();
-        if (mapKey != 6 && mapKey != 36 && mapKey != 8 && mapKey != 21 && mapKey != 19 && mapKey != 7 &&
-                mapKey != 720 && mapKey != 44 && mapKey != 722 && mapKey != 1313 && mapKey != 1410 && mapKey != 1701 && mapKey != 514) {
+//        if (mapKey != 6 && mapKey != 36 && mapKey != 8 && mapKey != 21 && mapKey != 19 && mapKey != 7 &&
+//                mapKey != 720 && mapKey != 44 && mapKey != 722 && mapKey != 1313 && mapKey != 1410 && mapKey != 1701 && mapKey != 514) {
                 try {
 
 
-                    for (Chromosome c : chromosomes) {
+              //      for (Chromosome c : chromosomes) {
 //                        log.info(Thread.currentThread().getName() + ": " + SpeciesType.getCommonName(key) + " ||  MapKey " + mapKey + " CHR-"+ c.getChromosome()+" started " + new Date());
 //
                         GeneCounts geneCounts = null;
@@ -87,23 +89,23 @@ public class ChromosomeMapDataThread implements Runnable {
                             }
                         }
 //                        Runnable workerThread = new ChromosomeThread(c, key, RgdIndex.getNewAlias(), mapKey, assembly);
-                        Runnable workerThread = new ChromosomeThread(c, key, RgdIndex.getNewAlias(), mapKey, assembly, geneCounts, objectsCountsMap, diseaseGenes, strainVairantMatrix);
-                        executor.execute(workerThread);
-                    }
+                       ChromosomeThread chromosomeThread = new ChromosomeThread(c, key, RgdIndex.getNewAlias(), mapKey, assembly, geneCounts, objectsCountsMap, diseaseGenes, strainVairantMatrix);
+                        chromosomeThread.run();
+                 //   }
 
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
 
 
-            }
+          //  }
             // }
 
 
         log.info(Thread.currentThread().getName() + ": " + SpeciesType.getCommonName(key) + " || Mapkey- "+mapKey+ " END " + new Date());
 
-        executor.shutdown();
-        while(!executor.isTerminated()){}
+//        executor.shutdown();
+//        while(!executor.isTerminated()){}
     }
 }
 

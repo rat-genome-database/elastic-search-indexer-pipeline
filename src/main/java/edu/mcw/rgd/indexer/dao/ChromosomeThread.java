@@ -26,7 +26,7 @@ import java.util.concurrent.ExecutionException;
 /**
  * Created by jthota on 11/7/2017.
  */
-public class ChromosomeThread implements  Runnable {
+public class ChromosomeThread  {
  //   private Thread t;
     private int key;
     private int mapKey;
@@ -54,9 +54,8 @@ public class ChromosomeThread implements  Runnable {
         this.diseaseGenes=diseaseGenes;
         this.strainVairantMatrix=strainVairantMatrix;
     }
-    Logger log = LogManager.getLogger("chromosome");
 
-    @Override
+
     public void run()  {
 //        Logger log = LogManager.getLogger("chromosome");
 //        log.info(Thread.currentThread().getName() + ": " + SpeciesType.getCommonName(key) + " || ChromosomeThread MapKey "+mapKey+ " started " + new Date());

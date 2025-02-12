@@ -120,7 +120,7 @@ public class Manager {
             boolean searchIndexCreated=false;
             //int runningThreadsCount=0;
             for (String arg : args) {
-                Runnable workerThread;
+
 
 
                 switch(arg){
@@ -148,7 +148,7 @@ public class Manager {
                                 List<TermSynonym> termSynonyms = (List<TermSynonym>) OntologySynonyms.ontSynonyms.get(ont_id);
                                 //     if(!ont_id.equalsIgnoreCase("CHEBI")) {
 
-                                workerThread = new IndexerDAO(ont_id, o.getName(), RgdIndex.getNewAlias(), termSynonyms,false);
+                                Runnable workerThread = new IndexerDAO(ont_id, o.getName(), RgdIndex.getNewAlias(), termSynonyms,false);
                                 executor.execute(workerThread);
                             }
                         }
@@ -157,7 +157,6 @@ public class Manager {
 
 
                     case "Chromosomes":
-                        executor=new MyThreadPoolExecutor(3, 3,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
                         admin.createIndex("chromosome_mappings", "chromosome");
                         if(arg.equalsIgnoreCase("chromosomes")){
                             MapDAO mapDAO= new MapDAO();
@@ -165,22 +164,31 @@ public class Manager {
                             OntologyXDAO ontologyXDAO=new OntologyXDAO();
 
                             log.info("INDEXING Chromosomes...");
+                            String rootTerm="DOID:4";
+                            List<TermWithStats> topLevelDiseaseTerms=   ontologyXDAO.getActiveChildTerms(rootTerm,3);
+
                             for(int speciesTypeKey : SpeciesType.getSpeciesTypeKeys()) {
                                 if (SpeciesType.isSearchable(speciesTypeKey)) {
                                     //   int key=3;
                                     if (speciesTypeKey != 0) {
-                                        String rootTerm="DOID:4";
-                                        List<TermWithStats> topLevelDiseaseTerms=   ontologyXDAO.getActiveChildTerms(rootTerm,3);
 
                                         try {
                                             List<Map>  maps = mapDAO.getMaps(speciesTypeKey, "bp");
                                             for(Map map:maps){
-                                                List<MappedGene> mappedGenes=geneDAO.getActiveMappedGenes(map.getKey());
+                                                int mapKey=map.getKey();
+                                                if (mapKey != 6 && mapKey != 36 && mapKey != 8 && mapKey != 21 && mapKey != 19 && mapKey != 7 &&
+                                                        mapKey != 720 && mapKey != 44 && mapKey != 722 && mapKey != 1313 && mapKey != 1410 && mapKey != 1701 && mapKey != 514) {
+
+                                                    List<MappedGene> mappedGenes=geneDAO.getActiveMappedGenes(map.getKey());
                                                 List<Chromosome>   chromosomes = mapDAO.getChromosomes(map.getKey());
 
-                                                workerThread=new ChromosomeMapDataThread(speciesTypeKey,map, mappedGenes, chromosomes,topLevelDiseaseTerms);
-                                                executor.execute(workerThread);
-                                            }
+                                                for(Chromosome chromosome:chromosomes) {
+                                                    if(!chromosome.getChromosome().startsWith("N")) { //skip scaffolds
+                                                        Runnable workerThread = new ChromosomeMapDataThread(speciesTypeKey, map, mappedGenes, chromosomes, topLevelDiseaseTerms, chromosome);
+                                                        executor.execute(workerThread);
+                                                    }
+                                                }
+                                            }}
                                         } catch (Exception e) {
                                             throw new RuntimeException(e);
                                         }
@@ -198,7 +206,7 @@ public class Manager {
                          //    int key=3;
                            if(SpeciesType.isSearchable(key)) {
                                if (key != 0) {
-                                   workerThread = new GenomeInfoThread(key, RgdIndex.getNewAlias(), log);
+                                   Runnable workerThread = new GenomeInfoThread(key, RgdIndex.getNewAlias(), log);
                                    executor.execute(workerThread);
                                }
                            }
@@ -237,7 +245,7 @@ public class Manager {
                                 List<TermSynonym> termSynonyms = (List<TermSynonym>) OntologySynonyms.ontSynonyms.get(ont_id);
                                 //     if(!ont_id.equalsIgnoreCase("CHEBI")) {
 
-                                workerThread = new IndexerDAO(ont_id, o.getName(), RgdIndex.getNewAlias(), termSynonyms, true);
+                            Runnable workerThread = new IndexerDAO(ont_id, o.getName(), RgdIndex.getNewAlias(), termSynonyms, true);
                                 executor.execute(workerThread);
                            // }
                         }
