@@ -157,7 +157,7 @@ public class Manager {
 
 
                     case "Chromosomes":
-                        executor=new MyThreadPoolExecutor(3, 3,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>())
+                        executor=new MyThreadPoolExecutor(3, 3,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
                         admin.createIndex("chromosome_mappings", "chromosome");
                         if(arg.equalsIgnoreCase("chromosomes")){
                             MapDAO mapDAO= new MapDAO();
