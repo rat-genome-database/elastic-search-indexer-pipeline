@@ -174,7 +174,7 @@ public class ChromosomeThread  {
                     if(key==3 && (mapKey==372 || mapKey==70 || mapKey==60)) {
                         obj.setVariantsMatrix(strainVairantMatrix);
                     }
-                    indexObject(obj);
+//                    indexObject(obj);
 //                    BulkIndexProcessor.bulkProcessor.add(new IndexRequest(index, "chromosome").source(obj, XContentType.JSON));
 
             // }

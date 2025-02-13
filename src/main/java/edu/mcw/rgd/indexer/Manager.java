@@ -1,10 +1,14 @@
 package edu.mcw.rgd.indexer;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.mcw.rgd.dao.DataSourceFactory;
 import edu.mcw.rgd.dao.impl.GeneDAO;
 import edu.mcw.rgd.dao.impl.MapDAO;
 import edu.mcw.rgd.dao.impl.OntologyXDAO;
 
 
+import edu.mcw.rgd.dao.impl.SampleDAO;
 import edu.mcw.rgd.datamodel.*;
 import edu.mcw.rgd.datamodel.ontologyx.Ontology;
 
@@ -30,6 +34,8 @@ import org.elasticsearch.action.admin.cluster.health.ClusterHealthRequest;
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
 
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest;
+import org.elasticsearch.action.bulk.BulkRequest;
+import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -157,11 +163,18 @@ public class Manager {
 
 
                     case "Chromosomes":
+                        BulkRequest bulkRequest = new BulkRequest();
+                        ObjectMapper mapper=new ObjectMapper();
+                        mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+                        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
                         admin.createIndex("chromosome_mappings", "chromosome");
                         if(arg.equalsIgnoreCase("chromosomes")){
                             MapDAO mapDAO= new MapDAO();
                             GeneDAO geneDAO=new GeneDAO();
                             OntologyXDAO ontologyXDAO=new OntologyXDAO();
+                            SampleDAO sampleDAO= new SampleDAO();
+                            sampleDAO.setDataSource(DataSourceFactory.getInstance().getCarpeNovoDataSource());
+
 
                             log.info("INDEXING Chromosomes...");
                             String rootTerm="DOID:4";
@@ -181,10 +194,14 @@ public class Manager {
 
                                                     List<MappedGene> mappedGenes=geneDAO.getActiveMappedGenes(map.getKey());
                                                 List<Chromosome>   chromosomes = mapDAO.getChromosomes(map.getKey());
-
+                                                List<Sample> samples=null;
+                                                if(speciesTypeKey==3 && (mapKey==372 || mapKey==360 || mapKey==70 || mapKey==60))
+                                                {
+                                                    samples=sampleDAO.getSamplesByMapKey(mapKey);
+                                                }
                                                 for(Chromosome chromosome:chromosomes) {
                                                     if(!chromosome.getChromosome().startsWith("N")) { //skip scaffolds
-                                                        Runnable workerThread = new ChromosomeMapDataThread(speciesTypeKey, map, mappedGenes, chromosomes, topLevelDiseaseTerms, chromosome);
+                                                        Runnable workerThread = new ChromosomeMapDataThread(speciesTypeKey, map, mappedGenes, chromosomes, topLevelDiseaseTerms, chromosome,bulkRequest, mapper, samples);
                                                         executor.execute(workerThread);
                                                     }
                                                 }
@@ -196,6 +213,13 @@ public class Manager {
                                 }
                             }
                         }
+
+                        }
+                        BulkResponse bulkResponse = ClientInit.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
+                        if (bulkResponse.hasFailures()) {
+                            System.err.println("Bulk indexing had errors!");
+                        } else {
+                            System.out.println("Bulk indexing completed.");
                         }
                         break;
                     case "GenomeInfo":

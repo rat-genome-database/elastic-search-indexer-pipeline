@@ -2,9 +2,7 @@ package edu.mcw.rgd.indexer.dao;
 
 import edu.mcw.rgd.dao.AbstractDAO;
 import edu.mcw.rgd.dao.DataSourceFactory;
-import edu.mcw.rgd.dao.impl.MapDAO;
-import edu.mcw.rgd.dao.impl.SampleDAO;
-import edu.mcw.rgd.datamodel.Chromosome;
+
 import edu.mcw.rgd.datamodel.Sample;
 import edu.mcw.rgd.indexer.model.genomeInfo.VariantCounts;
 
@@ -12,7 +10,6 @@ import edu.mcw.rgd.indexer.model.genomeInfo.VariantCounts;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,11 +18,9 @@ import java.util.List;
  */
 public class StrainVariants extends AbstractDAO{
 
-    public String[][] getStrainVariants(int mapKey, String chr) throws Exception {
+    public String[][] getStrainVariants(int mapKey, String chr, List<Sample> samples) throws Exception {
 
-        SampleDAO sampleDAO= new SampleDAO();
-        sampleDAO.setDataSource(DataSourceFactory.getInstance().getCarpeNovoDataSource());
-        List<edu.mcw.rgd.datamodel.Sample> samples=sampleDAO.getSamplesByMapKey(mapKey);
+
         List<VariantCounts> variantCounts=this.getVariants(samples, chr, mapKey);
         int size=variantCounts.size();
         String matrix[][]= new String[4][size];
@@ -102,9 +97,5 @@ public class StrainVariants extends AbstractDAO{
 
         return variantCounts;
     }
-public static void main(String[] args) throws Exception {
-    StrainVariants s= new StrainVariants();
-    s.getStrainVariants(360, null);
-    System.out.println("DONE");
-}
+
 }

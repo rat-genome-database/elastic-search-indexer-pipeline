@@ -2,8 +2,10 @@ package edu.mcw.rgd.indexer.dao;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.mcw.rgd.dao.DataSourceFactory;
 import edu.mcw.rgd.dao.impl.GeneDAO;
 import edu.mcw.rgd.dao.impl.MapDAO;
+import edu.mcw.rgd.dao.impl.SampleDAO;
 import edu.mcw.rgd.datamodel.Map;
 import edu.mcw.rgd.datamodel.MappedGene;
 import edu.mcw.rgd.datamodel.SpeciesType;
@@ -61,8 +63,12 @@ public class GenomeInfoThread implements Runnable {
 
          String species = SpeciesType.getCommonName(key);
             List<Map> maps = mapDAO.getMaps(key,"bp");
+         SampleDAO sampleDAO= new SampleDAO();
+         sampleDAO.setDataSource(DataSourceFactory.getInstance().getCarpeNovoDataSource());
         for (edu.mcw.rgd.datamodel.Map m : maps) {
            //   Map m= mapDAO.getMap(360);
+
+            List<edu.mcw.rgd.datamodel.Sample> samples=sampleDAO.getSamplesByMapKey(mapKey);
             List<MappedGene> mappedGenes=geneDAO.getActiveMappedGenes(m.getKey());
                 int mapKey=m.getKey();
                 if(mapKey!=6 && mapKey!=36 && mapKey!=8 && mapKey!=21 && mapKey!=19 && mapKey!=7 && mapKey!=900) {
@@ -168,7 +174,7 @@ public class GenomeInfoThread implements Runnable {
                 }
                 if (key == 3) {
                     if (mapKey == 360 || mapKey == 70 || mapKey == 60 || mapKey == 372 || mapKey==38) {
-                        String[][] strainVairantMatrix = variants.getStrainVariants(mapKey, null);
+                        String[][] strainVairantMatrix = variants.getStrainVariants(mapKey, null, samples);
                         obj.setVariantsMatrix(strainVairantMatrix);
                     }
                 }
