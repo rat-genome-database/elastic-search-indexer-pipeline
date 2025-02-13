@@ -65,6 +65,7 @@ public class Manager {
     private RgdIndex rgdIndex;
     private boolean reindex;
     BulkIndexProcessor bulkIndexProcessor;
+    BulkRequest bulkRequest;
     IndexDAO indexDAO=new IndexDAO();
     private final Logger log = LogManager.getLogger("main");
 
@@ -163,7 +164,7 @@ public class Manager {
 
 
                     case "Chromosomes":
-                        BulkRequest bulkRequest = new BulkRequest();
+                        bulkRequest = new BulkRequest();
                         ObjectMapper mapper=new ObjectMapper();
                         mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
                         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
@@ -223,12 +224,7 @@ public class Manager {
                         }
 
                         }
-                        BulkResponse bulkResponse = ClientInit.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
-                        if (bulkResponse.hasFailures()) {
-                            System.err.println("Bulk indexing had errors!");
-                        } else {
-                            System.out.println("Bulk indexing completed.");
-                        }
+
                         break;
                     case "GenomeInfo":
 
@@ -289,6 +285,14 @@ public class Manager {
             }
            executor.shutdown();
             while (!executor.isTerminated()) {}
+            if(bulkRequest!=null) {
+                BulkResponse bulkResponse = ClientInit.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
+                if (bulkResponse.hasFailures()) {
+                    System.err.println("Bulk indexing had errors!");
+                } else {
+                    System.out.println("Bulk indexing completed.");
+                }
+            }
             System.out.println("Finished all threads: " + new Date());
             log.info("Finished all threads: " + new Date());
 
