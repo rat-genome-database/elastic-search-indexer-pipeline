@@ -174,7 +174,7 @@ public class Manager {
                             OntologyXDAO ontologyXDAO=new OntologyXDAO();
                             SampleDAO sampleDAO= new SampleDAO();
                             sampleDAO.setDataSource(DataSourceFactory.getInstance().getCarpeNovoDataSource());
-
+                            StrainVariants variants=new StrainVariants();
 
                             log.info("INDEXING Chromosomes...");
                             String rootTerm="DOID:4";
@@ -201,7 +201,15 @@ public class Manager {
                                                 }
                                                 for(Chromosome chromosome:chromosomes) {
                                                     if(!chromosome.getChromosome().startsWith("N")) { //skip scaffolds
-                                                        Runnable workerThread = new ChromosomeMapDataThread(speciesTypeKey, map, mappedGenes, chromosomes, topLevelDiseaseTerms, chromosome,bulkRequest, mapper, samples);
+                                                        String[][] strainVairantMatrix = null;
+                                                        if (speciesTypeKey == 3 && (mapKey==372 || mapKey==360 || mapKey==70 || mapKey==60) ){
+                                                            try {
+                                                                strainVairantMatrix = variants.getStrainVariants(mapKey, chromosome.getChromosome(),samples);
+                                                            } catch (Exception e) {
+                                                                throw new RuntimeException(e);
+                                                            }
+                                                        }
+                                                        Runnable workerThread = new ChromosomeMapDataThread(speciesTypeKey, map, mappedGenes, topLevelDiseaseTerms, chromosome,bulkRequest, mapper,strainVairantMatrix);
                                                         executor.execute(workerThread);
                                                     }
                                                 }

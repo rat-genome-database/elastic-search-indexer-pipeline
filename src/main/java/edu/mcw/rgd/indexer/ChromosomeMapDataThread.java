@@ -33,14 +33,15 @@ public class ChromosomeMapDataThread implements Runnable {
     private Chromosome c;
     private BulkRequest bulkRequest;
     private ObjectMapper mapper;
-    MapDAO mapDAO = new MapDAO();
+
 //    List<Chromosome>   chromosomes ;
    private List<TermWithStats> topLevelDiseaseTerms;
-   private List<Sample> samples;
+
+   private String[][] strainVairantMatrix;
     GenomeDAO genomeDAO=new GenomeDAO();
     StrainVariants variants=new StrainVariants();
 
-    public ChromosomeMapDataThread(int key, Map m,List<MappedGene> mappedGenes, List<Chromosome>   chromosomes, List<TermWithStats> topLevelDiseaseTerms, Chromosome c,BulkRequest bulkRequest, ObjectMapper mapper, List<Sample> samples ) {
+    public ChromosomeMapDataThread(int key, Map m,List<MappedGene> mappedGenes,  List<TermWithStats> topLevelDiseaseTerms, Chromosome c,BulkRequest bulkRequest, ObjectMapper mapper ,String[][] strainVairantMatrix) {
 //        this.chromosomes=chromosomes;
         this.m = m;
         this.key = key;
@@ -49,7 +50,7 @@ public class ChromosomeMapDataThread implements Runnable {
         this.c=c;
         this.bulkRequest=bulkRequest;
         this.mapper=mapper;
-        this.samples=samples;
+        this.strainVairantMatrix=strainVairantMatrix;
     }
 
     Logger log = LogManager.getLogger("chromosomeMapDataThread");
@@ -89,14 +90,7 @@ public class ChromosomeMapDataThread implements Runnable {
                         } catch (Exception e) {
                             throw new RuntimeException(e);
                         }
-                        String[][] strainVairantMatrix = null;
-                        if (key == 3 && (mapKey==372 || mapKey==360 || mapKey==70 || mapKey==60) ){
-                            try {
-                          //   strainVairantMatrix = variants.getStrainVariants(mapKey, c.getChromosome(),samples);
-                            } catch (Exception e) {
-                                throw new RuntimeException(e);
-                            }
-                        }
+
 //                        Runnable workerThread = new ChromosomeThread(c, key, RgdIndex.getNewAlias(), mapKey, assembly);
 //                       ChromosomeThread chromosomeThread = new ChromosomeThread(c, key, RgdIndex.getNewAlias(), mapKey, assembly, geneCounts, objectsCountsMap, diseaseGenes, strainVairantMatrix);
 //                        chromosomeThread.run();
@@ -216,7 +210,7 @@ public class ChromosomeMapDataThread implements Runnable {
             obj.setDiseaseGenechartData(this.getDiseaseGeneChartData(diseaseGenes));
         }
         //ADD STRAIN VARIANTS IF SPECIES_TYPE_KEY=3 (RAT SPECIES)
-        if(key==3 && (mapKey==372 || mapKey==70 || mapKey==60)) {
+        if(key==3 && (mapKey==372 || mapKey==360 || mapKey==70 || mapKey==60)) {
             obj.setVariantsMatrix(strainVairantMatrix);
         }
 //                    indexObject(obj);
