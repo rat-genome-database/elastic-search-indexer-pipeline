@@ -190,6 +190,7 @@ public class Manager {
                                             List<Map>  maps = mapDAO.getMaps(speciesTypeKey, "bp");
                                             for(Map map:maps){
                                                 int mapKey=map.getKey();
+                                                if(mapKey==360){
                                                 if (mapKey != 6 && mapKey != 36 && mapKey != 8 && mapKey != 21 && mapKey != 19 && mapKey != 7 &&
                                                         mapKey != 720 && mapKey != 44 && mapKey != 722 && mapKey != 1313 && mapKey != 1410 && mapKey != 1701 && mapKey != 514) {
 
@@ -214,7 +215,7 @@ public class Manager {
                                                         executor.execute(workerThread);
                                                     }
                                                 }
-                                            }}
+                                            }}}
                                         } catch (Exception e) {
                                             throw new RuntimeException(e);
                                         }
