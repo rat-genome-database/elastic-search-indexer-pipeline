@@ -10,6 +10,7 @@ import edu.mcw.rgd.dao.impl.OntologyXDAO;
 
 import edu.mcw.rgd.dao.impl.SampleDAO;
 import edu.mcw.rgd.datamodel.*;
+import edu.mcw.rgd.datamodel.Map;
 import edu.mcw.rgd.datamodel.ontologyx.Ontology;
 
 import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
@@ -24,6 +25,8 @@ import edu.mcw.rgd.indexer.dao.variants.*;
 import edu.mcw.rgd.indexer.model.RgdIndex;
 import edu.mcw.rgd.indexer.model.findModels.ModelIndexObject;
 
+import edu.mcw.rgd.indexer.model.genomeInfo.VariantCounts;
+import edu.mcw.rgd.indexer.model.genomeInfo.VariantsCountsList;
 import edu.mcw.rgd.process.Utils;
 import edu.mcw.rgd.services.ClientInit;
 import org.apache.commons.lang.ArrayUtils;
@@ -43,10 +46,7 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.FileSystemResource;
 
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -173,8 +173,8 @@ public class Manager {
                             MapDAO mapDAO= new MapDAO();
                             GeneDAO geneDAO=new GeneDAO();
                             OntologyXDAO ontologyXDAO=new OntologyXDAO();
-                            SampleDAO sampleDAO= new SampleDAO();
-                            sampleDAO.setDataSource(DataSourceFactory.getInstance().getCarpeNovoDataSource());
+//                            SampleDAO sampleDAO= new SampleDAO();
+//                            sampleDAO.setDataSource(DataSourceFactory.getInstance().getCarpeNovoDataSource());
                             StrainVariants variants=new StrainVariants();
 
                             log.info("INDEXING Chromosomes...");
@@ -185,7 +185,11 @@ public class Manager {
                                 if (SpeciesType.isSearchable(speciesTypeKey)) {
                                     //   int key=3;
                                     if (speciesTypeKey != 0) {
-
+                                        VariantsCountsList variantsCountsList=null;
+                                        if(speciesTypeKey==3){
+                                            List<VariantCounts> variantCounts=variants.getVariantCounts(speciesTypeKey);
+                                             variantsCountsList=new VariantsCountsList(variantCounts);
+                                        }
                                         try {
                                             List<Map>  maps = mapDAO.getMaps(speciesTypeKey, "bp");
                                             for(Map map:maps){
@@ -195,17 +199,13 @@ public class Manager {
 
                                                     List<MappedGene> mappedGenes=geneDAO.getActiveMappedGenes(map.getKey());
                                                 List<Chromosome>   chromosomes = mapDAO.getChromosomes(map.getKey());
-                                                List<Sample> samples=null;
-                                                if(speciesTypeKey==3 && (mapKey==372 || mapKey==360 || mapKey==70 || mapKey==60))
-                                                {
-                                                    samples=sampleDAO.getSamplesByMapKey(mapKey);
-                                                }
+
                                                 for(Chromosome chromosome:chromosomes) {
                                                     if(!chromosome.getChromosome().startsWith("N")) { //skip scaffolds
                                                         String[][] strainVairantMatrix = null;
                                                         if (speciesTypeKey == 3 && (mapKey==372 || mapKey==360 || mapKey==70 || mapKey==60) ){
                                                             try {
-                                                                strainVairantMatrix = variants.getStrainVariants(mapKey, chromosome.getChromosome(),samples,speciesTypeKey);
+                                                                strainVairantMatrix = variants.getStrainVariants(mapKey, chromosome.getChromosome(), variantsCountsList);
                                                             } catch (Exception e) {
                                                                 throw new RuntimeException(e);
                                                             }
@@ -227,14 +227,19 @@ public class Manager {
 
                         break;
                     case "GenomeInfo":
-
+                            StrainVariants variants=new StrainVariants();
                         admin.createIndex("genome_mappings", "genome");
                         System.out.println("INDEXING GENOMEINFO...");
                        for(int key : SpeciesType.getSpeciesTypeKeys()) {
                          //    int key=3;
                            if(SpeciesType.isSearchable(key)) {
                                if (key != 0) {
-                                   Runnable workerThread = new GenomeInfoThread(key, RgdIndex.getNewAlias(), log);
+                                   VariantsCountsList variantsCountsList=null;
+                                   if(key==3){
+                                       List<VariantCounts>variantCounts=variants.getVariantCounts(key);
+                                      variantsCountsList =new VariantsCountsList(variantCounts);
+                                   }
+                                   Runnable workerThread = new GenomeInfoThread(key, RgdIndex.getNewAlias(), variantsCountsList);
                                    executor.execute(workerThread);
                                }
                            }

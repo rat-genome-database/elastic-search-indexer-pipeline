@@ -14,6 +14,7 @@ import edu.mcw.rgd.indexer.model.genomeInfo.AssemblyInfo;
 import edu.mcw.rgd.indexer.model.genomeInfo.GeneCounts;
 import edu.mcw.rgd.indexer.model.genomeInfo.GenomeIndexObject;
 
+import edu.mcw.rgd.indexer.model.genomeInfo.VariantsCountsList;
 import edu.mcw.rgd.services.ClientInit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -40,12 +41,14 @@ public class GenomeInfoThread implements Runnable {
     private int key;
     private int mapKey;
     private String index;
+    private VariantsCountsList variantsCountsList;
     GeneDAO geneDAO=new GeneDAO();
 
-    public GenomeInfoThread(int speciestypeKey, String index, Logger log){
+    public GenomeInfoThread(int speciestypeKey, String index,  VariantsCountsList variantsCountsList){
 
      this.key=speciestypeKey;
        this.index= index;
+       this.variantsCountsList=variantsCountsList;
 
     }
 
@@ -173,8 +176,9 @@ public class GenomeInfoThread implements Runnable {
                     }
                 }
                 if (key == 3) {
-                    if (mapKey == 360 || mapKey == 70 || mapKey == 60 || mapKey == 372 || mapKey==38) {
-                        String[][] strainVairantMatrix = variants.getStrainVariants(mapKey, null, samples,key);
+                    if (mapKey == 360 || mapKey == 70 || mapKey == 60 || mapKey == 372 ) {
+
+                        String[][] strainVairantMatrix = variants.getStrainVariants(mapKey, null,  variantsCountsList);
                         obj.setVariantsMatrix(strainVairantMatrix);
                     }
                 }

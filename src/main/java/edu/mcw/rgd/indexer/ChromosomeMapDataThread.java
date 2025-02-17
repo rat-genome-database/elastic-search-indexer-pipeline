@@ -1,12 +1,9 @@
 package edu.mcw.rgd.indexer;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import edu.mcw.rgd.dao.impl.MapDAO;
 import edu.mcw.rgd.datamodel.*;
 import edu.mcw.rgd.datamodel.ontologyx.TermWithStats;
-import edu.mcw.rgd.indexer.dao.ChromosomeThread;
 import edu.mcw.rgd.indexer.dao.GenomeDAO;
 import edu.mcw.rgd.indexer.dao.StrainVariants;
 import edu.mcw.rgd.indexer.model.RgdIndex;
@@ -21,14 +18,12 @@ import org.elasticsearch.xcontent.XContentType;
 
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
+
 
 public class ChromosomeMapDataThread implements Runnable {
 
     private Map m;
-    private int key;
+    private int speciesTypeKey;
     private List<MappedGene> mappedGenes;
     private Chromosome c;
     private BulkRequest bulkRequest;
@@ -39,12 +34,11 @@ public class ChromosomeMapDataThread implements Runnable {
 
    private String[][] strainVairantMatrix;
     GenomeDAO genomeDAO=new GenomeDAO();
-    StrainVariants variants=new StrainVariants();
 
-    public ChromosomeMapDataThread(int key, Map m,List<MappedGene> mappedGenes,  List<TermWithStats> topLevelDiseaseTerms, Chromosome c,BulkRequest bulkRequest, ObjectMapper mapper ,String[][] strainVairantMatrix) {
+    public ChromosomeMapDataThread(int speciesTypeKey, Map m,List<MappedGene> mappedGenes,  List<TermWithStats> topLevelDiseaseTerms, Chromosome c,BulkRequest bulkRequest, ObjectMapper mapper ,String[][] strainVairantMatrix) {
 //        this.chromosomes=chromosomes;
         this.m = m;
-        this.key = key;
+        this.speciesTypeKey = speciesTypeKey;
         this.mappedGenes=mappedGenes;
         this.topLevelDiseaseTerms=topLevelDiseaseTerms;
         this.c=c;
@@ -74,7 +68,7 @@ public class ChromosomeMapDataThread implements Runnable {
 //
                         GeneCounts geneCounts = null;
                         try {
-                            geneCounts = genomeDAO.getGeneCounts( mapKey, key,c.getChromosome(), mappedGenes);
+                            geneCounts = genomeDAO.getGeneCounts( mapKey, speciesTypeKey,c.getChromosome(), mappedGenes);
                         } catch (Exception e) {
                             throw new RuntimeException(e);
                         }
@@ -86,7 +80,7 @@ public class ChromosomeMapDataThread implements Runnable {
                         }
                         List<DiseaseGeneObject> diseaseGenes = null;
                         try {
-                            diseaseGenes = genomeDAO.getDiseaseGenes(mapKey, c.getChromosome(), key,topLevelDiseaseTerms);
+                            diseaseGenes = genomeDAO.getDiseaseGenes(mapKey, c.getChromosome(), speciesTypeKey,topLevelDiseaseTerms);
                         } catch (Exception e) {
                             throw new RuntimeException(e);
                         }
@@ -96,7 +90,7 @@ public class ChromosomeMapDataThread implements Runnable {
 //                        chromosomeThread.run();
 
 
-                    ChromosomeIndexObject indexObject=  buildIndexObject(c, key, RgdIndex.getNewAlias(), mapKey, assembly, geneCounts, objectsCountsMap, diseaseGenes, strainVairantMatrix);
+                    ChromosomeIndexObject indexObject=  buildIndexObject(c, speciesTypeKey, RgdIndex.getNewAlias(), mapKey, assembly, geneCounts, objectsCountsMap, diseaseGenes, strainVairantMatrix);
 
 
 
@@ -122,7 +116,7 @@ public class ChromosomeMapDataThread implements Runnable {
             // }
 
 
-        log.info(Thread.currentThread().getName() + ": " + SpeciesType.getCommonName(key) + " || Mapkey-"+mapKey+"-CHR-"+c.getChromosome()+ " END " + new Date());
+        log.info(Thread.currentThread().getName() + ": " + SpeciesType.getCommonName(speciesTypeKey) + " || Mapkey-"+mapKey+"-CHR-"+c.getChromosome()+ " END " + new Date());
 
 //        executor.shutdown();
 //        while(!executor.isTerminated()){}
@@ -210,7 +204,7 @@ public class ChromosomeMapDataThread implements Runnable {
             obj.setDiseaseGenechartData(this.getDiseaseGeneChartData(diseaseGenes));
         }
         //ADD STRAIN VARIANTS IF SPECIES_TYPE_KEY=3 (RAT SPECIES)
-        if(key==3 && (mapKey==372 || mapKey==360 || mapKey==70 || mapKey==60)) {
+        if(speciesTypeKey==3 && (mapKey==372 || mapKey==360 || mapKey==70 || mapKey==60)) {
             obj.setVariantsMatrix(strainVairantMatrix);
         }
 //                    indexObject(obj);

@@ -6,12 +6,21 @@ package edu.mcw.rgd.indexer.model.genomeInfo;
 public class VariantCounts {
     private int mapKey;
     private String strain;
+    private int sampleId;
     private String totalVariants;
     private String snp;
     private String del;
     private String ins;
     private String snv;
     private String chr;
+
+    public int getSampleId() {
+        return sampleId;
+    }
+
+    public void setSampleId(int sampleId) {
+        this.sampleId = sampleId;
+    }
 
     public String getSnv() {
         return snv;
