@@ -18,10 +18,10 @@ import java.util.List;
  */
 public class StrainVariants extends AbstractDAO{
 
-    public String[][] getStrainVariants(int mapKey, String chr, List<Sample> samples) throws Exception {
+    public String[][] getStrainVariants(int mapKey, String chr, List<Sample> samples, int speciesTypeKey) throws Exception {
 
 
-        List<VariantCounts> variantCounts=this.getVariants(samples, chr, mapKey);
+        List<VariantCounts> variantCounts=this.getVariants(samples, chr, mapKey, speciesTypeKey);
         int size=variantCounts.size();
         String matrix[][]= new String[4][size];
         int j=0;
@@ -43,13 +43,13 @@ public class StrainVariants extends AbstractDAO{
 
         return matrix;
     }
-    public List<VariantCounts> getVariants(List<Sample> samples, String chr, int mapKey)  {
+    public List<VariantCounts> getVariants(List<Sample> samples, String chr, int mapKey, int speciesTypeKey)  {
         List<VariantCounts> variantCounts= new ArrayList<>();
         String sql="select count(variant_type) tot, variant_type from variant v " +
                 " inner join variant_map_data vmd on vmd.rgd_id=v.rgd_id " +
                 " inner join variant_sample_detail vsd on vsd.rgd_id=v.rgd_id " +
-                "                  where " +
-                "                 vsd.sample_id=? " ;
+                "                  where v.species_type_key=? and " +
+                "                 vsd.sample_id=?" ;
 
         if(chr!=null){
             sql=sql+"and vmd.chromosome=?";
