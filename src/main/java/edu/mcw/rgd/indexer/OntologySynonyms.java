@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 public class OntologySynonyms {
     public static Map<String, List<TermSynonym>> ontSynonyms;
 
-    public OntologySynonyms() throws Exception {
+    public void init() throws Exception {
         if(ontSynonyms==null){
             load();
         }
