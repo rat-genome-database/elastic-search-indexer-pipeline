@@ -145,11 +145,16 @@ public class Manager {
                             for (Ontology o : ontologies) {
 
                                 String ont_id = o.getId();
-                                List<TermSynonym> termSynonyms = (List<TermSynonym>) OntologySynonyms.ontSynonyms.get(ont_id);
-                                //     if(!ont_id.equalsIgnoreCase("CHEBI")) {
+                                try {
+                                    List<TermSynonym> termSynonyms = (List<TermSynonym>) OntologySynonyms.ontSynonyms.get(ont_id);
+                                    //     if(!ont_id.equalsIgnoreCase("CHEBI")) {
 
-                                workerThread = new IndexerDAO(ont_id, o.getName(), RgdIndex.getNewAlias(), termSynonyms,false);
-                                executor.execute(workerThread);
+                                    workerThread = new IndexerDAO(ont_id, o.getName(), RgdIndex.getNewAlias(), termSynonyms, false);
+                                    executor.execute(workerThread);
+                                }catch (Exception exception){
+                                    System.out.println("ONT_ID:"+ ont_id);
+                                    exception.printStackTrace();
+                                }
                             }
                         }
 
