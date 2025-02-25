@@ -3,6 +3,7 @@ package edu.mcw.rgd.indexer;
 import edu.mcw.rgd.dao.impl.OntologyXDAO;
 import edu.mcw.rgd.datamodel.ontologyx.Ontology;
 import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
+import edu.mcw.rgd.indexer.dao.IndexerDAO;
 import edu.mcw.rgd.indexer.dao.phenominer.OntologySynonymsThread;
 
 import java.util.HashMap;
@@ -18,24 +19,25 @@ import java.util.concurrent.TimeUnit;
 public class OntologySynonyms {
     public static Map<String, List<TermSynonym>> ontSynonyms;
 
-    public void init() throws Exception {
-        if(ontSynonyms==null){
-            load();
-        }
-    }
-    public void load() throws Exception {
+   static  {
         OntologyXDAO ontologyXDAO= new OntologyXDAO();
-        if(ontSynonyms==null){
-            ontSynonyms=new HashMap<>();
-        }
+
+       Map<String, List<TermSynonym>>  synonyms=new HashMap<>();
+
         ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
-        List<Ontology> ontologies = ontologyXDAO.getPublicOntologies();
-        for(Ontology ont:ontologies){
-            Runnable   workerThread = new OntologySynonymsThread(ont.getId(), ontSynonyms);
+       List<Ontology> ontologies = null;
+       try {
+           ontologies = ontologyXDAO.getPublicOntologies();
+       } catch (Exception e) {
+           throw new RuntimeException(e);
+       }
+       for(Ontology ont:ontologies){
+            Runnable   workerThread = new OntologySynonymsThread(ont.getId(), synonyms);
             executor.execute(workerThread);
         }
         executor.shutdown();
         while (!executor.isTerminated()){}
+        ontSynonyms=synonyms;
         System.out.println("DONE Ontology Synonyms"+ ontSynonyms.keySet().toString());
     }
 

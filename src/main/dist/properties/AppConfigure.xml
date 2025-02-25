@@ -20,9 +20,9 @@
     <bean id="client" class="edu.mcw.rgd.services.ClientInit" init-method="init" destroy-method="destroy"/>
     <bean id="rdao" class="edu.mcw.rgd.indexer.dao.IndexDAO">
     </bean>
-    <bean id="ontologySynonyms" class="edu.mcw.rgd.indexer.OntologySynonyms" init-method="init">
+<!--    <bean id="ontologySynonyms" class="edu.mcw.rgd.indexer.OntologySynonyms" init-method="init">-->
 
-    </bean>
+<!--    </bean>-->
 
     <bean id="admin" class="edu.mcw.rgd.indexer.client.IndexAdmin">
             <property name="rgdIndex" ref="rgdIndex"/>
