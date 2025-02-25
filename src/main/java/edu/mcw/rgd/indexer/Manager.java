@@ -1,20 +1,13 @@
 package edu.mcw.rgd.indexer;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import edu.mcw.rgd.dao.DataSourceFactory;
-import edu.mcw.rgd.dao.impl.GeneDAO;
 import edu.mcw.rgd.dao.impl.MapDAO;
 import edu.mcw.rgd.dao.impl.OntologyXDAO;
 
 
-import edu.mcw.rgd.dao.impl.SampleDAO;
 import edu.mcw.rgd.datamodel.*;
-import edu.mcw.rgd.datamodel.Map;
 import edu.mcw.rgd.datamodel.ontologyx.Ontology;
 
 import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
-import edu.mcw.rgd.datamodel.ontologyx.TermWithStats;
 import edu.mcw.rgd.indexer.client.IndexAdmin;
 
 import edu.mcw.rgd.indexer.dao.*;
@@ -24,9 +17,8 @@ import edu.mcw.rgd.indexer.dao.phenominer.PhenominerNormalizedThread;
 import edu.mcw.rgd.indexer.dao.variants.*;
 import edu.mcw.rgd.indexer.model.RgdIndex;
 import edu.mcw.rgd.indexer.model.findModels.ModelIndexObject;
-
-import edu.mcw.rgd.indexer.model.genomeInfo.VariantCounts;
-import edu.mcw.rgd.indexer.model.genomeInfo.VariantsCountsList;
+import edu.mcw.rgd.indexer.model.genomeInfo.DiseaseGeneObject;
+import edu.mcw.rgd.indexer.model.genomeInfo.GeneCounts;
 import edu.mcw.rgd.process.Utils;
 import edu.mcw.rgd.services.ClientInit;
 import org.apache.commons.lang.ArrayUtils;
@@ -37,8 +29,6 @@ import org.elasticsearch.action.admin.cluster.health.ClusterHealthRequest;
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
 
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest;
-import org.elasticsearch.action.bulk.BulkRequest;
-import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -46,7 +36,10 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.FileSystemResource;
 
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -65,8 +58,8 @@ public class Manager {
     private RgdIndex rgdIndex;
     private boolean reindex;
     BulkIndexProcessor bulkIndexProcessor;
-    BulkRequest bulkRequest;
     IndexDAO indexDAO=new IndexDAO();
+    GenomeDAO genomeDAO=new GenomeDAO();
     private final Logger log = LogManager.getLogger("main");
 
     public static void main(String[] args) throws Exception {
@@ -127,7 +120,7 @@ public class Manager {
             boolean searchIndexCreated=false;
             //int runningThreadsCount=0;
             for (String arg : args) {
-
+                Runnable workerThread;
 
 
                 switch(arg){
@@ -152,11 +145,16 @@ public class Manager {
                             for (Ontology o : ontologies) {
 
                                 String ont_id = o.getId();
-                                List<TermSynonym> termSynonyms = (List<TermSynonym>) OntologySynonyms.ontSynonyms.get(ont_id);
-                                //     if(!ont_id.equalsIgnoreCase("CHEBI")) {
+                                try {
+                                    List<TermSynonym> termSynonyms = (List<TermSynonym>) OntologySynonyms.ontSynonyms.get(ont_id);
+                                    //     if(!ont_id.equalsIgnoreCase("CHEBI")) {
 
-                                Runnable workerThread = new IndexerDAO(ont_id, o.getName(), RgdIndex.getNewAlias(), termSynonyms,false);
-                                executor.execute(workerThread);
+                                    workerThread = new IndexerDAO(ont_id, o.getName(), RgdIndex.getNewAlias(), termSynonyms, false);
+                                    executor.execute(workerThread);
+                                }catch (Exception exception){
+                                    System.out.println("ONT_ID:"+ ont_id);
+                                    exception.printStackTrace();
+                                }
                             }
                         }
 
@@ -164,82 +162,37 @@ public class Manager {
 
 
                     case "Chromosomes":
-                        bulkRequest = new BulkRequest();
-                        ObjectMapper mapper=new ObjectMapper();
-                        mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
-                        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
                         admin.createIndex("chromosome_mappings", "chromosome");
                         if(arg.equalsIgnoreCase("chromosomes")){
                             MapDAO mapDAO= new MapDAO();
-                            GeneDAO geneDAO=new GeneDAO();
-                            OntologyXDAO ontologyXDAO=new OntologyXDAO();
-//                            SampleDAO sampleDAO= new SampleDAO();
-//                            sampleDAO.setDataSource(DataSourceFactory.getInstance().getCarpeNovoDataSource());
-                            StrainVariants variants=new StrainVariants();
-
                             log.info("INDEXING Chromosomes...");
-                            String rootTerm="DOID:4";
-                            List<TermWithStats> topLevelDiseaseTerms=   ontologyXDAO.getActiveChildTerms(rootTerm,3);
-
-                            for(int speciesTypeKey : SpeciesType.getSpeciesTypeKeys()) {
-                                if (SpeciesType.isSearchable(speciesTypeKey)) {
+                            for(int key : SpeciesType.getSpeciesTypeKeys()) {
+                                if (SpeciesType.isSearchable(key)) {
                                     //   int key=3;
-                                    if (speciesTypeKey != 0) {
-                                        VariantsCountsList variantsCountsList=null;
-                                        if(speciesTypeKey==3){
-                                            List<VariantCounts> variantCounts=variants.getVariantCounts(speciesTypeKey);
-                                             variantsCountsList=new VariantsCountsList(variantCounts);
-                                        }
+                                    if (key != 0) {
+                                        List<Map> maps = null;
                                         try {
-                                            List<Map>  maps = mapDAO.getMaps(speciesTypeKey, "bp");
-                                            for(Map map:maps){
-                                                int mapKey=map.getKey();
-                                                if (mapKey != 6 && mapKey != 36 && mapKey != 8 && mapKey != 21 && mapKey != 19 && mapKey != 7 &&
-                                                        mapKey != 720 && mapKey != 44 && mapKey != 722 && mapKey != 1313 && mapKey != 1410 && mapKey != 1701 && mapKey != 514) {
-
-                                                    List<MappedGene> mappedGenes=geneDAO.getActiveMappedGenes(map.getKey());
-                                                List<Chromosome>   chromosomes = mapDAO.getChromosomes(map.getKey());
-
-                                                for(Chromosome chromosome:chromosomes) {
-                                                    if(!chromosome.getChromosome().startsWith("N")) { //skip scaffolds
-                                                        String[][] strainVairantMatrix = null;
-                                                        if (speciesTypeKey == 3 && (mapKey==372 || mapKey==360 || mapKey==70 || mapKey==60) ){
-                                                            try {
-                                                                strainVairantMatrix = variants.getStrainVariants(mapKey, chromosome.getChromosome(), variantsCountsList);
-                                                            } catch (Exception e) {
-                                                                throw new RuntimeException(e);
-                                                            }
-                                                        }
-                                                        Runnable workerThread = new ChromosomeMapDataThread(speciesTypeKey, map, mappedGenes, topLevelDiseaseTerms, chromosome,bulkRequest, mapper,strainVairantMatrix);
-                                                        executor.execute(workerThread);
-                                                    }
-                                                }
-                                            }}
+                                            maps = mapDAO.getMaps(key, "bp");
                                         } catch (Exception e) {
                                             throw new RuntimeException(e);
                                         }
-
+                                        for(Map m:maps){
+                                             workerThread=new ChromosomeMapDataThread(key,m);
+                                             executor.execute(workerThread);
+                                        }
                                 }
                             }
-                        }
-
-                        }
-
+                        }}
                         break;
                     case "GenomeInfo":
-                            StrainVariants variants=new StrainVariants();
+
                         admin.createIndex("genome_mappings", "genome");
                         System.out.println("INDEXING GENOMEINFO...");
                        for(int key : SpeciesType.getSpeciesTypeKeys()) {
                          //    int key=3;
                            if(SpeciesType.isSearchable(key)) {
                                if (key != 0) {
-                                   VariantsCountsList variantsCountsList=null;
-                                   if(key==3){
-                                       List<VariantCounts>variantCounts=variants.getVariantCounts(key);
-                                      variantsCountsList =new VariantsCountsList(variantCounts);
-                                   }
-                                   Runnable workerThread = new GenomeInfoThread(key, RgdIndex.getNewAlias(), variantsCountsList);
+                                   workerThread = new GenomeInfoThread(key, RgdIndex.getNewAlias(), log);
                                    executor.execute(workerThread);
                                }
                            }
@@ -278,7 +231,7 @@ public class Manager {
                                 List<TermSynonym> termSynonyms = (List<TermSynonym>) OntologySynonyms.ontSynonyms.get(ont_id);
                                 //     if(!ont_id.equalsIgnoreCase("CHEBI")) {
 
-                            Runnable workerThread = new IndexerDAO(ont_id, o.getName(), RgdIndex.getNewAlias(), termSynonyms, true);
+                                workerThread = new IndexerDAO(ont_id, o.getName(), RgdIndex.getNewAlias(), termSynonyms, true);
                                 executor.execute(workerThread);
                            // }
                         }
@@ -290,14 +243,6 @@ public class Manager {
             }
            executor.shutdown();
             while (!executor.isTerminated()) {}
-            if(bulkRequest!=null) {
-                BulkResponse bulkResponse = ClientInit.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
-                if (bulkResponse.hasFailures()) {
-                    System.err.println("Bulk indexing had errors!");
-                } else {
-                    System.out.println("Bulk indexing completed.");
-                }
-            }
             System.out.println("Finished all threads: " + new Date());
             log.info("Finished all threads: " + new Date());
 
