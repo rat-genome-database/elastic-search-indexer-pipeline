@@ -3,7 +3,6 @@ package edu.mcw.rgd.indexer;
 import edu.mcw.rgd.dao.impl.OntologyXDAO;
 import edu.mcw.rgd.datamodel.ontologyx.Ontology;
 import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
-import edu.mcw.rgd.indexer.dao.IndexerDAO;
 import edu.mcw.rgd.indexer.dao.phenominer.OntologySynonymsThread;
 
 import java.util.HashMap;
@@ -19,6 +18,11 @@ import java.util.concurrent.TimeUnit;
 public class OntologySynonyms {
     public static Map<String, List<TermSynonym>> ontSynonyms;
 
+    public OntologySynonyms() throws Exception {
+        if(ontSynonyms==null){
+            load();
+        }
+    }
     public void load() throws Exception {
         OntologyXDAO ontologyXDAO= new OntologyXDAO();
         if(ontSynonyms==null){
