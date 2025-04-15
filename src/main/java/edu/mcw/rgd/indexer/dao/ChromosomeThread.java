@@ -8,7 +8,6 @@ import edu.mcw.rgd.dao.impl.MapDAO;
 import edu.mcw.rgd.datamodel.*;
 import edu.mcw.rgd.indexer.dao.phenominer.model.PhenominerIndexObject;
 import edu.mcw.rgd.indexer.dao.variants.BulkIndexProcessor;
-import edu.mcw.rgd.indexer.model.RgdIndex;
 import edu.mcw.rgd.indexer.model.genomeInfo.*;
 
 import edu.mcw.rgd.services.ClientInit;

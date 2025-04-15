@@ -22,7 +22,7 @@ import edu.mcw.rgd.indexer.dao.variants.BulkIndexProcessor;
 import edu.mcw.rgd.indexer.dao.variants.VariantIndexerThread;
 import edu.mcw.rgd.indexer.index.*;
 import edu.mcw.rgd.indexer.model.*;
-import edu.mcw.rgd.indexer.model.RgdIndex;
+
 import edu.mcw.rgd.indexer.model.genomeInfo.AssemblyInfo;
 import edu.mcw.rgd.indexer.model.genomeInfo.GeneCounts;
 import edu.mcw.rgd.indexer.model.genomeInfo.GenomeIndexObject;
