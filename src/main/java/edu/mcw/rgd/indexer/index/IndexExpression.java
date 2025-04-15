@@ -84,7 +84,7 @@ public class IndexExpression implements Runnable{
     }
     void buildIndexObject() throws Exception {
         setMap();
-        setBioSampleId();
+       // setBioSampleId();
         setGeoSampleAcc();
         setExpressionUnit();
         setExpressionLevel();
