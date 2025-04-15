@@ -72,12 +72,7 @@ public class IndexExpression implements Runnable{
     }
     void index() throws Exception {
         buildIndexObject();
-        Gson gson=new Gson();
-//        for(GeneExpression ge:records){
-//            System.out.println(gson.toJson(ge));
-//        }
-        System.out.println(gson.toJson(object));
-        try {
+         try {
           String  json = JacksonConfiguration.MAPPER.writeValueAsString(object);
             IndexRequest request= new IndexRequest(RgdIndex.getNewAlias()).source(json, XContentType.JSON);
             BulkIndexProcessor.bulkProcessor.add(request);

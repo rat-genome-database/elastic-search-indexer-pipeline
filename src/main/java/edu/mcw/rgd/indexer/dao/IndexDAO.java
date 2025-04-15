@@ -6,8 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.mcw.rgd.dao.AbstractDAO;
 import edu.mcw.rgd.dao.DataSourceFactory;
 import edu.mcw.rgd.dao.impl.*;
-import edu.mcw.rgd.dao.spring.ExperimentQuery;
-import edu.mcw.rgd.dao.spring.GeneQuery;
+
 import edu.mcw.rgd.dao.spring.StringMapQuery;
 
 import edu.mcw.rgd.datamodel.*;
@@ -164,9 +163,9 @@ public class IndexDAO extends AbstractDAO {
     }
     public void getExpression() throws Exception {
         List<Gene> genes= geneDAO.getAllActiveGenes();
-        ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+       ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
         for(Gene gene: genes) {
-//            Gene gene= geneDAO.getGene(3001);
+//            Gene gene= geneDAO.getGene(3876);
             Runnable workerThread= new IndexExpression(gene);
             executor.execute(workerThread);
         }
