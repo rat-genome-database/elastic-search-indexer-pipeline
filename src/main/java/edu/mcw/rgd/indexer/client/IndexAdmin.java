@@ -1,6 +1,6 @@
 package edu.mcw.rgd.indexer.client;
 
-import edu.mcw.rgd.indexer.model.RgdIndex;
+import edu.mcw.rgd.datamodel.RgdIndex;
 import edu.mcw.rgd.process.Utils;
 import edu.mcw.rgd.services.ClientInit;
 import org.apache.logging.log4j.LogManager;
