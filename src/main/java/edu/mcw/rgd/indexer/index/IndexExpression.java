@@ -4,10 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.gson.Gson;
 import edu.mcw.rgd.dao.impl.GeneExpressionDAO;
 import edu.mcw.rgd.dao.impl.OntologyXDAO;
-import edu.mcw.rgd.datamodel.Gene;
-import edu.mcw.rgd.datamodel.GeneExpression;
-import edu.mcw.rgd.datamodel.RgdIndex;
-import edu.mcw.rgd.datamodel.SpeciesType;
+import edu.mcw.rgd.dao.impl.PhenominerDAO;
+import edu.mcw.rgd.dao.impl.SampleDAO;
+import edu.mcw.rgd.datamodel.*;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.pheno.ClinicalMeasurement;
 import edu.mcw.rgd.indexer.dao.IndexDAO;
@@ -23,8 +22,10 @@ import org.elasticsearch.xcontent.XContentType;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class IndexExpression implements Runnable{
@@ -34,6 +35,9 @@ public class IndexExpression implements Runnable{
     GeneExpressionDAO expressionDAO=new GeneExpressionDAO();
     IndexDAO indexDAO=new IndexDAO();
     OntologyXDAO xdao=new OntologyXDAO();
+    SampleDAO sampleDAO=new SampleDAO();
+    PhenominerDAO phenominerDAO=new PhenominerDAO();
+
 
     public IndexExpression(Gene gene){this.gene=gene;
     this.object=new ExpressionIndexObject();
@@ -71,14 +75,17 @@ public class IndexExpression implements Runnable{
         }
     }
     void index() throws Exception {
+        if(records!=null && records.size()>0) {
         buildIndexObject();
-         try {
-          String  json = JacksonConfiguration.MAPPER.writeValueAsString(object);
-            IndexRequest request= new IndexRequest(RgdIndex.getNewAlias()).source(json, XContentType.JSON);
-            BulkIndexProcessor.bulkProcessor.add(request);
+
+            try {
+                String json = JacksonConfiguration.MAPPER.writeValueAsString(object);
+                IndexRequest request = new IndexRequest(RgdIndex.getNewAlias()).source(json, XContentType.JSON);
+                BulkIndexProcessor.bulkProcessor.add(request);
 //            IndexResponse response= ClientInit.getClient().index(request, RequestOptions.DEFAULT);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
         }
 
     }
@@ -95,6 +102,19 @@ public class IndexExpression implements Runnable{
         setTissueTerms();
         setStrainAcc();
         setStrainTerms();
+
+        setCellTypeAcc();
+        setCellTypeTerms();
+        setExperimentId();
+   //     setSampleId();
+        /**** TODO
+        setExperimentId();
+         setSampleId();
+        setVTAcc();
+        setStudySource();
+         setGEOSeriesAcc();
+         setRGDReference();
+         ****/
         setClinicalMeasurementTerms();
     }
     void setGeoSampleAcc(){
@@ -121,6 +141,18 @@ public class IndexExpression implements Runnable{
                 object.setStrainTerms(terms.stream().map(Term::getTerm).collect(Collectors.toSet()));
         }
     }
+    void setCellTypeAcc(){
+        object.setCellTypeAccId( records.stream().map(r->r.getSample().getCellTypeAccId()).filter(Objects::nonNull).collect(Collectors.toSet()));
+
+    }
+    void setCellTypeTerms() throws Exception {
+        if(object.getCellTypeAccId().size()>0) {
+            String[] arrayIds = object.getCellTypeAccId().toArray(new String[0]);
+            List<Term> terms = xdao.getTermByAccId(arrayIds);
+            if (terms!=null && terms.size() > 0)
+                object.setCellTypeTerms(terms.stream().map(Term::getTerm).collect(Collectors.toSet()));
+        }
+    }
     void setTissueAcc(){
         object.setTissueAccId( records.stream().map(r->r.getSample().getTissueAccId()).filter(Objects::nonNull).collect(Collectors.toSet()));
 
@@ -141,6 +173,25 @@ public class IndexExpression implements Runnable{
         object.setExpressionUnit( records.stream().map(r->r.getGeneExpressionRecordValue().getExpressionUnit()).filter(Objects::nonNull).collect(Collectors.toSet()));
 
     }
+    void setExperimentId(){
+        object.setExperimentId( records.stream().map(r->r.getGeneExpressionRecord().getExperimentId()).collect(Collectors.toSet()));
+
+    }
+//    void setSampleId(){
+//        object.setSampleId( records.stream().map(r->r.getGeneExpressionRecord().getSampleId()).collect(Collectors.toSet()));
+//
+//    }
+//    void setSample(){
+//        Set<Integer> sampleIds=object.getSampleId();
+//        if(sampleIds!=null && sampleIds.size()>0){
+//          List<Sample> samples=  sampleDAO.getSampleBySampleId(new ArrayList<>(sampleIds));
+//          if(samples!=null && samples.size()>0){
+//              object.setSample( samples.stream().map(s->s.get));
+//          }
+//        }
+//
+//
+//    }
     void setMap(){
         object.setMapKey( records.stream().map(r->r.getGeneExpressionRecordValue().getMapKey()).filter(obj -> true).collect(Collectors.toSet()));
 

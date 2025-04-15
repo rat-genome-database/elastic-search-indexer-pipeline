@@ -15,11 +15,57 @@ public class ExpressionIndexObject extends GeneIndexObject {
     private Set<String> strainTerms;
     private Set<String>tissueAccId;
     private Set<String>tissueTerms;
+    private Set<String> cellTypeAccId;
+    private Set<String> cellTypeTerms;
     private Set<String> expressionLevel;
     private Set<String>expressionUnit;
+    private Set<Integer>experimentId;
+    private Set<Integer> sampleId;
+    private Set<String> sample;
     private Set<Integer> mapKey;
     private Set<String> clinicalMeasurementId;
     private Set<String> clinicalMeasurementTerms;
+
+    public Set<Integer> getExperimentId() {
+        return experimentId;
+    }
+
+    public void setExperimentId(Set<Integer> experimentId) {
+        this.experimentId = experimentId;
+    }
+
+    public Set<Integer> getSampleId() {
+        return sampleId;
+    }
+
+    public void setSampleId(Set<Integer> sampleId) {
+        this.sampleId = sampleId;
+    }
+
+
+    public Set<String> getSample() {
+        return sample;
+    }
+
+    public void setSample(Set<String> sample) {
+        this.sample = sample;
+    }
+
+    public Set<String> getCellTypeAccId() {
+        return cellTypeAccId;
+    }
+
+    public void setCellTypeAccId(Set<String> cellTypeAccId) {
+        this.cellTypeAccId = cellTypeAccId;
+    }
+
+    public Set<String> getCellTypeTerms() {
+        return cellTypeTerms;
+    }
+
+    public void setCellTypeTerms(Set<String> cellTypeTerms) {
+        this.cellTypeTerms = cellTypeTerms;
+    }
 
     public Set<String> getStrainTerms() {
         return strainTerms;
