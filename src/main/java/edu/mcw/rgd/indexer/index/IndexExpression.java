@@ -117,7 +117,7 @@ public class IndexExpression implements Runnable{
         if(object.getStrainAccId().size()>0) {
             String[] arrayIds = object.getStrainAccId().toArray(new String[0]);
             List<Term> terms = xdao.getTermByAccId(arrayIds);
-            if (terms.size() > 0)
+            if (terms!=null && terms.size() > 0)
                 object.setStrainTerms(terms.stream().map(Term::getTerm).collect(Collectors.toSet()));
         }
     }
@@ -129,7 +129,7 @@ public class IndexExpression implements Runnable{
         if(object.getTissueAccId().size()>0) {
             String[] arrayIds = object.getTissueAccId().toArray(new String[0]);
             List<Term> terms = xdao.getTermByAccId(arrayIds);
-            if (terms.size() > 0)
+            if (terms!=null && terms.size() > 0)
                 object.setTissueTerms(terms.stream().map(Term::getTerm).collect(Collectors.toSet()));
         }
     }
