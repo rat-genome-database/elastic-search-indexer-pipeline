@@ -22,6 +22,7 @@ import edu.mcw.rgd.indexer.dao.variants.BulkIndexProcessor;
 import edu.mcw.rgd.indexer.dao.variants.VariantIndexerThread;
 import edu.mcw.rgd.indexer.index.*;
 import edu.mcw.rgd.indexer.model.*;
+import edu.mcw.rgd.indexer.model.RgdIndex;
 import edu.mcw.rgd.indexer.model.genomeInfo.AssemblyInfo;
 import edu.mcw.rgd.indexer.model.genomeInfo.GeneCounts;
 import edu.mcw.rgd.indexer.model.genomeInfo.GenomeIndexObject;
@@ -157,6 +158,18 @@ public class IndexDAO extends AbstractDAO {
             Runnable workerThread= new IndexGene(gene);
             executor.execute(workerThread);
    }
+        executor.shutdown();
+        while (!executor.isTerminated()) {}
+
+    }
+    public void getExpression() throws Exception {
+        List<Gene> genes= geneDAO.getAllActiveGenes();
+        ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+        for(Gene gene: genes) {
+//            Gene gene= geneDAO.getGene(3001);
+            Runnable workerThread= new IndexExpression(gene);
+            executor.execute(workerThread);
+        }
         executor.shutdown();
         while (!executor.isTerminated()) {}
 
