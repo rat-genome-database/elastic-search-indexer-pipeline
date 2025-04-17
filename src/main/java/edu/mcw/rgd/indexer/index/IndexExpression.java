@@ -69,13 +69,17 @@ public class IndexExpression implements Runnable{
     }
     void setExpressionRecords()  {
         try {
-            this.records= expressionDAO.getGeneExpressionObjectsByRgdIdUnit(gene.getRgdId(), "TPM");
+            this.records= expressionDAO.getGeneExpressionObjectsByRgdIdUnit(gene.getRgdId(), "TPM")
+                    .stream().filter(r->
+                         ( r.getGeneExpressionRecordValue().getExpressionLevel().equalsIgnoreCase("high") ||
+                                r.getGeneExpressionRecordValue().getExpressionLevel().equalsIgnoreCase("low"))).collect(Collectors.toList());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
     void index() throws Exception {
         if(records!=null && records.size()>0) {
+
         buildIndexObject();
 
             try {
