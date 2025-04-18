@@ -123,27 +123,28 @@ public class IndexExpression implements Runnable{
     void buildIndexObject() throws Exception {
         setMap();
        // setBioSampleId();
-        setGeoSampleAcc();
+//        setGeoSampleAcc();
         setExpressionUnit();
         setExpressionLevel();
         setSex();
         setLifeStage();
-        setClinicalMeasurement();
-        setTissueAcc();
-        setTissueTerms();
-        setStrainAcc();
-        setStrainTerms();
-
-        setCellTypeAcc();
-        setCellTypeTerms();
+//        setClinicalMeasurement();
+//        setTissueAcc();
+//        setTissueTerms();
+//        setStrainAcc();
+//        setStrainTerms();
+//
+//        setCellTypeAcc();
+//        setCellTypeTerms();
         setExperimentId();
+//        setGEOSeriesAcc();
    //     setSampleId();
         /**** TODO
         setExperimentId();
          setSampleId();
         setVTAcc();
         setStudySource();
-         setGEOSeriesAcc();
+
          setRGDReference();
          ****/
         setClinicalMeasurementTerms();
@@ -208,6 +209,10 @@ public class IndexExpression implements Runnable{
         object.setExperimentId( records.stream().map(r->r.getGeneExpressionRecord().getExperimentId()).collect(Collectors.toSet()));
 
     }
+//    void setGEOSeriesAcc(){
+//        object.setGeoSeriesAcc( records.stream().map(r->r.getGeoSeriesAcc()).collect(Collectors.toSet()));
+//
+//    }
 //    void setSampleId(){
 //        object.setSampleId( records.stream().map(r->r.getGeneExpressionRecord().getSampleId()).collect(Collectors.toSet()));
 //

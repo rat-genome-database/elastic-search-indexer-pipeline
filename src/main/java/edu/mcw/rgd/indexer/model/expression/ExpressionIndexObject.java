@@ -20,11 +20,20 @@ public class ExpressionIndexObject extends GeneIndexObject {
     private Set<String> expressionLevel;
     private Set<String>expressionUnit;
     private Set<Integer>experimentId;
+    private Set<String> geoSeriesAcc;
     private Set<Integer> sampleId;
     private Set<String> sample;
     private Set<Integer> mapKey;
     private Set<String> clinicalMeasurementId;
     private Set<String> clinicalMeasurementTerms;
+
+    public Set<String> getGeoSeriesAcc() {
+        return geoSeriesAcc;
+    }
+
+    public void setGeoSeriesAcc(Set<String> geoSeriesAcc) {
+        this.geoSeriesAcc = geoSeriesAcc;
+    }
 
     public Set<Integer> getExperimentId() {
         return experimentId;
