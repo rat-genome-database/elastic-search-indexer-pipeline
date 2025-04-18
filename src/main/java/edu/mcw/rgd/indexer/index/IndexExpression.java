@@ -11,6 +11,7 @@ import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.pheno.ClinicalMeasurement;
 import edu.mcw.rgd.indexer.dao.IndexDAO;
 import edu.mcw.rgd.indexer.dao.variants.BulkIndexProcessor;
+import edu.mcw.rgd.indexer.model.AliasData;
 import edu.mcw.rgd.indexer.model.JacksonConfiguration;
 import edu.mcw.rgd.indexer.model.expression.ExpressionIndexObject;
 import edu.mcw.rgd.services.ClientInit;
@@ -65,7 +66,33 @@ public class IndexExpression implements Runnable{
         object.setSymbol(gene.getSymbol());
         object.setType(gene.getType());
         object.setName(gene.getName());
-
+        try {
+            object.setMapDataList(indexDAO.getMapData(gene.getRgdId()));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        List<AliasData> aliases = null;
+        try {
+            aliases = indexDAO.getAliases(gene.getRgdId());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        List<String> synonyms = aliases!=null && aliases.size()>0?aliases.stream().map(a->a.getAlias_name()).collect(Collectors.toList()) : null;
+        List<String> oldSymbols=aliases!=null && aliases.size()>0? aliases.stream()
+                .filter(a -> a.getAlias_type().equalsIgnoreCase("old_gene_symbol"))
+                .map(AliasData::getAlias_name).toList() : null;
+        List<String> oldNames=aliases!=null && aliases.size()>0? aliases.stream()
+                .filter(a -> a.getAlias_type().equalsIgnoreCase("old_gene_name"))
+                .map(AliasData::getAlias_name).toList() : null;
+        object.setSynonyms(synonyms);
+        object.setOldSymbols(oldSymbols);
+        object.setOldNames(oldNames);
+        //    obj.setSynonyms(getAliasesByRgdId(aliases, rgdId));
+        try {
+            object.setXdbIdentifiers(indexDAO.getExternalIdentifiers(gene.getRgdId()));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
     void setExpressionRecords()  {
         try {
