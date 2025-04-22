@@ -79,9 +79,14 @@ public class ExpressionDataIndexer implements Runnable{
         ExpressionDataIndexObject object=new ExpressionDataIndexObject();
         mapGene(object);
         object.setStrainAcc(record.getSample().getStrainAccId());
+        if(object.getStrainAcc()!=null && !object.getStrainAcc().equals(""))
         object.setStrainTerm(getTerm(object.getStrainAcc()));
+
         object.setTissueAcc(record.getSample().getTissueAccId());
+
+        if(object.getTissueAcc()!=null && !object.getTissueAcc().equals(""))
         object.setTissueTerm(getTerm(object.getTissueAcc()));
+
         object.setExpressionValue(record.getGeneExpressionRecordValue().getExpressionValue());
         object.setExpressionLevel(record.getGeneExpressionRecordValue().getExpressionLevel());
         return object;
