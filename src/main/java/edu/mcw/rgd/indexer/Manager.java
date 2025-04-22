@@ -1,5 +1,7 @@
 package edu.mcw.rgd.indexer;
 
+import edu.mcw.rgd.dao.impl.GeneDAO;
+import edu.mcw.rgd.dao.impl.GeneExpressionDAO;
 import edu.mcw.rgd.dao.impl.MapDAO;
 import edu.mcw.rgd.dao.impl.OntologyXDAO;
 
@@ -8,13 +10,13 @@ import edu.mcw.rgd.datamodel.*;
 import edu.mcw.rgd.datamodel.ontologyx.Ontology;
 
 import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
-import edu.mcw.rgd.indexer.client.IndexAdmin;
-
+import edu.mcw.rgd.services.IndexAdmin;
 import edu.mcw.rgd.indexer.dao.*;
 
 import edu.mcw.rgd.indexer.dao.findModels.FullAnnotDao;
 import edu.mcw.rgd.indexer.dao.phenominer.PhenominerNormalizedThread;
 import edu.mcw.rgd.indexer.dao.variants.*;
+import edu.mcw.rgd.indexer.index.IndexExpression;
 import edu.mcw.rgd.indexer.model.findModels.ModelIndexObject;
 import edu.mcw.rgd.indexer.model.genomeInfo.DiseaseGeneObject;
 import edu.mcw.rgd.indexer.model.genomeInfo.GeneCounts;
@@ -235,6 +237,18 @@ public class Manager {
                                 executor.execute(workerThread);
                            // }
                         }
+                        break;
+                    case "ExpressionData": // all species variants
+                        admin.createIndex(null, null);
+                        GeneDAO geneDAO=new GeneDAO();
+                        List<Gene> genes= geneDAO.getAllActiveGenes();
+                        for(Gene gene: genes) {
+                    //    Gene gene= geneDAO.getGene(3876);
+                         workerThread= new ExpressionDataIndexer(gene);
+                        executor.execute(workerThread);
+                        }
+                        executor.shutdown();
+                        while (!executor.isTerminated()) {}
                         break;
                     default:
                         break;
