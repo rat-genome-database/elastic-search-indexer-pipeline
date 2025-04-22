@@ -1,5 +1,6 @@
 package edu.mcw.rgd.indexer.model;
 
+import java.util.List;
 import java.util.Map;
 
 public class ExpressionDataIndexObject {
@@ -15,7 +16,16 @@ public class ExpressionDataIndexObject {
    private String expressionLevel;
    private String species;
    private String condition;
+    private List<MapInfo> mapDataList;
    private Map<String, String> metaData;
+
+    public List<MapInfo> getMapDataList() {
+        return mapDataList;
+    }
+
+    public void setMapDataList(List<MapInfo> mapDataList) {
+        this.mapDataList = mapDataList;
+    }
 
     public String getExpressionLevel() {
         return expressionLevel;

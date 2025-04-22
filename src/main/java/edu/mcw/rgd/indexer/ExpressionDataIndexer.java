@@ -8,6 +8,7 @@ import edu.mcw.rgd.datamodel.GeneExpression;
 import edu.mcw.rgd.datamodel.RgdIndex;
 import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
+import edu.mcw.rgd.indexer.dao.IndexDAO;
 import edu.mcw.rgd.indexer.dao.variants.BulkIndexProcessor;
 
 import edu.mcw.rgd.indexer.model.ExpressionDataIndexObject;
@@ -23,6 +24,7 @@ public class ExpressionDataIndexer implements Runnable{
     private Gene gene;
     private  String species;
     private List<GeneExpression> records;
+    IndexDAO indexDAO=new IndexDAO();
 
     GeneExpressionDAO geneExpressionDAO=new GeneExpressionDAO();
     OntologyXDAO xdao=new OntologyXDAO();
@@ -48,6 +50,11 @@ public class ExpressionDataIndexer implements Runnable{
     public void mapGene(ExpressionDataIndexObject object){
         object.setGeneRgdId(String.valueOf(gene.getRgdId()));
         object.setGeneSymbol(gene.getSymbol());
+        try {
+            object.setMapDataList(indexDAO.getMapData(gene.getRgdId()));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
     void setExpressionRecords()  {
         try {
@@ -78,6 +85,7 @@ public class ExpressionDataIndexer implements Runnable{
     ExpressionDataIndexObject buildIndexObject(GeneExpression record) throws Exception {
         ExpressionDataIndexObject object=new ExpressionDataIndexObject();
         mapGene(object);
+        object.setSpecies(species);
         object.setStrainAcc(record.getSample().getStrainAccId());
         try {
             if (object.getStrainAcc() != null && !object.getStrainAcc().equals(""))
