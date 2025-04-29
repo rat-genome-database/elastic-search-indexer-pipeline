@@ -2,6 +2,7 @@ package edu.mcw.rgd.indexer.model;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class ExpressionDataIndexObject {
    private String geneSymbol;
@@ -11,9 +12,9 @@ public class ExpressionDataIndexObject {
    private String strainTerm;
    private String tissueAcc;
    private String tissueTerm;
-   private double expressionValue;
+   private List<Double> expressionValue;
    private String expressionUnit;
-   private String expressionLevel;
+   private Set<String> expressionLevel;
    private String species;
    private String condition;
     private List<MapInfo> mapDataList;
@@ -27,11 +28,19 @@ public class ExpressionDataIndexObject {
         this.mapDataList = mapDataList;
     }
 
-    public String getExpressionLevel() {
+    public List<Double> getExpressionValue() {
+        return expressionValue;
+    }
+
+    public void setExpressionValue(List<Double> expressionValue) {
+        this.expressionValue = expressionValue;
+    }
+
+    public Set<String> getExpressionLevel() {
         return expressionLevel;
     }
 
-    public void setExpressionLevel(String expressionLevel) {
+    public void setExpressionLevel(Set<String> expressionLevel) {
         this.expressionLevel = expressionLevel;
     }
 
@@ -91,13 +100,7 @@ public class ExpressionDataIndexObject {
         this.tissueTerm = tissueTerm;
     }
 
-    public double getExpressionValue() {
-        return expressionValue;
-    }
 
-    public void setExpressionValue(double expressionValue) {
-        this.expressionValue = expressionValue;
-    }
 
     public String getExpressionUnit() {
         return expressionUnit;

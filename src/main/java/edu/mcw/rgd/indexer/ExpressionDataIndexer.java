@@ -8,6 +8,7 @@ import edu.mcw.rgd.datamodel.GeneExpression;
 import edu.mcw.rgd.datamodel.RgdIndex;
 import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
+import edu.mcw.rgd.datamodel.pheno.GeneExpressionRecord;
 import edu.mcw.rgd.indexer.dao.IndexDAO;
 import edu.mcw.rgd.indexer.dao.variants.BulkIndexProcessor;
 
@@ -16,7 +17,10 @@ import edu.mcw.rgd.indexer.model.JacksonConfiguration;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.xcontent.XContentType;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class ExpressionDataIndexer implements Runnable{
@@ -67,44 +71,73 @@ public class ExpressionDataIndexer implements Runnable{
             throw new RuntimeException(e);
         }
     }
-    void index() throws Exception {
-        if(records!=null && records.size()>0) {
-            for (GeneExpression record:records) {
-                ExpressionDataIndexObject object = buildIndexObject(record);
-
-                try {
-                    String json = JacksonConfiguration.MAPPER.writeValueAsString(object);
-                    IndexRequest request = new IndexRequest(RgdIndex.getNewAlias()).source(json, XContentType.JSON);
-                    BulkIndexProcessor.bulkProcessor.add(request);
-                } catch (JsonProcessingException e) {
-                    e.printStackTrace();
-                }
+    Set<String> getStrainAccIds(){
+       return records.stream().map(r->r.getSample().getStrainAccId()).collect(Collectors.toSet());
+    }
+    Set<String> getTissueAccIds(){
+        return records.stream().map(r->r.getSample().getTissueAccId()).collect(Collectors.toSet());
+    }
+    List<GeneExpression> getFilteredRecords(String strainAccId, String tissueAccId){
+        List<GeneExpression> filteredRecs=new ArrayList<>();
+        for(GeneExpression rec:records){
+            if(rec.getSample().getStrainAccId().equalsIgnoreCase(strainAccId) && rec.getSample().getTissueAccId().equalsIgnoreCase(tissueAccId)){
+                filteredRecs.add(rec);
             }
         }
+        return filteredRecs;
     }
-    ExpressionDataIndexObject buildIndexObject(GeneExpression record) throws Exception {
-        ExpressionDataIndexObject object=new ExpressionDataIndexObject();
-        mapGene(object);
-        object.setSpecies(species);
-        object.setStrainAcc(record.getSample().getStrainAccId());
-        try {
-            if (object.getStrainAcc() != null && !object.getStrainAcc().equals(""))
-                object.setStrainTerm(getTerm(object.getStrainAcc()));
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-        object.setTissueAcc(record.getSample().getTissueAccId());
+    void index() throws Exception {
+        if(records!=null && records.size()>0) {
+            for(String sampleId:getStrainAccIds()){
+                for(String tissueId:getTissueAccIds()){
+                    List<GeneExpression> filteredRecords=getFilteredRecords(sampleId, tissueId);
+                    if(filteredRecords.size()>0){
+                        ExpressionDataIndexObject object = new ExpressionDataIndexObject();
+                        object.setSpecies(species);
+                        object.setStrainAcc(sampleId);
+                        try {
+                            if (object.getStrainAcc() != null && !object.getStrainAcc().equals(""))
+                                object.setStrainTerm(getTerm(object.getStrainAcc()));
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
+                        object.setTissueAcc(tissueId);
 
+                        try {
+                            if (object.getTissueAcc() != null && !object.getTissueAcc().equals(""))
+                                object.setTissueTerm(getTerm(object.getTissueAcc()));
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
+                        List<Double> values=new ArrayList<>();
+                        Set<String> level=new HashSet<>();
+                        for (GeneExpression record:filteredRecords) {
+                              Double val=record.getGeneExpressionRecordValue().getExpressionValue();
+                                values.add(val);
+                                level.add(record.getGeneExpressionRecordValue().getExpressionLevel());
+
+                        }
+                        object.setExpressionLevel(level);
+                        object.setExpressionValue(values);
+                        mapGene(object);
+                        index(object);
+                    }
+
+
+        }}}
+    }
+    void index(ExpressionDataIndexObject object){
         try {
-            if (object.getTissueAcc() != null && !object.getTissueAcc().equals(""))
-                object.setTissueTerm(getTerm(object.getTissueAcc()));
-        }catch (Exception e){
+            byte[] json = JacksonConfiguration.MAPPER.writeValueAsBytes(object);
+            IndexRequest request = new IndexRequest(RgdIndex.getNewAlias()).source(json, XContentType.JSON);
+            BulkIndexProcessor.bulkProcessor.add(request);
+        } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
-        object.setExpressionValue(record.getGeneExpressionRecordValue().getExpressionValue());
-        object.setExpressionLevel(record.getGeneExpressionRecordValue().getExpressionLevel());
-        return object;
     }
+
+
+
     String getTerm(String accId) throws Exception {
         Term term = xdao.getTerm(accId);
           return term.getTerm();
