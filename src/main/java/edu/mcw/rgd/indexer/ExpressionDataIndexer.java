@@ -82,7 +82,8 @@ public class ExpressionDataIndexer implements Runnable{
     List<GeneExpression> getFilteredRecords(String strainAccId, String tissueAccId){
         List<GeneExpression> filteredRecs=new ArrayList<>();
         for(GeneExpression rec:records){
-            if(rec.getSample().getStrainAccId().equalsIgnoreCase(strainAccId) && rec.getSample().getTissueAccId().equalsIgnoreCase(tissueAccId)){
+            if(rec.getSample()!=null && rec.getSample().getStrainAccId()!=null &&  rec.getSample().getTissueAccId()!=null &&
+                    rec.getSample().getStrainAccId().equalsIgnoreCase(strainAccId) && rec.getSample().getTissueAccId().equalsIgnoreCase(tissueAccId)){
                 filteredRecs.add(rec);
             }
         }
