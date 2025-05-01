@@ -15,8 +15,10 @@ import edu.mcw.rgd.indexer.dao.variants.BulkIndexProcessor;
 import edu.mcw.rgd.indexer.model.ExpressionDataIndexObject;
 import edu.mcw.rgd.indexer.model.JacksonConfiguration;
 import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.search.DocValueFormat;
 import org.elasticsearch.xcontent.XContentType;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -88,6 +90,7 @@ public class ExpressionDataIndexer implements Runnable{
     }
     void index() throws Exception {
         if(records!=null && records.size()>0) {
+            DecimalFormat df=new DecimalFormat("#.####");
             for(String sampleId:getStrainAccIds()){
                 for(String tissueId:getTissueAccIds()){
                     List<GeneExpression> filteredRecords=getFilteredRecords(sampleId, tissueId);
@@ -111,14 +114,18 @@ public class ExpressionDataIndexer implements Runnable{
                         }
                         List<Double> values=new ArrayList<>();
                         Set<String> level=new HashSet<>();
+                        double valueSum=0;
                         for (GeneExpression record:filteredRecords) {
                               Double val=record.getGeneExpressionRecordValue().getExpressionValue();
+                              valueSum+=val;
                                 values.add(val);
                                 level.add(record.getGeneExpressionRecordValue().getExpressionLevel());
 
                         }
+                        double valueMean= Double.parseDouble(df.format(valueSum / filteredRecords.size()));
                         object.setExpressionLevel(level);
                         object.setExpressionValue(values);
+                        object.setValueMean(valueMean);
                         mapGene(object);
                         index(object);
                     }

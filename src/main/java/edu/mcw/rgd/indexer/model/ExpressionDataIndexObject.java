@@ -13,12 +13,21 @@ public class ExpressionDataIndexObject {
    private String tissueAcc;
    private String tissueTerm;
    private List<Double> expressionValue;
+   private double valueMean;
    private String expressionUnit;
    private Set<String> expressionLevel;
    private String species;
    private String condition;
     private List<MapInfo> mapDataList;
    private Map<String, String> metaData;
+
+    public double getValueMean() {
+        return valueMean;
+    }
+
+    public void setValueMean(double valueMean) {
+        this.valueMean = valueMean;
+    }
 
     public List<MapInfo> getMapDataList() {
         return mapDataList;
