@@ -56,6 +56,7 @@ public class ExpressionDataIndexer implements Runnable{
     public void mapGene(ExpressionDataIndexObject object){
         object.setGeneRgdId(String.valueOf(gene.getRgdId()));
         object.setGeneSymbol(gene.getSymbol());
+        object.setGeneSymbolWithRgdId(gene.getSymbol()+"-RGD:"+gene.getRgdId());
         try {
             object.setMapDataList(indexDAO.getMapData(gene.getRgdId()));
         } catch (Exception e) {

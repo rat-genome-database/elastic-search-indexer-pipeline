@@ -7,6 +7,7 @@ import java.util.Set;
 public class ExpressionDataIndexObject {
    private String geneSymbol;
    private String geneRgdId;
+    private String geneSymbolWithRgdId;
    private String sampleId;
    private String strainAcc;
    private String strainTerm;
@@ -20,6 +21,14 @@ public class ExpressionDataIndexObject {
    private String condition;
     private List<MapInfo> mapDataList;
    private Map<String, String> metaData;
+
+    public String getGeneSymbolWithRgdId() {
+        return geneSymbolWithRgdId;
+    }
+
+    public void setGeneSymbolWithRgdId(String geneSymbolWithRgdId) {
+        this.geneSymbolWithRgdId = geneSymbolWithRgdId;
+    }
 
     public double getValueMean() {
         return valueMean;
