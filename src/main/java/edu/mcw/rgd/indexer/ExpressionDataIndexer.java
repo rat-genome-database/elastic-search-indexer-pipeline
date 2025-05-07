@@ -19,10 +19,7 @@ import org.elasticsearch.search.DocValueFormat;
 import org.elasticsearch.xcontent.XContentType;
 
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ExpressionDataIndexer implements Runnable{
@@ -91,6 +88,40 @@ public class ExpressionDataIndexer implements Runnable{
         return filteredRecs;
     }
     void index() throws Exception {
+      // indexNormalised();
+       indexDenormalized();
+    }
+    void indexDenormalized(){
+        if(records!=null && records.size()>0) {
+        //    DecimalFormat df=new DecimalFormat("#.####");
+            for(GeneExpression record:records) {
+                ExpressionDataIndexObject object = new ExpressionDataIndexObject();
+                object.setSpecies(species);
+                object.setStrainAcc(record.getSample().getStrainAccId());
+                try {
+                    if (object.getStrainAcc() != null && !object.getStrainAcc().equals(""))
+                        object.setStrainTerm(getTerm(object.getStrainAcc()));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                object.setTissueAcc(record.getSample().getTissueAccId());
+
+                try {
+                    if (object.getTissueAcc() != null && !object.getTissueAcc().equals(""))
+                        object.setTissueTerm(getTerm(object.getTissueAcc()));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                object.setExpressionLevel(new HashSet<>(Collections.singleton(record.getGeneExpressionRecordValue().getExpressionLevel())));
+                object.setExpressionValue(new ArrayList<>(Collections.singleton(record.getGeneExpressionRecordValue().getExpressionValue())));
+                mapGene(object);
+                index(object);
+
+
+            }
+                }
+    }
+    void indexNormalised(){
         if(records!=null && records.size()>0) {
             DecimalFormat df=new DecimalFormat("#.####");
             for(String sampleId:getStrainAccIds()){
@@ -118,10 +149,10 @@ public class ExpressionDataIndexer implements Runnable{
                         Set<String> level=new HashSet<>();
                         double valueSum=0;
                         for (GeneExpression record:filteredRecords) {
-                              Double val=record.getGeneExpressionRecordValue().getExpressionValue();
-                              valueSum+=val;
-                                values.add(val);
-                                level.add(record.getGeneExpressionRecordValue().getExpressionLevel());
+                            Double val=record.getGeneExpressionRecordValue().getExpressionValue();
+                            valueSum+=val;
+                            values.add(val);
+                            level.add(record.getGeneExpressionRecordValue().getExpressionLevel());
 
                         }
                         double valueMean= Double.parseDouble(df.format(valueSum / filteredRecords.size()));
@@ -133,7 +164,7 @@ public class ExpressionDataIndexer implements Runnable{
                     }
 
 
-        }}}
+                }}}
     }
     void index(ExpressionDataIndexObject object){
         try {
