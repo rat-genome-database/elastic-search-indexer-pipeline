@@ -88,8 +88,8 @@ public class ExpressionDataIndexer implements Runnable{
         return filteredRecs;
     }
     void index() throws Exception {
-      // indexNormalised();
-       indexDenormalized();
+       indexNormalised();
+      // indexDenormalized();
     }
     void indexDenormalized(){
         if(records!=null && records.size()>0) {
@@ -159,6 +159,9 @@ public class ExpressionDataIndexer implements Runnable{
                         object.setExpressionLevel(level);
                         object.setExpressionValue(values);
                         object.setValueMean(valueMean);
+                        if(valueMean>0){
+                           object.setLogValue(Math.log(valueMean));
+                        }
                         mapGene(object);
                         index(object);
                     }
