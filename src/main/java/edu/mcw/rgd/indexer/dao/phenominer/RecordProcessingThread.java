@@ -180,11 +180,11 @@ public class RecordProcessingThread implements Runnable{
         }catch (Exception e){log.debug("No sex for record "+ record.getId());}
 
         try {
-            object.setAgeLowBound(Integer.parseInt(String.valueOf(record.getSample().getAgeDaysFromLowBound())));
+            object.setAgeLowBound(record.getSample().getAgeDaysFromLowBound());
         }catch (Exception e){log.debug("No age low bound for record "+ record.getId());}
 
         try {
-            object.setAgeHighBound(Integer.parseInt(String.valueOf(record.getSample().getAgeDaysFromHighBound())));
+            object.setAgeHighBound(record.getSample().getAgeDaysFromHighBound());
         }catch (Exception e){log.debug("NO age high bound for record "+ record.getId());}
 
         try {
