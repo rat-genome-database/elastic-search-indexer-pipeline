@@ -12,6 +12,7 @@ import edu.mcw.rgd.dao.spring.StringMapQuery;
 
 import edu.mcw.rgd.datamodel.*;
 
+import edu.mcw.rgd.datamodel.RgdIndex;
 import edu.mcw.rgd.datamodel.ontology.Annotation;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;

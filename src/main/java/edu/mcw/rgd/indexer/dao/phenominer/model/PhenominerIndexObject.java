@@ -30,8 +30,8 @@ public class PhenominerIndexObject {
     private String rsRootTermAcc;
 
     private String sex;
-    private int ageLowBound;
-    private int ageHighBound;
+    private double ageLowBound;
+    private double ageHighBound;
     private String units;
 
     private String rsTopLevelTerm;
@@ -486,19 +486,19 @@ public class PhenominerIndexObject {
         this.sex = sex;
     }
 
-    public int getAgeLowBound() {
+    public double getAgeLowBound() {
         return ageLowBound;
     }
 
-    public void setAgeLowBound(int ageLowBound) {
+    public void setAgeLowBound(double ageLowBound) {
         this.ageLowBound = ageLowBound;
     }
 
-    public int getAgeHighBound() {
+    public double getAgeHighBound() {
         return ageHighBound;
     }
 
-    public void setAgeHighBound(int ageHighBound) {
+    public void setAgeHighBound(double ageHighBound) {
         this.ageHighBound = ageHighBound;
     }
 
