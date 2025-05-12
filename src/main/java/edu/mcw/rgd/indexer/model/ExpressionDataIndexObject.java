@@ -15,7 +15,17 @@ public class ExpressionDataIndexObject {
    private String tissueTerm;
    private List<Double> expressionValue;
    private double valueMean;
-   private String expressionUnit;
+   private double logValue;
+
+    public double getLogValue() {
+        return logValue;
+    }
+
+    public void setLogValue(double logValue) {
+        this.logValue = logValue;
+    }
+
+    private String expressionUnit;
    private Set<String> expressionLevel;
    private String species;
    private String condition;
