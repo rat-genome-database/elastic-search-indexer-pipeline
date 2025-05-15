@@ -6,13 +6,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.mcw.rgd.dao.AbstractDAO;
 import edu.mcw.rgd.dao.DataSourceFactory;
 import edu.mcw.rgd.dao.impl.*;
-import edu.mcw.rgd.dao.spring.ExperimentQuery;
-import edu.mcw.rgd.dao.spring.GeneQuery;
+
 import edu.mcw.rgd.dao.spring.StringMapQuery;
 
 import edu.mcw.rgd.datamodel.*;
 
-import edu.mcw.rgd.datamodel.RgdIndex;
 import edu.mcw.rgd.datamodel.ontology.Annotation;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
@@ -33,7 +31,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.index.Index;
 import org.elasticsearch.xcontent.XContentType;
 
 
@@ -49,24 +46,22 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import static org.elasticsearch.client.Requests.refreshRequest;
-
 /**
  * Created by jthota on 3/23/2017.
  */
 public class IndexDAO extends AbstractDAO {
 
-    private GeneDAO geneDAO = new GeneDAO();
-    private StrainDAO strainDAO = new StrainDAO();
-    private QTLDAO qtlDAO = new QTLDAO();
-    private SSLPDAO sslpdao = new SSLPDAO();
-    private AnnotationDAO annotationDAO = new AnnotationDAO();
-    private XdbIdDAO xdbDAO = new XdbIdDAO();
-    private PhenominerDAO phenominerDAO = new PhenominerDAO();
-    private AliasDAO aliasDAO = new AliasDAO();
-    private MapDAO mapDAO = new MapDAO();
-    private TranscriptDAO transcriptDAO = new TranscriptDAO();
-    private AssociationDAO adao = new AssociationDAO();
+    public GeneDAO geneDAO = new GeneDAO();
+     StrainDAO strainDAO = new StrainDAO();
+     QTLDAO qtlDAO = new QTLDAO();
+     SSLPDAO sslpdao = new SSLPDAO();
+     AnnotationDAO annotationDAO = new AnnotationDAO();
+     XdbIdDAO xdbDAO = new XdbIdDAO();
+     PhenominerDAO phenominerDAO = new PhenominerDAO();
+     AliasDAO aliasDAO = new AliasDAO();
+     MapDAO mapDAO = new MapDAO();
+     TranscriptDAO transcriptDAO = new TranscriptDAO();
+     AssociationDAO adao = new AssociationDAO();
     private VariantInfoDAO vdao= new VariantInfoDAO();
     private VariantDAO variantDAO= new VariantDAO();
     private OntologyXDAO ontologyXDAO= new OntologyXDAO();
@@ -151,15 +146,21 @@ public class IndexDAO extends AbstractDAO {
 
 
     public void getGenes() throws Exception {
-        List<Gene> genes= geneDAO.getAllActiveGenes();
-        ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
-        for(Gene gene: genes) {
-      // Gene gene= geneDAO.getGene(2493);
-            Runnable workerThread= new IndexGene(gene);
-            executor.execute(workerThread);
-   }
-        executor.shutdown();
-        while (!executor.isTerminated()) {}
+
+        ExecutorService executor = new MyThreadPoolExecutor(10, 10, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+        List<edu.mcw.rgd.datamodel.Map> maps = mapDAO.getActiveMaps();
+        for (edu.mcw.rgd.datamodel.Map map : maps) {
+            List<MappedGene> genes = geneDAO.getActiveMappedGenes(map.getKey());
+            for (MappedGene gene : genes) {
+                // Gene gene= geneDAO.getGene(2493);
+                Runnable workerThread = new IndexGene(gene);
+                executor.execute(workerThread);
+            }
+        }
+            executor.shutdown();
+            while (!executor.isTerminated()) {
+            }
+
 
     }
     public int getAnnotsCount(int rgdId) throws Exception {
@@ -968,7 +969,7 @@ public class IndexDAO extends AbstractDAO {
         }
         return symbols;
     }
-    public List<String> getPromoersByRgdId(int rgdId, List<Association> associations, List<GenomicElement> gElements) throws Exception {
+    public List<String> getPromotersByRgdId(int rgdId, List<Association> associations, List<GenomicElement> gElements) throws Exception {
 
         List<String> symbols = new ArrayList<>();
         for (Association a : associations) {

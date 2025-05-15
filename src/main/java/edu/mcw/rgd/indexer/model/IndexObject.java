@@ -31,8 +31,55 @@ public class IndexObject {
     private List<String> synonyms;
     private String trait;
     private String subTrait;
-    private String chromosome;
+
     private List<MapInfo> mapDataList;
+    private String chromosome;
+    private String map;
+    private long startPos;
+    private long stopPos;
+    private int rank;
+private int mapKey;
+
+    public int getMapKey() {
+        return mapKey;
+    }
+
+    public void setMapKey(int mapKey) {
+        this.mapKey = mapKey;
+    }
+
+    public String getMap() {
+        return map;
+    }
+
+    public void setMap(String map) {
+        this.map = map;
+    }
+
+    public long getStartPos() {
+        return startPos;
+    }
+
+    public void setStartPos(long startPos) {
+        this.startPos = startPos;
+    }
+
+    public long getStopPos() {
+        return stopPos;
+    }
+
+    public void setStopPos(long stopPos) {
+        this.stopPos = stopPos;
+    }
+
+    public int getRank() {
+        return rank;
+    }
+
+    public void setRank(int rank) {
+        this.rank = rank;
+    }
+
     private List<String> promoters;
     private String subcat;
     private String variantCategory;
