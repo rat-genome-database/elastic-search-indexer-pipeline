@@ -1,16 +1,17 @@
 package edu.mcw.rgd.indexer.index.objectDetails;
 
-import edu.mcw.rgd.datamodel.Gene;
+import edu.mcw.rgd.datamodel.Map;
 import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.indexer.dao.IndexDAO;
 import edu.mcw.rgd.indexer.model.Annotations;
-import edu.mcw.rgd.indexer.model.GeneIndexObject;
+import edu.mcw.rgd.indexer.model.IndexObject;
+import edu.mcw.rgd.process.mapping.MapManager;
 
 public abstract class ObjectDetails<T> extends IndexDAO implements Details<T> {
     T t;
-     GeneIndexObject obj;
+     IndexObject obj;
 
-    ObjectDetails(T t, GeneIndexObject object){this.t=t; this.obj=object;}
+    ObjectDetails(T t, IndexObject object){this.t=t; this.obj=object;}
     @Override
     public void mapSpecies() {
         String species = SpeciesType.getCommonName(getSpeciesTypeKey());
@@ -42,16 +43,12 @@ public abstract class ObjectDetails<T> extends IndexDAO implements Details<T> {
         }
     }
     @Override
-    public void mapAnnotations() {
+    public void mapAssembly() {
         try {
-            obj.setAnnotationsCount(getAnnotsCount(getRgdId()));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        try {
-            Annotations<T> annotations=new Annotations<>(t);
-            obj.setGoAnnotations(annotations.getGoAnnotations());
-
+            Map map=  MapManager.getInstance().getMap(obj.getMapKey());
+            obj.setRank(map.getRank());
+            obj.setMap(map.getName());
+//            obj.setMapDataList(getMapData(getRgdId()));
         } catch (Exception e) {
             e.printStackTrace();
         }

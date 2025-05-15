@@ -15,11 +15,12 @@ public class IndexGene implements Runnable {
     }
     @Override
     public void run() {
-        GeneIndexObject object=new GeneIndexObject();
+        IndexObject object=new IndexObject();
         object.setChromosome(mappedGene.getChromosome());
         object.setStartPos(mappedGene.getStart());
         object.setStopPos(mappedGene.getStop());
         object.setMapKey(mappedGene.getMapKey());
+        object.setCategory("Gene");
         ObjectDetails<Gene> details=new GeneDetails(gene, object);
         details.index();
 

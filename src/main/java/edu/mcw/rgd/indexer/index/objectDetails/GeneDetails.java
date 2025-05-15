@@ -3,9 +3,7 @@ package edu.mcw.rgd.indexer.index.objectDetails;
 import edu.mcw.rgd.datamodel.Gene;
 import edu.mcw.rgd.datamodel.Map;
 
-import edu.mcw.rgd.indexer.model.AliasData;
-import edu.mcw.rgd.indexer.model.Associations;
-import edu.mcw.rgd.indexer.model.GeneIndexObject;
+import edu.mcw.rgd.indexer.model.*;
 import edu.mcw.rgd.process.Utils;
 import edu.mcw.rgd.process.mapping.MapManager;
 import org.jsoup.Jsoup;
@@ -14,7 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class GeneDetails extends ObjectDetails<Gene> {
-    public GeneDetails(Gene gene, GeneIndexObject obj) {
+    public GeneDetails(Gene gene, IndexObject obj) {
         super(gene, obj);
     }
     @Override
@@ -48,17 +46,7 @@ public class GeneDetails extends ObjectDetails<Gene> {
         obj.setCategory("Gene");
         obj.setName(name);
     }
-    @Override
-    public void mapAssembly() {
-        try {
-          Map map=  MapManager.getInstance().getMap(obj.getMapKey());
-          obj.setRank(map.getRank());
-          obj.setMap(map.getName());
-//            obj.setMapDataList(getMapData(getRgdId()));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+
     @Override
     public void mapPromotoers() {
         try {
@@ -107,5 +95,19 @@ public class GeneDetails extends ObjectDetails<Gene> {
             e.printStackTrace();
         }
     }
+    @Override
+    public void mapAnnotations() {
+        try {
+            obj.setAnnotationsCount(getAnnotsCount(getRgdId()));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            Annotations<Gene> annotations=new Annotations<>(t);
+            obj.setGoAnnotations(annotations.getGoAnnotations());
 
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

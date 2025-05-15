@@ -146,13 +146,11 @@ public class IndexDAO extends AbstractDAO {
 
 
     public void getGenes() throws Exception {
-
         ExecutorService executor = new MyThreadPoolExecutor(10, 10, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
         List<edu.mcw.rgd.datamodel.Map> maps = mapDAO.getActiveMaps();
         for (edu.mcw.rgd.datamodel.Map map : maps) {
             List<MappedGene> genes = geneDAO.getActiveMappedGenes(map.getKey());
             for (MappedGene gene : genes) {
-                // Gene gene= geneDAO.getGene(2493);
                 Runnable workerThread = new IndexGene(gene);
                 executor.execute(workerThread);
             }
@@ -475,15 +473,15 @@ public class IndexDAO extends AbstractDAO {
     }
 
     public void getQtls() throws Exception{
-        List<IndexObject> objList= new ArrayList<>();
-     //   List<Alias> aliases=aliasDAO.getActiveAliases(RgdId.OBJECT_KEY_QTLS);
-        List<QTL> qtls=qtlDAO.getActiveQTLs();
-        ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
-        for(QTL qtl: qtls) {
-            // QTL qtl= qtlDAO.getQTL(61368);
-            Runnable workerThread= new IndexQTL(qtl);
-            executor.execute(workerThread);
-        }
+        ExecutorService executor = new MyThreadPoolExecutor(10, 10, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+        List<edu.mcw.rgd.datamodel.Map> maps = mapDAO.getActiveMaps();
+     //   for (edu.mcw.rgd.datamodel.Map map : maps) {
+            List<MappedQTL> qtls = qtlDAO.getActiveMappedQTLsByMapKey(360);
+            for (MappedQTL qtl : qtls) {
+                Runnable workerThread = new IndexQTL(qtl);
+                executor.execute(workerThread);
+            }
+      //  }
         executor.shutdown();
         while (!executor.isTerminated()) {}
 

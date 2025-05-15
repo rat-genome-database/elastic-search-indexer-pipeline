@@ -39,6 +39,33 @@ public class IndexObject {
     private long stopPos;
     private int rank;
 private int mapKey;
+    private List<String> goAnnotations;
+    private boolean withSSLPS;
+    private boolean withHomologs;
+
+    public List<String> getGoAnnotations() {
+        return goAnnotations;
+    }
+
+    public void setGoAnnotations(List<String> goAnnotations) {
+        this.goAnnotations = goAnnotations;
+    }
+
+    public boolean isWithSSLPS() {
+        return withSSLPS;
+    }
+
+    public void setWithSSLPS(boolean withSSLPS) {
+        this.withSSLPS = withSSLPS;
+    }
+
+    public boolean isWithHomologs() {
+        return withHomologs;
+    }
+
+    public void setWithHomologs(boolean withHomologs) {
+        this.withHomologs = withHomologs;
+    }
 
     public int getMapKey() {
         return mapKey;
