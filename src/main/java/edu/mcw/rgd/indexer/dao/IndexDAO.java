@@ -313,12 +313,15 @@ public class IndexDAO extends AbstractDAO {
        ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
         //  Strain strain=strainDAO.getStrain(7248453);
   //      List<Alias> aliases=aliasDAO.getActiveAliases(RgdId.OBJECT_KEY_STRAINS);
-        List<Strain> strains= strainDAO.getActiveStrains();
-        Map<Integer, Gene> genes=getStrainAssociations(strains);
-        for(Strain strain: strains) {
-            Runnable workerThread= new IndexStrain(strain, genes);
-            executor.execute(workerThread);
-        }
+       List<edu.mcw.rgd.datamodel.Map> maps = mapDAO.getActiveMaps();
+       for (edu.mcw.rgd.datamodel.Map map : maps) {
+           List<MappedStrain> strains = strainDAO.getActiveMappedStrainPositions(map.getKey());
+
+           for (MappedStrain strain : strains) {
+               Runnable workerThread = new IndexStrain(strain);
+               executor.execute(workerThread);
+           }
+       }
        executor.shutdown();
        while (!executor.isTerminated()) {}
     }
@@ -330,11 +333,11 @@ public class IndexDAO extends AbstractDAO {
            rgdIds.add(s.getRgdId());
         }
         Collection[] colletions = this.split(rgdIds, 1000);
-        Connection conn=null;
-        Statement stmt= null;
-        ResultSet rs=null;
+
         for(int i=0; i<colletions.length;i++){
             List c= (List) colletions[i];
+            try(Connection conn=this.getDataSource().getConnection();
+                Statement stmt= conn.createStatement();){
             String sql="select s.rgd_id as strain_rgd_id, g.* from genes g, " +
                     "genes_variations gv, " +
                     "genes a, rgd_ids r, " +
@@ -348,9 +351,8 @@ public class IndexDAO extends AbstractDAO {
                     "and r.object_status='ACTIVE' " +
                     "and s.rgd_id in ("+Utils.concatenate(c,",")+")";
 
-           conn=this.getDataSource().getConnection();
-           stmt= conn.createStatement();
-          rs=stmt.executeQuery(sql);
+
+          ResultSet rs=stmt.executeQuery(sql);
             while(rs.next()){
                 Gene g= new Gene();
                 g.setSymbol(rs.getString("gene_symbol").toLowerCase());
@@ -360,13 +362,41 @@ public class IndexDAO extends AbstractDAO {
             }
 
             rs.close();
-            stmt.close();
-            if(!conn.isClosed()){
-                conn.close();
-            }
+        }
         }
 
         return genes;
+    }
+
+    public Gene getStrainAssociations(int rgdId) throws Exception {
+            Gene gene=new Gene();
+
+            try(Connection conn=this.getDataSource().getConnection();
+                Statement stmt= conn.createStatement();){
+                String sql="select s.rgd_id as strain_rgd_id, g.* from genes g, " +
+                        "genes_variations gv, " +
+                        "genes a, rgd_ids r, " +
+                        "strains s," +
+                        "rgd_strains_rgd rs " +
+                        "where gv.gene_key=g.gene_key " +
+                        "AND gv.variation_key=a.gene_key " +
+                        "and a.rgd_id=rs.rgd_id " +
+                        "and rs.strain_key=s.strain_key " +
+                        "and r.rgd_id=g.rgd_id " +
+                        "and r.object_status='ACTIVE' " +
+                        "and s.rgd_id ="+rgdId;
+
+
+                ResultSet rs=stmt.executeQuery(sql);
+                while(rs.next()){
+                    gene.setSymbol(rs.getString("gene_symbol").toLowerCase());
+                    gene.setName(rs.getString("full_name_lc"));
+
+                }
+
+                rs.close();
+            }
+      return gene;
     }
 
     public List<String> getAliasesByRgdId(List<Alias> aliases,int rgdid) throws Exception {
@@ -452,6 +482,7 @@ public class IndexDAO extends AbstractDAO {
     public int sampleExists(int strainRgdid, int patient_id) throws Exception {
         SampleDAO sampleDAO= new SampleDAO();
         sampleDAO.setDataSource(DataSourceFactory.getInstance().getCarpeNovoDataSource());
+
       Sample s=  sampleDAO.getSampleByStrainRgdId(strainRgdid, patient_id);
         if(s!=null){
 

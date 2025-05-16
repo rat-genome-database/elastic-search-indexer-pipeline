@@ -4,7 +4,6 @@ import edu.mcw.rgd.dao.impl.AssociationDAO;
 import edu.mcw.rgd.datamodel.QTL;
 import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.datamodel.Strain;
-import edu.mcw.rgd.indexer.model.AliasData;
 import edu.mcw.rgd.indexer.model.Annotations;
 import edu.mcw.rgd.indexer.model.IndexObject;
 import org.jsoup.Jsoup;
@@ -51,25 +50,6 @@ public class QTLDetails extends  ObjectDetails<QTL> {
         obj.setCategory("QTL");
     }
 
-    @Override
-    public void mapPromoters() {
-
-    }
-
-    @Override
-    public void mapSynonyms() {
-        List<AliasData> aliases = null;
-        try {
-            aliases = getAliases(getRgdId());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        List<String> synonyms = new ArrayList<>();
-        for (AliasData a : aliases) {
-            synonyms.add(a.getAlias_name());
-        }
-        obj.setSynonyms(synonyms);
-    }
     @Override
     public void mapAnnotations() {
         try {

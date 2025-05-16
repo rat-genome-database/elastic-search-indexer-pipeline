@@ -1,6 +1,7 @@
 package edu.mcw.rgd.indexer.index;
 
 import edu.mcw.rgd.datamodel.Gene;
+import edu.mcw.rgd.datamodel.MappedStrain;
 import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.datamodel.Strain;
 import edu.mcw.rgd.indexer.dao.IndexDAO;
@@ -13,10 +14,13 @@ import java.util.List;
 import java.util.Map;
 
 public class IndexStrain implements Runnable {
+    private MappedStrain mappedObject;
     private Strain strain;
     private Map<Integer, Gene> genes;
     IndexDAO indexDAO=new IndexDAO();
-    public IndexStrain(Strain strain,Map<Integer, Gene> genes){ this.strain=strain;this.genes=genes;}
+    public IndexStrain(MappedStrain mappedObject){
+        this.mappedObject=mappedObject;
+        this.strain=mappedObject.getStrain();}
     @Override
     public void run() {
         int speciesTypeKey = strain.getSpeciesTypeKey();

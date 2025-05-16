@@ -3,9 +3,13 @@ package edu.mcw.rgd.indexer.index.objectDetails;
 import edu.mcw.rgd.datamodel.Map;
 import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.indexer.dao.IndexDAO;
+import edu.mcw.rgd.indexer.model.AliasData;
 import edu.mcw.rgd.indexer.model.Annotations;
 import edu.mcw.rgd.indexer.model.IndexObject;
 import edu.mcw.rgd.process.mapping.MapManager;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class ObjectDetails<T> extends IndexDAO implements Details<T> {
     T t;
@@ -52,6 +56,25 @@ public abstract class ObjectDetails<T> extends IndexDAO implements Details<T> {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+    @Override
+    public void mapSynonyms() {
+        List<AliasData> aliases = new ArrayList<>();
+        try {
+            aliases = getAliases(getRgdId());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        List<String> synonyms = new ArrayList<>();
+        for (AliasData a : aliases) {
+            synonyms.add(a.getAlias_name());
+        }
+        obj.setSynonyms(synonyms);
+    }
+
+    @Override
+    public void mapPromoters() {
+
     }
     @Override
     public void index() {

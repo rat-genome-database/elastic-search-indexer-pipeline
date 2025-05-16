@@ -30,26 +30,6 @@ public class SSLPDetails extends  ObjectDetails<SSLP> {
     }
 
     @Override
-    public void mapPromoters() {
-
-    }
-
-    @Override
-    public void mapSynonyms() {
-     List<AliasData> aliases = null;
-     try {
-      aliases = getAliases(getRgdId());
-     } catch (Exception e) {
-      e.printStackTrace();
-     }
-     List<String> synonyms = new ArrayList<>();
-     for (AliasData a : aliases) {
-      synonyms.add(a.getAlias_name());
-     }
-     obj.setSynonyms(synonyms);
-    }
-
-    @Override
     public void mapAnnotations() {
      try {
       obj.setAnnotationsCount(getAnnotsCount(getRgdId()));
