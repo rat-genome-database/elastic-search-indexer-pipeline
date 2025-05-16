@@ -9,7 +9,7 @@ public interface Details<T> {
     void mapObject();
     void mapSpecies();
     void mapAssembly();
-    void mapPromotoers();
+    void mapPromoters();
 
     void mapSynonyms();
     void mapTranscripts();

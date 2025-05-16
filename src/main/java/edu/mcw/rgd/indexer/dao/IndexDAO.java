@@ -475,13 +475,13 @@ public class IndexDAO extends AbstractDAO {
     public void getQtls() throws Exception{
         ExecutorService executor = new MyThreadPoolExecutor(10, 10, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
         List<edu.mcw.rgd.datamodel.Map> maps = mapDAO.getActiveMaps();
-     //   for (edu.mcw.rgd.datamodel.Map map : maps) {
-            List<MappedQTL> qtls = qtlDAO.getActiveMappedQTLsByMapKey(360);
+        for (edu.mcw.rgd.datamodel.Map map : maps) {
+            List<MappedQTL> qtls = qtlDAO.getActiveMappedQTLsByMapKey(map.getKey());
             for (MappedQTL qtl : qtls) {
                 Runnable workerThread = new IndexQTL(qtl);
                 executor.execute(workerThread);
             }
-      //  }
+        }
         executor.shutdown();
         while (!executor.isTerminated()) {}
 
@@ -513,11 +513,14 @@ public class IndexDAO extends AbstractDAO {
     public void getSslps() throws Exception{
         ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
      //   List<Alias> aliases=aliasDAO.getActiveAliases(RgdId.OBJECT_KEY_SSLPS);
-        for(SSLP sslp: sslpdao.getActiveSSLPs()) {
-            //  SSLP sslp= sslpdao.getSSLP(37320);
-            Runnable workerThread=new IndexSslp(sslp);
-            executor.execute(workerThread);
-        }
+        List<edu.mcw.rgd.datamodel.Map> maps = mapDAO.getActiveMaps();
+       // for (edu.mcw.rgd.datamodel.Map map : maps) {
+            for (MappedSSLP sslp : sslpdao.getActiveMappedSSLPs(360)) {
+                //  SSLP sslp= sslpdao.getSSLP(37320);
+                Runnable workerThread = new IndexSslp(sslp);
+                executor.execute(workerThread);
+            }
+       // }
         executor.shutdown();
         while (!executor.isTerminated()){}
 

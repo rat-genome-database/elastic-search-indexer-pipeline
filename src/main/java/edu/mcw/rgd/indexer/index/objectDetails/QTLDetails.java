@@ -52,7 +52,7 @@ public class QTLDetails extends  ObjectDetails<QTL> {
     }
 
     @Override
-    public void mapPromotoers() {
+    public void mapPromoters() {
 
     }
 

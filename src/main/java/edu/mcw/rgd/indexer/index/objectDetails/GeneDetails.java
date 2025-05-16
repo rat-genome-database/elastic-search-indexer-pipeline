@@ -48,7 +48,7 @@ public class GeneDetails extends ObjectDetails<Gene> {
     }
 
     @Override
-    public void mapPromotoers() {
+    public void mapPromoters() {
         try {
             obj.setPromoters(getPromotersByGeneRgdId(getRgdId()));
         } catch (Exception e) {
