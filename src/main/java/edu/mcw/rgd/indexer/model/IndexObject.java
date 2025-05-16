@@ -38,10 +38,55 @@ public class IndexObject {
     private long startPos;
     private long stopPos;
     private int rank;
-private int mapKey;
+    private int mapKey;
     private List<String> goAnnotations;
     private boolean withSSLPS;
     private boolean withHomologs;
+    private String regionName;
+    private String regionNameLc;
+    private List<String>  analysisName;
+    private String varNuc;
+    private String refNuc;
+
+    public String getVarNuc() {
+        return varNuc;
+    }
+
+    public void setVarNuc(String varNuc) {
+        this.varNuc = varNuc;
+    }
+
+    public String getRefNuc() {
+        return refNuc;
+    }
+
+    public void setRefNuc(String refNuc) {
+        this.refNuc = refNuc;
+    }
+
+    public List<String> getAnalysisName() {
+        return analysisName;
+    }
+
+    public void setAnalysisName(List<String> analysisName) {
+        this.analysisName = analysisName;
+    }
+
+    public String getRegionName() {
+        return regionName;
+    }
+
+    public void setRegionName(String regionName) {
+        this.regionName = regionName;
+    }
+
+    public String getRegionNameLc() {
+        return regionNameLc;
+    }
+
+    public void setRegionNameLc(String regionNameLc) {
+        this.regionNameLc = regionNameLc;
+    }
 
     public List<String> getGoAnnotations() {
         return goAnnotations;

@@ -52,7 +52,7 @@ import java.util.concurrent.TimeUnit;
 public class IndexDAO extends AbstractDAO {
 
     public GeneDAO geneDAO = new GeneDAO();
-     StrainDAO strainDAO = new StrainDAO();
+    public StrainDAO strainDAO = new StrainDAO();
      QTLDAO qtlDAO = new QTLDAO();
      SSLPDAO sslpdao = new SSLPDAO();
      AnnotationDAO annotationDAO = new AnnotationDAO();
@@ -62,13 +62,13 @@ public class IndexDAO extends AbstractDAO {
      MapDAO mapDAO = new MapDAO();
      TranscriptDAO transcriptDAO = new TranscriptDAO();
      AssociationDAO adao = new AssociationDAO();
+     public OntologyXDAO ontologyXDAO=new OntologyXDAO();
     private VariantInfoDAO vdao= new VariantInfoDAO();
     private VariantDAO variantDAO= new VariantDAO();
-    private OntologyXDAO ontologyXDAO= new OntologyXDAO();
     private ReferenceDAO referenceDAO=new ReferenceDAO();
     private GenomeDAO genomeDAO=new GenomeDAO();
     private GenomicElementDAO gdao= new GenomicElementDAO();
-    private AssociationDAO associationDAO=new AssociationDAO();
+    public AssociationDAO associationDAO=new AssociationDAO();
     private GenomicElementDAO gedao= new GenomicElementDAO();
     private RgdVariantDAO rgdVariantDAO =new RgdVariantDAO();
     Logger log= LogManager.getLogger("main");
