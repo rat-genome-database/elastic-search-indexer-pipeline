@@ -49,10 +49,7 @@ public abstract class ObjectDetails<T> extends IndexDAO implements Details<T> {
     @Override
     public void mapAssembly() {
         try {
-            Map map=  MapManager.getInstance().getMap(obj.getMapKey());
-            obj.setRank(map.getRank());
-            obj.setMap(map.getName());
-//            obj.setMapDataList(getMapData(getRgdId()));
+            obj.setMapDataList(getMapData(getRgdId()));
         } catch (Exception e) {
             e.printStackTrace();
         }
