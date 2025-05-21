@@ -16,19 +16,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class IndexQTL implements Runnable {
-    private final MappedQTL mappedObject;
     private final QTL qtl;
-    public IndexQTL(MappedQTL mappedQTL){
-        this.mappedObject=mappedQTL;
-        this.qtl=mappedQTL.getQTL();
+    public IndexQTL(QTL qtl){
+        this.qtl=qtl;
     }
     @Override
     public void run() {
         IndexObject object=new IndexObject();
-        object.setChromosome(mappedObject.getChromosome());
-        object.setStartPos(mappedObject.getStart());
-        object.setStopPos(mappedObject.getStop());
-        object.setMapKey(mappedObject.getMapKey());
         object.setCategory("QTL");
         ObjectDetails<QTL> details=new QTLDetails(qtl, object);
         details.index();

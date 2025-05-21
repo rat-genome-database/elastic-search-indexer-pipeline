@@ -10,19 +10,13 @@ import edu.mcw.rgd.indexer.model.IndexObject;
 
 
 public class IndexStrain implements Runnable {
-    private MappedStrain mappedObject;
     private Strain strain;
 
-    public IndexStrain(MappedStrain mappedObject){
-        this.mappedObject=mappedObject;
-        this.strain=mappedObject.getStrain();}
+    public IndexStrain(Strain strain){
+        this.strain=strain;}
     @Override
     public void run() {
         IndexObject object=new IndexObject();
-        object.setChromosome(mappedObject.getChromosome());
-        object.setStartPos(mappedObject.getStart());
-        object.setStopPos(mappedObject.getStop());
-        object.setMapKey(mappedObject.getMapKey());
         ObjectDetails<Strain> details=new StrainDetails(strain, object);
         details.index();
     }

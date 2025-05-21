@@ -30,7 +30,7 @@ public class StrainDetails extends ObjectDetails<Strain>{
         obj.setTerm_acc(String.valueOf(getRgdId()));
         obj.setSymbol(t.getSymbol());
         obj.setSource(t.getSource());
-        obj.setOrigin(t.getOrigin());
+        obj.setOrigin(t.getOrigination());
         obj.setDescription(t.getDescription());
         obj.setType(t.getStrainTypeName());
         obj.setName(t.getName());

@@ -3,6 +3,9 @@ package edu.mcw.rgd.indexer.index.objectDetails;
 import edu.mcw.rgd.datamodel.Reference;
 import edu.mcw.rgd.indexer.model.IndexObject;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ReferenceDetails extends ObjectDetails<Reference>{
 
    public ReferenceDetails(Reference reference, IndexObject object) {
@@ -21,6 +24,27 @@ public class ReferenceDetails extends ObjectDetails<Reference>{
 
     @Override
     public void mapObject() {
+        obj.setTerm_acc(String.valueOf(getRgdId()));
+        obj.setCitation(t.getCitation());
+        obj.setTitle(t.getTitle());
+        List<String> authors= null;
+        try {
+            authors = getAuthors(t.getKey());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        obj.setAuthor(authors);
+
+        List<String> input= new ArrayList<>();
+        if(authors!=null)
+            input.addAll(authors);
+        if(t.getTitle()!=null)
+            input.add(t.getTitle());
+
+        obj.setRefAbstract(t.getRefAbstract());
+        if(t.getPubDate()!=null)
+            obj.setPub_year(Integer.toString(t.getPubDate().getYear()+1900));
+        obj.setCategory("Reference");
 
     }
 

@@ -16,18 +16,12 @@ import java.util.List;
 
 public class IndexSslp implements Runnable {
     private final SSLP sslp;
-    private final MappedSSLP mappedObject;
-    public IndexSslp(MappedSSLP mappedSSLP){
-        this.mappedObject=mappedSSLP;
-        this.sslp=mappedSSLP.getSSLP();
+    public IndexSslp(SSLP sslp){
+        this.sslp=sslp;
     }
     @Override
     public void run() {
         IndexObject object=new IndexObject();
-        object.setChromosome(mappedObject.getChromosome());
-        object.setStartPos(mappedObject.getStart());
-        object.setStopPos(mappedObject.getStop());
-        object.setMapKey(mappedObject.getMapKey());
         ObjectDetails<SSLP> details=new SSLPDetails(sslp, object);
         details.index();
     }
