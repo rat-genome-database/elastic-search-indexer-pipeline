@@ -128,8 +128,8 @@ public class Manager {
                             searchIndexCreated = true;
                         }
                         for (IndexCategory category : IndexCategory.values()) {
-                            System.out.println("Indexing ..."+ category);
-                            indexDAO.getClass().getMethod("get" + category).invoke(indexDAO);
+                            System.out.println("Indexing ..."+ category.toString());
+                            indexDAO.getClass().getMethod("get" + category.toString()).invoke(indexDAO);
                         }
                     }
                     case "Chromosomes" -> {
