@@ -47,6 +47,42 @@ public class IndexObject {
     private List<String>  analysisName;
     private String varNuc;
     private String refNuc;
+    private Set<String> lifeStage;
+    private Set<String> sex;
+    private Set<String> expressionLevel;
+    private Set<String>expressionUnit;
+
+    public Set<String> getLifeStage() {
+        return lifeStage;
+    }
+
+    public void setLifeStage(Set<String> lifeStage) {
+        this.lifeStage = lifeStage;
+    }
+
+    public Set<String> getSex() {
+        return sex;
+    }
+
+    public void setSex(Set<String> sex) {
+        this.sex = sex;
+    }
+
+    public Set<String> getExpressionLevel() {
+        return expressionLevel;
+    }
+
+    public void setExpressionLevel(Set<String> expressionLevel) {
+        this.expressionLevel = expressionLevel;
+    }
+
+    public Set<String> getExpressionUnit() {
+        return expressionUnit;
+    }
+
+    public void setExpressionUnit(Set<String> expressionUnit) {
+        this.expressionUnit = expressionUnit;
+    }
 
     public String getVarNuc() {
         return varNuc;

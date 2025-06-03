@@ -9,19 +9,20 @@ import edu.mcw.rgd.datamodel.*;
 import edu.mcw.rgd.datamodel.ontologyx.Ontology;
 
 import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
-import edu.mcw.rgd.indexer.client.IndexAdmin;
+
 
 import edu.mcw.rgd.indexer.dao.*;
 
 import edu.mcw.rgd.indexer.dao.findModels.FullAnnotDao;
 import edu.mcw.rgd.indexer.dao.phenominer.PhenominerNormalizedThread;
 import edu.mcw.rgd.indexer.dao.variants.*;
-import edu.mcw.rgd.indexer.model.RgdIndex;
+
 import edu.mcw.rgd.indexer.model.findModels.ModelIndexObject;
-import edu.mcw.rgd.indexer.model.genomeInfo.DiseaseGeneObject;
-import edu.mcw.rgd.indexer.model.genomeInfo.GeneCounts;
+
+import edu.mcw.rgd.indexer.objectSearchIndexer.IndexCategory;
 import edu.mcw.rgd.process.Utils;
 import edu.mcw.rgd.services.ClientInit;
+import edu.mcw.rgd.services.IndexAdmin;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -44,7 +45,6 @@ import java.util.List;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 
@@ -54,13 +54,13 @@ import java.util.concurrent.TimeUnit;
 public class Manager {
     private String version;
     private int threadCount;
-    private IndexAdmin admin;
+
     private static List<String> envrionments;
+    private IndexAdmin admin;
     private RgdIndex rgdIndex;
     private boolean reindex;
     BulkIndexProcessor bulkIndexProcessor;
     IndexDAO indexDAO=new IndexDAO();
-    GenomeDAO genomeDAO=new GenomeDAO();
     private final Logger log = LogManager.getLogger("main");
 
     public static void main(String[] args) throws Exception {
@@ -203,18 +203,19 @@ public class Manager {
                             // }
                         }
                     }
-                    case "ExpressionData": // all species variants
+                    case "ExpressionData"-> {// all species variants
                         admin.createIndex(null, null);
-                        GeneDAO geneDAO=new GeneDAO();
-                        List<Gene> genes= geneDAO.getAllActiveGenes();
-                        for(Gene gene: genes) {
+                        GeneDAO geneDAO = new GeneDAO();
+                        List<Gene> genes = geneDAO.getAllActiveGenes();
+                        for (Gene gene : genes) {
                             //    Gene gene= geneDAO.getGene(3876);
-                            workerThread= new ExpressionDataIndexer(gene);
+                            workerThread = new ExpressionDataIndexer(gene);
                             executor.execute(workerThread);
                         }
                         executor.shutdown();
-                        while (!executor.isTerminated()) {}
-                        break;
+                        while (!executor.isTerminated()) {
+                        }
+                    }
                     default -> {
                     }
                 }

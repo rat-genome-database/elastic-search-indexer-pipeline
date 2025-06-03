@@ -9,5 +9,6 @@ public enum IndexCategory {
     Reference,
     Variants,
     AlleleVariants,
+    Expression,
     Annotations
 }
