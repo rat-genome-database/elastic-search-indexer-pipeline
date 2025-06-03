@@ -569,7 +569,6 @@ public class IndexDAO extends AbstractDAO {
 
         Map<Integer, List<String>> associations=this.getAssociationsByObjectKey(objectKey);
         for(GenomicElement ge: gedao.getActiveElements(objectKey)) {
-       //    GenomicElement ge= gedao.getElement(8655626);
             Runnable workerThread=new IndexGenomicElement(ge,category, associations);
             executor.execute(workerThread);
       }
