@@ -128,6 +128,7 @@ public class Manager {
                             searchIndexCreated = true;
                         }
                         for (IndexCategory category : IndexCategory.values()) {
+                            System.out.println("Indexing ..."+ category);
                             indexDAO.getClass().getMethod("get" + category).invoke(indexDAO);
                         }
                     }
