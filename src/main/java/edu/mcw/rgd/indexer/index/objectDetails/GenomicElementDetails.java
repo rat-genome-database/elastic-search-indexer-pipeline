@@ -4,10 +4,13 @@ import edu.mcw.rgd.datamodel.GenomicElement;
 import edu.mcw.rgd.indexer.model.IndexObject;
 
 import java.util.List;
+import java.util.Map;
 
 public class GenomicElementDetails extends  ObjectDetails<GenomicElement> {
-    public GenomicElementDetails(GenomicElement genomicElement, IndexObject object) {
+   private final  Map<Integer, List<String>> associations;
+    public GenomicElementDetails(GenomicElement genomicElement, IndexObject object,     Map<Integer, List<String>> associations) {
         super(genomicElement, object);
+        this.associations=associations;
     }
 
     @Override
