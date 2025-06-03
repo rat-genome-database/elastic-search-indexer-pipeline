@@ -3,17 +3,10 @@ package edu.mcw.rgd.indexer.dao;
 
 import edu.mcw.rgd.dao.impl.*;
 
-import edu.mcw.rgd.datamodel.Alias;
-import edu.mcw.rgd.datamodel.RgdId;
-import edu.mcw.rgd.datamodel.SpeciesType;
-import edu.mcw.rgd.datamodel.Strain;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
-import edu.mcw.rgd.datamodel.ontologyx.TermWithStats;
 import edu.mcw.rgd.indexer.MyThreadPoolExecutor;
-import edu.mcw.rgd.indexer.index.IndexOntTerm;
-import edu.mcw.rgd.indexer.model.IndexObject;
-import edu.mcw.rgd.process.mapping.ObjectMapper;
+import edu.mcw.rgd.indexer.objectSearchIndexer.IndexOntTerm;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -21,9 +14,6 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
-
-
-import static org.elasticsearch.client.Requests.refreshRequest;
 
 /**
  * Created by jthota on 6/20/2017.
