@@ -41,7 +41,6 @@ public class GeneDetails extends ObjectDetails<Gene> {
         obj.setHtmlStrippedSymbol(htmlStrippedSymbol);
         obj.setDescription(description);
         obj.setType(type);
-        obj.setCategory("Gene");
         obj.setName(name);
     }
 
