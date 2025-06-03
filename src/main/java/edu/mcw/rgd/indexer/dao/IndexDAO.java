@@ -12,11 +12,13 @@ import edu.mcw.rgd.dao.spring.StringMapQuery;
 import edu.mcw.rgd.datamodel.*;
 
 import edu.mcw.rgd.datamodel.ontology.Annotation;
+import edu.mcw.rgd.datamodel.ontologyx.Ontology;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
 import edu.mcw.rgd.datamodel.ontologyx.TermWithStats;
-import edu.mcw.rgd.indexer.AnnotationFormatter;
+
 import edu.mcw.rgd.indexer.MyThreadPoolExecutor;
+import edu.mcw.rgd.indexer.OntologySynonyms;
 import edu.mcw.rgd.indexer.dao.variants.BulkIndexProcessor;
 import edu.mcw.rgd.indexer.dao.variants.VariantIndexerThread;
 import edu.mcw.rgd.indexer.objectSearchIndexer.*;
@@ -24,7 +26,7 @@ import edu.mcw.rgd.indexer.model.*;
 import edu.mcw.rgd.indexer.model.genomeInfo.AssemblyInfo;
 import edu.mcw.rgd.indexer.model.genomeInfo.GeneCounts;
 import edu.mcw.rgd.indexer.model.genomeInfo.GenomeIndexObject;
-import edu.mcw.rgd.indexer.spring.XdbObjectQuery;
+import edu.mcw.rgd.process.AnnotationFormatter;
 import edu.mcw.rgd.process.Utils;
 
 import org.apache.logging.log4j.LogManager;
@@ -74,6 +76,8 @@ public class IndexDAO extends AbstractDAO {
     Logger log= LogManager.getLogger("main");
 
     Map<Integer, edu.mcw.rgd.datamodel.Map> rgdMaps=new HashMap<>();
+
+
     public List<GenomeIndexObject> getGenomeInfo() throws Exception {
         List<GenomeIndexObject> objects= new ArrayList<>();
         for(int speciesTypeKey : SpeciesType.getSpeciesTypeKeys()) {
@@ -159,6 +163,26 @@ public class IndexDAO extends AbstractDAO {
             }
 
 
+    }
+    public void getAnnotations() throws Exception{
+        ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+
+        List<Ontology> ontologies = ontologyXDAO.getPublicOntologies();
+        for (Ontology o : ontologies) {
+            String ont_id = o.getId();
+            try {
+                List<TermSynonym> termSynonyms = (List<TermSynonym>) OntologySynonyms.ontSynonyms.get(ont_id);
+
+
+             Runnable   workerThread = new IndexerDAO(ont_id, o.getName(), RgdIndex.getNewAlias(), termSynonyms, false);
+                executor.execute(workerThread);
+            } catch (Exception exception) {
+                System.out.println("ONT_ID:" + ont_id);
+                exception.printStackTrace();
+            }
+        }
+        executor.shutdown();
+        while (!executor.isTerminated()) {}
     }
     public int getAnnotsCount(int rgdId) throws Exception {
        List<Annotation> annots= annotationDAO.getAnnotations(rgdId);
@@ -1019,24 +1043,7 @@ public class IndexDAO extends AbstractDAO {
         return null;
     }
 
-   public List<XdbObject> getXdbIdsByObjectKey(int objectKey) throws Exception {
-       String sql = "SELECT  x.rgd_id, x.acc_id FROM rgd_acc_xdb x, rgd_ids i, rgd_objects o, rgd_xdb d WHERE x.rgd_id = i.rgd_id AND i.object_key = o.object_key AND x.xdb_key = d.xdb_key  AND i.object_status=\'ACTIVE\' AND i.species_type_key<>8" +
-               " and o.object_key=?";
-       XdbObjectQuery query= new XdbObjectQuery(this.getDataSource(), sql);
-       List<XdbObject> xdbs= execute(query, new Object[]{objectKey});
-       System.out.println("XDBS SIZE:"+xdbs.size());
-       return xdbs;
-   }
-    public List<String> getXdbIds(List<XdbObject> objects,int rgdId) throws Exception {
 
-        List<String> xdbIds= new ArrayList<>();
-        for(XdbObject o:objects){
-            if(o.getRgdId()==732446){
-                xdbIds.add(o.getAccId());
-            }
-        }
-        return xdbIds;
-    }
 
     public  List<String> getExternalIdentifiers(int rgdId) throws Exception {
 

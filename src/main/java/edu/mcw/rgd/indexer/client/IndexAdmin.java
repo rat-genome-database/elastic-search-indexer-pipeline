@@ -135,26 +135,4 @@ public class IndexAdmin {
         return rgdIndex;
     }
 
-
-    public static void main(String[] args) throws IOException {
-        IndexAdmin admin= new IndexAdmin();
-
-        DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
-        new XmlBeanDefinitionReader(bf).loadBeanDefinitions(new FileSystemResource("properties/AppConfigure.xml"));
-
-        admin.rgdIndex= (RgdIndex) bf.getBean("rgdIndex");
-        List<String> indices= new ArrayList<>();
-        admin.rgdIndex.setIndex("rgd_index_"+ "dev");
-        indices.add("rgd_index_"+"dev"+"1");
-        indices.add("rgd_index_"+"dev"+"2");
-        admin.rgdIndex.setIndices(indices);
-
-        try {
-            admin.createIndex("","");
-        } catch (Exception e) {
-            Utils.printStackTrace(e, log);
-        }
-
-        ClientInit.destroy();
-    }
 }
