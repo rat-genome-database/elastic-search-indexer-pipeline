@@ -1,11 +1,9 @@
-package edu.mcw.rgd.indexer.index.objectDetails;
+package edu.mcw.rgd.indexer.objectSearchIndexer.objectDetails;
 
 import edu.mcw.rgd.datamodel.Gene;
-import edu.mcw.rgd.datamodel.Map;
 
 import edu.mcw.rgd.indexer.model.*;
 import edu.mcw.rgd.process.Utils;
-import edu.mcw.rgd.process.mapping.MapManager;
 import org.jsoup.Jsoup;
 
 import java.util.List;

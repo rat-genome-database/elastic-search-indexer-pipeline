@@ -1,10 +1,10 @@
-package edu.mcw.rgd.indexer.index;
+package edu.mcw.rgd.indexer.objectSearchIndexer;
 
 
 import edu.mcw.rgd.datamodel.VariantInfo;
 
-import edu.mcw.rgd.indexer.index.objectDetails.ClinvarDetails;
-import edu.mcw.rgd.indexer.index.objectDetails.ObjectDetails;
+import edu.mcw.rgd.indexer.objectSearchIndexer.objectDetails.ClinvarDetails;
+import edu.mcw.rgd.indexer.objectSearchIndexer.objectDetails.ObjectDetails;
 
 import edu.mcw.rgd.indexer.model.IndexObject;
 

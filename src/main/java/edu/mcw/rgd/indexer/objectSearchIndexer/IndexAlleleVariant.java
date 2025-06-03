@@ -1,10 +1,10 @@
-package edu.mcw.rgd.indexer.index;
+package edu.mcw.rgd.indexer.objectSearchIndexer;
 
 
 import edu.mcw.rgd.datamodel.*;
 
-import edu.mcw.rgd.indexer.index.objectDetails.AlleleVariantDetails;
-import edu.mcw.rgd.indexer.index.objectDetails.ObjectDetails;
+import edu.mcw.rgd.indexer.objectSearchIndexer.objectDetails.AlleleVariantDetails;
+import edu.mcw.rgd.indexer.objectSearchIndexer.objectDetails.ObjectDetails;
 
 import edu.mcw.rgd.indexer.model.IndexObject;
 

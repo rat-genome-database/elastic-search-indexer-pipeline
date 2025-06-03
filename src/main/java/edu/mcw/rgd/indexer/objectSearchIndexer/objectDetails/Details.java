@@ -1,6 +1,4 @@
-package edu.mcw.rgd.indexer.index.objectDetails;
-
-import edu.mcw.rgd.indexer.model.IndexObject;
+package edu.mcw.rgd.indexer.objectSearchIndexer.objectDetails;
 
 public interface Details<T> {
     int getRgdId();

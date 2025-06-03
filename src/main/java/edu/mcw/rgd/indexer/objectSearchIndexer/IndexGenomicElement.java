@@ -1,16 +1,11 @@
-package edu.mcw.rgd.indexer.index;
+package edu.mcw.rgd.indexer.objectSearchIndexer;
 
-import edu.mcw.rgd.datamodel.Gene;
 import edu.mcw.rgd.datamodel.GenomicElement;
-import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.indexer.dao.IndexDAO;
-import edu.mcw.rgd.indexer.index.objectDetails.GeneDetails;
-import edu.mcw.rgd.indexer.index.objectDetails.GenomicElementDetails;
-import edu.mcw.rgd.indexer.index.objectDetails.ObjectDetails;
-import edu.mcw.rgd.indexer.model.AliasData;
+import edu.mcw.rgd.indexer.objectSearchIndexer.objectDetails.GenomicElementDetails;
+import edu.mcw.rgd.indexer.objectSearchIndexer.objectDetails.ObjectDetails;
 import edu.mcw.rgd.indexer.model.IndexObject;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 

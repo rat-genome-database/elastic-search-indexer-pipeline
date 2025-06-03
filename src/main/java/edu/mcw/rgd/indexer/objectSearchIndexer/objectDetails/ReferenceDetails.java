@@ -1,4 +1,4 @@
-package edu.mcw.rgd.indexer.index.objectDetails;
+package edu.mcw.rgd.indexer.objectSearchIndexer.objectDetails;
 
 import edu.mcw.rgd.datamodel.Reference;
 import edu.mcw.rgd.indexer.model.IndexObject;

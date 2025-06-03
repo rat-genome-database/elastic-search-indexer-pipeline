@@ -1,8 +1,8 @@
-package edu.mcw.rgd.indexer.index;
+package edu.mcw.rgd.indexer.objectSearchIndexer;
 
 import edu.mcw.rgd.datamodel.*;
-import edu.mcw.rgd.indexer.index.objectDetails.GeneDetails;
-import edu.mcw.rgd.indexer.index.objectDetails.ObjectDetails;
+import edu.mcw.rgd.indexer.objectSearchIndexer.objectDetails.GeneDetails;
+import edu.mcw.rgd.indexer.objectSearchIndexer.objectDetails.ObjectDetails;
 import edu.mcw.rgd.indexer.model.*;
 
 public class IndexGene implements Runnable {

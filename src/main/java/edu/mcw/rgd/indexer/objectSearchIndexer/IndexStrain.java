@@ -1,11 +1,9 @@
-package edu.mcw.rgd.indexer.index;
-
-import edu.mcw.rgd.datamodel.MappedStrain;
+package edu.mcw.rgd.indexer.objectSearchIndexer;
 
 import edu.mcw.rgd.datamodel.Strain;
-import edu.mcw.rgd.indexer.index.objectDetails.ObjectDetails;
+import edu.mcw.rgd.indexer.objectSearchIndexer.objectDetails.ObjectDetails;
 
-import edu.mcw.rgd.indexer.index.objectDetails.StrainDetails;
+import edu.mcw.rgd.indexer.objectSearchIndexer.objectDetails.StrainDetails;
 import edu.mcw.rgd.indexer.model.IndexObject;
 
 
