@@ -17,6 +17,7 @@ import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
 import edu.mcw.rgd.datamodel.ontologyx.TermWithStats;
 
+import edu.mcw.rgd.datamodel.pheno.Study;
 import edu.mcw.rgd.indexer.MyThreadPoolExecutor;
 import edu.mcw.rgd.indexer.OntologySynonyms;
 import edu.mcw.rgd.indexer.dao.variants.BulkIndexProcessor;
@@ -191,6 +192,18 @@ public class IndexDAO extends AbstractDAO {
         for(Gene gene: genes) {
 //            Gene gene= geneDAO.getGene(3876);
             Runnable workerThread= new IndexExpression(gene);
+            executor.execute(workerThread);
+        }
+        executor.shutdown();
+        while (!executor.isTerminated()) {}
+
+    }
+    public void getExpressionStudy() throws Exception {
+        GeneExpressionDAO geneExpressionDAO=new GeneExpressionDAO();
+        List<Study> studies= geneExpressionDAO.getGeneExpressionStudies();
+        ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+        for(Study study: studies) {
+            Runnable workerThread= new IndexExpressionStudy(study);
             executor.execute(workerThread);
         }
         executor.shutdown();
