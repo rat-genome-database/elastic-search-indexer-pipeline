@@ -1,6 +1,7 @@
 package edu.mcw.rgd.indexer.model;
 
 import edu.mcw.rgd.datamodel.Association;
+import edu.mcw.rgd.indexer.model.expression.ExpressionIndexObject;
 
 import java.util.List;
 import java.util.Map;
@@ -9,7 +10,7 @@ import java.util.Set;
 /**
  * Created by jthota on 3/23/2017.
  */
-public class IndexObject {
+public class IndexObject extends ExpressionIndexObject {
     private String term_acc;
     private String status;
     private String symbol;
