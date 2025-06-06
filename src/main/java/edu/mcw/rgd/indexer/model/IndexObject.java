@@ -31,8 +31,163 @@ public class IndexObject {
     private List<String> synonyms;
     private String trait;
     private String subTrait;
-    private String chromosome;
+
     private List<MapInfo> mapDataList;
+    private String chromosome;
+    private String map;
+    private long startPos;
+    private long stopPos;
+    private int rank;
+    private int mapKey;
+    private List<String> goAnnotations;
+    private boolean withSSLPS;
+    private boolean withHomologs;
+    private String regionName;
+    private String regionNameLc;
+    private List<String>  analysisName;
+    private String varNuc;
+    private String refNuc;
+    private Set<String> lifeStage;
+    private Set<String> sex;
+    private Set<String> expressionLevel;
+    private Set<String>expressionUnit;
+
+    public Set<String> getLifeStage() {
+        return lifeStage;
+    }
+
+    public void setLifeStage(Set<String> lifeStage) {
+        this.lifeStage = lifeStage;
+    }
+
+    public Set<String> getSex() {
+        return sex;
+    }
+
+    public void setSex(Set<String> sex) {
+        this.sex = sex;
+    }
+
+    public Set<String> getExpressionLevel() {
+        return expressionLevel;
+    }
+
+    public void setExpressionLevel(Set<String> expressionLevel) {
+        this.expressionLevel = expressionLevel;
+    }
+
+    public Set<String> getExpressionUnit() {
+        return expressionUnit;
+    }
+
+    public void setExpressionUnit(Set<String> expressionUnit) {
+        this.expressionUnit = expressionUnit;
+    }
+
+    public String getVarNuc() {
+        return varNuc;
+    }
+
+    public void setVarNuc(String varNuc) {
+        this.varNuc = varNuc;
+    }
+
+    public String getRefNuc() {
+        return refNuc;
+    }
+
+    public void setRefNuc(String refNuc) {
+        this.refNuc = refNuc;
+    }
+
+    public List<String> getAnalysisName() {
+        return analysisName;
+    }
+
+    public void setAnalysisName(List<String> analysisName) {
+        this.analysisName = analysisName;
+    }
+
+    public String getRegionName() {
+        return regionName;
+    }
+
+    public void setRegionName(String regionName) {
+        this.regionName = regionName;
+    }
+
+    public String getRegionNameLc() {
+        return regionNameLc;
+    }
+
+    public void setRegionNameLc(String regionNameLc) {
+        this.regionNameLc = regionNameLc;
+    }
+
+    public List<String> getGoAnnotations() {
+        return goAnnotations;
+    }
+
+    public void setGoAnnotations(List<String> goAnnotations) {
+        this.goAnnotations = goAnnotations;
+    }
+
+    public boolean isWithSSLPS() {
+        return withSSLPS;
+    }
+
+    public void setWithSSLPS(boolean withSSLPS) {
+        this.withSSLPS = withSSLPS;
+    }
+
+    public boolean isWithHomologs() {
+        return withHomologs;
+    }
+
+    public void setWithHomologs(boolean withHomologs) {
+        this.withHomologs = withHomologs;
+    }
+
+    public int getMapKey() {
+        return mapKey;
+    }
+
+    public void setMapKey(int mapKey) {
+        this.mapKey = mapKey;
+    }
+
+    public String getMap() {
+        return map;
+    }
+
+    public void setMap(String map) {
+        this.map = map;
+    }
+
+    public long getStartPos() {
+        return startPos;
+    }
+
+    public void setStartPos(long startPos) {
+        this.startPos = startPos;
+    }
+
+    public long getStopPos() {
+        return stopPos;
+    }
+
+    public void setStopPos(long stopPos) {
+        this.stopPos = stopPos;
+    }
+
+    public int getRank() {
+        return rank;
+    }
+
+    public void setRank(int rank) {
+        this.rank = rank;
+    }
+
     private List<String> promoters;
     private String subcat;
     private String variantCategory;

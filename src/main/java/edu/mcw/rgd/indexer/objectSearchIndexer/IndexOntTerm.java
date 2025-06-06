@@ -1,4 +1,4 @@
-package edu.mcw.rgd.indexer.index;
+package edu.mcw.rgd.indexer.objectSearchIndexer;
 
 import edu.mcw.rgd.dao.impl.AliasDAO;
 import edu.mcw.rgd.dao.impl.OntologyXDAO;

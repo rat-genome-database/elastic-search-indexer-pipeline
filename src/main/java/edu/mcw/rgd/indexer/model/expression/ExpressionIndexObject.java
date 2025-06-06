@@ -164,9 +164,9 @@ public class ExpressionIndexObject extends GeneIndexObject {
         this.expressionUnit = expressionUnit;
     }
 
-    public Set<Integer> getMapKey() {
-        return mapKey;
-    }
+//    public Set<Integer> getMapKey() {
+//        return mapKey;
+//    }
 
     public void setMapKey(Set<Integer> mapKey) {
         this.mapKey = mapKey;

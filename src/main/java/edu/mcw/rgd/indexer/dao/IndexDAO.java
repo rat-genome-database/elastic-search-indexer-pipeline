@@ -11,29 +11,30 @@ import edu.mcw.rgd.dao.spring.StringMapQuery;
 
 import edu.mcw.rgd.datamodel.*;
 
-import edu.mcw.rgd.datamodel.RgdIndex;
 import edu.mcw.rgd.datamodel.ontology.Annotation;
+import edu.mcw.rgd.datamodel.ontologyx.Ontology;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
 import edu.mcw.rgd.datamodel.ontologyx.TermWithStats;
-import edu.mcw.rgd.indexer.AnnotationFormatter;
+
+import edu.mcw.rgd.datamodel.pheno.Study;
 import edu.mcw.rgd.indexer.MyThreadPoolExecutor;
+import edu.mcw.rgd.indexer.OntologySynonyms;
 import edu.mcw.rgd.indexer.dao.variants.BulkIndexProcessor;
 import edu.mcw.rgd.indexer.dao.variants.VariantIndexerThread;
-import edu.mcw.rgd.indexer.index.*;
+import edu.mcw.rgd.indexer.objectSearchIndexer.*;
 import edu.mcw.rgd.indexer.model.*;
 
 import edu.mcw.rgd.indexer.model.genomeInfo.AssemblyInfo;
 import edu.mcw.rgd.indexer.model.genomeInfo.GeneCounts;
 import edu.mcw.rgd.indexer.model.genomeInfo.GenomeIndexObject;
-import edu.mcw.rgd.indexer.spring.XdbObjectQuery;
+import edu.mcw.rgd.process.AnnotationFormatter;
 import edu.mcw.rgd.process.Utils;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.index.Index;
 import org.elasticsearch.xcontent.XContentType;
 
 
@@ -49,36 +50,36 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import static org.elasticsearch.client.Requests.refreshRequest;
-
 /**
  * Created by jthota on 3/23/2017.
  */
 public class IndexDAO extends AbstractDAO {
 
-    private GeneDAO geneDAO = new GeneDAO();
-    private StrainDAO strainDAO = new StrainDAO();
-    private QTLDAO qtlDAO = new QTLDAO();
-    private SSLPDAO sslpdao = new SSLPDAO();
-    private AnnotationDAO annotationDAO = new AnnotationDAO();
-    private XdbIdDAO xdbDAO = new XdbIdDAO();
-    private PhenominerDAO phenominerDAO = new PhenominerDAO();
-    private AliasDAO aliasDAO = new AliasDAO();
-    private MapDAO mapDAO = new MapDAO();
-    private TranscriptDAO transcriptDAO = new TranscriptDAO();
-    private AssociationDAO adao = new AssociationDAO();
+    public GeneDAO geneDAO = new GeneDAO();
+    public StrainDAO strainDAO = new StrainDAO();
+     QTLDAO qtlDAO = new QTLDAO();
+     SSLPDAO sslpdao = new SSLPDAO();
+     AnnotationDAO annotationDAO = new AnnotationDAO();
+     XdbIdDAO xdbDAO = new XdbIdDAO();
+     PhenominerDAO phenominerDAO = new PhenominerDAO();
+     AliasDAO aliasDAO = new AliasDAO();
+     MapDAO mapDAO = new MapDAO();
+     TranscriptDAO transcriptDAO = new TranscriptDAO();
+     AssociationDAO adao = new AssociationDAO();
+     public OntologyXDAO ontologyXDAO=new OntologyXDAO();
     private VariantInfoDAO vdao= new VariantInfoDAO();
     private VariantDAO variantDAO= new VariantDAO();
-    private OntologyXDAO ontologyXDAO= new OntologyXDAO();
     private ReferenceDAO referenceDAO=new ReferenceDAO();
     private GenomeDAO genomeDAO=new GenomeDAO();
     private GenomicElementDAO gdao= new GenomicElementDAO();
-    private AssociationDAO associationDAO=new AssociationDAO();
+    public AssociationDAO associationDAO=new AssociationDAO();
     private GenomicElementDAO gedao= new GenomicElementDAO();
     private RgdVariantDAO rgdVariantDAO =new RgdVariantDAO();
     Logger log= LogManager.getLogger("main");
 
     Map<Integer, edu.mcw.rgd.datamodel.Map> rgdMaps=new HashMap<>();
+
+
     public List<GenomeIndexObject> getGenomeInfo() throws Exception {
         List<GenomeIndexObject> objects= new ArrayList<>();
         for(int speciesTypeKey : SpeciesType.getSpeciesTypeKeys()) {
@@ -151,16 +152,39 @@ public class IndexDAO extends AbstractDAO {
 
 
     public void getGenes() throws Exception {
-        List<Gene> genes= geneDAO.getAllActiveGenes();
+        ExecutorService executor = new MyThreadPoolExecutor(10, 10, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+
+            List<Gene> genes = geneDAO.getActiveGenes();
+            for (Gene gene : genes) {
+                Runnable workerThread = new IndexGene(gene);
+                executor.execute(workerThread);
+            }
+
+            executor.shutdown();
+            while (!executor.isTerminated()) {
+            }
+
+
+    }
+    public void getAnnotations() throws Exception{
         ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
-        for(Gene gene: genes) {
-      // Gene gene= geneDAO.getGene(2493);
-            Runnable workerThread= new IndexGene(gene);
-            executor.execute(workerThread);
-   }
+
+        List<Ontology> ontologies = ontologyXDAO.getPublicOntologies();
+        for (Ontology o : ontologies) {
+            String ont_id = o.getId();
+            try {
+                List<TermSynonym> termSynonyms = (List<TermSynonym>) OntologySynonyms.ontSynonyms.get(ont_id);
+
+
+             Runnable   workerThread = new IndexerDAO(ont_id, o.getName(), RgdIndex.getNewAlias(), termSynonyms, false);
+                executor.execute(workerThread);
+            } catch (Exception exception) {
+                System.out.println("ONT_ID:" + ont_id);
+                exception.printStackTrace();
+            }
+        }
         executor.shutdown();
         while (!executor.isTerminated()) {}
-
     }
     public void getExpression() throws Exception {
         List<Gene> genes= geneDAO.getAllActiveGenes();
@@ -168,6 +192,18 @@ public class IndexDAO extends AbstractDAO {
         for(Gene gene: genes) {
 //            Gene gene= geneDAO.getGene(3876);
             Runnable workerThread= new IndexExpression(gene);
+            executor.execute(workerThread);
+        }
+        executor.shutdown();
+        while (!executor.isTerminated()) {}
+
+    }
+    public void getExpressionStudy() throws Exception {
+        GeneExpressionDAO geneExpressionDAO=new GeneExpressionDAO();
+        List<Study> studies= geneExpressionDAO.getGeneExpressionStudies();
+        ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+        for(Study study: studies) {
+            Runnable workerThread= new IndexExpressionStudy(study);
             executor.execute(workerThread);
         }
         executor.shutdown();
@@ -326,12 +362,14 @@ public class IndexDAO extends AbstractDAO {
        ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
         //  Strain strain=strainDAO.getStrain(7248453);
   //      List<Alias> aliases=aliasDAO.getActiveAliases(RgdId.OBJECT_KEY_STRAINS);
-        List<Strain> strains= strainDAO.getActiveStrains();
-        Map<Integer, Gene> genes=getStrainAssociations(strains);
-        for(Strain strain: strains) {
-            Runnable workerThread= new IndexStrain(strain, genes);
-            executor.execute(workerThread);
-        }
+
+           List<Strain> strains = strainDAO.getActiveStrains();
+
+           for (Strain strain : strains) {
+               Runnable workerThread = new IndexStrain(strain);
+               executor.execute(workerThread);
+           }
+
        executor.shutdown();
        while (!executor.isTerminated()) {}
     }
@@ -343,11 +381,11 @@ public class IndexDAO extends AbstractDAO {
            rgdIds.add(s.getRgdId());
         }
         Collection[] colletions = this.split(rgdIds, 1000);
-        Connection conn=null;
-        Statement stmt= null;
-        ResultSet rs=null;
+
         for(int i=0; i<colletions.length;i++){
             List c= (List) colletions[i];
+            try(Connection conn=this.getDataSource().getConnection();
+                Statement stmt= conn.createStatement();){
             String sql="select s.rgd_id as strain_rgd_id, g.* from genes g, " +
                     "genes_variations gv, " +
                     "genes a, rgd_ids r, " +
@@ -361,9 +399,8 @@ public class IndexDAO extends AbstractDAO {
                     "and r.object_status='ACTIVE' " +
                     "and s.rgd_id in ("+Utils.concatenate(c,",")+")";
 
-           conn=this.getDataSource().getConnection();
-           stmt= conn.createStatement();
-          rs=stmt.executeQuery(sql);
+
+          ResultSet rs=stmt.executeQuery(sql);
             while(rs.next()){
                 Gene g= new Gene();
                 g.setSymbol(rs.getString("gene_symbol").toLowerCase());
@@ -373,13 +410,41 @@ public class IndexDAO extends AbstractDAO {
             }
 
             rs.close();
-            stmt.close();
-            if(!conn.isClosed()){
-                conn.close();
-            }
+        }
         }
 
         return genes;
+    }
+
+    public Gene getStrainAssociations(int rgdId) throws Exception {
+            Gene gene=new Gene();
+
+            try(Connection conn=this.getDataSource().getConnection();
+                Statement stmt= conn.createStatement();){
+                String sql="select s.rgd_id as strain_rgd_id, g.* from genes g, " +
+                        "genes_variations gv, " +
+                        "genes a, rgd_ids r, " +
+                        "strains s," +
+                        "rgd_strains_rgd rs " +
+                        "where gv.gene_key=g.gene_key " +
+                        "AND gv.variation_key=a.gene_key " +
+                        "and a.rgd_id=rs.rgd_id " +
+                        "and rs.strain_key=s.strain_key " +
+                        "and r.rgd_id=g.rgd_id " +
+                        "and r.object_status='ACTIVE' " +
+                        "and s.rgd_id ="+rgdId;
+
+
+                ResultSet rs=stmt.executeQuery(sql);
+                while(rs.next()){
+                    gene.setSymbol(rs.getString("gene_symbol").toLowerCase());
+                    gene.setName(rs.getString("full_name_lc"));
+
+                }
+
+                rs.close();
+            }
+      return gene;
     }
 
     public List<String> getAliasesByRgdId(List<Alias> aliases,int rgdid) throws Exception {
@@ -465,6 +530,7 @@ public class IndexDAO extends AbstractDAO {
     public int sampleExists(int strainRgdid, int patient_id) throws Exception {
         SampleDAO sampleDAO= new SampleDAO();
         sampleDAO.setDataSource(DataSourceFactory.getInstance().getCarpeNovoDataSource());
+
       Sample s=  sampleDAO.getSampleByStrainRgdId(strainRgdid, patient_id);
         if(s!=null){
 
@@ -486,15 +552,14 @@ public class IndexDAO extends AbstractDAO {
     }
 
     public void getQtls() throws Exception{
-        List<IndexObject> objList= new ArrayList<>();
-     //   List<Alias> aliases=aliasDAO.getActiveAliases(RgdId.OBJECT_KEY_QTLS);
-        List<QTL> qtls=qtlDAO.getActiveQTLs();
-        ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
-        for(QTL qtl: qtls) {
-            // QTL qtl= qtlDAO.getQTL(61368);
-            Runnable workerThread= new IndexQTL(qtl);
-            executor.execute(workerThread);
-        }
+        ExecutorService executor = new MyThreadPoolExecutor(10, 10, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+
+            List<QTL> qtls = qtlDAO.getActiveQTLs();
+            for (QTL qtl : qtls) {
+                Runnable workerThread = new IndexQTL(qtl);
+                executor.execute(workerThread);
+            }
+
         executor.shutdown();
         while (!executor.isTerminated()) {}
 
@@ -526,11 +591,13 @@ public class IndexDAO extends AbstractDAO {
     public void getSslps() throws Exception{
         ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
      //   List<Alias> aliases=aliasDAO.getActiveAliases(RgdId.OBJECT_KEY_SSLPS);
-        for(SSLP sslp: sslpdao.getActiveSSLPs()) {
-            //  SSLP sslp= sslpdao.getSSLP(37320);
-            Runnable workerThread=new IndexSslp(sslp);
-            executor.execute(workerThread);
-        }
+
+            for (SSLP sslp : sslpdao.getActiveSSLPs()) {
+                //  SSLP sslp= sslpdao.getSSLP(37320);
+                Runnable workerThread = new IndexSslp(sslp);
+                executor.execute(workerThread);
+            }
+
         executor.shutdown();
         while (!executor.isTerminated()){}
 
@@ -552,7 +619,6 @@ public class IndexDAO extends AbstractDAO {
 
         Map<Integer, List<String>> associations=this.getAssociationsByObjectKey(objectKey);
         for(GenomicElement ge: gedao.getActiveElements(objectKey)) {
-       //    GenomicElement ge= gedao.getElement(8655626);
             Runnable workerThread=new IndexGenomicElement(ge,category, associations);
             executor.execute(workerThread);
       }
@@ -980,7 +1046,7 @@ public class IndexDAO extends AbstractDAO {
         }
         return symbols;
     }
-    public List<String> getPromoersByRgdId(int rgdId, List<Association> associations, List<GenomicElement> gElements) throws Exception {
+    public List<String> getPromotersByRgdId(int rgdId, List<Association> associations, List<GenomicElement> gElements) throws Exception {
 
         List<String> symbols = new ArrayList<>();
         for (Association a : associations) {
@@ -1003,24 +1069,7 @@ public class IndexDAO extends AbstractDAO {
         return null;
     }
 
-   public List<XdbObject> getXdbIdsByObjectKey(int objectKey) throws Exception {
-       String sql = "SELECT  x.rgd_id, x.acc_id FROM rgd_acc_xdb x, rgd_ids i, rgd_objects o, rgd_xdb d WHERE x.rgd_id = i.rgd_id AND i.object_key = o.object_key AND x.xdb_key = d.xdb_key  AND i.object_status=\'ACTIVE\' AND i.species_type_key<>8" +
-               " and o.object_key=?";
-       XdbObjectQuery query= new XdbObjectQuery(this.getDataSource(), sql);
-       List<XdbObject> xdbs= execute(query, new Object[]{objectKey});
-       System.out.println("XDBS SIZE:"+xdbs.size());
-       return xdbs;
-   }
-    public List<String> getXdbIds(List<XdbObject> objects,int rgdId) throws Exception {
 
-        List<String> xdbIds= new ArrayList<>();
-        for(XdbObject o:objects){
-            if(o.getRgdId()==732446){
-                xdbIds.add(o.getAccId());
-            }
-        }
-        return xdbIds;
-    }
 
     public  List<String> getExternalIdentifiers(int rgdId) throws Exception {
 

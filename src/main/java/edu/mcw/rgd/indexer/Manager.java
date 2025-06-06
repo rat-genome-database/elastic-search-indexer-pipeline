@@ -1,7 +1,6 @@
 package edu.mcw.rgd.indexer;
 
 import edu.mcw.rgd.dao.impl.GeneDAO;
-import edu.mcw.rgd.dao.impl.GeneExpressionDAO;
 import edu.mcw.rgd.dao.impl.MapDAO;
 import edu.mcw.rgd.dao.impl.OntologyXDAO;
 
@@ -10,18 +9,20 @@ import edu.mcw.rgd.datamodel.*;
 import edu.mcw.rgd.datamodel.ontologyx.Ontology;
 
 import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
-import edu.mcw.rgd.services.IndexAdmin;
+
+
 import edu.mcw.rgd.indexer.dao.*;
 
 import edu.mcw.rgd.indexer.dao.findModels.FullAnnotDao;
 import edu.mcw.rgd.indexer.dao.phenominer.PhenominerNormalizedThread;
 import edu.mcw.rgd.indexer.dao.variants.*;
-import edu.mcw.rgd.indexer.index.IndexExpression;
+
 import edu.mcw.rgd.indexer.model.findModels.ModelIndexObject;
-import edu.mcw.rgd.indexer.model.genomeInfo.DiseaseGeneObject;
-import edu.mcw.rgd.indexer.model.genomeInfo.GeneCounts;
+
+import edu.mcw.rgd.indexer.objectSearchIndexer.IndexCategory;
 import edu.mcw.rgd.process.Utils;
 import edu.mcw.rgd.services.ClientInit;
+import edu.mcw.rgd.services.IndexAdmin;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -44,7 +45,6 @@ import java.util.List;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 
@@ -54,13 +54,13 @@ import java.util.concurrent.TimeUnit;
 public class Manager {
     private String version;
     private int threadCount;
-    private IndexAdmin admin;
+
     private static List<String> envrionments;
+    private IndexAdmin admin;
     private RgdIndex rgdIndex;
     private boolean reindex;
     BulkIndexProcessor bulkIndexProcessor;
     IndexDAO indexDAO=new IndexDAO();
-    GenomeDAO genomeDAO=new GenomeDAO();
     private final Logger log = LogManager.getLogger("main");
 
     public static void main(String[] args) throws Exception {
@@ -119,140 +119,104 @@ public class Manager {
 
         ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
             boolean searchIndexCreated=false;
-            //int runningThreadsCount=0;
             for (String arg : args) {
                 Runnable workerThread;
-
-
-                switch(arg){
-                    case "Qtls" :
-                    case "Strains" :
-                    case "Genes" :
-                    case "Sslps" :
-                    case "GenomicElements" :
-                    case "Annotations" : // all public ontologies
-                    case "Reference" :
-                    case "Variants" : // these are only ClinVar variants
-                    case "AlleleVariants" : // there are RGD allele variants
-                    case "Expression":
-                        if(!searchIndexCreated) {
+                switch (arg) {
+                    case "ObjectSearch" -> {
+                        System.out.println("Running Object Search Indexer ....");
+                        if (!searchIndexCreated) {
                             admin.createIndex("search_mappings", "search");
-                            searchIndexCreated=true;
+                            searchIndexCreated = true;
                         }
-                        if(!arg.equalsIgnoreCase("annotations")) {
-                                     indexDAO.getClass().getMethod("get" + arg).invoke(indexDAO);
-                        }else{
-                            OntologyXDAO ontologyXDAO = new OntologyXDAO();
-                            List<Ontology> ontologies = ontologyXDAO.getPublicOntologies();
-                            for (Ontology o : ontologies) {
-
-                                String ont_id = o.getId();
-                                try {
-                                    List<TermSynonym> termSynonyms = (List<TermSynonym>) OntologySynonyms.ontSynonyms.get(ont_id);
-                                    //     if(!ont_id.equalsIgnoreCase("CHEBI")) {
-
-                                    workerThread = new IndexerDAO(ont_id, o.getName(), RgdIndex.getNewAlias(), termSynonyms, false);
-                                    executor.execute(workerThread);
-                                }catch (Exception exception){
-                                    System.out.println("ONT_ID:"+ ont_id);
-                                    exception.printStackTrace();
-                                }
-                            }
+                        for (IndexCategory category : IndexCategory.values()) {
+                            System.out.println("Indexing ..."+ category.toString());
+                            indexDAO.getClass().getMethod("get" + category.toString()).invoke(indexDAO);
                         }
-
-                    break;
-
-
-                    case "Chromosomes":
+                    }
+                    case "Chromosomes" -> {
+                        System.out.println("Running Chromosome Indexer ....");
                         admin.createIndex("chromosome_mappings", "chromosome");
-                        if(arg.equalsIgnoreCase("chromosomes")){
-                            MapDAO mapDAO= new MapDAO();
-                            log.info("INDEXING Chromosomes...");
-                            for(int key : SpeciesType.getSpeciesTypeKeys()) {
-                                if (SpeciesType.isSearchable(key)) {
-                                    //   int key=3;
-                                    if (key != 0) {
-                                        List<Map> maps = null;
-                                        try {
-                                            maps = mapDAO.getMaps(key, "bp");
-                                        } catch (Exception e) {
-                                            throw new RuntimeException(e);
-                                        }
-                                        for(Map m:maps){
-                                             workerThread=new ChromosomeMapDataThread(key,m);
-                                             executor.execute(workerThread);
-                                        }
+                        MapDAO mapDAO = new MapDAO();
+                        log.info("INDEXING Chromosomes...");
+                        for (int key : SpeciesType.getSpeciesTypeKeys()) {
+                            if (SpeciesType.isSearchable(key)) {
+                                if (key != 0) {
+                                    List<Map> maps = null;
+                                    try {
+                                        maps = mapDAO.getMaps(key, "bp");
+                                    } catch (Exception e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                    for (Map m : maps) {
+                                        workerThread = new ChromosomeMapDataThread(key, m);
+                                        executor.execute(workerThread);
+                                    }
                                 }
                             }
-                        }}
-                        break;
-                    case "GenomeInfo":
-
+                        }
+                    }
+                    case "GenomeInfo" -> {
+                        System.out.println("Running Genome Info Indexer ....");
                         admin.createIndex("genome_mappings", "genome");
                         System.out.println("INDEXING GENOMEINFO...");
-                       for(int key : SpeciesType.getSpeciesTypeKeys()) {
-                         //    int key=3;
-                           if(SpeciesType.isSearchable(key)) {
-                               if (key != 0) {
-                                   workerThread = new GenomeInfoThread(key, RgdIndex.getNewAlias(), log);
-                                   executor.execute(workerThread);
-                               }
-                           }
-                      }
-                        break;
-                    case "Phenominer":
-
+                        for (int key : SpeciesType.getSpeciesTypeKeys()) {
+                            if (SpeciesType.isSearchable(key)) {
+                                if (key != 0) {
+                                    workerThread = new GenomeInfoThread(key, RgdIndex.getNewAlias(), log);
+                                    executor.execute(workerThread);
+                                }
+                            }
+                        }
+                    }
+                    case "Phenominer" -> {
+                        System.out.println("Running Phenominer Indexer ....");
                         admin.createIndex("phenominer_mappings", "genome");
                         System.out.println("INDEXING phenominer records...");
-                        PhenominerNormalizedThread thread=new PhenominerNormalizedThread(RgdIndex.getNewAlias());
+                        PhenominerNormalizedThread thread = new PhenominerNormalizedThread(RgdIndex.getNewAlias());
                         thread.run();
-                        break;
-                    case "Models":
+                    }
+                    case "Models" -> {
                         System.out.println("Indexing models...");
                         admin.createIndex("models", "models");
-                        FullAnnotDao dao= new FullAnnotDao();
-                        List<String> aspects= new ArrayList<>(Arrays.asList("D", "B", "N"));
-                      //  for(String aspect:aspects) {
-                            List<ModelIndexObject> models = dao.getAnnotationsBySpeciesNObjectKey(3,5);
-                            dao.indexModels(models);
-                       // }
+                        FullAnnotDao dao = new FullAnnotDao();
+                        List<String> aspects = new ArrayList<>(Arrays.asList("D", "B", "N"));
+                        List<ModelIndexObject> models = dao.getAnnotationsBySpeciesNObjectKey(3, 5);
+                        dao.indexModels(models);
                         System.out.println("Indexing models is DONE!!");
-                        break;
-                    case "Variant": // all species variants
-                                    admin.createIndex("variant_mappings", "variant");
-                                    indexDAO.indexVariantsFromCarpenovoNewTableStructure();
-                                    break;
-                    case "AITermMappings": // all species variants
+                    }
+                    case "Variant" -> { // all species variants
+                        System.out.println("Running Variant General Search Indexer ....");
+                        admin.createIndex("variant_mappings", "variant");
+                        indexDAO.indexVariantsFromCarpenovoNewTableStructure();
+                    }
+                    case "AITermMappings" -> { // all species variants
+                        System.out.println("Running AI Term - Ontology Term Mapper Indexer ....");
                         admin.createIndex("ai_mappings", "ai_mappings");
                         OntologyXDAO ontologyXDAO = new OntologyXDAO();
                         List<Ontology> ontologies = ontologyXDAO.getPublicOntologies();
                         for (Ontology o : ontologies) {
-
                             String ont_id = o.getId();
-                          //  if(ont_id.equalsIgnoreCase("RDO")) {
-                                List<TermSynonym> termSynonyms = (List<TermSynonym>) OntologySynonyms.ontSynonyms.get(ont_id);
-                                //     if(!ont_id.equalsIgnoreCase("CHEBI")) {
+                            List<TermSynonym> termSynonyms = (List<TermSynonym>) OntologySynonyms.ontSynonyms.get(ont_id);
+                            workerThread = new IndexerDAO(ont_id, o.getName(), RgdIndex.getNewAlias(), termSynonyms, true);
+                            executor.execute(workerThread);
 
-                                workerThread = new IndexerDAO(ont_id, o.getName(), RgdIndex.getNewAlias(), termSynonyms, true);
-                                executor.execute(workerThread);
-                           // }
                         }
-                        break;
-                    case "ExpressionData": // all species variants
+                    }
+                    case "ExpressionData"-> {// all species variants
+                        System.out.println("Running Expression General Search Indexer ....");
                         admin.createIndex(null, null);
-                        GeneDAO geneDAO=new GeneDAO();
-                        List<Gene> genes= geneDAO.getAllActiveGenes();
-                        for(Gene gene: genes) {
-                    //    Gene gene= geneDAO.getGene(3876);
-                         workerThread= new ExpressionDataIndexer(gene);
-                        executor.execute(workerThread);
+                        GeneDAO geneDAO = new GeneDAO();
+                        List<Gene> genes = geneDAO.getAllActiveGenes();
+                        for (Gene gene : genes) {
+                            workerThread = new ExpressionDataIndexer(gene);
+                            executor.execute(workerThread);
                         }
                         executor.shutdown();
-                        while (!executor.isTerminated()) {}
-                        break;
-                    default:
-                        break;
-
+                        while (!executor.isTerminated()) {
+                        }
+                    }
+                    default -> {
+                    }
                 }
             }
            executor.shutdown();
@@ -311,25 +275,17 @@ public class Manager {
 
     }
     public void printUsage(){
-        System.out.println("INCORRECT ARGUMENTS. USAGE..." +
-                "\n\t\tREINDEX ENV_OPT OPTION [OPTIONS..]   -   creates new index of specified OPTIONS [Genes Qtls etc] and switch index alias to this new index [RECOMMENDED]" +
-                "\n\t\tUPDATE ENV_OPT OPTION [OPTIONS..]    -   updates existing index documents with speciefied OPTIONS[Genes Qtls etc]" +
-                "\n\t\tENV_OPT                              -   dev/test/cur only one" +
-                "\n\t\tOPTIONS                              -   options must be SPACE seperated and must provide atleast ONE OPTION from below OPTIONS List and case sensitive" +
-                "\n\t\tOPTIONS LIST                         -   [Genes Qtls Strains Sslps Variants GenomicElements Reference Annotations]"
-
-        );
-        log.info("INCORRECT ARGUMENTS. USAGE..." +
-                "\n\t\tREINDEX ENV_OPT OPTION [OPTIONS..] -   creates new index of speciefied OPTIONS [Genes Qtls etc] and switch index alias to this new index [RECOMMENDED]" +
-                "\n\t\tUPDATE ENV_OPT OPTION [OPTIONS..] -   updates existing index documents with speciefied OPTIONS[Genes Qtls etc]" +
-                "\n\t\tENV_OPT                    -   dev/test/cur only one" +
-                "\n\t\tOPTIONS                    -   options must be SPACE seperated and must provide atleast ONE OPTION from below OPTIONS List and case sensitive" +
-                "\n\t\tOPTIONS LIST               -   [Genes Qtls Strains Sslps Variants GenomicElements Reference Annotations]"
-
-        );
-
+        log.info(usageInfo());
     }
-
+    public String usageInfo(){
+        return "INCORRECT ARGUMENTS. USAGE..." +
+                  "\n\t\tREINDEX ENV_OPT INDEX_NAME OPTION [OPTIONS..]   -   creates new index of specified OPTIONS [Genes Qtls etc] and switch index alias to this new index [RECOMMENDED]" +
+                  "\n\t\tUPDATE ENV_OPT INDEX_NAME OPTION [OPTIONS..]    -   updates existing index documents with speciefied OPTIONS[Genes Qtls etc]" +
+                  "\n\t\tINDEX_NAME                           -    for example: search or chromosome etc" +
+                  "\n\t\tENV_OPT                              -   dev/test/cur only one" +
+                  "\n\t\tOPTIONS                              -   options must be SPACE seperated and must provide atleast ONE OPTION from below OPTIONS List and case sensitive" +
+                  "\n\t\tOPTIONS LIST                         -   [ObjectSearch, Chromosomes, Models, Variants, GenomeInfo, Phenominer]";
+    }
     public String getClusterHealth(String index) throws Exception {
 
         ClusterHealthRequest request = new ClusterHealthRequest(index);
