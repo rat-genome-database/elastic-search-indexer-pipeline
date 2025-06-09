@@ -61,12 +61,13 @@ public class IndexDAO extends AbstractDAO {
      SSLPDAO sslpdao = new SSLPDAO();
      AnnotationDAO annotationDAO = new AnnotationDAO();
      XdbIdDAO xdbDAO = new XdbIdDAO();
-     PhenominerDAO phenominerDAO = new PhenominerDAO();
+     public PhenominerDAO phenominerDAO = new PhenominerDAO();
      AliasDAO aliasDAO = new AliasDAO();
      MapDAO mapDAO = new MapDAO();
      TranscriptDAO transcriptDAO = new TranscriptDAO();
      AssociationDAO adao = new AssociationDAO();
      public OntologyXDAO ontologyXDAO=new OntologyXDAO();
+
     private VariantInfoDAO vdao= new VariantInfoDAO();
     private VariantDAO variantDAO= new VariantDAO();
     private ReferenceDAO referenceDAO=new ReferenceDAO();
@@ -199,13 +200,15 @@ public class IndexDAO extends AbstractDAO {
 
     }
     public void getExpressionStudy() throws Exception {
+        System.out.println("Started Indexing ... Expression Studies>>>>>>"+new Date());
         GeneExpressionDAO geneExpressionDAO=new GeneExpressionDAO();
-        List<Study> studies= geneExpressionDAO.getGeneExpressionStudies();
+//        List<Study> studies= geneExpressionDAO.getGeneExpressionStudies();
         ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
-        for(Study study: studies) {
+//        for(Study study: studies) {
+        Study study=phenominerDAO.getStudy(3040);
             Runnable workerThread= new IndexExpressionStudy(study);
             executor.execute(workerThread);
-        }
+//        }
         executor.shutdown();
         while (!executor.isTerminated()) {}
 

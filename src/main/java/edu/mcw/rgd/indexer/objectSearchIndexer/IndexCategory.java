@@ -1,6 +1,8 @@
 package edu.mcw.rgd.indexer.objectSearchIndexer;
 
 public enum IndexCategory {
+    ExpressionStudy,
+    Expression,
     Qtls,
     Strains,
     Genes,
@@ -9,6 +11,5 @@ public enum IndexCategory {
     Reference,
     Variants,
     AlleleVariants,
-    Expression,
     Annotations
 }

@@ -1,10 +1,11 @@
 package edu.mcw.rgd.indexer.model.expression;
 
 import edu.mcw.rgd.indexer.model.GeneIndexObject;
+import edu.mcw.rgd.indexer.model.IndexObject;
 
 import java.util.Set;
 
-public class ExpressionIndexObject extends GeneIndexObject {
+public class ExpressionIndexObject {
 
 
     private Set<String> geoSampleAcc;
@@ -21,11 +22,20 @@ public class ExpressionIndexObject extends GeneIndexObject {
     private Set<String>expressionUnit;
     private Set<Integer>experimentId;
     private Set<String> geoSeriesAcc;
-    private Set<Integer> sampleId;
+    private Set<Integer> expressionSampleIds;
     private Set<String> sample;
-    private Set<Integer> mapKey;
+    private Set<Integer> expressionMapKey;
     private Set<String> clinicalMeasurementId;
     private Set<String> clinicalMeasurementTerms;
+    private Set<String> expressedGeneSymbols;
+
+    public Set<String> getExpressedGeneSymbols() {
+        return expressedGeneSymbols;
+    }
+
+    public void setExpressedGeneSymbols(Set<String> expressedGeneSymbols) {
+        this.expressedGeneSymbols = expressedGeneSymbols;
+    }
 
     public Set<String> getGeoSeriesAcc() {
         return geoSeriesAcc;
@@ -43,13 +53,15 @@ public class ExpressionIndexObject extends GeneIndexObject {
         this.experimentId = experimentId;
     }
 
-    public Set<Integer> getSampleId() {
-        return sampleId;
+
+    public Set<Integer> getExpressionSampleIds() {
+        return expressionSampleIds;
     }
 
-    public void setSampleId(Set<Integer> sampleId) {
-        this.sampleId = sampleId;
+    public void setExpressionSampleIds(Set<Integer> expressionSampleIds) {
+        this.expressionSampleIds = expressionSampleIds;
     }
+
 
 
     public Set<String> getSample() {
@@ -164,12 +176,13 @@ public class ExpressionIndexObject extends GeneIndexObject {
         this.expressionUnit = expressionUnit;
     }
 
-//    public Set<Integer> getMapKey() {
-//        return mapKey;
-//    }
 
-    public void setMapKey(Set<Integer> mapKey) {
-        this.mapKey = mapKey;
+    public Set<Integer> getExpressionMapKey() {
+        return expressionMapKey;
+    }
+
+    public void setExpressionMapKey(Set<Integer> expressionMapKey) {
+        this.expressionMapKey = expressionMapKey;
     }
 
     public Set<String> getClinicalMeasurementId() {
