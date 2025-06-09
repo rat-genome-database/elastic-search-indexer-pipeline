@@ -202,13 +202,13 @@ public class IndexDAO extends AbstractDAO {
     public void getExpressionStudy() throws Exception {
         System.out.println("Started Indexing ... Expression Studies>>>>>>"+new Date());
         GeneExpressionDAO geneExpressionDAO=new GeneExpressionDAO();
-//        List<Study> studies= geneExpressionDAO.getGeneExpressionStudies();
+        List<Study> studies= geneExpressionDAO.getGeneExpressionStudies();
         ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
-//        for(Study study: studies) {
-        Study study=phenominerDAO.getStudy(3040);
+        for(Study study: studies) {
+//        Study study=phenominerDAO.getStudy(3040);
             Runnable workerThread= new IndexExpressionStudy(study);
             executor.execute(workerThread);
-//        }
+        }
         executor.shutdown();
         while (!executor.isTerminated()) {}
 
