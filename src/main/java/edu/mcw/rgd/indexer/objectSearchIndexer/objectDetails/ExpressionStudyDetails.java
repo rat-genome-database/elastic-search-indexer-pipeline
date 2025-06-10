@@ -27,6 +27,9 @@ public class ExpressionStudyDetails extends ObjectDetails<Study> {
 
     @Override
     public int getSpeciesTypeKey() {
+        Set<Integer> speciesTypeKeys= records.stream().map(r->r.getGeneExpressionRecord().getSpeciesTypeKey()).collect(Collectors.toSet());
+        if(speciesTypeKeys.size()>0)
+            return speciesTypeKeys.stream().toList().get(0);
         return 0;
     }
 
@@ -52,6 +55,8 @@ public class ExpressionStudyDetails extends ObjectDetails<Study> {
     @Override
     public void index()  {
 
+       mapObject();
+       mapSpecies();
             setMap();
             setGeneSymbols();
             setBioSampleId();
