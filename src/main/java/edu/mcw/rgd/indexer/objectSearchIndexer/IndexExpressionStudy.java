@@ -27,7 +27,7 @@ public class IndexExpressionStudy implements Runnable{
         System.out.println(Thread.currentThread().getName() +  " STARTED " + new Date() + "records size:"+ records.size());
 
         IndexObject object=new IndexObject();
-        object.setCategory("ExpressionStudy");
+        object.setCategory("Expression Study");
         ObjectDetails<Study> studyObjectDetails=new ExpressionStudyDetails(study,object, records);
         studyObjectDetails.index();
     }

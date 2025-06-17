@@ -3,11 +3,9 @@ package edu.mcw.rgd.indexer.objectSearchIndexer.objectDetails;
 
 import edu.mcw.rgd.datamodel.GeneExpression;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
-import edu.mcw.rgd.datamodel.pheno.Sample;
 import edu.mcw.rgd.datamodel.pheno.Study;
 import edu.mcw.rgd.indexer.model.IndexObject;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;

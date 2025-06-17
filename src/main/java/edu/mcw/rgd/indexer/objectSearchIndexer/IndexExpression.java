@@ -21,7 +21,7 @@ public class IndexExpression extends GeneExpressionDAO implements Runnable{
     @Override
     public void run() {
         IndexObject object=new IndexObject();
-        object.setCategory("Expression");
+        object.setCategory("Expressed Gene");
         ObjectDetails<Gene> details=new ExpressionDetails(gene, object, records);
         details.index();
     }
