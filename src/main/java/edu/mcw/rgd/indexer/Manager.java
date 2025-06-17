@@ -19,7 +19,6 @@ import edu.mcw.rgd.indexer.dao.variants.*;
 
 import edu.mcw.rgd.indexer.model.findModels.ModelIndexObject;
 
-import edu.mcw.rgd.indexer.objectSearchIndexer.IndexCategory;
 import edu.mcw.rgd.process.Utils;
 import edu.mcw.rgd.services.ClientInit;
 import edu.mcw.rgd.services.IndexAdmin;
@@ -122,16 +121,25 @@ public class Manager {
             for (String arg : args) {
                 Runnable workerThread;
                 switch (arg) {
-                    case "ObjectSearch" -> {
+                    case "Qtls",
+                     "Strains" ,
+                     "Genes",
+                     "Sslps",
+                     "GenomicElements",
+                     "Annotations" , // all public ontologies
+                     "Reference",
+                     "Variants" ,// these are only ClinVar variants
+                     "Expression",
+                        "ExpressionStudy"-> {
                         System.out.println("Running Object Search Indexer ....");
                         if (!searchIndexCreated) {
                             admin.createIndex("search_mappings", "search");
                             searchIndexCreated = true;
                         }
-                        for (IndexCategory category : IndexCategory.values()) {
-                            System.out.println("Indexing ..."+ category.toString());
-                            indexDAO.getClass().getMethod("get" + category.toString()).invoke(indexDAO);
-                        }
+
+                            System.out.println("Indexing ..."+ arg);
+                            indexDAO.getClass().getMethod("get" + arg).invoke(indexDAO);
+
                     }
                     case "Chromosomes" -> {
                         System.out.println("Running Chromosome Indexer ....");
