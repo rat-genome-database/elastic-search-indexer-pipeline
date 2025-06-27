@@ -3,6 +3,7 @@ package edu.mcw.rgd.indexer.objectSearchIndexer.objectDetails;
 import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.indexer.dao.IndexDAO;
 import edu.mcw.rgd.indexer.model.AliasData;
+import edu.mcw.rgd.indexer.model.IndexDocument;
 import edu.mcw.rgd.indexer.model.IndexObject;
 
 import java.util.ArrayList;
@@ -81,7 +82,7 @@ public abstract class ObjectDetails<T> extends IndexDAO implements Details<T> {
             mapExternalDataBaseIdentifiers();
             mapTranscripts();
             mapSynonyms();
-            indexDocument(obj);
+            IndexDocument.index(obj);
         }
     }
 }

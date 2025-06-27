@@ -1155,7 +1155,7 @@ public class IndexDAO extends AbstractDAO {
       termObject.setCategory(document.getCategory());
       termObject.setSubcat(document.getSubcat());
       termObject.setType("term");
-      indexDocument(termObject);
+      IndexDocument.index(termObject);
       if(termSynonyms!=null && termSynonyms.size()>0){
           for(String synonym:termSynonyms){
               IndexObject object=new IndexObject();
@@ -1165,22 +1165,12 @@ public class IndexDAO extends AbstractDAO {
               object.setCategory(document.getCategory());
               object.setSubcat(document.getSubcat());
               object.setType("synonym");
-              indexDocument(object);
+              IndexDocument.index(object);
           }
       }
 
     }
-    public void indexDocument(IndexObject document) {
-        byte[] json = new byte[0];
-            try {
-                json = JacksonConfiguration.MAPPER.writeValueAsBytes(document);
-                BulkIndexProcessor.bulkProcessor.add(new IndexRequest(RgdIndex.getNewAlias()).source(json, XContentType.JSON));
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
-            }
-       
 
-    }
 
     public static void main(String[] args) throws Exception {
           IndexDAO dao= new IndexDAO();

@@ -6,6 +6,7 @@ import edu.mcw.rgd.dao.impl.MapDAO;
 import edu.mcw.rgd.datamodel.Map;
 import edu.mcw.rgd.datamodel.SpeciesType;
 
+import edu.mcw.rgd.indexer.model.IndexDocument;
 import edu.mcw.rgd.indexer.model.genomeInfo.AssemblyInfo;
 import edu.mcw.rgd.indexer.model.genomeInfo.GeneCounts;
 import edu.mcw.rgd.indexer.model.genomeInfo.GenomeIndexObject;
@@ -37,7 +38,9 @@ public class GenomeInfoThread implements Runnable {
     private int mapKey;
     private String index;
 
-
+    private final Logger log= LogManager.getLogger("genome");
+    MapDAO mapDAO= new MapDAO();
+    GenomeDAO genomeDAO= new GenomeDAO();
     public GenomeInfoThread(int speciestypeKey, String index, Logger log){
 
      this.key=speciestypeKey;
@@ -47,20 +50,15 @@ public class GenomeInfoThread implements Runnable {
 
     @Override
     public void run() {
-        Logger log= LogManager.getLogger("genome");
+
         log.info(Thread.currentThread().getName() + ": " + SpeciesType.getCommonName(key) + " started " + new Date());
 
-      MapDAO mapDAO= new MapDAO();
-        GenomeDAO genomeDAO= new GenomeDAO();
         StrainVariants variants= new StrainVariants();
-        List<GenomeIndexObject> objects= new ArrayList<>();
-     try {
-
-
-         String species = SpeciesType.getCommonName(key);
-            List<Map> maps = mapDAO.getMaps(key,"bp");
-        for (edu.mcw.rgd.datamodel.Map m : maps) {
-           //   Map m= mapDAO.getMap(360);
+        try {
+            String species = SpeciesType.getCommonName(key);
+//            List<Map> maps = mapDAO.getMaps(key,"bp");
+//            for (edu.mcw.rgd.datamodel.Map m : maps) {
+              Map m= mapDAO.getMap(360);
 
                 int mapKey=m.getKey();
                 if(mapKey!=6 && mapKey!=36 && mapKey!=8 && mapKey!=21 && mapKey!=19 && mapKey!=7 && mapKey!=900) {
@@ -170,35 +168,10 @@ public class GenomeInfoThread implements Runnable {
                         obj.setVariantsMatrix(strainVairantMatrix);
                     }
                 }
+                    IndexDocument.index(obj);
 
-                objects.add(obj);
           }
-       }
-           log.info("Objects List Size of " + species + " : " + objects.size());
-    //     BulkRequestBuilder bulkRequestBuilder= ESClient.getClient().prepareBulk().setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
-         BulkRequest bulkRequest=new BulkRequest();
-         bulkRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE);
-
-         int docCount=0;
-            for (GenomeIndexObject o : objects) {
-                docCount++;
-                ObjectMapper mapper = new ObjectMapper();
-                byte[] json = new byte[0];
-                try {
-                    json = mapper.writeValueAsBytes(o);
-                } catch (JsonProcessingException e) {
-                    e.printStackTrace();
-                }
-                bulkRequest.add(new IndexRequest(index).source(json, XContentType.JSON));
-
-            }
-         BulkResponse response=      ClientInit.getClient().bulk(bulkRequest, RequestOptions.DEFAULT);
-         bulkRequest= new BulkRequest();
-          //   BulkResponse response=       bulkRequestBuilder.get();
-         //  ESClient.getClient().admin().indices().refresh(refreshRequest()).actionGet();
-         RefreshRequest refreshRequest=new RefreshRequest();
-         ClientInit.getClient().indices().refresh(refreshRequest, RequestOptions.DEFAULT);
-            log.info("Indexed " + species + "  genome objects Size: " + objects.size() + " Exiting thread.");
+     //  }
             log.info(Thread.currentThread().getName() + ": " + species + " End " + new Date());
        }catch (Exception e){
             e.printStackTrace();

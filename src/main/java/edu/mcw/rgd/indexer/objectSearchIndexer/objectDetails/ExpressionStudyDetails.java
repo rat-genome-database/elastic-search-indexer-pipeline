@@ -4,6 +4,7 @@ package edu.mcw.rgd.indexer.objectSearchIndexer.objectDetails;
 import edu.mcw.rgd.datamodel.GeneExpression;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.pheno.Study;
+import edu.mcw.rgd.indexer.model.IndexDocument;
 import edu.mcw.rgd.indexer.model.IndexObject;
 
 import java.util.List;
@@ -88,7 +89,7 @@ public class ExpressionStudyDetails extends ObjectDetails<Study> {
              ****/
             setClinicalMeasurementTerms();
 
-        indexDocument(obj);
+        IndexDocument.index(obj);
     }
     void setGeneSymbols(){
         obj.setExpressedGeneSymbols( records.stream().map(r->r.getGeneExpressionRecordValue().getExpressedGeneSymbol()).filter(Objects::nonNull).collect(Collectors.toSet()));

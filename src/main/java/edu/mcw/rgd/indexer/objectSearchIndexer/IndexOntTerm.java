@@ -12,6 +12,7 @@ import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
 import edu.mcw.rgd.datamodel.ontologyx.TermWithStats;
 import edu.mcw.rgd.indexer.dao.IndexDAO;
+import edu.mcw.rgd.indexer.model.IndexDocument;
 import edu.mcw.rgd.indexer.model.IndexObject;
 
 import java.util.ArrayList;
@@ -119,7 +120,7 @@ public class IndexOntTerm implements Runnable {
         obj.setCategory("Ontology");
         indexDAO.setSuggest(obj);
         if(!isAITermMapping){
-           indexDAO.indexDocument(obj);}
+            IndexDocument.index(obj);}
         else {
             obj.setSubcat(ontId);
             indexDAO.indexAITermMappingDocument(obj);

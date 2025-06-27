@@ -2,6 +2,7 @@ package edu.mcw.rgd.indexer.objectSearchIndexer.objectDetails;
 
 import edu.mcw.rgd.datamodel.Gene;
 import edu.mcw.rgd.datamodel.GeneExpression;
+import edu.mcw.rgd.indexer.model.IndexDocument;
 import edu.mcw.rgd.indexer.model.IndexObject;
 
 import java.util.List;
@@ -31,7 +32,7 @@ public class ExpressionDetails extends GeneDetails{
             setExpressionUnit();
             setSex();
             setLifeStage();
-            indexDocument(obj);
+            IndexDocument.index(obj);
         }
     }
 

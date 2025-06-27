@@ -33,13 +33,10 @@ import java.util.stream.Collectors;
 public class PhenominerNormalizedThread implements Runnable {
 
     private final Logger log = LogManager.getLogger("phenominer");
-
     private String index;
-//    private BulkIndexProcessor bulkIndexProcessor;
+
     PhenominerDAO phenominerDAO = new PhenominerDAO();
-//    PhenominerProcess process=new PhenominerProcess();
-//
-//    public PhenominerNormalizedThread() {}
+
 
     public PhenominerNormalizedThread(String index) {
         this.index = index;
