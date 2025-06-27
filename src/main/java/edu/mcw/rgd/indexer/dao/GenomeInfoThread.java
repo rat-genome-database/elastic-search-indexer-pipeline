@@ -56,9 +56,9 @@ public class GenomeInfoThread implements Runnable {
         StrainVariants variants= new StrainVariants();
         try {
             String species = SpeciesType.getCommonName(key);
-//            List<Map> maps = mapDAO.getMaps(key,"bp");
-//            for (edu.mcw.rgd.datamodel.Map m : maps) {
-              Map m= mapDAO.getMap(360);
+            List<Map> maps = mapDAO.getMaps(key,"bp");
+            for (edu.mcw.rgd.datamodel.Map m : maps) {
+      //        Map m= mapDAO.getMap(360);
 
                 int mapKey=m.getKey();
                 if(mapKey!=6 && mapKey!=36 && mapKey!=8 && mapKey!=21 && mapKey!=19 && mapKey!=7 && mapKey!=900) {
@@ -171,7 +171,7 @@ public class GenomeInfoThread implements Runnable {
                     IndexDocument.index(obj);
 
           }
-     //  }
+       }
             log.info(Thread.currentThread().getName() + ": " + species + " End " + new Date());
        }catch (Exception e){
             e.printStackTrace();

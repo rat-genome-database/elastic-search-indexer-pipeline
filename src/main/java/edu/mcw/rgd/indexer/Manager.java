@@ -167,15 +167,15 @@ public class Manager {
                         System.out.println("Running Genome Info Indexer ....");
                         admin.createIndex("genome_mappings", "genome");
                         System.out.println("INDEXING GENOMEINFO...");
-                    //    for (int key : SpeciesType.getSpeciesTypeKeys()) {
-                        int key=3;
+                        for (int key : SpeciesType.getSpeciesTypeKeys()) {
+//                        int key=3;
                             if (SpeciesType.isSearchable(key)) {
                                 if (key != 0) {
                                     workerThread = new GenomeInfoThread(key, RgdIndex.getNewAlias(), log);
                                     executor.execute(workerThread);
                                 }
                             }
-                      //  }
+                        }
                     }
                     case "Phenominer" -> {
                         System.out.println("Running Phenominer Indexer ....");
