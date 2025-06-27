@@ -118,19 +118,19 @@ public class Manager {
 
         ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
             boolean searchIndexCreated=false;
+            boolean expressionSearchIndexCreated=false;
             for (String arg : args) {
                 Runnable workerThread;
                 switch (arg) {
                     case "Qtls",
-                     "Strains" ,
-                     "Genes",
-                     "Sslps",
-                     "GenomicElements",
-                     "Annotations" , // all public ontologies
-                     "Reference",
-                     "Variants" ,// these are only ClinVar variants
-                     "Expression",
-                        "ExpressionStudy"-> {
+                        "Strains" ,
+                        "Genes",
+                        "Sslps",
+                        "GenomicElements",
+                        "Annotations" , // all public ontologies
+                        "Reference",
+                        "Variants" // these are only ClinVar variants
+                            -> {
                         System.out.println("Running Object Search Indexer ....");
                         if (!searchIndexCreated) {
                             admin.createIndex("search_mappings", "search");
@@ -209,6 +209,18 @@ public class Manager {
                             executor.execute(workerThread);
 
                         }
+                    }
+                    case "ExpressionGene",
+                            "ExpressionStudy"-> {
+                        System.out.println("Running "+arg+" Indexer ....");
+                        if (!expressionSearchIndexCreated) {
+                            admin.createIndex("search_mappings", "expression");
+                            expressionSearchIndexCreated = true;
+                        }
+
+                        System.out.println("Indexing ..."+ arg);
+                        indexDAO.getClass().getMethod("get" + arg).invoke(indexDAO);
+
                     }
                     case "ExpressionData"-> {// all species variants
                         System.out.println("Running Expression General Search Indexer ....");

@@ -11,10 +11,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 
-public class IndexExpression extends GeneExpressionDAO implements Runnable{
+public class IndexExpressionGene extends GeneExpressionDAO implements Runnable{
     private Gene gene;
     List<GeneExpression> records;
-    public IndexExpression(Gene gene){
+    public IndexExpressionGene(Gene gene){
         this.gene=gene;
         setRecords();
     }

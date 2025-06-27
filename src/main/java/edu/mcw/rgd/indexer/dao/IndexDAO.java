@@ -187,12 +187,12 @@ public class IndexDAO extends AbstractDAO {
         executor.shutdown();
         while (!executor.isTerminated()) {}
     }
-    public void getExpression() throws Exception {
+    public void getExpressionGene() throws Exception {
         List<Gene> genes= geneDAO.getAllActiveGenes();
        ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
         for(Gene gene: genes) {
 //            Gene gene= geneDAO.getGene(3876);
-            Runnable workerThread= new IndexExpression(gene);
+            Runnable workerThread= new IndexExpressionGene(gene);
             executor.execute(workerThread);
         }
         executor.shutdown();
