@@ -147,19 +147,21 @@ public class Manager {
                         MapDAO mapDAO = new MapDAO();
                         log.info("INDEXING Chromosomes...");
                         for (int key : SpeciesType.getSpeciesTypeKeys()) {
-                            if (SpeciesType.isSearchable(key)) {
-                                if (key != 0) {
-                                    List<Map> maps = null;
+                            if (key != 0 && SpeciesType.isSearchable(key)) {
+                                List<Map> maps = null;
                                     try {
                                         maps = mapDAO.getMaps(key, "bp");
                                     } catch (Exception e) {
                                         throw new RuntimeException(e);
                                     }
                                     for (Map m : maps) {
+//                                        int key=3;
+//                                        Map m=mapDAO.getMap(360);
+
                                         workerThread = new ChromosomeMapDataThread(key, m);
                                         executor.execute(workerThread);
                                     }
-                                }
+
                             }
                         }
                     }

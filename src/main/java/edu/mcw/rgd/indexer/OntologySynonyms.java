@@ -3,8 +3,7 @@ package edu.mcw.rgd.indexer;
 import edu.mcw.rgd.dao.impl.OntologyXDAO;
 import edu.mcw.rgd.datamodel.ontologyx.Ontology;
 import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
-import edu.mcw.rgd.indexer.dao.IndexerDAO;
-import edu.mcw.rgd.indexer.dao.phenominer.OntologySynonymsThread;
+import edu.mcw.rgd.indexer.dao.OntologySynonymsThread;
 
 import java.util.HashMap;
 import java.util.List;

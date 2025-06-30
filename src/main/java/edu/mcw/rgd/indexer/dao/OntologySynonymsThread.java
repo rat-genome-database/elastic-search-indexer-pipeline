@@ -1,4 +1,4 @@
-package edu.mcw.rgd.indexer.dao.phenominer;
+package edu.mcw.rgd.indexer.dao;
 
 import edu.mcw.rgd.dao.impl.OntologyXDAO;
 import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;

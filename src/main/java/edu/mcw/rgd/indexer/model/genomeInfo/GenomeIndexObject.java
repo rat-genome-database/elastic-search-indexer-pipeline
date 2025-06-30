@@ -61,6 +61,103 @@ public class GenomeIndexObject {
     private String[][] variantsMatrix;
     private int proteinsCount;
 
+    /***************************SPECIFIC TO CHROMOSOME INFO OBJECT*********************************/
+
+    private String chromosome;
+    private String refseqId;
+    private String genbankId;
+    private int seqLength;
+    private int gapLength;
+    private int gapCount;
+    private int contigCount;
+    private StringBuffer pieData;
+
+
+    //DISEASE GENE SETS
+    private List<DiseaseGeneObject> diseaseGenes;
+    private StringBuffer diseaseGenechartData;
+
+    public String getChromosome() {
+        return chromosome;
+    }
+
+    public void setChromosome(String chromosome) {
+        this.chromosome = chromosome;
+    }
+
+    public String getRefseqId() {
+        return refseqId;
+    }
+
+    public void setRefseqId(String refseqId) {
+        this.refseqId = refseqId;
+    }
+
+    public String getGenbankId() {
+        return genbankId;
+    }
+
+    public void setGenbankId(String genbankId) {
+        this.genbankId = genbankId;
+    }
+
+    public int getSeqLength() {
+        return seqLength;
+    }
+
+    public void setSeqLength(int seqLength) {
+        this.seqLength = seqLength;
+    }
+
+    public int getGapLength() {
+        return gapLength;
+    }
+
+    public void setGapLength(int gapLength) {
+        this.gapLength = gapLength;
+    }
+
+    public int getGapCount() {
+        return gapCount;
+    }
+
+    public void setGapCount(int gapCount) {
+        this.gapCount = gapCount;
+    }
+
+    public int getContigCount() {
+        return contigCount;
+    }
+
+    public void setContigCount(int contigCount) {
+        this.contigCount = contigCount;
+    }
+
+    public StringBuffer getPieData() {
+        return pieData;
+    }
+
+    public void setPieData(StringBuffer pieData) {
+        this.pieData = pieData;
+    }
+
+    public List<DiseaseGeneObject> getDiseaseGenes() {
+        return diseaseGenes;
+    }
+
+    public void setDiseaseGenes(List<DiseaseGeneObject> diseaseGenes) {
+        this.diseaseGenes = diseaseGenes;
+    }
+
+    public StringBuffer getDiseaseGenechartData() {
+        return diseaseGenechartData;
+    }
+
+    public void setDiseaseGenechartData(StringBuffer diseaseGenechartData) {
+        this.diseaseGenechartData = diseaseGenechartData;
+    }
+
+    /************************************************************************************************************/
     public int getPigOrthologs() {
         return pigOrthologs;
     }

@@ -89,12 +89,4 @@ public class DiseaseGeneSets extends AbstractDAO {
 
         return null;
     }
-    public static void main(String[] args) throws Exception {
-       DiseaseGeneSets ds= new DiseaseGeneSets();
-     List<DiseaseGeneObject> diseaseGeneSets=  ds.getDiseaseGeneSets(360, "1", 3);
-        for(DiseaseGeneObject d:diseaseGeneSets){
-            System.out.println(d.getOntTermAccId() + "  "+ d.getOntTerm() + "   "+ d.getGeneCount());
-        }
-       System.out.println("DONE");
-   }
 }

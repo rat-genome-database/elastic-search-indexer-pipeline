@@ -28,7 +28,12 @@ import java.util.Map;
  * Created by jthota on 10/23/2017.
  */
 public class GenomeDAO extends AbstractDAO{
-    MapDAO mapDAO=new MapDAO();
+   public MapDAO mapDAO=new MapDAO();
+
+  public   GeneDAO geneDAO=new GeneDAO();
+  public  ProteinDAO pdao=new ProteinDAO();
+  public   StrainVariants variants= new StrainVariants();
+  public OntologyXDAO ontologyXDAO=new OntologyXDAO();
     public AssemblyStats loadAssemblyStats(String refSeqAccession){
         System.out.println("loading ..."+ refSeqAccession);
         AssemblyStats stats=new AssemblyStats();
@@ -112,94 +117,7 @@ public class GenomeDAO extends AbstractDAO{
 
         return info;
     }
-    public GeneCounts  getGeneCounts(int mapKey, int speciesTypeKey, String chr) throws Exception {
 
-        GeneDAO geneDAO= new GeneDAO();
-
-
-        int proteninCoding=0;
-        int ncrna=0;
-        int trna=0;
-        int snrna=0;
-        int rrna=0;
-        int pseudo=0;
-
-        GeneCounts geneCounts = new GeneCounts();
-        List<MappedGene> filteredGenes= new ArrayList<>();
-        List<MappedGene> mGenes= geneDAO.getActiveMappedGenes(mapKey);
-        if(chr!=null){
-            for(MappedGene m: mGenes){
-                if(m.getChromosome().equals(chr)){
-                    filteredGenes.add(m);
-                }
-            }
-        }else{
-            filteredGenes=mGenes;
-        }
-        if(filteredGenes.size()>0) {
-            for (MappedGene g : filteredGenes) {
-
-                Gene gene = g.getGene();
-                String type = gene.getType();
-
-                if (type.equalsIgnoreCase("protein-coding")) {
-                    proteninCoding++;
-                }
-                if (type.equalsIgnoreCase("ncrna")) {
-                    ncrna++;
-                }
-                if (type.equalsIgnoreCase("trna")) {
-                    trna++;
-                }
-                if (type.equalsIgnoreCase("snrna")) {
-                    snrna++;
-                }
-                if (type.equalsIgnoreCase("rrna")) {
-                    rrna++;
-                }
-                if (type.equalsIgnoreCase("pseudo")) {
-                    pseudo++;
-                }
-            }
-
-            geneCounts.setTotalGenes(filteredGenes.size());
-            geneCounts.setProteinCoding(proteninCoding);
-            geneCounts.setNcrna(ncrna);
-            geneCounts.setPseudo(pseudo);
-            geneCounts.setrRna(rrna);
-            geneCounts.setSnRna(snrna);
-            geneCounts.settRna(trna);
-            Map<String, Integer> mirTargetCount=  this.getMirnaTargetCount(mapKey, chr);
-            geneCounts.setMirnaTargets(mirTargetCount);
-
-
-        }
-        Map<String, Integer> orthCounts=new HashMap<>();
-        orthCounts = this.getOrthologCounts(mapKey, speciesTypeKey, chr);
-        geneCounts.setOrthologCountsMap(orthCounts);
-
-        return geneCounts;
-
-    }
-    public Map<String, Integer> getOrthologCounts(int mapKey, int speciesTypeKey, String chr) throws Exception {
-
-        OrthologDAO orthologDAO= new OrthologDAO();
-        Map<String, Integer> counts=  orthologDAO.getOrthologCounts(mapKey, speciesTypeKey, chr);
-        int genesWithOrthologs= orthologDAO.getGeneCountWithOrthologs(mapKey, speciesTypeKey, chr);
-        int genesWithoutOrthologs= orthologDAO.getGeneCountWithOutOrthologs(mapKey, speciesTypeKey, chr);
-        counts.put("withOrthologs", genesWithOrthologs);
-        counts.put("WithOutOrthologs",genesWithoutOrthologs);
-        return counts;
-
-    }
-
-    public Map<String, Integer> getMirnaTargetCount(int mapKey, String chr) throws Exception {
-        Map<String, Integer> targetMap=new HashMap<>();
-        StatsDAO statsDAO= new StatsDAO();
-        targetMap= statsDAO.getMirnaTargetCountsMap(mapKey, chr);
-
-        return targetMap;
-    }
     public int getTranscriptsCount(int mapKey, String chr) throws Exception {
         String sql="SELECT count(distinct(ri.rgd_id)) as tot, ro.object_name from rgd_ids ri, rgd_objects ro , maps_data m where ri.object_key = ro.object_key " +
                 "AND m.rgd_id=ri.rgd_id and m.map_key=? and ri.object_status = 'ACTIVE' ";
@@ -260,27 +178,7 @@ public class GenomeDAO extends AbstractDAO{
 
         return objectCounts;
     }
-    public Object getOtherObjectsCounts(Object obj, int mapKey, String chr, String objectType) throws Exception {
-        GenomeDAO genomeDAO= new GenomeDAO();
-        java.util.Map<String, Long> countsMap=   genomeDAO.getObjectCounts(mapKey, chr);
-        if(objectType.equalsIgnoreCase("chromosome")){
-        ChromosomeIndexObject  chrObject=(ChromosomeIndexObject) obj;
-           chrObject.setExons(this.getOtherObjectsCounts(countsMap, "exons"));
-            chrObject.setQtls(this.getOtherObjectsCounts(countsMap, "qtls"));
-            chrObject.setExons(this.getOtherObjectsCounts(countsMap, "genes"));
-            chrObject.setQtls(this.getOtherObjectsCounts(countsMap, "qtls"));
-            chrObject.setExons(this.getOtherObjectsCounts(countsMap, "exons"));
-            chrObject.setQtls(this.getOtherObjectsCounts(countsMap, "qtls"));
-            chrObject.setExons(this.getOtherObjectsCounts(countsMap, "exons"));
-            chrObject.setQtls(this.getOtherObjectsCounts(countsMap, "qtls"));
 
-        }
-        if(objectType.equalsIgnoreCase("genome")){
-         GenomeIndexObject  geneomeObject=(GenomeIndexObject)obj;
-
-    }
-        return null;
-}
     public long getOtherObjectsCounts(Map<String, Long> countsMap, String type){
         for(java.util.Map.Entry e: countsMap.entrySet()){
             String key= (String) e.getKey();
@@ -346,14 +244,5 @@ public class GenomeDAO extends AbstractDAO{
         }
         return props.getProperty("NCBI_API_KEY");
     }
-    public static void main(String[] args) throws Exception {
-        GenomeDAO genomeDAO= new GenomeDAO();
-        MapDAO dao=new MapDAO();
-        List<edu.mcw.rgd.datamodel.Map>  maps=dao.getMaps(6);
-        for(edu.mcw.rgd.datamodel.Map map:maps) {
-            System.out.println("MAP:"+ map.getKey());
-            genomeDAO.getAssemblyInfo(map);
-        }
 
-    }
 }
