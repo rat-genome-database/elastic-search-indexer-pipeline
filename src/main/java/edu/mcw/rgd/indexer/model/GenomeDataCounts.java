@@ -39,6 +39,12 @@ public class GenomeDataCounts extends GenomeDAO {
             throw new RuntimeException(e);
         }
     }
+    public String getChromosome(){
+        if(chromosome!=null){
+            return chromosome.getChromosome();
+        }else
+            return null;
+    }
     public List<MappedGene> getMappedGenes(){
         if(chromosome!=null){
             List<MappedGene> genes=new ArrayList<>();
@@ -127,7 +133,7 @@ public class GenomeDataCounts extends GenomeDAO {
     }
     public void mapMirnaTargetCount() throws Exception {
         StatsDAO statsDAO= new StatsDAO();
-        java.util.Map<String, Integer>  mirnaTargets= statsDAO.getMirnaTargetCountsMap(map.getKey(), chromosome.getChromosome());
+        java.util.Map<String, Integer>  mirnaTargets= statsDAO.getMirnaTargetCountsMap(map.getKey(), getChromosome());
         if(mirnaTargets!=null) {
             for (java.util.Map.Entry entry : mirnaTargets.entrySet()) {
                 String targetType = (String) entry.getKey();
@@ -144,9 +150,9 @@ public class GenomeDataCounts extends GenomeDAO {
     }
     public void mapOrthologCounts() throws Exception {
         OrthologDAO orthologDAO= new OrthologDAO();
-        java.util.Map<String, Integer> orthologCounts=  orthologDAO.getOrthologCounts(map.getKey(), speciesTypeKey, chromosome.getChromosome());
-        int genesWithOrthologs= orthologDAO.getGeneCountWithOrthologs(map.getKey(), speciesTypeKey, chromosome.getChromosome());
-        int genesWithoutOrthologs= orthologDAO.getGeneCountWithOutOrthologs(map.getKey(), speciesTypeKey, chromosome.getChromosome());
+        java.util.Map<String, Integer> orthologCounts=  orthologDAO.getOrthologCounts(map.getKey(), speciesTypeKey, getChromosome());
+        int genesWithOrthologs= orthologDAO.getGeneCountWithOrthologs(map.getKey(), speciesTypeKey,getChromosome());
+        int genesWithoutOrthologs= orthologDAO.getGeneCountWithOutOrthologs(map.getKey(), speciesTypeKey, getChromosome());
         orthologCounts.put("withOrthologs", genesWithOrthologs);
         orthologCounts.put("WithOutOrthologs",genesWithoutOrthologs);
         if(orthologCounts.get("1")!=null){obj.setHumanOrthologs(orthologCounts.get("1")); }
@@ -163,12 +169,12 @@ public class GenomeDataCounts extends GenomeDAO {
 
     }
     public void mapProteinCounts() throws Exception {
-        obj.setProteinsCount(pdao.getProteinsCount(map.getKey(), chromosome.getChromosome()));
+        obj.setProteinsCount(pdao.getProteinsCount(map.getKey(), getChromosome()));
     }
     public void mapObjectCounts(){
         java.util.Map<String, Long> countsMap = null;
         try {
-            countsMap = getObjectCounts(map.getKey(), chromosome.getChromosome());
+            countsMap = getObjectCounts(map.getKey(), getChromosome());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -211,7 +217,7 @@ public class GenomeDataCounts extends GenomeDAO {
         if (map.getKey() == 360 || map.getKey() == 70 || map.getKey() == 60 || map.getKey() == 372 || map.getKey()==38) {
             String[][] strainVairantMatrix = new String[0][];
             try {
-                strainVairantMatrix = variants.getStrainVariants(map.getKey(), chromosome.getChromosome());
+                strainVairantMatrix = variants.getStrainVariants(map.getKey(), getChromosome());
                 obj.setVariantsMatrix(strainVairantMatrix);
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -232,7 +238,7 @@ public class GenomeDataCounts extends GenomeDAO {
         for(TermWithStats t:topLevelDiseaseTerms){
             DiseaseGeneObject obj= new DiseaseGeneObject();
 
-            int count= getGeneCountsByTermAcc(t.getAccId(), map.getKey(), aspect, chromosome.getChromosome());
+            int count= getGeneCountsByTermAcc(t.getAccId(), map.getKey(), aspect, getChromosome());
             if(count>0) {
                 obj.setOntTermAccId(t.getAccId());
                 obj.setOntTerm(t.getTerm());
