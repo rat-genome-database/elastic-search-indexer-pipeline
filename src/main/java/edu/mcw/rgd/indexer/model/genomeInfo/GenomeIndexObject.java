@@ -54,6 +54,8 @@ public class GenomeIndexObject {
     private int dogOrthologs;
     private int chinchillaOrthologs;
     private int pigOrthologs;
+    private int greenMonkeyOrthologs;
+    private int nakedMoleRatOrthologs;
 
     private List<String> refs;
 
@@ -72,6 +74,21 @@ public class GenomeIndexObject {
     private int contigCount;
     private StringBuffer pieData;
 
+    public int getGreenMonkeyOrthologs() {
+        return greenMonkeyOrthologs;
+    }
+
+    public void setGreenMonkeyOrthologs(int greenMonkeyOrthologs) {
+        this.greenMonkeyOrthologs = greenMonkeyOrthologs;
+    }
+
+    public int getNakedMoleRatOrthologs() {
+        return nakedMoleRatOrthologs;
+    }
+
+    public void setNakedMoleRatOrthologs(int nakedMoleRatOrthologs) {
+        this.nakedMoleRatOrthologs = nakedMoleRatOrthologs;
+    }
 
     //DISEASE GENE SETS
     private List<DiseaseGeneObject> diseaseGenes;

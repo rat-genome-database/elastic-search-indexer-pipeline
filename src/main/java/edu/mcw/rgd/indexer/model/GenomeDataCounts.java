@@ -1,6 +1,5 @@
 package edu.mcw.rgd.indexer.model;
 
-import com.google.gson.Gson;
 import edu.mcw.rgd.dao.impl.OrthologDAO;
 import edu.mcw.rgd.datamodel.*;
 import edu.mcw.rgd.datamodel.ontologyx.Ontology;
@@ -163,6 +162,8 @@ public class GenomeDataCounts extends GenomeDAO {
         if(orthologCounts.get("7")!=null){    obj.setSquirrelOrthologs(orthologCounts.get("7"));}
         if(orthologCounts.get("5")!=null){    obj.setBonoboOrthologs(orthologCounts.get("5"));}
         if(orthologCounts.get("9")!=null){    obj.setPigOrthologs(orthologCounts.get("9"));}
+        if(orthologCounts.get("13")!=null){    obj.setGreenMonkeyOrthologs(orthologCounts.get("13"));}
+        if(orthologCounts.get("14")!=null){    obj.setNakedMoleRatOrthologs(orthologCounts.get("14"));}
 
         obj.setGenesWithoutOrthologs(orthologCounts.get("WithOutOrthologs"));
         obj.setGenesWithOrthologs(orthologCounts.get("withOrthologs"));
@@ -296,8 +297,6 @@ public class GenomeDataCounts extends GenomeDAO {
             addDiseaseGeneChartData();
             addPieData();
         }
-//        Gson gson=new Gson();
-//        System.out.println("OBJECT:"+ gson.toJson(obj));
         IndexDocument.index(obj);
     }
 }

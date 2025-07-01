@@ -173,7 +173,7 @@ public class Manager {
 //                        int key=3;
                             if (SpeciesType.isSearchable(key)) {
                                 if (key != 0) {
-                                    workerThread = new GenomeInfoThread(key, RgdIndex.getNewAlias(), log);
+                                    workerThread = new GenomeInfoThread(key, RgdIndex.getNewAlias());
                                     executor.execute(workerThread);
                                 }
                             }
