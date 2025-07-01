@@ -13,9 +13,9 @@ import org.apache.logging.log4j.Logger;
 import java.util.Date;
 
 public class ChromosomeIndexer implements Runnable {
-    private int speciesTypeKey;
-    private Chromosome chromosome;
-    private Map map;
+    private final int speciesTypeKey;
+    private final Chromosome chromosome;
+    private final Map map;
 
     public ChromosomeIndexer(int speciestypeKey, Chromosome chromosome, Map map){
         this.speciesTypeKey=speciestypeKey;
