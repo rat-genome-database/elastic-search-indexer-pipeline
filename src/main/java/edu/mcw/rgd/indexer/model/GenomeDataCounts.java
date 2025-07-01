@@ -296,8 +296,8 @@ public class GenomeDataCounts extends GenomeDAO {
             addDiseaseGeneChartData();
             addPieData();
         }
-        Gson gson=new Gson();
-        System.out.println("OBJECT:"+ gson.toJson(obj));
+//        Gson gson=new Gson();
+//        System.out.println("OBJECT:"+ gson.toJson(obj));
         IndexDocument.index(obj);
     }
 }
