@@ -20,11 +20,11 @@ import java.util.Comparator;
 import java.util.List;
 
 public class GenomeDataCounts extends GenomeDAO {
-    private Map map;
-    private int speciesTypeKey;
+    private final Map map;
+    private final int speciesTypeKey;
     private List<MappedGene> mappedGenes;
-    private GenomeIndexObject obj;
-    private Chromosome chromosome;
+    private final GenomeIndexObject obj;
+    private final Chromosome chromosome;
     public GenomeDataCounts(Map map, int speciesTypeKey, Chromosome chr){
         this.map=map;
         this.speciesTypeKey=speciesTypeKey;
@@ -255,18 +255,18 @@ public class GenomeDataCounts extends GenomeDAO {
         });
         obj.setDiseaseGenes(diseaseGeneSets);
     }
-    public StringBuffer addDiseaseGeneChartData(){
+    public void addDiseaseGeneChartData(){
         StringBuffer sb = new StringBuffer();
         sb.append("[");
         for (DiseaseGeneObject d : obj.getDiseaseGenes()) {
             if (d.getGeneCount() > 0)
-                sb.append("{\"disease\":\"" + d.getOntTerm() + "\", \"geneCount\":" + d.getGeneCount() + "},");
+                sb.append("{\"disease\":\"").append(d.getOntTerm()).append("\", \"geneCount\":").append(d.getGeneCount()).append("},");
         }
         sb.append("]");
 
-        return sb;
+       obj.setDiseaseGenechartData(sb);
     }
-    public StringBuffer addPieData(){
+    public void addPieData(){
         StringBuffer pieData= new StringBuffer();
         pieData.append("[{\"label\":\"protein-coding\", \"value\":"+obj.getProteinCoding()+"}," );
         if(obj.getNcrna()!=0)
@@ -280,7 +280,7 @@ public class GenomeDataCounts extends GenomeDAO {
         if(obj.getSnRna()!=0)
             pieData.append("{\"label\":\"ncrna\", \"value\":" + obj.getSnRna()+"}");
         pieData.append("]");
-        return pieData;
+       obj.setPieData( pieData);
     }
     public void index() throws Exception {
         mapAssembly();
