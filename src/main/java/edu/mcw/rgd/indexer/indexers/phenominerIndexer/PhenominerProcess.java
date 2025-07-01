@@ -1,36 +1,16 @@
 package edu.mcw.rgd.indexer.dao.phenominer.utils;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import edu.mcw.rgd.dao.impl.AssociationDAO;
 import edu.mcw.rgd.dao.impl.OntologyXDAO;
-import edu.mcw.rgd.dao.impl.PhenominerDAO;
-import edu.mcw.rgd.dao.impl.StrainDAO;
-import edu.mcw.rgd.datamodel.RgdIndex;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
 import edu.mcw.rgd.datamodel.pheno.Condition;
 import edu.mcw.rgd.datamodel.pheno.Record;
-import edu.mcw.rgd.indexer.Manager;
-import edu.mcw.rgd.indexer.dao.IndexDAO;
-import edu.mcw.rgd.indexer.dao.phenominer.model.PhenominerIndexObject;
-import edu.mcw.rgd.indexer.dao.phenominer.model.TreeNode;
-import edu.mcw.rgd.indexer.dao.variants.BulkIndexProcessor;
-import edu.mcw.rgd.services.ClientInit;
-import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
-import org.elasticsearch.action.bulk.BulkRequest;
-import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.support.WriteRequest;
-import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.core.TimeValue;
-import org.elasticsearch.xcontent.XContentType;
+import edu.mcw.rgd.indexer.model.phenominer.PhenominerIndexObject;
+import edu.mcw.rgd.indexer.model.phenominer.TreeNode;
 
 
-import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 public class PhenominerProcess {
@@ -313,19 +293,5 @@ public class PhenominerProcess {
         }
 
     }
-    public void indexObject(List<PhenominerIndexObject> objs, String index) throws ExecutionException, InterruptedException, IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        for (PhenominerIndexObject o : objs) {
 
-            byte[] json = new byte[0];
-            try {
-                json = mapper.writeValueAsBytes(o);
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
-            }
-            BulkIndexProcessor.bulkProcessor.add(new IndexRequest(RgdIndex.getNewAlias()).source(json, XContentType.JSON));
-        }
-    }
 }

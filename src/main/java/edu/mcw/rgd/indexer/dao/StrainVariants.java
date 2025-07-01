@@ -56,7 +56,7 @@ public class StrainVariants extends AbstractDAO{
             sql=sql+"and vmd.chromosome=?";
 
         }
-        sql=sql+ "   group by v.variant_type, s.sample_id, s.analysis_name";
+        sql=sql+ "   group by v.variant_type, s.sample_id, s.analysis_name order by s.analysis_name";
         try(Connection conn= DataSourceFactory.getInstance().getCarpeNovoDataSource().getConnection();
             PreparedStatement ps= conn.prepareStatement(sql);){
 
@@ -65,7 +65,7 @@ public class StrainVariants extends AbstractDAO{
                 if(chr!=null)
                     ps.setString(2, chr);
                 ResultSet rs= ps.executeQuery();
-                int snvAndSnps=0;
+
                 while(rs.next()){
                     VariantCounts vc= new VariantCounts();
                     int sampleId=rs.getInt("sample_id");
@@ -75,16 +75,18 @@ public class StrainVariants extends AbstractDAO{
                     String variantType= rs.getString("variant_type");
 
                     if(variantType.equalsIgnoreCase("snv") || variantType.equalsIgnoreCase("snp")){
-                        snvAndSnps=snvAndSnps+rs.getInt("tot");
+                        int snvOrSnpCount= Integer.parseInt(vc.getSnv());
+                        snvOrSnpCount+=rs.getInt("tot");
+                        vc.setSnv(String.valueOf(snvOrSnpCount));
                     }
 
-                    if(variantType.equalsIgnoreCase("ins"))
+                    if(variantType.equalsIgnoreCase("insertion"))
                         vc.setIns(rs.getString("tot"));
-                    if(variantType.equalsIgnoreCase("del"))
+                    if(variantType.equalsIgnoreCase("deletion"))
                         vc.setDel(rs.getString("tot"));
 
                     totalVariants=totalVariants+rs.getInt("tot");
-                    vc.setSnv(String.valueOf(snvAndSnps));
+
                     variantCounts.add(vc);
                 }
 
