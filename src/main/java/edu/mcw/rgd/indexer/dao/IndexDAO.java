@@ -1,8 +1,5 @@
 package edu.mcw.rgd.indexer.dao;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.mcw.rgd.dao.AbstractDAO;
 import edu.mcw.rgd.dao.DataSourceFactory;
 import edu.mcw.rgd.dao.impl.*;
@@ -20,32 +17,23 @@ import edu.mcw.rgd.datamodel.ontologyx.TermWithStats;
 import edu.mcw.rgd.datamodel.pheno.Study;
 import edu.mcw.rgd.indexer.MyThreadPoolExecutor;
 import edu.mcw.rgd.indexer.OntologySynonyms;
-import edu.mcw.rgd.indexer.dao.variants.BulkIndexProcessor;
 import edu.mcw.rgd.indexer.dao.variants.VariantIndexerThread;
-import edu.mcw.rgd.indexer.objectSearchIndexer.*;
+import edu.mcw.rgd.indexer.indexers.objectSearchIndexer.*;
 import edu.mcw.rgd.indexer.model.*;
 
-import edu.mcw.rgd.indexer.model.genomeInfo.AssemblyInfo;
-import edu.mcw.rgd.indexer.model.genomeInfo.GeneCounts;
-import edu.mcw.rgd.indexer.model.genomeInfo.GenomeIndexObject;
 import edu.mcw.rgd.process.AnnotationFormatter;
 import edu.mcw.rgd.process.Utils;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.xcontent.XContentType;
 
-
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 
 import java.sql.Statement;
 import java.util.*;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;

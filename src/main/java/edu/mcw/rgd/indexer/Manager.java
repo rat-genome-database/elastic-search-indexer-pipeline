@@ -17,6 +17,10 @@ import edu.mcw.rgd.indexer.dao.findModels.FullAnnotDao;
 import edu.mcw.rgd.indexer.dao.phenominer.PhenominerNormalizedThread;
 import edu.mcw.rgd.indexer.dao.variants.*;
 
+import edu.mcw.rgd.indexer.indexers.expressionIndexer.ExpressionDataIndexer;
+import edu.mcw.rgd.indexer.indexers.genomeInfoIndexer.ChromosomeMapDataThread;
+import edu.mcw.rgd.indexer.indexers.genomeInfoIndexer.GenomeInfoThread;
+import edu.mcw.rgd.indexer.indexers.modelsIndexer.FindModels;
 import edu.mcw.rgd.indexer.model.findModels.ModelIndexObject;
 
 import edu.mcw.rgd.process.Utils;
@@ -155,9 +159,6 @@ public class Manager {
                                         throw new RuntimeException(e);
                                     }
                                     for (Map m : maps) {
-//                                        int key=3;
-//                                        Map m=mapDAO.getMap(360);
-
                                         workerThread = new ChromosomeMapDataThread(key, m);
                                         executor.execute(workerThread);
                                     }
@@ -191,8 +192,10 @@ public class Manager {
                         admin.createIndex("models", "models");
                         FullAnnotDao dao = new FullAnnotDao();
                         List<String> aspects = new ArrayList<>(Arrays.asList("D", "B", "N"));
-                        List<ModelIndexObject> models = dao.getAnnotationsBySpeciesNObjectKey(3, 5);
-                        dao.indexModels(models);
+//                        List<ModelIndexObject> models = dao.getAnnotationsBySpeciesNObjectKey(3, 5);
+//                        dao.indexModels(models);
+                        FindModels models=new FindModels();
+                        models.getModelIndexObjects(3, 5);
                         System.out.println("Indexing models is DONE!!");
                     }
                     case "Variant" -> { // all species variants
