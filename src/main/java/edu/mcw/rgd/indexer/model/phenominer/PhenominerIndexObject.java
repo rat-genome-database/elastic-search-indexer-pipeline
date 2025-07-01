@@ -1,6 +1,5 @@
-package edu.mcw.rgd.indexer.dao.phenominer.model;
+package edu.mcw.rgd.indexer.model.phenominer;
 
-import edu.mcw.rgd.dao.spring.StringMapQuery;
 import edu.mcw.rgd.datamodel.pheno.IndividualRecord;
 
 import java.util.*;

@@ -1,4 +1,4 @@
-package edu.mcw.rgd.indexer.dao.phenominer.utils;
+package edu.mcw.rgd.indexer.indexers.phenominerIndexer;
 
 import com.google.gson.Gson;
 import edu.mcw.rgd.dao.impl.OntologyXDAO;

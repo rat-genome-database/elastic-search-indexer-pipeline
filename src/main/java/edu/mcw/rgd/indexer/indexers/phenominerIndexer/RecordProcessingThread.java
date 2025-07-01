@@ -1,24 +1,19 @@
-package edu.mcw.rgd.indexer.dao.phenominer;
+package edu.mcw.rgd.indexer.indexers.phenominerIndexer;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.mcw.rgd.dao.impl.OntologyXDAO;
 import edu.mcw.rgd.dao.impl.PhenominerDAO;
 import edu.mcw.rgd.dao.impl.StrainDAO;
-import edu.mcw.rgd.datamodel.RgdIndex;
 import edu.mcw.rgd.datamodel.Strain;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.pheno.Condition;
 import edu.mcw.rgd.datamodel.pheno.IndividualRecord;
 import edu.mcw.rgd.datamodel.pheno.PhenominerUnitTable;
 import edu.mcw.rgd.datamodel.pheno.Record;
-import edu.mcw.rgd.indexer.dao.phenominer.model.PhenominerIndexObject;
-import edu.mcw.rgd.indexer.dao.phenominer.utils.PhenominerProcess;
-import edu.mcw.rgd.indexer.dao.variants.BulkIndexProcessor;
+import edu.mcw.rgd.indexer.model.IndexDocument;
+import edu.mcw.rgd.indexer.model.phenominer.PhenominerIndexObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.xcontent.XContentType;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -279,16 +274,16 @@ public class RecordProcessingThread implements Runnable{
             }
 
         }catch (Exception e){e.printStackTrace();}
-        index(object);
+        IndexDocument.index(object);
 
     }
-    public void index(PhenominerIndexObject o){
-        byte[] json = new byte[0];
-        try {
-            json = mapper.writeValueAsBytes(o);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-        BulkIndexProcessor.bulkProcessor.add(new IndexRequest(RgdIndex.getNewAlias()).source(json, XContentType.JSON));
-    }
+//    public void index(PhenominerIndexObject o){
+//        byte[] json = new byte[0];
+//        try {
+//            json = mapper.writeValueAsBytes(o);
+//        } catch (JsonProcessingException e) {
+//            e.printStackTrace();
+//        }
+//        BulkIndexProcessor.bulkProcessor.add(new IndexRequest(RgdIndex.getNewAlias()).source(json, XContentType.JSON));
+//    }
 }

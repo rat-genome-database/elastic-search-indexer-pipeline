@@ -668,7 +668,7 @@ public class IndexDAO extends AbstractDAO {
         ExecutorService executor2 = new MyThreadPoolExecutor(3, 3, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
         Runnable variantIndexerThread = null;
 
-        for(int speciesTypeKey:Arrays.asList(2, 3, 6, 9, 13)) {
+        for(int speciesTypeKey:Arrays.asList(2, 3, 6, 9, 13)) { //HUMAN VARIANTS ARE NOT INCLUDED AS THEY ARE ALREADY INDEXED AS CLINVAR VARIANTS
             String species = SpeciesType.getCommonName(speciesTypeKey);
             System.out.println("Processing " + species + " variants...");
 

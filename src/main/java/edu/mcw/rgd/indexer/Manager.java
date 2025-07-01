@@ -14,14 +14,13 @@ import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
 import edu.mcw.rgd.indexer.dao.*;
 
 import edu.mcw.rgd.indexer.dao.findModels.FullAnnotDao;
-import edu.mcw.rgd.indexer.dao.phenominer.PhenominerNormalizedThread;
+import edu.mcw.rgd.indexer.indexers.phenominerIndexer.PhenominerNormalizedThread;
 import edu.mcw.rgd.indexer.dao.variants.*;
 
 import edu.mcw.rgd.indexer.indexers.expressionIndexer.ExpressionDataIndexer;
 import edu.mcw.rgd.indexer.indexers.genomeInfoIndexer.ChromosomeMapDataThread;
 import edu.mcw.rgd.indexer.indexers.genomeInfoIndexer.GenomeInfoThread;
 import edu.mcw.rgd.indexer.indexers.modelsIndexer.FindModels;
-import edu.mcw.rgd.indexer.model.findModels.ModelIndexObject;
 
 import edu.mcw.rgd.process.Utils;
 import edu.mcw.rgd.services.ClientInit;
