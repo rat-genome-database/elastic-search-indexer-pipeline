@@ -25,9 +25,9 @@ public class GenomeInfoThread implements Runnable {
     private String index;
     private final Logger log= LogManager.getLogger("genome");
     MapDAO mapDAO= new MapDAO();
-    public GenomeInfoThread(int speciestypeKey, String index){
+    public GenomeInfoThread(int speciesTypeKey, String index){
 
-     this.key=speciestypeKey;
+     this.key=speciesTypeKey;
        this.index= index;
 
     }

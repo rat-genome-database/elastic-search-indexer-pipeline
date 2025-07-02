@@ -20,8 +20,6 @@ public class StrainVariants extends AbstractDAO{
 
     public String[][] getStrainVariants(int mapKey, String chr) throws Exception {
 
-        SampleDAO sampleDAO= new SampleDAO();
-        sampleDAO.setDataSource(DataSourceFactory.getInstance().getCarpeNovoDataSource());
         List<VariantCounts> variantCounts=this.getVariantCounts(chr, mapKey);
         int size=variantCounts.size();
         String matrix[][]= new String[4][size];
@@ -53,20 +51,21 @@ public class StrainVariants extends AbstractDAO{
                 "                 where vmd.map_key=?";
 
         if(chr!=null){
-            sql=sql+"and vmd.chromosome=?";
+            sql=sql+"   and vmd.chromosome=?";
 
         }
         sql=sql+ "   group by v.variant_type, s.sample_id, s.analysis_name order by s.analysis_name";
         try(Connection conn= DataSourceFactory.getInstance().getCarpeNovoDataSource().getConnection();
             PreparedStatement ps= conn.prepareStatement(sql);){
 
-            int totalVariants=0;
+
             ps.setInt(1, mapKey);
                 if(chr!=null)
                     ps.setString(2, chr);
                 ResultSet rs= ps.executeQuery();
-
+            int totalVariants=0;
                 while(rs.next()){
+
                     VariantCounts vc= new VariantCounts();
                     int sampleId=rs.getInt("sample_id");
                     vc.setStrain(rs.getString("analysis_name"));
@@ -75,7 +74,11 @@ public class StrainVariants extends AbstractDAO{
                     String variantType= rs.getString("variant_type");
 
                     if(variantType.equalsIgnoreCase("snv") || variantType.equalsIgnoreCase("snp")){
-                        int snvOrSnpCount= Integer.parseInt(vc.getSnv());
+                        int snvOrSnpCount=0;
+                        if(vc.getSnv()!=null)
+                               snvOrSnpCount+= Integer.parseInt(vc.getSnv());
+                        if(vc.getSnp()!=null)
+                            snvOrSnpCount+=Integer.parseInt(vc.getSnp());
                         snvOrSnpCount+=rs.getInt("tot");
                         vc.setSnv(String.valueOf(snvOrSnpCount));
                     }
@@ -86,7 +89,7 @@ public class StrainVariants extends AbstractDAO{
                         vc.setDel(rs.getString("tot"));
 
                     totalVariants=totalVariants+rs.getInt("tot");
-
+                    vc.setTotalVariants(String.valueOf(totalVariants));
                     variantCounts.add(vc);
                 }
 

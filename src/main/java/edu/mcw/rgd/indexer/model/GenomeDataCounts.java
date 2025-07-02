@@ -216,10 +216,10 @@ public class GenomeDataCounts extends GenomeDAO {
     }
     public void mapVariants(){
         if (map.getKey() == 360 || map.getKey() == 70 || map.getKey() == 60 || map.getKey() == 372 || map.getKey()==38) {
-            String[][] strainVairantMatrix = new String[0][];
+          //  String[][] strainVairantMatrix = new String[0][];
             try {
-                strainVairantMatrix = variants.getStrainVariants(map.getKey(), getChromosome());
-                obj.setVariantsMatrix(strainVairantMatrix);
+                String[][]   strainVariantMatrix = variants.getStrainVariants(map.getKey(), getChromosome());
+                obj.setVariantsMatrix(strainVariantMatrix);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
