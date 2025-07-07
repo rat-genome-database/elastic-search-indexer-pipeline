@@ -133,7 +133,8 @@ public class Manager {
                         "GenomicElements",
                         "Annotations" , // all public ontologies
                         "Reference",
-                        "Variants" // these are only ClinVar variants
+                        "Variants",// these are only ClinVar variants
+                           "AlleleVariants"
                             -> {
                         System.out.println("Running Object Search Indexer ....");
                         if (!searchIndexCreated) {
@@ -143,7 +144,7 @@ public class Manager {
 
                             System.out.println("Indexing ..."+ arg);
                             indexDAO.getClass().getMethod("get" + arg).invoke(indexDAO);
-
+                            System.out.println("Indexing ..."+ arg +" DONE");
                     }
                     case "Chromosomes" -> {
                         System.out.println("Running Chromosome Indexer ....");
