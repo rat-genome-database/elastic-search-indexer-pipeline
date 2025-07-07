@@ -155,7 +155,7 @@ public class IndexDAO extends AbstractDAO {
     public void getGenes() throws Exception {
         ExecutorService executor = new MyThreadPoolExecutor(10, 10, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
 
-            List<Gene> genes = geneDAO.getActiveGenes();
+            List<Gene> genes = geneDAO.getAllActiveGenes();
             for (Gene gene : genes) {
                 Runnable workerThread = new IndexGene(gene);
                 executor.execute(workerThread);
