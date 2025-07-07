@@ -18,13 +18,13 @@ public class OntologySynonymsThread implements Runnable{
     }
     @Override
     public void run() {
-        System.out.println(Thread.currentThread().getName() + ": " + ontId + " START " + new Date());
+        System.out.println(Thread.currentThread().getName() + ": " + ontId + "Synonyms START " + new Date());
         try {
             List<TermSynonym> synonyms = ontologyXDAO.getActiveSynonyms(ontId);
             ontSynonyms.put(ontId, synonyms);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        System.out.println(Thread.currentThread().getName() + ": " + ontId + " END " + new Date());
+        System.out.println(Thread.currentThread().getName() + ": " + ontId + "Synonyms END " + new Date());
     }
 }

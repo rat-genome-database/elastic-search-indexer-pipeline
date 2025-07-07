@@ -16,9 +16,8 @@ import java.util.concurrent.TimeUnit;
  * Created by jthota on 7/20/2017.
  */
 public class OntologySynonyms {
-    public static Map<String, List<TermSynonym>> ontSynonyms;
-
-   static  {
+    public  static Map<String, List<TermSynonym>> ontSynonyms;
+    public void init(){
         OntologyXDAO ontologyXDAO= new OntologyXDAO();
 
        Map<String, List<TermSynonym>>  synonyms=new HashMap<>();
