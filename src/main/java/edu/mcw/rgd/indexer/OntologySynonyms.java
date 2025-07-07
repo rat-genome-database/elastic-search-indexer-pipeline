@@ -36,7 +36,7 @@ public class OntologySynonyms {
         executor.shutdown();
         while (!executor.isTerminated()){}
         ontSynonyms=synonyms;
-        System.out.println("DONE Ontology Synonyms"+ ontSynonyms.keySet().toString());
+        System.out.println("DONE Ontology Synonyms "+ ontSynonyms.keySet().toString());
     }
 
 }

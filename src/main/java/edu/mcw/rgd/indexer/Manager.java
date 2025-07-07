@@ -60,8 +60,9 @@ public class Manager {
     private static List<String> envrionments;
     private IndexAdmin admin;
     private RgdIndex rgdIndex;
+    private OntologySynonyms ontologySynonyms;
     private boolean reindex;
-    BulkIndexProcessor bulkIndexProcessor;
+     BulkIndexProcessor bulkIndexProcessor;
     IndexDAO indexDAO=new IndexDAO();
     private final Logger log = LogManager.getLogger("main");
 
@@ -374,5 +375,11 @@ public class Manager {
         this.reindex = reindex;
     }
 
+    public OntologySynonyms getOntologySynonyms() {
+        return ontologySynonyms;
+    }
 
+    public void setOntologySynonyms(OntologySynonyms ontologySynonyms) {
+        this.ontologySynonyms = ontologySynonyms;
+    }
 }
