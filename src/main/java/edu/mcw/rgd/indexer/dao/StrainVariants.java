@@ -10,13 +10,18 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by jthota on 12/6/2017.
  */
 public class StrainVariants extends AbstractDAO{
+    public static void main(String[] args) throws Exception {
+        StrainVariants variants=new StrainVariants();
+        variants.getStrainVariants(372, "12");
+    }
+
 
     public String[][] getStrainVariants(int mapKey, String chr) throws Exception {
 
@@ -40,10 +45,12 @@ public class StrainVariants extends AbstractDAO{
         j++;
         }
 
+        System.out.println("MATRIX:"+ Arrays.deepToString(matrix));
         return matrix;
     }
     public List<VariantCounts> getVariantCounts(String chr, int mapKey)  {
         List<VariantCounts> variantCounts= new ArrayList<>();
+        LinkedHashMap<Integer, VariantCounts> countsMap=new LinkedHashMap<>();
         String sql="select count(variant_type) tot, variant_type, s.analysis_name, s.sample_id  from variant v " +
                 "                inner join variant_sample_detail vsd on vsd.rgd_id=v.rgd_id" +
                 " inner join sample s on s.sample_id=vsd.sample_id " +
@@ -64,41 +71,49 @@ public class StrainVariants extends AbstractDAO{
                     ps.setString(2, chr);
                 ResultSet rs= ps.executeQuery();
             int totalVariants=0;
-                while(rs.next()){
+                while(rs.next()) {
+                    int sampleId = rs.getInt("sample_id");
+                    VariantCounts vc=countsMap.get(sampleId);
+                    if(vc==null){
+                        vc=new VariantCounts();
+                        vc.setStrain(rs.getString("analysis_name"));
+                        vc.setMapKey(mapKey);
+                        vc.setChr(chr);
 
-                    VariantCounts vc= new VariantCounts();
-                    int sampleId=rs.getInt("sample_id");
-                    vc.setStrain(rs.getString("analysis_name"));
-                    vc.setMapKey(mapKey);
-                    vc.setChr(chr);
-                    String variantType= rs.getString("variant_type");
-
-                    if(variantType.equalsIgnoreCase("snv") || variantType.equalsIgnoreCase("snp")){
-                        int snvOrSnpCount=0;
-                        if(vc.getSnv()!=null)
-                               snvOrSnpCount+= Integer.parseInt(vc.getSnv());
-                        if(vc.getSnp()!=null)
-                            snvOrSnpCount+=Integer.parseInt(vc.getSnp());
-                        snvOrSnpCount+=rs.getInt("tot");
-                        vc.setSnv(String.valueOf(snvOrSnpCount));
                     }
 
-                    if(variantType.equalsIgnoreCase("insertion"))
-                        vc.setIns(rs.getString("tot"));
-                    if(variantType.equalsIgnoreCase("deletion"))
-                        vc.setDel(rs.getString("tot"));
+                        String variantType = rs.getString("variant_type");
 
-                    totalVariants=totalVariants+rs.getInt("tot");
-                    vc.setTotalVariants(String.valueOf(totalVariants));
-                    variantCounts.add(vc);
-                }
+                        if (variantType.equalsIgnoreCase("snv") || variantType.equalsIgnoreCase("snp")) {
+                            int snvOrSnpCount = 0;
+                            if (vc.getSnv() != null)
+                                snvOrSnpCount += Integer.parseInt(vc.getSnv());
+                            if (vc.getSnp() != null)
+                                snvOrSnpCount += Integer.parseInt(vc.getSnp());
+                            snvOrSnpCount += rs.getInt("tot");
+                            vc.setSnv(String.valueOf(snvOrSnpCount));
+                        }
+
+                        if (variantType.equalsIgnoreCase("insertion"))
+                            vc.setIns(rs.getString("tot"));
+                        if (variantType.equalsIgnoreCase("deletion"))
+                            vc.setDel(rs.getString("tot"));
+
+                        totalVariants = totalVariants + rs.getInt("tot");
+                        vc.setTotalVariants(String.valueOf(totalVariants));
+                        countsMap.put(sampleId, vc);
+                       // variantCounts.add(vc);
+                    }
+
 
                 rs.close();
 
         }catch (Exception e){
             e.printStackTrace();
         }
-
+        for(Map.Entry entry:countsMap.entrySet()){
+            variantCounts.add((VariantCounts) entry.getValue());
+        }
 
         return variantCounts;
     }

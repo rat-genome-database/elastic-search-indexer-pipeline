@@ -134,7 +134,7 @@ public class Manager {
                         "Annotations" , // all public ontologies
                         "Reference",
                         "Variants",// these are only ClinVar variants
-                           "AlleleVariants"
+                           "AlleleVariants" // these are RGD allele variants
                             -> {
                         System.out.println("Running Object Search Indexer ....");
                         if (!searchIndexCreated) {
