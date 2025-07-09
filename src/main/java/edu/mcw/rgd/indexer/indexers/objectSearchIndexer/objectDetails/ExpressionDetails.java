@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 public class ExpressionDetails extends GeneDetails{
 
-    private List<GeneExpression> records;
+    private final List<GeneExpression> records;
     public ExpressionDetails(Gene gene, IndexObject obj,  List<GeneExpression> records) {
         super(gene, obj);
         this.records=records;
