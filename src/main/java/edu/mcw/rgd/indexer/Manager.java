@@ -233,7 +233,7 @@ public class Manager {
                         System.out.println("Running Expression General Search Indexer ....");
                         admin.createIndex(null, null);
                         GeneDAO geneDAO = new GeneDAO();
-                        List<Gene> genes = geneDAO.getActiveGenes();
+                        List<Gene> genes = geneDAO.getActiveGenes(3);
                         for (Gene gene : genes) {
                             workerThread = new ExpressionDataIndexer(gene);
                             executor.execute(workerThread);

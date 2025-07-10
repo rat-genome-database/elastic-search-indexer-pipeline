@@ -90,8 +90,8 @@ public class ExpressionDataIndexer implements Runnable{
         return filteredRecs;
     }
     void index() throws Exception {
-       indexNormalised();
-      // indexDenormalized();
+//       indexNormalised();
+       indexDenormalized();
     }
     void indexDenormalized(){
         if(records!=null && records.size()>0) {
