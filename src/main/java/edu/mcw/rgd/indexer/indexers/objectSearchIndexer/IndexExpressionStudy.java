@@ -23,11 +23,12 @@ public class IndexExpressionStudy implements Runnable{
     @Override
     public void run() {
         System.out.println(Thread.currentThread().getName() +  " STARTED " + new Date() + "records size:"+ records.size());
-
-        IndexObject object=new IndexObject();
-        object.setCategory("Expression Study");
-        ObjectDetails<Study> studyObjectDetails=new ExpressionStudyDetails(study,object, records);
-        studyObjectDetails.index();
+        if(records.size()>0) {
+            IndexObject object = new IndexObject();
+            object.setCategory("Expression Study");
+            ObjectDetails<Study> studyObjectDetails = new ExpressionStudyDetails(study, object, records);
+            studyObjectDetails.index();
+        }
     }
     public void setRecords(){
         System.out.println("Getting  study records ...");
