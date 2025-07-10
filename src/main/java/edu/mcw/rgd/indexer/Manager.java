@@ -229,11 +229,11 @@ public class Manager {
                         indexDAO.getClass().getMethod("get" + arg).invoke(indexDAO);
 
                     }
-                    case "ExpressionData"-> {// all species variants
+                    case "ExpressionData"-> {
                         System.out.println("Running Expression General Search Indexer ....");
                         admin.createIndex(null, null);
                         GeneDAO geneDAO = new GeneDAO();
-                        List<Gene> genes = geneDAO.getAllActiveGenes();
+                        List<Gene> genes = geneDAO.getActiveGenes();
                         for (Gene gene : genes) {
                             workerThread = new ExpressionDataIndexer(gene);
                             executor.execute(workerThread);

@@ -13,6 +13,7 @@ import edu.mcw.rgd.indexer.dao.IndexDAO;
 import edu.mcw.rgd.indexer.dao.variants.BulkIndexProcessor;
 
 import edu.mcw.rgd.indexer.model.ExpressionDataIndexObject;
+import edu.mcw.rgd.indexer.model.IndexDocument;
 import edu.mcw.rgd.indexer.model.JacksonConfiguration;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.search.DocValueFormat;
@@ -45,6 +46,7 @@ public class ExpressionDataIndexer implements Runnable{
         setExpressionRecords();
 
         try {
+            if(records.size()>0)
             index();
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -115,7 +117,7 @@ public class ExpressionDataIndexer implements Runnable{
                 object.setExpressionLevel(new HashSet<>(Collections.singleton(record.getGeneExpressionRecordValue().getExpressionLevel())));
                 object.setExpressionValue(new ArrayList<>(Collections.singleton(record.getGeneExpressionRecordValue().getExpressionValue())));
                 mapGene(object);
-                index(object);
+                IndexDocument.index(object);
 
 
             }
@@ -163,21 +165,21 @@ public class ExpressionDataIndexer implements Runnable{
                            object.setLogValue(Math.log(valueMean));
                         }
                         mapGene(object);
-                        index(object);
+                        IndexDocument.index(object);
                     }
 
 
                 }}}
     }
-    void index(ExpressionDataIndexObject object){
-        try {
-            byte[] json = JacksonConfiguration.MAPPER.writeValueAsBytes(object);
-            IndexRequest request = new IndexRequest(RgdIndex.getNewAlias()).source(json, XContentType.JSON);
-            BulkIndexProcessor.bulkProcessor.add(request);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-    }
+//    void index(ExpressionDataIndexObject object){
+//        try {
+//            byte[] json = JacksonConfiguration.MAPPER.writeValueAsBytes(object);
+//            IndexRequest request = new IndexRequest(RgdIndex.getNewAlias()).source(json, XContentType.JSON);
+//            BulkIndexProcessor.bulkProcessor.add(request);
+//        } catch (JsonProcessingException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
 
 

@@ -28,12 +28,14 @@ public class GeneDetails extends ObjectDetails<Gene> {
         String name = t.getName();
         String htmlStrippedSymbol = Jsoup.parse(symbol).text();
         String description = null;
-        try {
-            description = Utils.getGeneDescription(t);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        if(obj.getCategory().equalsIgnoreCase("Gene")) {
+            try {
+                description = Utils.getGeneDescription(t);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
+        }
         String type = t.getType();
 
         obj.setTerm_acc(String.valueOf(getRgdId()));

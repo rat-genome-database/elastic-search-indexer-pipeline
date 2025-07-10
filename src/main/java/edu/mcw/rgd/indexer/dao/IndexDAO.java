@@ -176,7 +176,7 @@ public class IndexDAO extends AbstractDAO {
         while (!executor.isTerminated()) {}
     }
     public void getExpressionGene() throws Exception {
-        List<Gene> genes= geneDAO.getAllActiveGenes();
+        List<Gene> genes= geneDAO.getActiveGenes();
        ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
         for(Gene gene: genes) {
 //            Gene gene= geneDAO.getGene(3876);

@@ -23,10 +23,10 @@ public class ExpressionDetails extends GeneDetails{
             mapObject();
             mapSpecies();
             mapAssembly();
-            mapAnnotations();
-            mapAssociations();
+//            mapAnnotations();
+//            mapAssociations();
             mapExternalDataBaseIdentifiers();
-            mapTranscripts();
+//            mapTranscripts();
             mapSynonyms();
             setExpressionLevel();
             setExpressionUnit();
