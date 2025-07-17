@@ -63,12 +63,6 @@ public class ReferenceDetails extends ObjectDetails<Reference>{
 
             mapObject();
             mapSpecies();
-//            mapAssembly();
-//            mapAnnotations();
-//            mapAssociations();
-//            mapExternalDataBaseIdentifiers();
-//            mapTranscripts();
-//            mapSynonyms();
             IndexDocument.index(obj);
         }
 

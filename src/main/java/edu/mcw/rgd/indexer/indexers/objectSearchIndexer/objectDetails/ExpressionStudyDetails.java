@@ -7,6 +7,7 @@ import edu.mcw.rgd.datamodel.pheno.Study;
 import edu.mcw.rgd.indexer.model.IndexDocument;
 import edu.mcw.rgd.indexer.model.IndexObject;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -38,6 +39,8 @@ public class ExpressionStudyDetails extends ObjectDetails<Study> {
         obj.setName(t.getName());
         obj.setSource(t.getSource());
         obj.setType(t.getType());
+        if(t.getGeoSeriesAcc()!=null && !t.getGeoSeriesAcc().equals(""))
+            obj.setXdbIdentifiers(Collections.singletonList(t.getGeoSeriesAcc()));
    }
 
     @Override
