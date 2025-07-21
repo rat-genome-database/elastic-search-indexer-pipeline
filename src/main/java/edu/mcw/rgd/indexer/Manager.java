@@ -256,11 +256,13 @@ public class Manager {
                 System.out.println(clusterStatus + ", refusing to continue with operations");
                 log.info(clusterStatus + ", refusing to continue with operations");
             } else {
-                if(reindex) {
-                    System.out.println("CLUSTER STATUR:"+ clusterStatus+". Switching Alias...");
-                    log.info("CLUSTER STATUR:"+ clusterStatus+". Switching Alias...");
-                    switchAlias();
-                }
+//                if(reindex) {
+//                    System.out.println("CLUSTER STATUS:"+ clusterStatus+". Switching Alias...");
+//                    log.info("CLUSTER STATUS:"+ clusterStatus+". Switching Alias...");
+//                    switchAlias();
+//                }
+                System.out.println("CLUSTER STATUS:"+ clusterStatus);
+                log.info("CLUSTER STATUS:"+ clusterStatus);
             }
 
             long end = System.currentTimeMillis();
