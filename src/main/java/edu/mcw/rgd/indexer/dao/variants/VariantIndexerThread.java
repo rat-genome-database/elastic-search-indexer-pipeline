@@ -15,9 +15,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 public class VariantIndexerThread implements Runnable {
-    private String chr;
-    private int mapKey;
-    private int speciesTypeKey;
+    private final String chr;
+    private final int mapKey;
+    private final int speciesTypeKey;
     VariantDao variantDao=new VariantDao();
     public VariantIndexerThread(String chr, int mapKey, int speciesTypeKey){
         this.chr=chr;
@@ -37,16 +37,17 @@ public class VariantIndexerThread implements Runnable {
         }
         log.info(Thread.currentThread().getName() + ": " + SpeciesType.getCommonName(mapKey) + " ||  MapKey: "+mapKey+ " || CHROMOSOME: "+chr+ " started " + new Date());
 
-        //   System.out.println("UNIQUE VAIANTS SIZE of CHR:" + chr + ":\t" + variantIds.size());
-        Collection[] collections = new Collection[0];
-        try {
-            collections = split(variantIds, 1000);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        for (int i = 0; i < collections.length; i++) {
-            variantsNewTableThread=new VariantProcessingThread(mapKey, (List<Integer>) collections[i]);
-            executor2.execute(variantsNewTableThread);
+        if(variantIds!=null) {
+            Collection[] collections = new Collection[0];
+            try {
+                collections = split(variantIds, 1000);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            for (int i = 0; i < collections.length; i++) {
+                variantsNewTableThread = new VariantProcessingThread(mapKey, (List<Integer>) collections[i]);
+                executor2.execute(variantsNewTableThread);
+            }
         }
         executor2.shutdown();
         while (!executor2.isTerminated()) {}
