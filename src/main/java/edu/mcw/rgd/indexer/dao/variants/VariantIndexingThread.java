@@ -37,7 +37,7 @@ public class VariantIndexingThread extends VariantDao implements Runnable {
                     try {
                         String clinvarSignificance = getClinvarInfo((int) variant.getVariant_id());
                         if (clinvarSignificance != null && !clinvarSignificance.equals(""))
-                            variant.setClinicalSignificance(clinvarSignificance);
+                            indexDoc.setClinicalSignificance(clinvarSignificance);
                     } catch (Exception e) {
                         System.out.println("NO CLINICAL SIGNIFICACE SAMPLE_ID:" + variant.getSampleId() + " RGD_ID:" + variant.getVariant_id());
                     }
