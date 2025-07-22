@@ -225,99 +225,99 @@ public class VariantDao extends AbstractDAO {
                 " and vmd.map_key=?";
 
         VariantIndexQuery query=new VariantIndexQuery(DataSourceFactory.getInstance().getCarpeNovoDataSource(), sql);
-        List<VariantIndex> variants=  execute(query, mapKey, mapKey,mapKey);
-        List<VariantIndex> vrList=new ArrayList<>();
-        Set<String> variantIds=new HashSet<>();
-        java.util.Map<String, VariantIndex>  sortedVariants=new HashMap<>();
-        Set<Long> variantIdsWithTrancripts=new HashSet<>();
-        for(VariantIndex variant:variants){
-            variantIdsWithTrancripts.add(variant.getVariant_id());
-            String key=variant.getVariant_id()+"-"+variant.getMapKey();
-            if(mapKey==38 || mapKey==17){
-                try {
-                    String clinvarSignificance = getClinvarInfo((int) variant.getVariant_id());
-                    if (clinvarSignificance != null && !clinvarSignificance.equals(""))
-                        variant.setClinicalSignificance(clinvarSignificance);
-                }catch (Exception e){
-                    System.out.println("NO CLINICAL SIGNIFICACE SAMPLE_ID:"+ variant.getSampleId() +" RGD_ID:"+variant.getVariant_id());
-                }
-            }
-            if(!variantIds.contains(key)){
-                variantIds.add(key);
-                variant.setAnalysisName(Arrays.asList(SampleManager.getInstance().getSampleName(variant.getSampleId()).getAnalysisName()));
-                sortedVariants.put(key,variant);
-            }else{
-                VariantIndex obj = sortedVariants.get(key);
-                List<Long> transcriptIds=new ArrayList<>();
-                boolean exists = false;
-                if(obj.getTranscriptRgdId()!=null){
-                    transcriptIds.addAll(obj.getTranscriptRgdId());
-                }
-                if(variant.getTranscriptRgdId()!=null) {
-                    for (long transcript : variant.getTranscriptRgdId()) {
-                            for (long t : transcriptIds) {
-                                if (transcript == t) {
-                                    exists = true;
-                                    break;
-                                }
-                            }
-                            if (!exists) {
-                                transcriptIds.add(transcript);
-                                obj.setTranscriptRgdId(transcriptIds);
-                            }
-
-                    }
-                }
-                if(variant.getAnalysisName()!=null){
-                    List<String> sampleNames=new ArrayList<>();
-                    for(String name:variant.getAnalysisName()) {
-
-                        sampleNames = obj.getAnalysisName();
-                        for (String str : sampleNames) {
-                            if (name.equals(str)) {
-                                exists = true;
-                            }
-                        }
-                        if (!exists) {
-                            sampleNames.add(name);
-                            obj.setAnalysisName(sampleNames);
-                        }
-                    }
-                    }
-                obj.setSampleId(0);
-                sortedVariants.put(key, obj);
-            }
-        }
-
-
-        for(Map.Entry e:sortedVariants.entrySet()){
-            vrList.add((VariantIndex) e.getValue());
-
-        }
-   //     System.out.println("varaiants size: "+ vrList.size());
-
-        Set<Long> variantIdsWithoutTranscripts=new HashSet<>();
-        if(variantIdsList.size()>variantIdsWithTrancripts.size()){
-            for(int id:variantIdsList){
-                if(!variantIdsWithTrancripts.contains((long)id)){
-                    variantIdsWithoutTranscripts.add((long) id);
-                }
-            }
-        //    System.out.println("Queried IDS:"+variantIdsList.size()+"\nIds without transcripts:"+ variantIdsWithoutTranscripts.size());
-            if(variantIdsWithoutTranscripts.size()>0) {
-                List<VariantIndex> variantsWithoutTranscripts = getVariantsWithoutTranscripts(mapKey, variantIdsWithoutTranscripts);
-                vrList.addAll(variantsWithoutTranscripts);
-            }
-        }
-      //  System.out.println("varaiants size include no transcript variants: "+ vrList.size());
-        for(VariantIndex vi: vrList){
-            try {
-                vi.setMapDataList(this.getMapData(vi));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return vrList;
+        return execute(query, mapKey, mapKey,mapKey);
+//        List<VariantIndex> vrList=new ArrayList<>();
+//        Set<String> variantIds=new HashSet<>();
+//        java.util.Map<String, VariantIndex>  sortedVariants=new HashMap<>();
+//        Set<Long> variantIdsWithTrancripts=new HashSet<>();
+//        for(VariantIndex variant:variants){
+//            variantIdsWithTrancripts.add(variant.getVariant_id());
+//            String key=variant.getVariant_id()+"-"+variant.getMapKey();
+//            if(mapKey==38 || mapKey==17){
+//                try {
+//                    String clinvarSignificance = getClinvarInfo((int) variant.getVariant_id());
+//                    if (clinvarSignificance != null && !clinvarSignificance.equals(""))
+//                        variant.setClinicalSignificance(clinvarSignificance);
+//                }catch (Exception e){
+//                    System.out.println("NO CLINICAL SIGNIFICACE SAMPLE_ID:"+ variant.getSampleId() +" RGD_ID:"+variant.getVariant_id());
+//                }
+//            }
+//            if(!variantIds.contains(key)){
+//                variantIds.add(key);
+//                variant.setAnalysisName(Arrays.asList(SampleManager.getInstance().getSampleName(variant.getSampleId()).getAnalysisName()));
+//                sortedVariants.put(key,variant);
+//            }else{
+//                VariantIndex obj = sortedVariants.get(key);
+//                List<Long> transcriptIds=new ArrayList<>();
+//                boolean exists = false;
+//                if(obj.getTranscriptRgdId()!=null){
+//                    transcriptIds.addAll(obj.getTranscriptRgdId());
+//                }
+//                if(variant.getTranscriptRgdId()!=null) {
+//                    for (long transcript : variant.getTranscriptRgdId()) {
+//                            for (long t : transcriptIds) {
+//                                if (transcript == t) {
+//                                    exists = true;
+//                                    break;
+//                                }
+//                            }
+//                            if (!exists) {
+//                                transcriptIds.add(transcript);
+//                                obj.setTranscriptRgdId(transcriptIds);
+//                            }
+//
+//                    }
+//                }
+//                if(variant.getAnalysisName()!=null){
+//                    List<String> sampleNames=new ArrayList<>();
+//                    for(String name:variant.getAnalysisName()) {
+//
+//                        sampleNames = obj.getAnalysisName();
+//                        for (String str : sampleNames) {
+//                            if (name.equals(str)) {
+//                                exists = true;
+//                            }
+//                        }
+//                        if (!exists) {
+//                            sampleNames.add(name);
+//                            obj.setAnalysisName(sampleNames);
+//                        }
+//                    }
+//                    }
+//                obj.setSampleId(0);
+//                sortedVariants.put(key, obj);
+//            }
+//        }
+//
+//
+//        for(Map.Entry e:sortedVariants.entrySet()){
+//            vrList.add((VariantIndex) e.getValue());
+//
+//        }
+//   //     System.out.println("varaiants size: "+ vrList.size());
+//
+//        Set<Long> variantIdsWithoutTranscripts=new HashSet<>();
+//        if(variantIdsList.size()>variantIdsWithTrancripts.size()){
+//            for(int id:variantIdsList){
+//                if(!variantIdsWithTrancripts.contains((long)id)){
+//                    variantIdsWithoutTranscripts.add((long) id);
+//                }
+//            }
+//        //    System.out.println("Queried IDS:"+variantIdsList.size()+"\nIds without transcripts:"+ variantIdsWithoutTranscripts.size());
+//            if(variantIdsWithoutTranscripts.size()>0) {
+//                List<VariantIndex> variantsWithoutTranscripts = getVariantsWithoutTranscripts(mapKey, variantIdsWithoutTranscripts);
+//                vrList.addAll(variantsWithoutTranscripts);
+//            }
+//        }
+//      //  System.out.println("varaiants size include no transcript variants: "+ vrList.size());
+//        for(VariantIndex vi: vrList){
+//            try {
+//                vi.setMapDataList(this.getMapData(vi));
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        }
+//        return vrList;
     }
 
     public List<VariantIndex> getVariantsWithoutTranscripts(int mapKey,Set<Long> variantIdsWithoutTranscripts) throws Exception {
@@ -345,48 +345,48 @@ public class VariantDao extends AbstractDAO {
         //   System.out.println("SQL:"+sql);
         VariantIndexQuery query=new VariantIndexQuery(DataSourceFactory.getInstance().getCarpeNovoDataSource(), sql);
 
-        List<VariantIndex> variants=  execute(query, mapKey, mapKey);
-        List<VariantIndex> vrList=new ArrayList<>();
-        Set<String> variantIds=new HashSet<>();
-        java.util.Map<String, VariantIndex>  sortedVariants=new HashMap<>();
-
-        for(VariantIndex variant:variants){
-            String key=variant.getVariant_id()+"-"+variant.getMapKey();
-
-            if(!variantIds.contains(key)){
-                variantIds.add(key);
-                sortedVariants.put(key,variant);
-            }else{
-            /*    VariantIndex obj = sortedVariants.get(key);
-                boolean exists = false;
-
-                if(variant.getAnalysisName()!=null){
-                    List<String> sampleNames=new ArrayList<>();
-                    for(String name:variant.getAnalysisName()) {
-                        if (obj != null) {
-
-                            sampleNames = obj.getAnalysisName();
-                            for (String str : sampleNames) {
-                                if (name.equals(str)) {
-                                    exists = true;
-                                }
-                            }
-                            if (!exists) {
-                                sampleNames.add(name);
-                                obj.setAnalysisName(sampleNames);
-                            }
-                        }   }
-                }
-                sortedVariants.put(key, obj);*/
-            }
-        }
-
-
-        for(Map.Entry e:sortedVariants.entrySet()){
-            vrList.add((VariantIndex) e.getValue());
-        }
-
-           return vrList;
+        return   execute(query, mapKey, mapKey);
+//        List<VariantIndex> vrList=new ArrayList<>();
+//        Set<String> variantIds=new HashSet<>();
+//        java.util.Map<String, VariantIndex>  sortedVariants=new HashMap<>();
+//
+//        for(VariantIndex variant:variants){
+//            String key=variant.getVariant_id()+"-"+variant.getMapKey();
+//
+//            if(!variantIds.contains(key)){
+//                variantIds.add(key);
+//                sortedVariants.put(key,variant);
+//            }else{
+//            /*    VariantIndex obj = sortedVariants.get(key);
+//                boolean exists = false;
+//
+//                if(variant.getAnalysisName()!=null){
+//                    List<String> sampleNames=new ArrayList<>();
+//                    for(String name:variant.getAnalysisName()) {
+//                        if (obj != null) {
+//
+//                            sampleNames = obj.getAnalysisName();
+//                            for (String str : sampleNames) {
+//                                if (name.equals(str)) {
+//                                    exists = true;
+//                                }
+//                            }
+//                            if (!exists) {
+//                                sampleNames.add(name);
+//                                obj.setAnalysisName(sampleNames);
+//                            }
+//                        }   }
+//                }
+//                sortedVariants.put(key, obj);*/
+//            }
+//        }
+//
+//
+//        for(Map.Entry e:sortedVariants.entrySet()){
+//            vrList.add((VariantIndex) e.getValue());
+//        }
+//
+//           return vrList;
 
     }
     public String getConScoreTable(int mapKey, String genicStatus ) {

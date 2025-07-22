@@ -33,7 +33,7 @@ public class VariantProcessingThread implements Runnable{
         }
         //   workerThread = new ProcessPartChromosome(list,mapKey);
         if (indexList.size() > 0) {
-            workerThread = new VariantIndexingThread(indexList);
+            workerThread = new VariantIndexingThread(indexList, mapKey, variantIds);
             executor.execute(workerThread);
         }
         executor.shutdown();
