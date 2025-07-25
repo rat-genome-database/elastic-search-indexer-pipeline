@@ -597,6 +597,7 @@ public class IndexDAO extends AbstractDAO {
     public void getGenomicElements() throws Exception{
         this.getGenomicElements(RgdId.OBJECT_KEY_CELL_LINES);
        this.getGenomicElements(RgdId.OBJECT_KEY_PROMOTERS);
+        this.getGenomicElements(RgdId.OBJECT_KEY_BIOLOGICAL_REGIONS);
     }
     public void getGenomicElements(int objectKey) throws Exception {
         ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
