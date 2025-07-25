@@ -608,6 +608,9 @@ public class IndexDAO extends AbstractDAO {
         if(objectKey==16){
             category="Promoter";
         }
+        if(objectKey==25){
+            category="Biological Region";
+        }
 
         Map<Integer, List<String>> associations=this.getAssociationsByObjectKey(objectKey);
         for(GenomicElement ge: gedao.getActiveElements(objectKey)) {
