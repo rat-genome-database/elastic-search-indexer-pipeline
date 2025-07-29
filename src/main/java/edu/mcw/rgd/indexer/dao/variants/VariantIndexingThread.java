@@ -29,7 +29,7 @@ public class VariantIndexingThread extends VariantDao implements Runnable {
         Set<Long> variantIdsWithTrancripts = new HashSet<>();
         for (int variantId : uniqueVariantIds) {
             boolean first=true;
-            VariantIndex indexDoc=new VariantIndex();
+            VariantIndex indexDoc=null;
             for (VariantIndex variant : indexList) {
                 if(variantId==variant.getVariant_id()){
                 variantIdsWithTrancripts.add(variant.getVariant_id());
@@ -37,13 +37,14 @@ public class VariantIndexingThread extends VariantDao implements Runnable {
                     try {
                         String clinvarSignificance = getClinvarInfo((int) variant.getVariant_id());
                         if (clinvarSignificance != null && !clinvarSignificance.equals(""))
-                            indexDoc.setClinicalSignificance(clinvarSignificance);
+                            variant.setClinicalSignificance(clinvarSignificance);
                     } catch (Exception e) {
                         System.out.println("NO CLINICAL SIGNIFICACE SAMPLE_ID:" + variant.getSampleId() + " RGD_ID:" + variant.getVariant_id());
                     }
                 }
                 if (first) {
                     first=false;
+                    indexDoc=variant;
                     indexDoc.setAnalysisName(Arrays.asList(SampleManager.getInstance().getSampleName(variant.getSampleId()).getAnalysisName()));
                     try {
                         indexDoc.setMapDataList(this.getMapData(indexDoc));
@@ -72,13 +73,14 @@ public class VariantIndexingThread extends VariantDao implements Runnable {
                         }
                     }
                     if (variant.getAnalysisName() != null) {
-                        List<String> sampleNames;
+                        List<String> sampleNames=new ArrayList<>();
+                        if(indexDoc.getAnalysisName()!=null)
+                            sampleNames .addAll(indexDoc.getAnalysisName());
                         for (String name : variant.getAnalysisName()) {
-
-                            sampleNames = indexDoc.getAnalysisName();
                             for (String str : sampleNames) {
                                 if (name.equals(str)) {
                                     exists = true;
+                                    break;
                                 }
                             }
                             if (!exists) {
@@ -94,6 +96,7 @@ public class VariantIndexingThread extends VariantDao implements Runnable {
             }
 
             }
+            if(indexDoc!=null)
             IndexDocument.index(indexDoc);
         }
 

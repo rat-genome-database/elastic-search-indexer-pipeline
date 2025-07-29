@@ -127,11 +127,12 @@ public class VariantDao extends AbstractDAO {
             edu.mcw.rgd.datamodel.Map m = mapDAO.getMapByKey(vi.getMapKey());
             rgdMaps.put(vi.getMapKey(), m);
         }
-        map.setMap(rgdMaps.get(vi.getMapKey()).getDescription());
-        map.setRank(rgdMaps.get(vi.getMapKey()).getRank());
+        if(rgdMaps!=null && rgdMaps.get(vi.getMapKey())!=null) {
+            map.setMap(rgdMaps.get(vi.getMapKey()).getDescription());
+            map.setRank(rgdMaps.get(vi.getMapKey()).getRank());
 
-        mapList.add(map);
-
+            mapList.add(map);
+        }
         return mapList;
     }
 
