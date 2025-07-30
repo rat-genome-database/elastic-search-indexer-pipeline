@@ -21,7 +21,7 @@ public class VariantProcessingThread implements Runnable{
     @Override
     public void run() {
 
-        ExecutorService executor = new MyThreadPoolExecutor(10, 10, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+        ExecutorService executor = new MyThreadPoolExecutor(3, 3, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
         Runnable workerThread= null;
         List<VariantIndex> indexList = new ArrayList<>();
         if(variantIds.size()>0)
