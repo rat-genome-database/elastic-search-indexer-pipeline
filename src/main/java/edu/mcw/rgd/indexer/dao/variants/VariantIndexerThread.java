@@ -27,7 +27,7 @@ public class VariantIndexerThread implements Runnable {
     @Override
     public void run() {
         Logger log = LogManager.getLogger("variant");
-        ExecutorService executor2 = new MyThreadPoolExecutor(5, 5, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+        ExecutorService executor2 = new MyThreadPoolExecutor(3, 3, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
         Runnable variantsNewTableThread= null;
         List<Integer> variantIds = null;
         try {

@@ -74,6 +74,8 @@ public class Manager {
         Manager manager = (Manager) bf.getBean("manager");
         manager.log.info(manager.getVersion());
         RgdIndex rgdIndex= (RgdIndex) bf.getBean("rgdIndex");
+        OntologySynonyms synonyms= (OntologySynonyms) bf.getBean("ontologySynonyms");
+
         manager.bulkIndexProcessor=BulkIndexProcessor.getInstance();
 
 
@@ -85,7 +87,8 @@ public class Manager {
                 indices.add(args[2]+"_index" + "_" + args[1] + "2");
                 rgdIndex.setIndices(indices);
             }
-
+            synonyms.setIndexCategory(rgdIndex.getIndex());
+            synonyms.init();
             manager.run(args);
         } catch (Exception e) {
             manager.bulkIndexProcessor.destroy();
