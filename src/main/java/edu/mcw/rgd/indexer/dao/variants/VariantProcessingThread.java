@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 public class VariantProcessingThread implements Runnable{
     private final List<VariantIndex> indexList;
-    private int mapKey;
+    private final int mapKey;
 
 
     public VariantProcessingThread(int mapKey,  List<VariantIndex> indexList){
@@ -25,7 +25,6 @@ public class VariantProcessingThread implements Runnable{
 
         ExecutorService executor = new MyThreadPoolExecutor(10, 10, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
         Runnable workerThread= null;
-        List<VariantIndex> indexList = new ArrayList<>();
 
         if (indexList.size() > 0) {
             Set<Long> uniqueVariantIds=indexList.stream().map(VariantIndex::getVariant_id).collect(Collectors.toSet());
