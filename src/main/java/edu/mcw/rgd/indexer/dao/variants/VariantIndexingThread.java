@@ -101,19 +101,19 @@ public class VariantIndexingThread extends VariantDao implements Runnable {
             IndexDocument.index(indexDoc);
         }
 
-        Set<Long> variantIdsWithoutTranscripts = new HashSet<>();
-        if (uniqueVariantIds.size() > variantIdsWithTrancripts.size()) {
-            for (int id : uniqueVariantIds) {
-                if (!variantIdsWithTrancripts.contains((long) id)) {
-                    variantIdsWithoutTranscripts.add((long) id);
-                }
-            }
-            if (variantIdsWithoutTranscripts.size() > 0) {
-                List<VariantIndex> variantsWithoutTranscripts = getVariantsWithoutTranscripts(mapKey, variantIdsWithoutTranscripts);
-               for(VariantIndex indexDoc:variantsWithoutTranscripts){
-                   IndexDocument.index(indexDoc);
-               }
-            }
-        }
+//        Set<Long> variantIdsWithoutTranscripts = new HashSet<>();
+//        if (uniqueVariantIds.size() > variantIdsWithTrancripts.size()) {
+//            for (int id : uniqueVariantIds) {
+//                if (!variantIdsWithTrancripts.contains((long) id)) {
+//                    variantIdsWithoutTranscripts.add((long) id);
+//                }
+//            }
+//            if (variantIdsWithoutTranscripts.size() > 0) {
+//                List<VariantIndex> variantsWithoutTranscripts = getVariantsWithoutTranscripts(mapKey, variantIdsWithoutTranscripts);
+//               for(VariantIndex indexDoc:variantsWithoutTranscripts){
+//                   IndexDocument.index(indexDoc);
+//               }
+//            }
+//        }
     }
 }
