@@ -7,6 +7,7 @@ import edu.mcw.rgd.indexer.model.variants.VariantIndex;
 
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class VariantIndexingThread extends VariantDao implements Runnable {
     private final List<VariantIndex> indexList;
@@ -27,7 +28,7 @@ public class VariantIndexingThread extends VariantDao implements Runnable {
     }
     public void sortVariants() throws Exception {
         Set<Long> variantIdsWithTrancripts = new HashSet<>();
-        for (int variantId : uniqueVariantIds) {
+        for (long variantId : indexList.stream().map(VariantIndex::getVariant_id).collect(Collectors.toSet())) {
             boolean first=true;
             VariantIndex indexDoc=null;
             for (VariantIndex variant : indexList) {

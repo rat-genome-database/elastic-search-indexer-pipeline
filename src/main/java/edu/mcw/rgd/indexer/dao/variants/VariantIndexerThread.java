@@ -2,11 +2,11 @@ package edu.mcw.rgd.indexer.dao.variants;
 
 import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.indexer.MyThreadPoolExecutor;
-import edu.mcw.rgd.indexer.model.IndexObject;
+;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
+
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
