@@ -17,10 +17,12 @@ import edu.mcw.rgd.datamodel.ontologyx.TermWithStats;
 import edu.mcw.rgd.datamodel.pheno.Study;
 import edu.mcw.rgd.indexer.MyThreadPoolExecutor;
 import edu.mcw.rgd.indexer.OntologySynonyms;
-import edu.mcw.rgd.indexer.dao.variants.VariantIndexerThread;
+import edu.mcw.rgd.indexer.dao.variants.VariantDao;
+import edu.mcw.rgd.indexer.dao.variants.VariantProcessingThread;
 import edu.mcw.rgd.indexer.indexers.objectSearchIndexer.*;
 import edu.mcw.rgd.indexer.model.*;
 
+import edu.mcw.rgd.indexer.model.variants.VariantIndex;
 import edu.mcw.rgd.process.AnnotationFormatter;
 import edu.mcw.rgd.process.Utils;
 
@@ -669,20 +671,33 @@ public class IndexDAO extends AbstractDAO {
         while (!executor.isTerminated()){}
     }
     public void indexVariantsFromCarpenovoNewTableStructure() throws Exception{
-        ExecutorService executor2 = new MyThreadPoolExecutor(3, 3, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+        VariantDao variantDao=new VariantDao();
+        ExecutorService executor2 = new MyThreadPoolExecutor(10, 10, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
         Runnable variantIndexerThread = null;
 
         for(int speciesTypeKey:Arrays.asList(2, 3, 6, 9, 13)) { //HUMAN VARIANTS ARE NOT INCLUDED AS THEY ARE ALREADY INDEXED AS CLINVAR VARIANTS
             String species = SpeciesType.getCommonName(speciesTypeKey);
             System.out.println("Processing " + species + " variants...");
+            List<edu.mcw.rgd.datamodel.Map> maps=mapDAO.getMaps(speciesTypeKey);
+           for( edu.mcw.rgd.datamodel.Map map : maps) {
+               int mapKey=map.getKey();
+                List<Chromosome> chromosomes=mapDAO.getChromosomes(mapKey);
+               for (Chromosome chr : chromosomes) {
+                    List<Integer> variantIds = variantDao.getUniqueVariantsIds(chr.getChromosome(), map.getKey(), speciesTypeKey);
+                    if(variantIds!=null) {
+                        Collection[] collections = new Collection[0];
+                        try {
+                            collections = split(variantIds, 1000);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        for (int i = 0; i < collections.length; i++) {
+                            List<VariantIndex>  indexList = variantDao.getVariantsNewTbaleStructure(map.getKey(), (List<Integer>) collections[i]);
+                            variantIndexerThread = new VariantProcessingThread(map.getKey(), indexList);
+                            executor2.execute(variantIndexerThread);
+                        }
 
-           for( edu.mcw.rgd.datamodel.Map map : mapDAO.getMaps(speciesTypeKey)) {
-               for (Chromosome chr : mapDAO.getChromosomes(map.getKey())) {
-                     variantIndexerThread = new VariantIndexerThread(chr.getChromosome(), map.getKey(), speciesTypeKey);
-                     executor2.execute(variantIndexerThread);
-                   }
-           }
-
+        }}}
         }
         executor2.shutdown();
         while (!executor2.isTerminated()) {}

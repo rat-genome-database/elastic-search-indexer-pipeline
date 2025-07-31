@@ -1,22 +1,22 @@
 package edu.mcw.rgd.indexer.dao.variants;
 
 
-import edu.mcw.rgd.datamodel.variants.SampleManager;
 import edu.mcw.rgd.indexer.model.IndexDocument;
 import edu.mcw.rgd.indexer.model.variants.VariantIndex;
 
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class VariantIndexingThread extends VariantDao implements Runnable {
     private final List<VariantIndex> indexList;
     private final int mapKey;
-    private final List<Integer> uniqueVariantIds;
-    public VariantIndexingThread(List<VariantIndex> indexList, int mapKey, List<Integer> uniqueVariantIds){
+    public final long variantId;
+
+    public VariantIndexingThread(List<VariantIndex> indexList, int mapKey, long variantId){
         this.indexList=indexList;
         this.mapKey=mapKey;
-        this.uniqueVariantIds=uniqueVariantIds;
+
+        this.variantId = variantId;
     }
     @Override
     public void run() {
@@ -27,32 +27,13 @@ public class VariantIndexingThread extends VariantDao implements Runnable {
         }
     }
     public void sortVariants() throws Exception {
-        Set<Long> variantIdsWithTrancripts = new HashSet<>();
-        for (long variantId : indexList.stream().map(VariantIndex::getVariant_id).collect(Collectors.toSet())) {
-            boolean first=true;
-            VariantIndex indexDoc=null;
-            for (VariantIndex variant : indexList) {
+        VariantIndex indexDoc= indexList.stream().filter(v -> v.getVariant_id() == variantId).toList().get(0);
+        indexDoc.setMapDataList(this.getMapData(indexDoc));
+        if (mapKey == 38 || mapKey == 17) {
+            mapClinicalSignificance(indexDoc);
+        }
+        for (VariantIndex variant : indexList) {
                 if(variantId==variant.getVariant_id()){
-                variantIdsWithTrancripts.add(variant.getVariant_id());
-                if (mapKey == 38 || mapKey == 17) {
-                    try {
-                        String clinvarSignificance = getClinvarInfo((int) variant.getVariant_id());
-                        if (clinvarSignificance != null && !clinvarSignificance.equals(""))
-                            variant.setClinicalSignificance(clinvarSignificance);
-                    } catch (Exception e) {
-                        System.out.println("NO CLINICAL SIGNIFICACE SAMPLE_ID:" + variant.getSampleId() + " RGD_ID:" + variant.getVariant_id());
-                    }
-                }
-                if (first) {
-                    first=false;
-                    indexDoc=variant;
-                    indexDoc.setAnalysisName(Arrays.asList(SampleManager.getInstance().getSampleName(variant.getSampleId()).getAnalysisName()));
-                    try {
-                        indexDoc.setMapDataList(this.getMapData(indexDoc));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                } else {
                     List<Long> transcriptIds = new ArrayList<>();
                     boolean exists = false;
                     if (indexDoc.getTranscriptRgdId() != null) {
@@ -91,15 +72,14 @@ public class VariantIndexingThread extends VariantDao implements Runnable {
                         }
                     }
                   //  indexDoc.setSampleId(0);
-                }
+              //  }
 
 
             }
 
             }
-            if(indexDoc!=null)
             IndexDocument.index(indexDoc);
-        }
+      //  }
 
 //        Set<Long> variantIdsWithoutTranscripts = new HashSet<>();
 //        if (uniqueVariantIds.size() > variantIdsWithTrancripts.size()) {
@@ -115,5 +95,14 @@ public class VariantIndexingThread extends VariantDao implements Runnable {
 //               }
 //            }
 //        }
+    }
+    public void mapClinicalSignificance(VariantIndex variant){
+        try {
+            String clinvarSignificance = getClinvarInfo((int) variant.getVariant_id());
+            if (clinvarSignificance != null && !clinvarSignificance.equals(""))
+                variant.setClinicalSignificance(clinvarSignificance);
+        } catch (Exception e) {
+            System.out.println("NO CLINICAL SIGNIFICACE SAMPLE_ID:" + variant.getSampleId() + " RGD_ID:" + variant.getVariant_id());
+        }
     }
 }
