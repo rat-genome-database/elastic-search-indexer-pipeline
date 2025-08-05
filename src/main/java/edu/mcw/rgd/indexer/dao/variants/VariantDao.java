@@ -61,11 +61,11 @@ public class VariantDao extends AbstractDAO {
         sql=sql+") ";
 
         sql=sql+ " and vsd.sample_id in (select sample_id from sample where map_key=?) "+
-                " and vt.map_key=? " +
+              //  " and vt.map_key=? " +
                 " and vmd.map_key=?";
 
         VariantIndexQuery query=new VariantIndexQuery(DataSourceFactory.getInstance().getCarpeNovoDataSource(), sql);
-        return execute(query, mapKey, mapKey,mapKey);
+        return execute(query,  mapKey,mapKey);
 
     }
 

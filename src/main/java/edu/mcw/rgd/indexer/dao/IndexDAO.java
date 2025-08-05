@@ -18,6 +18,7 @@ import edu.mcw.rgd.datamodel.pheno.Study;
 import edu.mcw.rgd.indexer.MyThreadPoolExecutor;
 import edu.mcw.rgd.indexer.OntologySynonyms;
 import edu.mcw.rgd.indexer.dao.variants.VariantDao;
+import edu.mcw.rgd.indexer.dao.variants.VariantIndexingThread;
 import edu.mcw.rgd.indexer.dao.variants.VariantProcessingThread;
 import edu.mcw.rgd.indexer.indexers.objectSearchIndexer.*;
 import edu.mcw.rgd.indexer.model.*;
@@ -28,6 +29,7 @@ import edu.mcw.rgd.process.Utils;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.elasticsearch.common.recycler.Recycler;
 
 
 import java.sql.Connection;
@@ -36,9 +38,8 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.*;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by jthota on 3/23/2017.
@@ -366,48 +367,48 @@ public class IndexDAO extends AbstractDAO {
        executor.shutdown();
        while (!executor.isTerminated()) {}
     }
-    public Map<Integer, Gene> getStrainAssociations(List<Strain> strains) throws Exception {
-        Map<Integer, Gene> genes= new HashMap<>();
-        List<Integer> rgdIds=new ArrayList<>();
-
-        for(Strain s:strains){
-           rgdIds.add(s.getRgdId());
-        }
-        Collection[] colletions = this.split(rgdIds, 1000);
-
-        for(int i=0; i<colletions.length;i++){
-            List c= (List) colletions[i];
-            try(Connection conn=this.getDataSource().getConnection();
-                Statement stmt= conn.createStatement();){
-            String sql="select s.rgd_id as strain_rgd_id, g.* from genes g, " +
-                    "genes_variations gv, " +
-                    "genes a, rgd_ids r, " +
-                    "strains s," +
-                    "rgd_strains_rgd rs " +
-                    "where gv.gene_key=g.gene_key " +
-                    "AND gv.variation_key=a.gene_key " +
-                    "and a.rgd_id=rs.rgd_id " +
-                    "and rs.strain_key=s.strain_key " +
-                    "and r.rgd_id=g.rgd_id " +
-                    "and r.object_status='ACTIVE' " +
-                    "and s.rgd_id in ("+Utils.concatenate(c,",")+")";
-
-
-          ResultSet rs=stmt.executeQuery(sql);
-            while(rs.next()){
-                Gene g= new Gene();
-                g.setSymbol(rs.getString("gene_symbol").toLowerCase());
-                g.setName(rs.getString("full_name_lc"));
-
-                genes.put(rs.getInt("strain_rgd_id"),g );
-            }
-
-            rs.close();
-        }
-        }
-
-        return genes;
-    }
+//    public Map<Integer, Gene> getStrainAssociations(List<Strain> strains) throws Exception {
+//        Map<Integer, Gene> genes= new HashMap<>();
+//        List<Integer> rgdIds=new ArrayList<>();
+//
+//        for(Strain s:strains){
+//           rgdIds.add(s.getRgdId());
+//        }
+//        Collection[] colletions = this.split(rgdIds, 1000);
+//
+//        for(int i=0; i<colletions.length;i++){
+//            List c= (List) colletions[i];
+//            try(Connection conn=this.getDataSource().getConnection();
+//                Statement stmt= conn.createStatement();){
+//            String sql="select s.rgd_id as strain_rgd_id, g.* from genes g, " +
+//                    "genes_variations gv, " +
+//                    "genes a, rgd_ids r, " +
+//                    "strains s," +
+//                    "rgd_strains_rgd rs " +
+//                    "where gv.gene_key=g.gene_key " +
+//                    "AND gv.variation_key=a.gene_key " +
+//                    "and a.rgd_id=rs.rgd_id " +
+//                    "and rs.strain_key=s.strain_key " +
+//                    "and r.rgd_id=g.rgd_id " +
+//                    "and r.object_status='ACTIVE' " +
+//                    "and s.rgd_id in ("+Utils.concatenate(c,",")+")";
+//
+//
+//          ResultSet rs=stmt.executeQuery(sql);
+//            while(rs.next()){
+//                Gene g= new Gene();
+//                g.setSymbol(rs.getString("gene_symbol").toLowerCase());
+//                g.setName(rs.getString("full_name_lc"));
+//
+//                genes.put(rs.getInt("strain_rgd_id"),g );
+//            }
+//
+//            rs.close();
+//        }
+//        }
+//
+//        return genes;
+//    }
 
     public Gene getStrainAssociations(int rgdId) throws Exception {
             Gene gene=new Gene();
@@ -672,35 +673,63 @@ public class IndexDAO extends AbstractDAO {
     }
     public void indexVariantsFromCarpenovoNewTableStructure() throws Exception{
         VariantDao variantDao=new VariantDao();
-        ExecutorService executor2 = new MyThreadPoolExecutor(10, 10, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
-        Runnable variantIndexerThread = null;
+        ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2);
+        List<CompletableFuture<Void>> futures = new ArrayList<>();
 
-        for(int speciesTypeKey:Arrays.asList(2, 3, 6, 9, 13)) { //HUMAN VARIANTS ARE NOT INCLUDED AS THEY ARE ALREADY INDEXED AS CLINVAR VARIANTS
+        List<Integer> speciesKeys = Arrays.asList(2, 3, 6, 9, 13);
+
+        for (int speciesTypeKey : speciesKeys) {
             String species = SpeciesType.getCommonName(speciesTypeKey);
             System.out.println("Processing " + species + " variants...");
-            List<edu.mcw.rgd.datamodel.Map> maps=mapDAO.getMaps(speciesTypeKey);
-           for( edu.mcw.rgd.datamodel.Map map : maps) {
-               int mapKey=map.getKey();
-                List<Chromosome> chromosomes=mapDAO.getChromosomes(mapKey);
-               for (Chromosome chr : chromosomes) {
-                    List<Integer> variantIds = variantDao.getUniqueVariantsIds(chr.getChromosome(), map.getKey(), speciesTypeKey);
-                    if(variantIds!=null) {
-                        Collection[] collections = new Collection[0];
-                        try {
-                            collections = split(variantIds, 1000);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        for (int i = 0; i < collections.length; i++) {
-                            List<VariantIndex>  indexList = variantDao.getVariantsNewTbaleStructure(map.getKey(), (List<Integer>) collections[i]);
-                            variantIndexerThread = new VariantProcessingThread(map.getKey(), indexList);
-                            executor2.execute(variantIndexerThread);
-                        }
 
-        }}}
+            List<edu.mcw.rgd.datamodel.Map> maps = mapDAO.getMaps(speciesTypeKey);
+            for (edu.mcw.rgd.datamodel.Map map : maps) {
+                int mapKey = map.getKey();
+                List<Chromosome> chromosomes = mapDAO.getChromosomes(mapKey);
+
+                for (Chromosome chr : chromosomes) {
+                    List<Integer> variantIds = variantDao.getUniqueVariantsIds(chr.getChromosome(), mapKey, speciesTypeKey);
+                    if (variantIds == null || variantIds.isEmpty()) continue;
+
+                    Collection<List<Integer>> batches;
+                    try {
+                        batches = split(variantIds, 1000);
+                    } catch (Exception e) {
+                        System.err.println("Failed to split variant IDs for mapKey " + mapKey + ": " + e.getMessage());
+                        continue;
+                    }
+
+                    for (List<Integer> batch : batches) {
+                        List<VariantIndex> indexList = variantDao.getVariantsNewTbaleStructure(mapKey, batch);
+
+                        // Create a future for each batch
+                        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+                            Set<Long> variantIdsSet = indexList.stream()
+                                    .map(VariantIndex::getVariant_id)
+                                    .collect(Collectors.toSet());
+
+                            variantIdsSet.forEach(variantId -> {
+                                new VariantIndexingThread(indexList, mapKey, variantId).run();
+                            });
+                        }, executor).exceptionally(ex -> {
+                            System.err.println("Error processing mapKey " + mapKey + ": " + ex.getMessage());
+                            ex.printStackTrace();
+                            return null;
+                        });
+
+                        futures.add(future);
+                    }
+                }
+            }
         }
-        executor2.shutdown();
-        while (!executor2.isTerminated()) {}
+
+// Wait for all tasks to finish
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+
+// Shutdown the executor
+        executor.shutdown();
+        System.out.println("All variant indexing tasks completed.");
+
     }
     public void getReference() throws Exception{
 
@@ -792,14 +821,14 @@ public class IndexDAO extends AbstractDAO {
     }
     /*************************************************************************************************/
 
-    public Collection[] split(List objs, int size) throws Exception{
+    public List<List<Integer>> split(List<Integer> objs, int size) throws Exception{
         int numOfBatches=(objs.size()/size)+1;
-        Collection[] batches= new Collection[numOfBatches];
+        List<List<Integer>> batches= new ArrayList<>();
         for(int index=0; index<numOfBatches; index++){
             int count=index+1;
             int fromIndex=Math.max(((count-1)*size),0);
             int toIndex=Math.min((count*size), objs.size());
-            batches[index]= objs.subList(fromIndex, toIndex);
+            batches.add( objs.subList(fromIndex, toIndex));
         }
         return batches;
     }

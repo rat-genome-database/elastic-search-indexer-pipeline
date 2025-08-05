@@ -27,57 +27,36 @@ public class VariantIndexingThread extends VariantDao implements Runnable {
         }
     }
     public void sortVariants() throws Exception {
-        VariantIndex indexDoc= indexList.stream().filter(v -> v.getVariant_id() == variantId).toList().get(0);
+        VariantIndex indexDoc= indexList.stream().findFirst().orElseThrow(() -> new RuntimeException("Variant ID " + variantId + " not found"));
         indexDoc.setMapDataList(this.getMapData(indexDoc));
         if (mapKey == 38 || mapKey == 17) {
             mapClinicalSignificance(indexDoc);
         }
+        // Merge transcript IDs
+        Set<Long> transcriptIds = new LinkedHashSet<>();
+        if (indexDoc.getTranscriptRgdId() != null) {
+            transcriptIds.addAll(indexDoc.getTranscriptRgdId());
+        }
+
+        // Merge analysis names
+        Set<String> analysisNames = new LinkedHashSet<>();
+        if (indexDoc.getAnalysisName() != null) {
+            analysisNames.addAll(indexDoc.getAnalysisName());
+        }
         for (VariantIndex variant : indexList) {
-                if(variantId==variant.getVariant_id()){
-                    List<Long> transcriptIds = new ArrayList<>();
-                    boolean exists = false;
-                    if (indexDoc.getTranscriptRgdId() != null) {
-                        transcriptIds.addAll(indexDoc.getTranscriptRgdId());
-                    }
-                    if (variant.getTranscriptRgdId() != null) {
-                        for (long transcript : variant.getTranscriptRgdId()) {
-                            for (long t : transcriptIds) {
-                                if (transcript == t) {
-                                    exists = true;
-                                    break;
-                                }
-                            }
-                            if (!exists) {
-                                transcriptIds.add(transcript);
-                                indexDoc.setTranscriptRgdId(transcriptIds);
-                            }
+            if (variantId != variant.getVariant_id()) continue;
 
-                        }
-                    }
-                    if (variant.getAnalysisName() != null) {
-                        List<String> sampleNames=new ArrayList<>();
-                        if(indexDoc.getAnalysisName()!=null)
-                            sampleNames .addAll(indexDoc.getAnalysisName());
-                        for (String name : variant.getAnalysisName()) {
-                            for (String str : sampleNames) {
-                                if (name.equals(str)) {
-                                    exists = true;
-                                    break;
-                                }
-                            }
-                            if (!exists) {
-                                sampleNames.add(name);
-                                indexDoc.setAnalysisName(sampleNames);
-                            }
-                        }
-                    }
-                  //  indexDoc.setSampleId(0);
-              //  }
-
-
+            if (variant.getTranscriptRgdId() != null) {
+                transcriptIds.addAll(variant.getTranscriptRgdId());
             }
 
+            if (variant.getAnalysisName() != null) {
+                analysisNames.addAll(variant.getAnalysisName());
             }
+        }
+
+        indexDoc.setTranscriptRgdId(new ArrayList<>(transcriptIds));
+        indexDoc.setAnalysisName(new ArrayList<>(analysisNames));
             IndexDocument.index(indexDoc);
       //  }
 
