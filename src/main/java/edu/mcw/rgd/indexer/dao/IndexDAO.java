@@ -673,12 +673,14 @@ public class IndexDAO extends AbstractDAO {
     }
     public void indexVariantsFromCarpenovoNewTableStructure() throws Exception{
         VariantDao variantDao=new VariantDao();
-        ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2);
+        System.out.println("run time processors:"+Runtime.getRuntime().availableProcessors());
+        ExecutorService executor = Executors.newFixedThreadPool(20 );
         List<CompletableFuture<Void>> futures = new ArrayList<>();
 
         List<Integer> speciesKeys = Arrays.asList(2, 3, 6, 9, 13);
 
         for (int speciesTypeKey : speciesKeys) {
+        //int speciesTypeKey=3;
             String species = SpeciesType.getCommonName(speciesTypeKey);
             System.out.println("Processing " + species + " variants...");
 
@@ -691,7 +693,7 @@ public class IndexDAO extends AbstractDAO {
                     List<Integer> variantIds = variantDao.getUniqueVariantsIds(chr.getChromosome(), mapKey, speciesTypeKey);
                     if (variantIds == null || variantIds.isEmpty()) continue;
 
-                    Collection<List<Integer>> batches;
+                    Collection<List<Integer>> batches=new ArrayList<>();
                     try {
                         batches = split(variantIds, 1000);
                     } catch (Exception e) {
@@ -700,34 +702,17 @@ public class IndexDAO extends AbstractDAO {
                     }
 
                     for (List<Integer> batch : batches) {
-                        List<VariantIndex> indexList = variantDao.getVariantsNewTbaleStructure(mapKey, batch);
-
-                        // Create a future for each batch
-                        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-                            Set<Long> variantIdsSet = indexList.stream()
-                                    .map(VariantIndex::getVariant_id)
-                                    .collect(Collectors.toSet());
-
-                            variantIdsSet.forEach(variantId -> {
-                                new VariantIndexingThread(indexList, mapKey, variantId).run();
-                            });
-                        }, executor).exceptionally(ex -> {
-                            System.err.println("Error processing mapKey " + mapKey + ": " + ex.getMessage());
-                            ex.printStackTrace();
-                            return null;
-                        });
-
-                        futures.add(future);
+                        Runnable thread=new VariantIndexingThread(batch, mapKey);
+                        executor.execute(thread);
                     }
                 }
             }
         }
 
-// Wait for all tasks to finish
-        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
 
 // Shutdown the executor
         executor.shutdown();
+        while (!executor.isTerminated()){}
         System.out.println("All variant indexing tasks completed.");
 
     }

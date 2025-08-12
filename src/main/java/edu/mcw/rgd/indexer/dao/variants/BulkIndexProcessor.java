@@ -17,16 +17,7 @@ public class BulkIndexProcessor {
     public static BulkProcessor bulkProcessor=null;
     private static BulkIndexProcessor bulkIndexProcessor=null;
     private BulkIndexProcessor(){}
-    public static BulkIndexProcessor getInstance(){
-        if(bulkIndexProcessor==null) {
-            bulkIndexProcessor = new BulkIndexProcessor();
-            bulkProcessor=init();
-        }
-        return bulkIndexProcessor;
-    }
-
-    private static BulkProcessor init() {
-
+    private static BulkProcessor getInstance(){
         System.out.println("CREATING NEW BULK PROCESSOR....");
         BulkProcessor.Listener listener = new BulkProcessor.Listener() {
             @Override
@@ -47,15 +38,15 @@ public class BulkIndexProcessor {
             }
         };
         return BulkProcessor.builder(
-                (request, bulkListener) ->
-                {
-                    try {
-                        ClientInit.getClient().bulkAsync(request, RequestOptions.DEFAULT, bulkListener);
-                    } catch (UnknownHostException e) {
-                        e.printStackTrace();
-                    }
-                },
-                listener)
+                        (request, bulkListener) ->
+                        {
+                            try {
+                                ClientInit.getClient().bulkAsync(request, RequestOptions.DEFAULT, bulkListener);
+                            } catch (UnknownHostException e) {
+                                e.printStackTrace();
+                            }
+                        },
+                        listener)
                 .setBulkActions(10000)
                 .setBulkSize(new ByteSizeValue(5, ByteSizeUnit.MB))
                 .setFlushInterval(TimeValue.timeValueSeconds(5))
@@ -64,9 +55,22 @@ public class BulkIndexProcessor {
                         BackoffPolicy.exponentialBackoff(TimeValue.timeValueMillis(100), 3))
                 .build();
 
+    }
+
+    private static void init() {
+        if(bulkIndexProcessor==null) {
+            bulkIndexProcessor = new BulkIndexProcessor();
+            if(bulkProcessor==null) {
+                bulkProcessor = getInstance();
+                System.out.println("Initialized bulk processor ...");
+            }
+        }
+    //    return bulkProcessor;
+
+
 
     }
-    public  void destroy(){
+    public static synchronized void destroy(){
         try {
             if(bulkProcessor!=null) {
                 bulkProcessor.flush();

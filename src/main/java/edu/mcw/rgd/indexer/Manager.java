@@ -15,7 +15,7 @@ import edu.mcw.rgd.indexer.dao.*;
 
 import edu.mcw.rgd.indexer.dao.findModels.FullAnnotDao;
 import edu.mcw.rgd.indexer.indexers.phenominerIndexer.PhenominerNormalizedThread;
-import edu.mcw.rgd.indexer.dao.variants.*;
+
 
 import edu.mcw.rgd.indexer.indexers.expressionIndexer.ExpressionDataIndexer;
 import edu.mcw.rgd.indexer.indexers.genomeInfoIndexer.ChromosomeMapDataThread;
@@ -23,6 +23,7 @@ import edu.mcw.rgd.indexer.indexers.genomeInfoIndexer.GenomeInfoThread;
 import edu.mcw.rgd.indexer.indexers.modelsIndexer.FindModels;
 
 import edu.mcw.rgd.process.Utils;
+import edu.mcw.rgd.indexer.dao.variants.BulkIndexProcessor;
 import edu.mcw.rgd.services.ClientInit;
 import edu.mcw.rgd.services.IndexAdmin;
 import org.apache.commons.lang.ArrayUtils;
@@ -35,6 +36,7 @@ import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest;
 import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.client.RequestOptions;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.FileSystemResource;
@@ -62,7 +64,10 @@ public class Manager {
     private RgdIndex rgdIndex;
     private OntologySynonyms ontologySynonyms;
     private boolean reindex;
-     BulkIndexProcessor bulkIndexProcessor;
+
+    private BulkIndexProcessor bulkIndexProcessor;
+
+   private ClientInit clientInit;
     IndexDAO indexDAO=new IndexDAO();
     private final Logger log = LogManager.getLogger("main");
 
@@ -76,8 +81,8 @@ public class Manager {
         RgdIndex rgdIndex= (RgdIndex) bf.getBean("rgdIndex");
         OntologySynonyms synonyms= (OntologySynonyms) bf.getBean("ontologySynonyms");
 
-        manager.bulkIndexProcessor=BulkIndexProcessor.getInstance();
-
+        manager.bulkIndexProcessor=  bf.getBean("bulkIndexProcessor", BulkIndexProcessor.class);
+        manager.clientInit= bf.getBean("clientInit", ClientInit.class);
 
         try {
             List<String> indices= new ArrayList<>();
@@ -89,16 +94,17 @@ public class Manager {
             }
             synonyms.setIndexCategory(rgdIndex.getIndex());
             synonyms.init();
-            manager.run(args);
+     manager.run(args);
         } catch (Exception e) {
-            manager.bulkIndexProcessor.destroy();
+            BulkIndexProcessor.destroy();
             ClientInit.destroy();
             manager.printUsage();
 
             Utils.printStackTrace(e, manager.log);
         }
-        manager.bulkIndexProcessor.destroy();
+        BulkIndexProcessor.destroy();
         ClientInit.destroy();
+
 
     }
     private void run(String[] args) throws Exception {
@@ -120,10 +126,9 @@ public class Manager {
             }
             args= (String[]) ArrayUtils.remove(args, 0);
         }
-
+        ExecutorService executor=null;
         args= (String[]) ArrayUtils.remove(args, 0);
 
-        ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
             boolean searchIndexCreated=false;
             boolean expressionSearchIndexCreated=false;
             for (String arg : args) {
@@ -150,6 +155,8 @@ public class Manager {
                             System.out.println("Indexing ..."+ arg +" DONE");
                     }
                     case "Chromosomes" -> {
+                         executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+
                         System.out.println("Running Chromosome Indexer ....");
                         admin.createIndex("chromosome_mappings", "chromosome");
                         MapDAO mapDAO = new MapDAO();
@@ -171,6 +178,8 @@ public class Manager {
                         }
                     }
                     case "GenomeInfo" -> {
+                         executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+
                         System.out.println("Running Genome Info Indexer ....");
                         admin.createIndex("genome_mappings", "genome");
                         System.out.println("INDEXING GENOMEINFO...");
@@ -208,6 +217,8 @@ public class Manager {
                         indexDAO.indexVariantsFromCarpenovoNewTableStructure();
                     }
                     case "AITermMappings" -> { // all species variants
+                         executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+
                         System.out.println("Running AI Term - Ontology Term Mapper Indexer ....");
                         admin.createIndex("ai_mappings", "ai_mappings");
                         OntologyXDAO ontologyXDAO = new OntologyXDAO();
@@ -233,6 +244,8 @@ public class Manager {
 
                     }
                     case "ExpressionData"-> {
+                         executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+
                         System.out.println("Running Expression General Search Indexer ....");
                         admin.createIndex(null, null);
                         GeneDAO geneDAO = new GeneDAO();
@@ -249,10 +262,14 @@ public class Manager {
                     }
                 }
             }
-           executor.shutdown();
-            while (!executor.isTerminated()) {}
-            System.out.println("Finished all threads: " + new Date());
-            log.info("Finished all threads: " + new Date());
+            if(executor!=null) {
+                executor.shutdown();
+                while (!executor.isTerminated()) {
+                }
+                System.out.println("Finished all threads: " + new Date());
+                log.info("Finished all threads: " + new Date());
+            }
+
 
             String clusterStatus = this.getClusterHealth(RgdIndex.getNewAlias());
             if (!clusterStatus.equalsIgnoreCase("ok")) {
@@ -385,5 +402,21 @@ public class Manager {
 
     public void setOntologySynonyms(OntologySynonyms ontologySynonyms) {
         this.ontologySynonyms = ontologySynonyms;
+    }
+
+    public BulkIndexProcessor getBulkIndexProcessor() {
+        return bulkIndexProcessor;
+    }
+
+    public void setBulkIndexProcessor(BulkIndexProcessor bulkIndexProcessor) {
+        this.bulkIndexProcessor = bulkIndexProcessor;
+    }
+
+    public ClientInit getClientInit() {
+        return clientInit;
+    }
+
+    public void setClientInit(ClientInit clientInit) {
+        this.clientInit = clientInit;
     }
 }

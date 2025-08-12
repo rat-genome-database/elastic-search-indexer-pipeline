@@ -29,7 +29,7 @@ public class VariantProcessingThread implements Runnable{
 
             Set<Long> uniqueVariantIds=indexList.stream().map(VariantIndex::getVariant_id).collect(Collectors.toSet());
             for(long id:uniqueVariantIds) {
-                executor.execute( new VariantIndexingThread( indexList, mapKey, id));
+          //      executor.execute( new VariantIndexingThread( indexList, mapKey, id));
 
             }
 
