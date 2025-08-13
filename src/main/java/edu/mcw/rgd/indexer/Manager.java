@@ -36,7 +36,6 @@ import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest;
 import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.client.RequestOptions;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.FileSystemResource;
@@ -92,7 +91,7 @@ public class Manager {
                 indices.add(args[2]+"_index" + "_" + args[1] + "2");
                 rgdIndex.setIndices(indices);
             }
-            synonyms.setIndexCategory(rgdIndex.getIndex());
+            synonyms.setIndexCategory(RgdIndex.getIndex());
             synonyms.init();
      manager.run(args);
         } catch (Exception e) {
@@ -289,7 +288,7 @@ public class Manager {
             System.out.println("CLIENT IS CLOSED");
         }
 
-    public boolean switchAlias() throws Exception {
+    public void switchAlias() throws Exception {
         System.out.println("NEEW ALIAS: " + RgdIndex.getNewAlias() + " || OLD ALIAS:" + RgdIndex.getOldAlias());
         IndicesAliasesRequest request = new IndicesAliasesRequest();
 
@@ -299,11 +298,11 @@ public class Manager {
             IndicesAliasesRequest.AliasActions removeAliasAction =
                     new IndicesAliasesRequest.AliasActions(IndicesAliasesRequest.AliasActions.Type.REMOVE)
                             .index(RgdIndex.getOldAlias())
-                            .alias(rgdIndex.getIndex());
+                            .alias(RgdIndex.getIndex());
             IndicesAliasesRequest.AliasActions addAliasAction =
                     new IndicesAliasesRequest.AliasActions(IndicesAliasesRequest.AliasActions.Type.ADD)
                             .index(RgdIndex.getNewAlias())
-                            .alias(rgdIndex.getIndex());
+                            .alias(RgdIndex.getIndex());
             request.addAliasAction(removeAliasAction);
             request.addAliasAction(addAliasAction);
             log.info("Switched from " + RgdIndex.getOldAlias() + " to  " + RgdIndex.getNewAlias());
@@ -312,13 +311,12 @@ public class Manager {
             IndicesAliasesRequest.AliasActions addAliasAction =
                     new IndicesAliasesRequest.AliasActions(IndicesAliasesRequest.AliasActions.Type.ADD)
                             .index(RgdIndex.getNewAlias())
-                            .alias(rgdIndex.getIndex());
+                            .alias(RgdIndex.getIndex());
             request.addAliasAction(addAliasAction);
-            log.info(rgdIndex.getIndex() + " pointed to " + RgdIndex.getNewAlias());
+            log.info(RgdIndex.getIndex() + " pointed to " + RgdIndex.getNewAlias());
         }
         AcknowledgedResponse indicesAliasesResponse =
                 ClientInit.getClient().indices().updateAliases(request, RequestOptions.DEFAULT);
-        return  true;
 
     }
     public void printUsage(){
@@ -385,7 +383,7 @@ public class Manager {
 }
 
     public void setEnvrionments(List<String> envrionments) {
-        this.envrionments = envrionments;
+        Manager.envrionments = envrionments;
     }
 
     public boolean isReindex() {

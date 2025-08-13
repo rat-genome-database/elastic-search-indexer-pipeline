@@ -695,7 +695,7 @@ public class IndexDAO extends AbstractDAO {
 
                     Collection<List<Integer>> batches=new ArrayList<>();
                     try {
-                        batches = split(variantIds, 1000);
+                        batches = split(variantIds, 500);
                     } catch (Exception e) {
                         System.err.println("Failed to split variant IDs for mapKey " + mapKey + ": " + e.getMessage());
                         continue;
