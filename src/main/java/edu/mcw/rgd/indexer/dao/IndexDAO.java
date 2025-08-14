@@ -674,8 +674,10 @@ public class IndexDAO extends AbstractDAO {
     public void indexVariantsFromCarpenovoNewTableStructure() throws Exception{
         VariantDao variantDao=new VariantDao();
         System.out.println("run time processors:"+Runtime.getRuntime().availableProcessors());
-        ExecutorService executor = Executors.newFixedThreadPool(20 );
-        List<CompletableFuture<Void>> futures = new ArrayList<>();
+ //       ExecutorService executor = Executors.newFixedThreadPool(10 );
+        ExecutorService   executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+
+//        List<CompletableFuture<Void>> futures = new ArrayList<>();
 
         List<Integer> speciesKeys = Arrays.asList(2, 3, 6, 9, 13);
 
