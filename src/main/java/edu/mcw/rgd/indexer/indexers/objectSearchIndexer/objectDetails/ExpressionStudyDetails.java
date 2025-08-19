@@ -18,6 +18,43 @@ public class ExpressionStudyDetails extends ObjectDetails<Study> {
    public ExpressionStudyDetails(Study study, IndexObject object, List<GeneExpression> records) {
         super(study, object);
         this.records=records;
+        if(records.size()>0) {
+           setMetaData();
+        }
+    }
+    void setMetaData(){
+        setMap();
+        setGeneSymbols();
+        setBioSampleId();
+        setGeoSampleAcc();
+        setExpressionUnit();
+        setExpressionLevel();
+        setSex();
+        setLifeStage();
+        setClinicalMeasurement();
+        setTissueAcc();
+        setTissueTerms();
+        setStrainAcc();
+        try {
+            setStrainTerms();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        setCellTypeAcc();
+        setCellTypeTerms();
+        setExperimentId();
+        setGEOSeriesAcc();
+        setSample();
+        /**** TODO
+         setExperimentId();
+         setSampleId();
+         setVTAcc();
+         setStudySource();
+
+         setRGDReference();
+         ****/
+        setClinicalMeasurementTerms();
     }
 
     @Override
@@ -59,38 +96,7 @@ public class ExpressionStudyDetails extends ObjectDetails<Study> {
 
        mapObject();
        mapSpecies();
-            setMap();
-            setGeneSymbols();
-            setBioSampleId();
-            setGeoSampleAcc();
-            setExpressionUnit();
-            setExpressionLevel();
-            setSex();
-            setLifeStage();
-            setClinicalMeasurement();
-            setTissueAcc();
-            setTissueTerms();
-            setStrainAcc();
-            try {
-                setStrainTerms();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
 
-            setCellTypeAcc();
-            setCellTypeTerms();
-            setExperimentId();
-            setGEOSeriesAcc();
-            setSample();
-            /**** TODO
-             setExperimentId();
-             setSampleId();
-             setVTAcc();
-             setStudySource();
-
-             setRGDReference();
-             ****/
-            setClinicalMeasurementTerms();
 
         IndexDocument.index(obj);
     }
