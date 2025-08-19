@@ -12,7 +12,7 @@ import java.util.List;
 
 public class IndexExpressionStudy implements Runnable{
 
-    private Study study;
+    private final Study study;
     private List<GeneExpression> records;
     GeneExpressionDAO expressionDAO=new GeneExpressionDAO();
     public IndexExpressionStudy(Study study){
@@ -34,7 +34,7 @@ public class IndexExpressionStudy implements Runnable{
         System.out.println("Getting  study records ...");
         try {
             this.records= expressionDAO.getGeneExpressionByStudyId(study.getId(), "TPM");
-            System.out.println("RECORDS SIZE:"+records.size());
+            System.out.println("RECORDS SIZE of study -"+study.getId()+":"+records.size());
 //                    .stream().filter(r->
 //                         ( r.getGeneExpressionRecordValue().getExpressionLevel().equalsIgnoreCase("high") ||
 //                                r.getGeneExpressionRecordValue().getExpressionLevel().equalsIgnoreCase("low"))).collect(Collectors.toList());

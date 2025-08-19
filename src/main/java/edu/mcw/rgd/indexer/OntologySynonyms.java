@@ -21,7 +21,7 @@ public class OntologySynonyms {
     private static String indexCategory;
 
     public void init(){
-        if(!indexCategory.toLowerCase().contains("variant")) {
+        if(!indexCategory.toLowerCase().contains("variant") && !indexCategory.toLowerCase().contains("expression")) {
             OntologyXDAO ontologyXDAO = new OntologyXDAO();
 
             Map<String, List<TermSynonym>> synonyms = new HashMap<>();
