@@ -31,7 +31,7 @@ public class IndexExpressionStudy implements Runnable{
             studyObjectDetails.index();
      //   }
     }
-    public void setRecords(){
+    public synchronized void  setRecords(){
         System.out.println("Getting  study records ...");
         try {
             this.records= expressionDAO.getGeneExpressionByStudyId(study.getId(), "TPM");
