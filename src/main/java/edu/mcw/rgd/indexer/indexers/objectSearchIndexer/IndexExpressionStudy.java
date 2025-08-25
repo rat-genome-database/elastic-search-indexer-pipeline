@@ -15,9 +15,9 @@ public class IndexExpressionStudy implements Runnable{
     private final Study study;
     private List<GeneExpression> records;
     GeneExpressionDAO expressionDAO=new GeneExpressionDAO();
-    public IndexExpressionStudy(Study study){
+    public IndexExpressionStudy(Study study, List<GeneExpression> records){
         this.study=study;
-        setRecords();
+       this.records=records;
     }
 
     @Override
@@ -31,16 +31,16 @@ public class IndexExpressionStudy implements Runnable{
             studyObjectDetails.index();
      //   }
     }
-    public synchronized void  setRecords(){
-        System.out.println("Getting  study records ...");
-        try {
-            this.records= expressionDAO.getGeneExpressionByStudyId(study.getId(), "TPM");
-            System.out.println("RECORDS SIZE of study -"+study.getId()+":"+records.size());
-//                    .stream().filter(r->
-//                         ( r.getGeneExpressionRecordValue().getExpressionLevel().equalsIgnoreCase("high") ||
-//                                r.getGeneExpressionRecordValue().getExpressionLevel().equalsIgnoreCase("low"))).collect(Collectors.toList());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
+//    public synchronized void  setRecords(){
+//        System.out.println("Getting  study records ...");
+//        try {
+//            this.records= expressionDAO.getGeneExpressionByStudyId(study.getId(), "TPM");
+//            System.out.println("RECORDS SIZE of study -"+study.getId()+":"+records.size());
+////                    .stream().filter(r->
+////                         ( r.getGeneExpressionRecordValue().getExpressionLevel().equalsIgnoreCase("high") ||
+////                                r.getGeneExpressionRecordValue().getExpressionLevel().equalsIgnoreCase("low"))).collect(Collectors.toList());
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
 }

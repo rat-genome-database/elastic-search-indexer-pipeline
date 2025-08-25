@@ -57,6 +57,7 @@ public class IndexDAO extends AbstractDAO {
      MapDAO mapDAO = new MapDAO();
      TranscriptDAO transcriptDAO = new TranscriptDAO();
      AssociationDAO adao = new AssociationDAO();
+     GeneExpressionDAO expressionDAO=new GeneExpressionDAO();
      public OntologyXDAO ontologyXDAO=new OntologyXDAO();
 
     private VariantInfoDAO vdao= new VariantInfoDAO();
@@ -197,7 +198,8 @@ public class IndexDAO extends AbstractDAO {
         ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
         for(Study study: studies) {
 //        Study study=phenominerDAO.getStudy(3040);
-            Runnable workerThread= new IndexExpressionStudy(study);
+          List<GeneExpression> records=  expressionDAO.getGeneExpressionByStudyId(study.getId(), "TPM");
+            Runnable workerThread= new IndexExpressionStudy(study, records);
             executor.execute(workerThread);
         }
         executor.shutdown();

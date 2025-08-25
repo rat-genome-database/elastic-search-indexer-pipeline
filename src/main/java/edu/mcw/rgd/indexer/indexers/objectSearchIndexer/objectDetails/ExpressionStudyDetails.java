@@ -22,7 +22,7 @@ public class ExpressionStudyDetails extends ObjectDetails<Study> {
            setMetaData();
         }
     }
-    void setMetaData(){
+   synchronized void setMetaData(){
         setMap();
         setGeneSymbols();
         setBioSampleId();
