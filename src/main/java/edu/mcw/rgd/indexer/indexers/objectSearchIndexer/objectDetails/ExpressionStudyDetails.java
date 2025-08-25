@@ -174,7 +174,9 @@ public class ExpressionStudyDetails extends ObjectDetails<Study> {
 
     }
     synchronized void setGEOSeriesAcc(){
-        obj.setGeoSeriesAcc( records.stream().map(GeneExpression::getGeoSeriesAcc).collect(Collectors.toSet()));
+       Set<String> geoSeriesAccIds=records.stream().map(GeneExpression::getGeoSeriesAcc).collect(Collectors.toSet());
+       geoSeriesAccIds.add(t.getGeoSeriesAcc());
+        obj.setGeoSeriesAcc( geoSeriesAccIds);
 
     }
     synchronized void setSample()  {

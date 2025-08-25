@@ -10,8 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class ObjectDetails<T> extends IndexDAO implements Details<T> {
-    T t;
-     IndexObject obj;
+    public final T t;
+    public final IndexObject obj;
 
     ObjectDetails(T t, IndexObject object){this.t=t; this.obj=object;}
     @Override
