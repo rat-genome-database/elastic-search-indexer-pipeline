@@ -231,7 +231,7 @@ public class Manager {
                         }
                     }
                     case "ExpressionGene",
-                            "ExpressionStudy"-> {
+                            "ExpressionStudy"-> { // for general search
                         System.out.println("Running "+arg+" Indexer ....");
                         if (!expressionSearchIndexCreated) {
                             admin.createIndex("search_mappings", "expression");
@@ -242,7 +242,7 @@ public class Manager {
                         indexDAO.getClass().getMethod("get" + arg).invoke(indexDAO);
 
                     }
-                    case "ExpressionData"-> {
+                    case "ExpressionData"-> { // for plotting the data in standalone expression UI tool
                          executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
 
                         System.out.println("Running Expression General Search Indexer ....");

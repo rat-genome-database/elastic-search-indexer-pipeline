@@ -37,7 +37,7 @@ dependencies {
 
     implementation 'org.jsoup:jsoup:1.15.3'
     implementation 'com.google.code.gson:gson:2.9.0'
-
+    implementation 'com.oracle.database.jdbc:ojdbc11:23.2.0.0'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.14.1' // it was 2.9.7
 // https://mvnrepository.com/artifact/com.oracle.database.jdbc/ojdbc11
     implementation group: 'com.oracle.database.jdbc', name: 'ojdbc11', version: '23.3.0.23.09'
