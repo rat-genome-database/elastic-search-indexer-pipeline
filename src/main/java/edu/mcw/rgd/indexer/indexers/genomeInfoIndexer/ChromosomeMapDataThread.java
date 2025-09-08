@@ -33,7 +33,7 @@ public class ChromosomeMapDataThread implements Runnable {
     public void run() {
         int mapKey = m.getKey();
         if (mapKey != 6 && mapKey != 36 && mapKey != 8 && mapKey != 21 && mapKey != 19 && mapKey != 7
-                && mapKey != 720 && mapKey != 44 && mapKey != 722 && mapKey != 1313 && mapKey != 1410 && mapKey != 1701 && mapKey != 514) {
+                && mapKey != 720 && mapKey != 44 && mapKey != 722 && mapKey != 1313 && mapKey != 1410  && mapKey != 514) {
 //            ExecutorService executor = new MyThreadPoolExecutor(10, 10, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
             try {
                 List<Chromosome> chromosomes = mapDAO.getChromosomes(mapKey);
