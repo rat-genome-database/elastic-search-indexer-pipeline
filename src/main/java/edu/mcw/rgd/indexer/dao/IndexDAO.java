@@ -1,5 +1,6 @@
 package edu.mcw.rgd.indexer.dao;
 
+import com.google.gson.Gson;
 import edu.mcw.rgd.dao.AbstractDAO;
 import edu.mcw.rgd.dao.DataSourceFactory;
 import edu.mcw.rgd.dao.impl.*;
@@ -193,12 +194,17 @@ public class IndexDAO extends AbstractDAO {
     }
     public void getExpressionStudy() throws Exception {
         System.out.println("Started Indexing ... Expression Studies>>>>>>"+new Date());
+//        Gson gson=new Gson();
         GeneExpressionDAO geneExpressionDAO=new GeneExpressionDAO();
+
         List<Study> studies= geneExpressionDAO.getGeneExpressionStudies();
+        System.out.println("TOTAL STUDIES:"+ studies.size());
         ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
         for(Study study: studies) {
-//        Study study=phenominerDAO.getStudy(3040);
-          List<GeneExpression> records=  expressionDAO.getGeneExpressionByStudyId(study.getId(), "TPM");
+//        Study study=geneExpressionDAO.getStudy(3522);
+        List<GeneExpression> records=  expressionDAO.getGeneExpressionByStudyId(study.getId(), "TPM");
+//        List<GeneExpression> records=  expressionDAO.getGeneExpressionByStudyId(3522, "TPM");
+//        System.out.println(gson.toJson(records));
             Runnable workerThread= new IndexExpressionStudy(study, records);
             executor.execute(workerThread);
         }

@@ -27,7 +27,25 @@ public class ExpressionIndexObject {
     private Set<Integer> expressionMapKey;
     private Set<String> clinicalMeasurementId;
     private Set<String> clinicalMeasurementTerms;
+    private Set<String> conditionAccId;
+    private Set<String> conditionTerms;
     private Set<String> expressedGeneSymbols;
+
+    public Set<String> getConditionAccId() {
+        return conditionAccId;
+    }
+
+    public void setConditionAccId(Set<String> conditionAccId) {
+        this.conditionAccId = conditionAccId;
+    }
+
+    public Set<String> getConditionTerms() {
+        return conditionTerms;
+    }
+
+    public void setConditionTerms(Set<String> conditionTerms) {
+        this.conditionTerms = conditionTerms;
+    }
 
     public Set<String> getExpressedGeneSymbols() {
         return expressedGeneSymbols;

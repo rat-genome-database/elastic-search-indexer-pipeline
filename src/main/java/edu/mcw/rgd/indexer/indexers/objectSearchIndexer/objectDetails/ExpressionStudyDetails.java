@@ -7,10 +7,7 @@ import edu.mcw.rgd.datamodel.pheno.Study;
 import edu.mcw.rgd.indexer.model.IndexDocument;
 import edu.mcw.rgd.indexer.model.IndexObject;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ExpressionStudyDetails extends ObjectDetails<Study> {
@@ -30,6 +27,7 @@ public class ExpressionStudyDetails extends ObjectDetails<Study> {
         setExpressionUnit();
         setExpressionLevel();
         setSex();
+        setComputedSex();
         setLifeStage();
         setClinicalMeasurement();
         setTissueAcc();
@@ -52,9 +50,13 @@ public class ExpressionStudyDetails extends ObjectDetails<Study> {
          setVTAcc();
          setStudySource();
 
-         setRGDReference();
+
          ****/
         setClinicalMeasurementTerms();
+       setConditionIds();
+       setConditionTerms();
+       setTraitTerms();
+       setRGDReference();
     }
 
     @Override
@@ -114,6 +116,9 @@ public class ExpressionStudyDetails extends ObjectDetails<Study> {
     }
     synchronized void setSex(){
         obj.setSex( records.stream().map(r->r.getSample().getSex()).filter(Objects::nonNull).collect(Collectors.toSet()));
+    }
+    synchronized void setComputedSex(){
+        obj.setSex( records.stream().map(r->r.getSample().getComputedSex()).filter(Objects::nonNull).collect(Collectors.toSet()));
     }
     synchronized void setStrainAcc(){
         obj.setStrainAccId( records.stream().map(r->r.getSample().getStrainAccId()).filter(Objects::nonNull).collect(Collectors.toSet()));
@@ -193,17 +198,32 @@ public class ExpressionStudyDetails extends ObjectDetails<Study> {
     }
     synchronized void setClinicalMeasurement(){
 //        System.out.println("CMO IDS:"+records.stream().map(r->r.getGeneExpressionRecord().getClinicalMeasurementId()).collect(Collectors.toSet()));
-        obj.setClinicalMeasurementId( records.stream().filter(r->r.getGeneExpressionRecord().getClinicalMeasurementId()>0).map(r->String.valueOf(r.getGeneExpressionRecord().getClinicalMeasurementId())).collect(Collectors.toSet()));
-
+     obj.setClinicalMeasurementId( records.stream().filter(r->r.getGeneExpressionRecord().getClinicalMeasurementId()>0).map(r->String.valueOf(r.getGeneExpressionRecord().getClinicalMeasurementId())).collect(Collectors.toSet()));
     }
     synchronized void setClinicalMeasurementTerms(){
-//        if(obj.getClinicalMeasurementId().size()>0) {
-//            String[] arrayIds = obj.getClinicalMeasurementId().toArray(new String[0]);
-//            List<Term> terms = xdao.getTermByAccId(arrayIds);
-//            if (terms.size() > 0)
-//                obj.setClinicalMeasurementTerms(terms.stream().map(Term::getTerm).collect(Collectors.toSet()));
-//        }
+        if(obj.getClinicalMeasurementId().size()>0) {
+            obj.setClinicalMeasurementTerms(records.stream().filter(r->r.getGeneExpressionRecord().getMeasurementTerm()!=null).map(r->r.getGeneExpressionRecord().getMeasurementTerm()).collect(Collectors.toSet()));
+        }
     }
+    synchronized void setConditionIds(){
 
+        obj.setConditionAccId(records.stream().filter(r->r.getGeneExpressionRecord().getConditionAccId()!=null).map(r->r.getGeneExpressionRecord().getConditionAccId()).collect(Collectors.toSet()));
+
+   }
+    synchronized void setConditionTerms(){
+
+            obj.setConditionTerms(records.stream().filter(r->r.getGeneExpressionRecord().getExperimentCondition()!=null).map(r->r.getGeneExpressionRecord().getExperimentCondition()).collect(Collectors.toSet()));
+
+    }
+    synchronized void setTraitTerms(){
+
+        obj.setTraitTerms(records.stream().filter(r->r.getGeneExpressionRecord().getTraitTerm()!=null).map(r->r.getGeneExpressionRecord().getTraitTerm()).collect(Collectors.toSet()));
+
+    }
+    synchronized void setRGDReference(){
+
+        obj.setRefRgdId(records.stream().map(GeneExpression::getRefRgdId).filter(refRgdId -> refRgdId >0).collect(Collectors.toSet()));
+
+    }
 
 }
