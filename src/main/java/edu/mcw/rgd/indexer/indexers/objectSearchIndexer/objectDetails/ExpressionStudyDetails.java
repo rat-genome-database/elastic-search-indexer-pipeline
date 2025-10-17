@@ -60,12 +60,12 @@ public class ExpressionStudyDetails extends ObjectDetails<Study> {
     }
 
     @Override
-    public synchronized int getRgdId() {
+    public  int getRgdId() {
         return 0;
     }
 
     @Override
-    public synchronized int getSpeciesTypeKey() {
+    public  int getSpeciesTypeKey() {
         Set<Integer> speciesTypeKeys= records.stream().map(r->r.getGeneExpressionRecord().getSpeciesTypeKey()).collect(Collectors.toSet());
         if(speciesTypeKeys.size()>0)
             return speciesTypeKeys.stream().toList().get(0);
@@ -73,7 +73,7 @@ public class ExpressionStudyDetails extends ObjectDetails<Study> {
     }
 
     @Override
-    public synchronized void mapObject() {
+    public  void mapObject() {
         obj.setTerm_acc(String.valueOf(t.getId()));
         obj.setName(t.getName());
         obj.setSource(t.getSource());
@@ -83,18 +83,18 @@ public class ExpressionStudyDetails extends ObjectDetails<Study> {
    }
 
     @Override
-    public synchronized void mapAnnotations() {
+    public  void mapAnnotations() {
 
     }
 
     @Override
-    public synchronized void mapAssociations() {
+    public  void mapAssociations() {
 
     }
 
 
     @Override
-    public synchronized void index()  {
+    public  void index()  {
 
        mapObject();
        mapSpecies();
@@ -102,29 +102,29 @@ public class ExpressionStudyDetails extends ObjectDetails<Study> {
 
         IndexDocument.index(obj);
     }
-    synchronized void setGeneSymbols(){
+     void setGeneSymbols(){
         obj.setExpressedGeneSymbols( records.stream().map(r->r.getGeneExpressionRecordValue().getExpressedGeneSymbol()).filter(Objects::nonNull).collect(Collectors.toSet()));
     }
-    synchronized void setGeoSampleAcc(){
+     void setGeoSampleAcc(){
        obj.setGeoSampleAcc( records.stream().map(r->r.getSample().getGeoSampleAcc()).filter(Objects::nonNull).collect(Collectors.toSet()));
     }
-    synchronized void setBioSampleId(){
+     void setBioSampleId(){
         obj.setBioSampleId( records.stream().map(r->r.getSample().getBioSampleId()).filter(Objects::nonNull).collect(Collectors.toSet()));
     }
-    synchronized void setLifeStage(){
+     void setLifeStage(){
         obj.setLifeStage( records.stream().map(r->r.getSample().getLifeStage()).filter(Objects::nonNull).collect(Collectors.toSet()));
     }
-    synchronized void setSex(){
+     void setSex(){
         obj.setSex( records.stream().map(r->r.getSample().getSex()).filter(Objects::nonNull).collect(Collectors.toSet()));
     }
-    synchronized void setComputedSex(){
+     void setComputedSex(){
         obj.setSex( records.stream().map(r->r.getSample().getComputedSex()).filter(Objects::nonNull).collect(Collectors.toSet()));
     }
-    synchronized void setStrainAcc(){
+     void setStrainAcc(){
         obj.setStrainAccId( records.stream().map(r->r.getSample().getStrainAccId()).filter(Objects::nonNull).collect(Collectors.toSet()));
 
     }
-    synchronized void setStrainTerms() throws Exception {
+     void setStrainTerms() throws Exception {
         if(obj.getStrainAccId().size()>0) {
             String[] arrayIds = obj.getStrainAccId().toArray(new String[0]);
             List<Term> terms = ontologyXDAO.getTermByAccId(arrayIds);
@@ -132,11 +132,11 @@ public class ExpressionStudyDetails extends ObjectDetails<Study> {
                 obj.setStrainTerms(terms.stream().map(Term::getTerm).collect(Collectors.toSet()));
         }
     }
-    synchronized void setCellTypeAcc(){
+     void setCellTypeAcc(){
         obj.setCellTypeAccId( records.stream().map(r->r.getSample().getCellTypeAccId()).filter(Objects::nonNull).collect(Collectors.toSet()));
 
     }
-    synchronized void setCellTypeTerms() {
+     void setCellTypeTerms() {
         if(obj.getCellTypeAccId().size()>0) {
             String[] arrayIds = obj.getCellTypeAccId().toArray(new String[0]);
             List<Term> terms = null;
@@ -149,11 +149,11 @@ public class ExpressionStudyDetails extends ObjectDetails<Study> {
                 obj.setCellTypeTerms(terms.stream().map(Term::getTerm).collect(Collectors.toSet()));
         }
     }
-    synchronized void setTissueAcc(){
+     void setTissueAcc(){
         obj.setTissueAccId( records.stream().map(r->r.getSample().getTissueAccId()).filter(Objects::nonNull).collect(Collectors.toSet()));
 
     }
-    synchronized void setTissueTerms() {
+     void setTissueTerms() {
         if(obj.getTissueAccId().size()>0) {
             String[] arrayIds = obj.getTissueAccId().toArray(new String[0]);
             List<Term> terms = null;
@@ -166,25 +166,25 @@ public class ExpressionStudyDetails extends ObjectDetails<Study> {
                 obj.setTissueTerms(terms.stream().map(Term::getTerm).collect(Collectors.toSet()));
         }
     }
-    synchronized void setExpressionLevel(){
+     void setExpressionLevel(){
         obj.setExpressionLevel( records.stream().map(r->r.getGeneExpressionRecordValue().getExpressionLevel()).filter(Objects::nonNull).collect(Collectors.toSet()));
 
     }
-    synchronized void setExpressionUnit(){
+     void setExpressionUnit(){
         obj.setExpressionUnit( records.stream().map(r->r.getGeneExpressionRecordValue().getExpressionUnit()).filter(Objects::nonNull).collect(Collectors.toSet()));
 
     }
-    synchronized void setExperimentId(){
+     void setExperimentId(){
         obj.setExperimentId( records.stream().map(r->r.getGeneExpressionRecord().getExperimentId()).collect(Collectors.toSet()));
 
     }
-    synchronized void setGEOSeriesAcc(){
+     void setGEOSeriesAcc(){
        Set<String> geoSeriesAccIds=records.stream().map(GeneExpression::getGeoSeriesAcc).collect(Collectors.toSet());
        geoSeriesAccIds.add(t.getGeoSeriesAcc());
         obj.setGeoSeriesAcc( geoSeriesAccIds);
 
     }
-    synchronized void setSample()  {
+     void setSample()  {
         Set<String> sampleIds=records.stream().map(r->String.valueOf(r.getSample().getGeoSampleAcc())).collect(Collectors.toSet());
         if(sampleIds.size()>0){
             obj.setSample( sampleIds);
@@ -192,35 +192,35 @@ public class ExpressionStudyDetails extends ObjectDetails<Study> {
 
 
     }
-    synchronized void setMap(){
+     void setMap(){
         obj.setExpressionMapKey( records.stream().map(r->r.getGeneExpressionRecordValue().getMapKey()).filter(obj -> true).collect(Collectors.toSet()));
 
     }
-    synchronized void setClinicalMeasurement(){
+     void setClinicalMeasurement(){
 //        System.out.println("CMO IDS:"+records.stream().map(r->r.getGeneExpressionRecord().getClinicalMeasurementId()).collect(Collectors.toSet()));
      obj.setClinicalMeasurementId( records.stream().filter(r->r.getGeneExpressionRecord().getClinicalMeasurementId()>0).map(r->String.valueOf(r.getGeneExpressionRecord().getClinicalMeasurementId())).collect(Collectors.toSet()));
     }
-    synchronized void setClinicalMeasurementTerms(){
+     void setClinicalMeasurementTerms(){
         if(obj.getClinicalMeasurementId().size()>0) {
             obj.setClinicalMeasurementTerms(records.stream().filter(r->r.getGeneExpressionRecord().getMeasurementTerm()!=null).map(r->r.getGeneExpressionRecord().getMeasurementTerm()).collect(Collectors.toSet()));
         }
     }
-    synchronized void setConditionIds(){
+     void setConditionIds(){
 
         obj.setConditionAccId(records.stream().filter(r->r.getGeneExpressionRecord().getConditionAccId()!=null).map(r->r.getGeneExpressionRecord().getConditionAccId()).collect(Collectors.toSet()));
 
    }
-    synchronized void setConditionTerms(){
+     void setConditionTerms(){
 
             obj.setConditionTerms(records.stream().filter(r->r.getGeneExpressionRecord().getExperimentCondition()!=null).map(r->r.getGeneExpressionRecord().getExperimentCondition()).collect(Collectors.toSet()));
 
     }
-    synchronized void setTraitTerms(){
+     void setTraitTerms(){
 
         obj.setTraitTerms(records.stream().filter(r->r.getGeneExpressionRecord().getTraitTerm()!=null).map(r->r.getGeneExpressionRecord().getTraitTerm()).collect(Collectors.toSet()));
 
     }
-    synchronized void setRGDReference(){
+     void setRGDReference(){
 
         obj.setRefRgdId(records.stream().map(GeneExpression::getRefRgdId).filter(refRgdId -> refRgdId >0).collect(Collectors.toSet()));
 

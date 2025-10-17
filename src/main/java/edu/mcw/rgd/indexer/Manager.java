@@ -68,7 +68,7 @@ public class Manager {
 
    private ClientInit clientInit;
     IndexDAO indexDAO=new IndexDAO();
-    private final Logger log = LogManager.getLogger("main");
+    private final Logger log = LogManager.getLogger(Manager.class);
 
     public static void main(String[] args) throws Exception {
 
