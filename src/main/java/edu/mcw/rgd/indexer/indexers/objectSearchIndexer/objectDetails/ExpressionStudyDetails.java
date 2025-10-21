@@ -1,9 +1,11 @@
 package edu.mcw.rgd.indexer.indexers.objectSearchIndexer.objectDetails;
 
 
+import edu.mcw.rgd.dao.impl.GeneExpressionDAO;
 import edu.mcw.rgd.datamodel.GeneExpression;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.pheno.Study;
+import edu.mcw.rgd.indexer.dao.variants.VariantIndexingThread;
 import edu.mcw.rgd.indexer.model.IndexDocument;
 import edu.mcw.rgd.indexer.model.IndexObject;
 
@@ -12,10 +14,19 @@ import java.util.stream.Collectors;
 
 public class ExpressionStudyDetails extends ObjectDetails<Study> {
     private final List<GeneExpression> records;
+    private  Set<Integer> recordIds;
+    private List<List<Integer>> batches;
+    GeneExpressionDAO geneExpressionDAO=new GeneExpressionDAO();
    public ExpressionStudyDetails(Study study, IndexObject object, List<GeneExpression> records) {
         super(study, object);
         this.records=records;
-        if(records.size()>0) {
+        this.recordIds=records.stream().map(r->r.getGeneExpressionRecord().getId()).collect(Collectors.toSet());
+       try {
+           this.batches=split(recordIds.stream().map(id->id).collect(Collectors.toList()), 500);
+       } catch (Exception e) {
+           throw new RuntimeException(e);
+       }
+       if(records.size()>0) {
            setMetaData();
         }
     }
@@ -98,12 +109,26 @@ public class ExpressionStudyDetails extends ObjectDetails<Study> {
 
        mapObject();
        mapSpecies();
-
-
-        IndexDocument.index(obj);
+       IndexDocument.index(obj);
     }
-     void setGeneSymbols(){
-        obj.setExpressedGeneSymbols( records.stream().map(r->r.getGeneExpressionRecordValue().getExpressedGeneSymbol()).filter(Objects::nonNull).collect(Collectors.toSet()));
+    synchronized void setGeneSymbols() {
+        try {
+            Set<String> symbols =new HashSet<>();
+            try {
+                batches = split((List<Integer>) recordIds, 500);
+                for (List<Integer> batch : batches) {
+                   symbols.addAll(geneExpressionDAO.getAnnotatedObjectsByRecordIds(new HashSet<>(batch)));
+                }
+            } catch (Exception e) {
+            }
+
+
+            obj.setExpressedGeneSymbols(symbols);
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
     }
      void setGeoSampleAcc(){
        obj.setGeoSampleAcc( records.stream().map(r->r.getSample().getGeoSampleAcc()).filter(Objects::nonNull).collect(Collectors.toSet()));
@@ -167,14 +192,56 @@ public class ExpressionStudyDetails extends ObjectDetails<Study> {
         }
     }
      void setExpressionLevel(){
-        obj.setExpressionLevel( records.stream().map(r->r.getGeneExpressionRecordValue().getExpressionLevel()).filter(Objects::nonNull).collect(Collectors.toSet()));
+      //  obj.setExpressionLevel( records.stream().map(r->r.getGeneExpressionRecordValue().getExpressionLevel()).filter(Objects::nonNull).collect(Collectors.toSet()));
+         try {
+             Set<String> levels =new HashSet<>();
+             try {
 
-    }
-     void setExpressionUnit(){
-        obj.setExpressionUnit( records.stream().map(r->r.getGeneExpressionRecordValue().getExpressionUnit()).filter(Objects::nonNull).collect(Collectors.toSet()));
+                 for (List<Integer> batch : batches) {
+                     levels.addAll(geneExpressionDAO.getExpressionLevelByRecordIds((Set<Integer>) batch));
+                 }
+             } catch (Exception ignored) {}
 
+
+             obj.setExpressionLevel(levels);
+
+         } catch (Exception e) {
+             throw new RuntimeException(e);
+         }
+//         try {
+//             List<String> levels=geneExpressionDAO.getExpressionLevelByRecordIds(recordIds);
+//             obj.setExpressionLevel(new HashSet<>(levels));
+//         } catch (Exception e) {
+//             throw new RuntimeException(e);
+//         }
+
+     }
+     synchronized void setExpressionUnit(){
+//        obj.setExpressionUnit( records.stream().map(r->r.getGeneExpressionRecordValue().getExpressionUnit()).filter(Objects::nonNull).collect(Collectors.toSet()));
+
+//         try {
+//             List<String> units=geneExpressionDAO.getExpressionUnitByRecordIds(recordIds);
+//             obj.setExpressionUnit(new HashSet<>(units));
+//         } catch (Exception e) {
+//             throw new RuntimeException(e);
+//         }
+         try {
+             Set<String> units =new HashSet<>();
+             try {
+
+                 for (List<Integer> batch : batches) {
+                     units.addAll(geneExpressionDAO.getExpressionUnitByRecordIds((Set<Integer>) batch));
+                 }
+             } catch (Exception ignored) {}
+
+
+             obj.setExpressionLevel(units);
+
+         } catch (Exception e) {
+             throw new RuntimeException(e);
+         }
     }
-     void setExperimentId(){
+    synchronized void setExperimentId(){
         obj.setExperimentId( records.stream().map(r->r.getGeneExpressionRecord().getExperimentId()).collect(Collectors.toSet()));
 
     }
