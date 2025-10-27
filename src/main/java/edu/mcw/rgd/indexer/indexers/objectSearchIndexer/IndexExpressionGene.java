@@ -30,7 +30,7 @@ public class IndexExpressionGene extends GeneExpressionDAO implements Runnable{
     public void setRecords(){
         try {
             this.records= getGeneExpressionObjectsByRgdIdUnit(gene.getRgdId(), "TPM")
-                    .stream().filter(r->
+                    .stream().filter(r->r.getGeneExpressionRecordValue().getExpressionLevel()!=null).filter(r->
                             ( r.getGeneExpressionRecordValue().getExpressionLevel().equalsIgnoreCase("high") ||
                                     r.getGeneExpressionRecordValue().getExpressionLevel().equalsIgnoreCase("low"))).collect(Collectors.toList());
         } catch (Exception e) {
