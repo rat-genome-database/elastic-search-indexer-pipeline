@@ -65,7 +65,7 @@ public class ExpressionDataIndexer implements Runnable{
     void setExpressionRecords()  {
         try {
             this.records= geneExpressionDAO.getGeneExpressionObjectsByRgdIdUnit(gene.getRgdId(), "TPM")
-                    .stream().filter(r->
+                    .stream().filter(r->r.getGeneExpressionRecordValue().getExpressionLevel()!=null).filter(r->
                             ( r.getGeneExpressionRecordValue().getExpressionLevel().equalsIgnoreCase("high") ||
                                     r.getGeneExpressionRecordValue().getExpressionLevel().equalsIgnoreCase("low") ||
                                     r.getGeneExpressionRecordValue().getExpressionLevel().equalsIgnoreCase("medium") )).collect(Collectors.toList());
