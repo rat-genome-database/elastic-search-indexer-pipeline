@@ -7,19 +7,22 @@ import edu.mcw.rgd.indexer.model.IndexObject;
 import edu.mcw.rgd.indexer.indexers.objectSearchIndexer.objectDetails.ExpressionDetails;
 import edu.mcw.rgd.indexer.indexers.objectSearchIndexer.objectDetails.ObjectDetails;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 
 public class IndexExpressionGene extends GeneExpressionDAO implements Runnable{
-    private Gene gene;
-    List<GeneExpression> records;
+    private final Gene gene;
+
     public IndexExpressionGene(Gene gene){
         this.gene=gene;
-        setRecords();
+
     }
     @Override
     public void run() {
+        List<GeneExpression> records= new ArrayList<>();
+        records=getExpressionRecords();
         if(records.size()>0) {
             IndexObject object = new IndexObject();
             object.setCategory("Expressed Gene");
@@ -27,12 +30,12 @@ public class IndexExpressionGene extends GeneExpressionDAO implements Runnable{
             details.index();
         }
     }
-    public void setRecords(){
+    public List<GeneExpression> getExpressionRecords(){
         try {
-            this.records= getGeneExpressionObjectsByRgdIdUnit(gene.getRgdId(), "TPM")
-                    .stream().filter(r->r.getGeneExpressionRecordValue().getExpressionLevel()!=null).filter(r->
-                            ( r.getGeneExpressionRecordValue().getExpressionLevel().equalsIgnoreCase("high") ||
-                                    r.getGeneExpressionRecordValue().getExpressionLevel().equalsIgnoreCase("low"))).collect(Collectors.toList());
+            return getGeneExpressionObjectsByRgdIdUnit(gene.getRgdId(), "TPM");
+//                    .stream().filter(r->r.getGeneExpressionRecordValue().getExpressionLevel()!=null).filter(r->
+//                            ( r.getGeneExpressionRecordValue().getExpressionLevel().equalsIgnoreCase("high") ||
+//                                    r.getGeneExpressionRecordValue().getExpressionLevel().equalsIgnoreCase("low"))).collect(Collectors.toList());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
