@@ -5,7 +5,6 @@ import edu.mcw.rgd.dao.impl.GeneExpressionDAO;
 import edu.mcw.rgd.datamodel.GeneExpression;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.pheno.Study;
-import edu.mcw.rgd.indexer.dao.variants.VariantIndexingThread;
 import edu.mcw.rgd.indexer.model.IndexDocument;
 import edu.mcw.rgd.indexer.model.IndexObject;
 
@@ -111,17 +110,15 @@ public class ExpressionStudyDetails extends ObjectDetails<Study> {
        mapSpecies();
        IndexDocument.index(obj);
     }
-    synchronized void setGeneSymbols() {
+     void setGeneSymbols() {
         try {
             Set<String> symbols =new HashSet<>();
             try {
-                batches = split((List<Integer>) recordIds, 500);
                 for (List<Integer> batch : batches) {
                    symbols.addAll(geneExpressionDAO.getAnnotatedObjectsByRecordIds(new HashSet<>(batch)));
                 }
             } catch (Exception e) {
             }
-
 
             obj.setExpressedGeneSymbols(symbols);
 
