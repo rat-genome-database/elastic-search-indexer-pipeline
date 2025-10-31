@@ -40,7 +40,7 @@ dependencies {
     implementation 'com.oracle.database.jdbc:ojdbc11:23.2.0.0'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.14.1' // it was 2.9.7
 // https://mvnrepository.com/artifact/com.oracle.database.jdbc/ojdbc11
-    implementation group: 'com.oracle.database.jdbc', name: 'ojdbc11', version: '23.3.0.23.09'
+//    implementation group: 'com.oracle.database.jdbc', name: 'ojdbc11', version: '23.3.0.23.09'
 // https://mvnrepository.com/artifact/org.springframework/spring-beans
     implementation group: 'org.springframework', name: 'spring-beans', version: '6.1.1'
 // https://mvnrepository.com/artifact/org.springframework/spring-jdbc
