@@ -62,7 +62,7 @@
     </Appenders>
 
     <Loggers>
-        <Root level="INFO">
+        <Root level="info">
             <AppenderRef ref="Console"/>
         </Root>
         <!-- daily -->
