@@ -82,6 +82,10 @@
           "source": {
             "type": "text",
             "analyzer": "english_analyzer"
+          },
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
           }
         }
       },

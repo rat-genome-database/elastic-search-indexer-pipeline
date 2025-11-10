@@ -195,7 +195,7 @@ public class ExpressionStudyDetails extends ObjectDetails<Study> {
              try {
 
                  for (List<Integer> batch : batches) {
-                     levels.addAll(geneExpressionDAO.getExpressionLevelByRecordIds((Set<Integer>) batch));
+                     levels.addAll(geneExpressionDAO.getExpressionLevelByRecordIds(new HashSet<>(batch)));
                  }
              } catch (Exception ignored) {}
 
@@ -227,12 +227,12 @@ public class ExpressionStudyDetails extends ObjectDetails<Study> {
              try {
 
                  for (List<Integer> batch : batches) {
-                     units.addAll(geneExpressionDAO.getExpressionUnitByRecordIds((Set<Integer>) batch));
+                     units.addAll(geneExpressionDAO.getExpressionUnitByRecordIds((new HashSet<>(batch))));
                  }
              } catch (Exception ignored) {}
 
 
-             obj.setExpressionLevel(units);
+             obj.setExpressionUnit(units);
 
          } catch (Exception e) {
              throw new RuntimeException(e);

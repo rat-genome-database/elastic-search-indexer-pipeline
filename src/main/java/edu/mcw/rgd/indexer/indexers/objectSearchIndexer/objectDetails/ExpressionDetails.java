@@ -59,6 +59,7 @@ public class ExpressionDetails extends GeneDetails{
             setConditionTerms();
             setTraitTerms();
             setRGDReference();
+            setStudySource();
             IndexDocument.index(obj);
         }
     }
@@ -179,6 +180,10 @@ public class ExpressionDetails extends GeneDetails{
     void setRGDReference(){
 
         obj.setRefRgdId(records.stream().map(GeneExpression::getRefRgdId).filter(refRgdId -> refRgdId >0).collect(Collectors.toSet()));
+
+    }
+    void setStudySource(){
+        obj.setExpressionSource(records.stream().map(GeneExpression::getStudySource).collect(Collectors.toSet()));
 
     }
 }

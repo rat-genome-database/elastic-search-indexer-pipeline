@@ -30,6 +30,15 @@ public class ExpressionIndexObject {
     private Set<String> conditionAccId;
     private Set<String> conditionTerms;
     private Set<String> expressedGeneSymbols;
+    private Set<String> expressionSource;
+
+    public Set<String> getExpressionSource() {
+        return expressionSource;
+    }
+
+    public void setExpressionSource(Set<String> expressionSource) {
+        this.expressionSource = expressionSource;
+    }
 
     public Set<String> getConditionAccId() {
         return conditionAccId;
