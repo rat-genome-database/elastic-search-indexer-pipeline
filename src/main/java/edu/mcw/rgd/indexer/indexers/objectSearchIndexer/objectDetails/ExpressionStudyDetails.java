@@ -86,7 +86,7 @@ public class ExpressionStudyDetails extends ObjectDetails<Study> {
     public  void mapObject() {
         obj.setTerm_acc(String.valueOf(t.getId()));
         obj.setName(t.getName());
-        obj.setSource(t.getSource());
+        obj.setExpressionSource(Collections.singleton(t.getSource()));
         obj.setType(t.getType());
         if(t.getGeoSeriesAcc()!=null && !t.getGeoSeriesAcc().equals(""))
             obj.setXdbIdentifiers(Collections.singletonList(t.getGeoSeriesAcc()));
