@@ -3,8 +3,6 @@ package edu.mcw.rgd.indexer.dao.variants;
 
 import edu.mcw.rgd.indexer.model.IndexDocument;
 import edu.mcw.rgd.indexer.model.variants.VariantIndex;
-import org.elasticsearch.common.recycler.Recycler;
-
 
 import java.util.*;
 
