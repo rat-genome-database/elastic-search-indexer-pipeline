@@ -1,18 +1,11 @@
 package edu.mcw.rgd.indexer.dao.variants;
 
-import edu.mcw.rgd.datamodel.SpeciesType;
-import edu.mcw.rgd.indexer.MyThreadPoolExecutor;
-;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+
 
 
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
+
 
 public class VariantIndexerThread implements Runnable {
     private final String chr;
