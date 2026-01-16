@@ -8,7 +8,8 @@ tasks.whenTaskAdded { task ->
 }
 apply plugin: 'java'
 apply plugin: 'application'
-
+sourceCompatibility = '17'
+targetCompatibility = '17'
 
 mainClassName = "edu.mcw.rgd.indexer.Manager"
 applicationDefaultJvmArgs = ["-Dgreeting.language=en"]
@@ -30,21 +31,17 @@ dependencies {
     implementation 'org.elasticsearch.client:elasticsearch-rest-high-level-client:7.17.4'
     implementation 'org.apache.lucene:lucene-core:8.2.0'
     implementation group: 'io.netty', name: 'netty-all', version: '4.1.87.Final'
-// https://mvnrepository.com/artifact/org.apache.commons/commons-dbcp2
     implementation group: 'org.apache.commons', name: 'commons-dbcp2', version: '2.9.0'
-
-    implementation group: 'commons-dbcp', name: 'commons-dbcp', version: '1.4'
     implementation 'commons-lang:commons-lang:2.6'
-//    implementation 'commons-logging:commons-logging:1.2'
     implementation 'org.apache.logging.log4j:log4j-api:2.19.0'
     implementation 'org.apache.logging.log4j:log4j-core:2.19.0'
 
-    implementation 'org.jsoup:jsoup:1.8.3'
+    implementation 'org.jsoup:jsoup:1.15.3'
     implementation 'com.google.code.gson:gson:2.9.0'
-
+    implementation 'com.oracle.database.jdbc:ojdbc11:23.2.0.0'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.14.1' // it was 2.9.7
 // https://mvnrepository.com/artifact/com.oracle.database.jdbc/ojdbc11
-    implementation group: 'com.oracle.database.jdbc', name: 'ojdbc11', version: '23.3.0.23.09'
+//    implementation group: 'com.oracle.database.jdbc', name: 'ojdbc11', version: '23.3.0.23.09'
 // https://mvnrepository.com/artifact/org.springframework/spring-beans
     implementation group: 'org.springframework', name: 'spring-beans', version: '6.1.1'
 // https://mvnrepository.com/artifact/org.springframework/spring-jdbc
