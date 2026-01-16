@@ -6,7 +6,7 @@ import edu.mcw.rgd.dao.impl.*;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
 import edu.mcw.rgd.indexer.MyThreadPoolExecutor;
-import edu.mcw.rgd.indexer.objectSearchIndexer.IndexOntTerm;
+import edu.mcw.rgd.indexer.indexers.objectSearchIndexer.IndexOntTerm;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

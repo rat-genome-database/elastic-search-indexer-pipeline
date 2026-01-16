@@ -52,6 +52,24 @@ public class IndexObject extends ExpressionIndexObject {
     private Set<String> sex;
     private Set<String> expressionLevel;
     private Set<String>expressionUnit;
+    private Set<Integer> refRgdId;
+    private Set<String> traitTerms;
+
+    public Set<String> getTraitTerms() {
+        return traitTerms;
+    }
+
+    public void setTraitTerms(Set<String> traitTerms) {
+        this.traitTerms = traitTerms;
+    }
+
+    public Set<Integer> getRefRgdId() {
+        return refRgdId;
+    }
+
+    public void setRefRgdId(Set<Integer> refRgdId) {
+        this.refRgdId = refRgdId;
+    }
 
     public Set<String> getLifeStage() {
         return lifeStage;

@@ -1,8 +1,6 @@
 package edu.mcw.rgd.indexer.dao;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import edu.mcw.rgd.dao.AbstractDAO;
 import edu.mcw.rgd.dao.DataSourceFactory;
 import edu.mcw.rgd.dao.impl.*;
@@ -20,35 +18,29 @@ import edu.mcw.rgd.datamodel.ontologyx.TermWithStats;
 import edu.mcw.rgd.datamodel.pheno.Study;
 import edu.mcw.rgd.indexer.MyThreadPoolExecutor;
 import edu.mcw.rgd.indexer.OntologySynonyms;
-import edu.mcw.rgd.indexer.dao.variants.BulkIndexProcessor;
-import edu.mcw.rgd.indexer.dao.variants.VariantIndexerThread;
-import edu.mcw.rgd.indexer.objectSearchIndexer.*;
+import edu.mcw.rgd.indexer.dao.variants.VariantDao;
+import edu.mcw.rgd.indexer.dao.variants.VariantIndexingThread;
+import edu.mcw.rgd.indexer.dao.variants.VariantProcessingThread;
+import edu.mcw.rgd.indexer.indexers.objectSearchIndexer.*;
 import edu.mcw.rgd.indexer.model.*;
 
-import edu.mcw.rgd.indexer.model.genomeInfo.AssemblyInfo;
-import edu.mcw.rgd.indexer.model.genomeInfo.GeneCounts;
-import edu.mcw.rgd.indexer.model.genomeInfo.GenomeIndexObject;
+import edu.mcw.rgd.indexer.model.variants.VariantIndex;
 import edu.mcw.rgd.process.AnnotationFormatter;
 import edu.mcw.rgd.process.Utils;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.xcontent.XContentType;
+import org.elasticsearch.common.recycler.Recycler;
 
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 
 import java.sql.Statement;
 import java.util.*;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by jthota on 3/23/2017.
@@ -66,6 +58,7 @@ public class IndexDAO extends AbstractDAO {
      MapDAO mapDAO = new MapDAO();
      TranscriptDAO transcriptDAO = new TranscriptDAO();
      AssociationDAO adao = new AssociationDAO();
+     GeneExpressionDAO expressionDAO=new GeneExpressionDAO();
      public OntologyXDAO ontologyXDAO=new OntologyXDAO();
 
     private VariantInfoDAO vdao= new VariantInfoDAO();
@@ -81,75 +74,75 @@ public class IndexDAO extends AbstractDAO {
     Map<Integer, edu.mcw.rgd.datamodel.Map> rgdMaps=new HashMap<>();
 
 
-    public List<GenomeIndexObject> getGenomeInfo() throws Exception {
-        List<GenomeIndexObject> objects= new ArrayList<>();
-        for(int speciesTypeKey : SpeciesType.getSpeciesTypeKeys()) {
-            //  int key=3;
-            boolean isSearchable=SpeciesType.isSearchable(speciesTypeKey);
-            if (speciesTypeKey != 0 && isSearchable) {
-             //   System.out.println("SPECIES TYPE KEY: " + key);
-                String species = SpeciesType.getCommonName(speciesTypeKey);
-                List<edu.mcw.rgd.datamodel.Map> maps = mapDAO.getMaps(speciesTypeKey);
-                for (edu.mcw.rgd.datamodel.Map m : maps) {
-
-                    GenomeIndexObject obj = new GenomeIndexObject();
-                    obj.setSpecies(species);
-                    AssemblyInfo info = new AssemblyInfo();
-                    info = genomeDAO.getAssemblyInfo(m);
-                    //    info=genomeDAO.getAssemblyInfo(3, 70);
-                    obj.setBasePairs(info.getBasePairs());
-                    obj.setTotalSeqLength(info.getTotalSeqLength());
-                    obj.setTotalUngappedLength(info.getTotalUngappedLength());
-                    obj.setGapBetweenScaffolds(info.getGapBetweenScaffolds());
-                    obj.setScaffolds(info.getScaffolds());
-                    obj.setScaffoldN50(info.getScaffoldN50());
-                    obj.setScaffoldL50(info.getScaffoldL50());
-                    obj.setContigs(info.getContigs());
-                    obj.setContigN50(info.getContigN50());
-                    obj.setContigL50(info.getContigL50());
-                    obj.setChromosomes(info.getChromosome());
-                    obj.setNcbiLink(info.getNcbiLink());
-                    obj.setRefSeqAssemblyAccession(info.getRefSeqAssemblyAccession());
-                    obj.setMapKey(m.getKey());
-                    //      obj.setMapKey(70);
-
-                    GeneCounts geneCounts = new GeneCounts();
-                    geneCounts = genomeDAO.getGeneCounts(m.getKey(), speciesTypeKey, null);
-                    // geneCounts= genomeDAO.getGeneCounts(70);
-                    obj.setTotalGenes(geneCounts.getTotalGenes());
-                    obj.setProteinCoding(geneCounts.getProteinCoding());
-                    obj.setNcrna(geneCounts.getNcrna());
-                    obj.settRna(geneCounts.gettRna());
-                    obj.setSnRna(geneCounts.getSnRna());
-                    obj.setrRna(geneCounts.getrRna());
-                    obj.setPseudo(geneCounts.getPseudo());
-                    obj.setTranscripts(geneCounts.getTranscripts());
-
-                    Map<String, Integer> mirnaTargets = geneCounts.getMirnaTargets();
-                    for (Map.Entry entry : mirnaTargets.entrySet()) {
-                        String targetType = (String) entry.getKey();
-                        int value = (int) entry.getValue();
-                        if (targetType.equalsIgnoreCase("confirmed")) {
-                            obj.setMirnaTargetsConfirmed(value);
-                        }
-                        if (targetType.equalsIgnoreCase("predicted")) {
-                            obj.setMirnaTargetsPredicted(value);
-                        }
-                    }
-                    objects.add(obj);
-                }
-
-            }else{
-                if(speciesTypeKey==3 || speciesTypeKey==2 || speciesTypeKey==1 || speciesTypeKey==4 || speciesTypeKey==5
-                        || speciesTypeKey==7 || speciesTypeKey==6 || speciesTypeKey==9){
-                    throw new Exception("Species Type Key: " +speciesTypeKey +"\tin getGenomeInfo Method"+"\t isSearchable: "+ isSearchable);
-                }
-            }
-        }
-     //   System.out.println("GENOMEINFO OBJECTS SIZE: "+ objects.size());
-
-        return objects;
-    }
+//    public List<GenomeIndexObject> getGenomeInfo() throws Exception {
+//        List<GenomeIndexObject> objects= new ArrayList<>();
+//        for(int speciesTypeKey : SpeciesType.getSpeciesTypeKeys()) {
+//            //  int key=3;
+//            boolean isSearchable=SpeciesType.isSearchable(speciesTypeKey);
+//            if (speciesTypeKey != 0 && isSearchable) {
+//             //   System.out.println("SPECIES TYPE KEY: " + key);
+//                String species = SpeciesType.getCommonName(speciesTypeKey);
+//                List<edu.mcw.rgd.datamodel.Map> maps = mapDAO.getMaps(speciesTypeKey);
+//                for (edu.mcw.rgd.datamodel.Map m : maps) {
+//
+//                    GenomeIndexObject obj = new GenomeIndexObject();
+//                    obj.setSpecies(species);
+//                    AssemblyInfo info = new AssemblyInfo();
+//                    info = genomeDAO.getAssemblyInfo(m);
+//                    //    info=genomeDAO.getAssemblyInfo(3, 70);
+//                    obj.setBasePairs(info.getBasePairs());
+//                    obj.setTotalSeqLength(info.getTotalSeqLength());
+//                    obj.setTotalUngappedLength(info.getTotalUngappedLength());
+//                    obj.setGapBetweenScaffolds(info.getGapBetweenScaffolds());
+//                    obj.setScaffolds(info.getScaffolds());
+//                    obj.setScaffoldN50(info.getScaffoldN50());
+//                    obj.setScaffoldL50(info.getScaffoldL50());
+//                    obj.setContigs(info.getContigs());
+//                    obj.setContigN50(info.getContigN50());
+//                    obj.setContigL50(info.getContigL50());
+//                    obj.setChromosomes(info.getChromosome());
+//                    obj.setNcbiLink(info.getNcbiLink());
+//                    obj.setRefSeqAssemblyAccession(info.getRefSeqAssemblyAccession());
+//                    obj.setMapKey(m.getKey());
+//                    //      obj.setMapKey(70);
+//
+//                    GeneCounts geneCounts = new GeneCounts();
+//                    geneCounts = genomeDAO.getGeneCounts(m.getKey(), speciesTypeKey, null);
+//                    // geneCounts= genomeDAO.getGeneCounts(70);
+//                    obj.setTotalGenes(geneCounts.getTotalGenes());
+//                    obj.setProteinCoding(geneCounts.getProteinCoding());
+//                    obj.setNcrna(geneCounts.getNcrna());
+//                    obj.settRna(geneCounts.gettRna());
+//                    obj.setSnRna(geneCounts.getSnRna());
+//                    obj.setrRna(geneCounts.getrRna());
+//                    obj.setPseudo(geneCounts.getPseudo());
+//                    obj.setTranscripts(geneCounts.getTranscripts());
+//
+//                    Map<String, Integer> mirnaTargets = geneCounts.getMirnaTargets();
+//                    for (Map.Entry entry : mirnaTargets.entrySet()) {
+//                        String targetType = (String) entry.getKey();
+//                        int value = (int) entry.getValue();
+//                        if (targetType.equalsIgnoreCase("confirmed")) {
+//                            obj.setMirnaTargetsConfirmed(value);
+//                        }
+//                        if (targetType.equalsIgnoreCase("predicted")) {
+//                            obj.setMirnaTargetsPredicted(value);
+//                        }
+//                    }
+//                    objects.add(obj);
+//                }
+//
+//            }else{
+//                if(speciesTypeKey==3 || speciesTypeKey==2 || speciesTypeKey==1 || speciesTypeKey==4 || speciesTypeKey==5
+//                        || speciesTypeKey==7 || speciesTypeKey==6 || speciesTypeKey==9){
+//                    throw new Exception("Species Type Key: " +speciesTypeKey +"\tin getGenomeInfo Method"+"\t isSearchable: "+ isSearchable);
+//                }
+//            }
+//        }
+//     //   System.out.println("GENOMEINFO OBJECTS SIZE: "+ objects.size());
+//
+//        return objects;
+//    }
 
 
     public void getGenes() throws Exception {
@@ -187,26 +180,34 @@ public class IndexDAO extends AbstractDAO {
         executor.shutdown();
         while (!executor.isTerminated()) {}
     }
-    public void getExpression() throws Exception {
-        List<Gene> genes= geneDAO.getAllActiveGenes();
+    public void getExpressionGene() throws Exception {
+        List<Gene> genes= expressionDAO.getAllAnnotatedGenes();
+        System.out.println("GENES:"+ genes.size());
        ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
         for(Gene gene: genes) {
 //            Gene gene= geneDAO.getGene(3876);
-            Runnable workerThread= new IndexExpression(gene);
+            Gene mappedGene=geneDAO.getGene(gene.getRgdId());
+            Runnable workerThread= new IndexExpressionGene(mappedGene);
             executor.execute(workerThread);
-        }
+       }
         executor.shutdown();
         while (!executor.isTerminated()) {}
 
     }
     public void getExpressionStudy() throws Exception {
         System.out.println("Started Indexing ... Expression Studies>>>>>>"+new Date());
+        Gson gson=new Gson();
         GeneExpressionDAO geneExpressionDAO=new GeneExpressionDAO();
+
         List<Study> studies= geneExpressionDAO.getGeneExpressionStudies();
+        System.out.println("TOTAL STUDIES:"+ studies.size());
         ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
         for(Study study: studies) {
-//        Study study=phenominerDAO.getStudy(3040);
-            Runnable workerThread= new IndexExpressionStudy(study);
+//        Study study=geneExpressionDAO.getStudy(3522);
+            List<GeneExpression> records=  expressionDAO.getExpressionMetaDataByStudyId(study.getId());
+//        List<GeneExpression> records=  expressionDAO.getGeneExpressionByStudyId(3522, "TPM");
+ //       System.out.println("STUDY ID:"+ study.getId()+"\t"+gson.toJson(records));
+            Runnable workerThread= new IndexExpressionStudy(study, records);
             executor.execute(workerThread);
         }
         executor.shutdown();
@@ -376,48 +377,48 @@ public class IndexDAO extends AbstractDAO {
        executor.shutdown();
        while (!executor.isTerminated()) {}
     }
-    public Map<Integer, Gene> getStrainAssociations(List<Strain> strains) throws Exception {
-        Map<Integer, Gene> genes= new HashMap<>();
-        List<Integer> rgdIds=new ArrayList<>();
-
-        for(Strain s:strains){
-           rgdIds.add(s.getRgdId());
-        }
-        Collection[] colletions = this.split(rgdIds, 1000);
-
-        for(int i=0; i<colletions.length;i++){
-            List c= (List) colletions[i];
-            try(Connection conn=this.getDataSource().getConnection();
-                Statement stmt= conn.createStatement();){
-            String sql="select s.rgd_id as strain_rgd_id, g.* from genes g, " +
-                    "genes_variations gv, " +
-                    "genes a, rgd_ids r, " +
-                    "strains s," +
-                    "rgd_strains_rgd rs " +
-                    "where gv.gene_key=g.gene_key " +
-                    "AND gv.variation_key=a.gene_key " +
-                    "and a.rgd_id=rs.rgd_id " +
-                    "and rs.strain_key=s.strain_key " +
-                    "and r.rgd_id=g.rgd_id " +
-                    "and r.object_status='ACTIVE' " +
-                    "and s.rgd_id in ("+Utils.concatenate(c,",")+")";
-
-
-          ResultSet rs=stmt.executeQuery(sql);
-            while(rs.next()){
-                Gene g= new Gene();
-                g.setSymbol(rs.getString("gene_symbol").toLowerCase());
-                g.setName(rs.getString("full_name_lc"));
-
-                genes.put(rs.getInt("strain_rgd_id"),g );
-            }
-
-            rs.close();
-        }
-        }
-
-        return genes;
-    }
+//    public Map<Integer, Gene> getStrainAssociations(List<Strain> strains) throws Exception {
+//        Map<Integer, Gene> genes= new HashMap<>();
+//        List<Integer> rgdIds=new ArrayList<>();
+//
+//        for(Strain s:strains){
+//           rgdIds.add(s.getRgdId());
+//        }
+//        Collection[] colletions = this.split(rgdIds, 1000);
+//
+//        for(int i=0; i<colletions.length;i++){
+//            List c= (List) colletions[i];
+//            try(Connection conn=this.getDataSource().getConnection();
+//                Statement stmt= conn.createStatement();){
+//            String sql="select s.rgd_id as strain_rgd_id, g.* from genes g, " +
+//                    "genes_variations gv, " +
+//                    "genes a, rgd_ids r, " +
+//                    "strains s," +
+//                    "rgd_strains_rgd rs " +
+//                    "where gv.gene_key=g.gene_key " +
+//                    "AND gv.variation_key=a.gene_key " +
+//                    "and a.rgd_id=rs.rgd_id " +
+//                    "and rs.strain_key=s.strain_key " +
+//                    "and r.rgd_id=g.rgd_id " +
+//                    "and r.object_status='ACTIVE' " +
+//                    "and s.rgd_id in ("+Utils.concatenate(c,",")+")";
+//
+//
+//          ResultSet rs=stmt.executeQuery(sql);
+//            while(rs.next()){
+//                Gene g= new Gene();
+//                g.setSymbol(rs.getString("gene_symbol").toLowerCase());
+//                g.setName(rs.getString("full_name_lc"));
+//
+//                genes.put(rs.getInt("strain_rgd_id"),g );
+//            }
+//
+//            rs.close();
+//        }
+//        }
+//
+//        return genes;
+//    }
 
     public Gene getStrainAssociations(int rgdId) throws Exception {
             Gene gene=new Gene();
@@ -609,6 +610,7 @@ public class IndexDAO extends AbstractDAO {
     public void getGenomicElements() throws Exception{
         this.getGenomicElements(RgdId.OBJECT_KEY_CELL_LINES);
        this.getGenomicElements(RgdId.OBJECT_KEY_PROMOTERS);
+        this.getGenomicElements(RgdId.OBJECT_KEY_BIOLOGICAL_REGIONS);
     }
     public void getGenomicElements(int objectKey) throws Exception {
         ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
@@ -618,6 +620,9 @@ public class IndexDAO extends AbstractDAO {
         }
         if(objectKey==16){
             category="Promoter";
+        }
+        if(objectKey==25){
+            category="Biological Region";
         }
 
         Map<Integer, List<String>> associations=this.getAssociationsByObjectKey(objectKey);
@@ -677,23 +682,51 @@ public class IndexDAO extends AbstractDAO {
         while (!executor.isTerminated()){}
     }
     public void indexVariantsFromCarpenovoNewTableStructure() throws Exception{
-        ExecutorService executor2 = new MyThreadPoolExecutor(3, 3, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
-        Runnable variantIndexerThread = null;
+        VariantDao variantDao=new VariantDao();
+        System.out.println("run time processors:"+Runtime.getRuntime().availableProcessors());
+ //       ExecutorService executor = Executors.newFixedThreadPool(10 );
+        ExecutorService   executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
 
-        for(int speciesTypeKey:Arrays.asList(2, 3, 6, 9, 13)) {
+//        List<CompletableFuture<Void>> futures = new ArrayList<>();
+
+        List<Integer> speciesKeys = Arrays.asList(2, 3, 6, 9, 13);
+
+        for (int speciesTypeKey : speciesKeys) {
+        //int speciesTypeKey=3;
             String species = SpeciesType.getCommonName(speciesTypeKey);
             System.out.println("Processing " + species + " variants...");
 
-           for( edu.mcw.rgd.datamodel.Map map : mapDAO.getMaps(speciesTypeKey)) {
-               for (Chromosome chr : mapDAO.getChromosomes(map.getKey())) {
-                     variantIndexerThread = new VariantIndexerThread(chr.getChromosome(), map.getKey(), speciesTypeKey);
-                     executor2.execute(variantIndexerThread);
-                   }
-           }
+            List<edu.mcw.rgd.datamodel.Map> maps = mapDAO.getMaps(speciesTypeKey);
+            for (edu.mcw.rgd.datamodel.Map map : maps) {
+                int mapKey = map.getKey();
+                List<Chromosome> chromosomes = mapDAO.getChromosomes(mapKey);
 
+                for (Chromosome chr : chromosomes) {
+                    List<Integer> variantIds = variantDao.getUniqueVariantsIds(chr.getChromosome(), mapKey, speciesTypeKey);
+                    if (variantIds == null || variantIds.isEmpty()) continue;
+
+                    Collection<List<Integer>> batches=new ArrayList<>();
+                    try {
+                        batches = split(variantIds, 500);
+                    } catch (Exception e) {
+                        System.err.println("Failed to split variant IDs for mapKey " + mapKey + ": " + e.getMessage());
+                        continue;
+                    }
+
+                    for (List<Integer> batch : batches) {
+                        Runnable thread=new VariantIndexingThread(batch, mapKey);
+                        executor.execute(thread);
+                    }
+                }
+            }
         }
-        executor2.shutdown();
-        while (!executor2.isTerminated()) {}
+
+
+// Shutdown the executor
+        executor.shutdown();
+        while (!executor.isTerminated()){}
+        System.out.println("All variant indexing tasks completed.");
+
     }
     public void getReference() throws Exception{
 
@@ -785,14 +818,14 @@ public class IndexDAO extends AbstractDAO {
     }
     /*************************************************************************************************/
 
-    public Collection[] split(List objs, int size) throws Exception{
+    public List<List<Integer>> split(List<Integer> objs, int size) throws Exception{
         int numOfBatches=(objs.size()/size)+1;
-        Collection[] batches= new Collection[numOfBatches];
+        List<List<Integer>> batches= new ArrayList<>();
         for(int index=0; index<numOfBatches; index++){
             int count=index+1;
             int fromIndex=Math.max(((count-1)*size),0);
             int toIndex=Math.min((count*size), objs.size());
-            batches[index]= objs.subList(fromIndex, toIndex);
+            batches.add( objs.subList(fromIndex, toIndex));
         }
         return batches;
     }
@@ -1130,23 +1163,23 @@ public class IndexDAO extends AbstractDAO {
         return url;
     }
 
-    public void indexObjects(List<IndexObject> objs, String index, String type) throws ExecutionException, InterruptedException, IOException {
-
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
-
-        for (IndexObject o : objs) {
-            byte[] json = new byte[0];
-            try {
-                json = mapper.writeValueAsBytes(o);
-                BulkIndexProcessor.bulkProcessor.add(new IndexRequest(RgdIndex.getNewAlias()).source(json, XContentType.JSON));
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
-            }
-        }
-
-    }
+//    public void indexObjects(List<IndexObject> objs, String index, String type) throws ExecutionException, InterruptedException, IOException {
+//
+//        ObjectMapper mapper = new ObjectMapper();
+//        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+//        mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+//
+//        for (IndexObject o : objs) {
+//            byte[] json = new byte[0];
+//            try {
+//                json = mapper.writeValueAsBytes(o);
+//                BulkIndexProcessor.bulkProcessor.add(new IndexRequest(RgdIndex.getNewAlias()).source(json, XContentType.JSON));
+//            } catch (JsonProcessingException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//
+//    }
     public void indexAITermMappingDocument(IndexObject document) {
       List<String> termSynonyms=document.getSynonyms();
       IndexObject termObject=new IndexObject();
@@ -1155,7 +1188,7 @@ public class IndexDAO extends AbstractDAO {
       termObject.setCategory(document.getCategory());
       termObject.setSubcat(document.getSubcat());
       termObject.setType("term");
-      indexDocument(termObject);
+      IndexDocument.index(termObject);
       if(termSynonyms!=null && termSynonyms.size()>0){
           for(String synonym:termSynonyms){
               IndexObject object=new IndexObject();
@@ -1165,22 +1198,12 @@ public class IndexDAO extends AbstractDAO {
               object.setCategory(document.getCategory());
               object.setSubcat(document.getSubcat());
               object.setType("synonym");
-              indexDocument(object);
+              IndexDocument.index(object);
           }
       }
 
     }
-    public void indexDocument(IndexObject document) {
-        byte[] json = new byte[0];
-            try {
-                json = JacksonConfiguration.MAPPER.writeValueAsBytes(document);
-                BulkIndexProcessor.bulkProcessor.add(new IndexRequest(RgdIndex.getNewAlias()).source(json, XContentType.JSON));
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
-            }
-       
 
-    }
 
     public static void main(String[] args) throws Exception {
           IndexDAO dao= new IndexDAO();

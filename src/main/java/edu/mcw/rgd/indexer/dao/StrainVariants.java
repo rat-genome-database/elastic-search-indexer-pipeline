@@ -2,31 +2,30 @@ package edu.mcw.rgd.indexer.dao;
 
 import edu.mcw.rgd.dao.AbstractDAO;
 import edu.mcw.rgd.dao.DataSourceFactory;
-import edu.mcw.rgd.dao.impl.MapDAO;
-import edu.mcw.rgd.dao.impl.SampleDAO;
-import edu.mcw.rgd.datamodel.Chromosome;
-import edu.mcw.rgd.datamodel.Sample;
-import edu.mcw.rgd.indexer.model.genomeInfo.VariantCounts;
 
+import edu.mcw.rgd.dao.impl.SampleDAO;
+import edu.mcw.rgd.indexer.model.genomeInfo.VariantCounts;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by jthota on 12/6/2017.
  */
 public class StrainVariants extends AbstractDAO{
+    public static void main(String[] args) throws Exception {
+        StrainVariants variants=new StrainVariants();
+        variants.getStrainVariants(372, "12");
+    }
+
 
     public String[][] getStrainVariants(int mapKey, String chr) throws Exception {
 
-        SampleDAO sampleDAO= new SampleDAO();
-        sampleDAO.setDataSource(DataSourceFactory.getInstance().getCarpeNovoDataSource());
-        List<edu.mcw.rgd.datamodel.Sample> samples=sampleDAO.getSamplesByMapKey(mapKey);
-        List<VariantCounts> variantCounts=this.getVariants(samples, chr, mapKey);
+        List<VariantCounts> variantCounts=this.getVariantCounts(chr, mapKey);
         int size=variantCounts.size();
         String matrix[][]= new String[4][size];
         int j=0;
@@ -46,65 +45,77 @@ public class StrainVariants extends AbstractDAO{
         j++;
         }
 
+        System.out.println("MATRIX:"+ Arrays.deepToString(matrix));
         return matrix;
     }
-    public List<VariantCounts> getVariants(List<Sample> samples, String chr, int mapKey)  {
+    public List<VariantCounts> getVariantCounts(String chr, int mapKey)  {
         List<VariantCounts> variantCounts= new ArrayList<>();
-        String sql="select count(variant_type) tot, variant_type from variant v " +
-                " inner join variant_sample_detail vsd on vsd.rgd_id=v.rgd_id " +
-                " inner join variant_map_data vmd on v.rgd_id=vmd.rgd_id " +
-                "                  where " +
-                "                 vsd.sample_id=? " ;
+        LinkedHashMap<Integer, VariantCounts> countsMap=new LinkedHashMap<>();
+        String sql="select count(variant_type) tot, variant_type, s.analysis_name, s.sample_id  from variant v " +
+                "                inner join variant_sample_detail vsd on vsd.rgd_id=v.rgd_id" +
+                " inner join sample s on s.sample_id=vsd.sample_id " +
+                "                 inner join variant_map_data vmd on v.rgd_id=vmd.rgd_id " +
+                "                 where vmd.map_key=?";
 
         if(chr!=null){
-            sql=sql+"and vmd.chromosome=?";
+            sql=sql+"   and vmd.chromosome=?";
+
         }
-        sql=sql+ "   group by v.variant_type";
+        sql=sql+ "   group by v.variant_type, s.sample_id, s.analysis_name order by s.analysis_name";
         try(Connection conn= DataSourceFactory.getInstance().getCarpeNovoDataSource().getConnection();
             PreparedStatement ps= conn.prepareStatement(sql);){
 
-            int totalVariants=0;
-            for(Sample s:samples){
-                VariantCounts vc= new VariantCounts();
-                int sampleId=s.getId();
-                vc.setStrain(s.getAnalysisName());
-                vc.setMapKey(mapKey);
-                vc.setChr(chr);
-                ps.setInt(1, sampleId);
+
+            ps.setInt(1, mapKey);
                 if(chr!=null)
                     ps.setString(2, chr);
                 ResultSet rs= ps.executeQuery();
-                int snvAndSnps=0;
-                while(rs.next()){
-                    String variantType= rs.getString("variant_type");
+            int totalVariants=0;
+                while(rs.next()) {
+                    int sampleId = rs.getInt("sample_id");
+                    VariantCounts vc=countsMap.get(sampleId);
+                    if(vc==null){
+                        vc=new VariantCounts();
+                        vc.setStrain(rs.getString("analysis_name"));
+                        vc.setMapKey(mapKey);
+                        vc.setChr(chr);
 
-                   if(variantType.equalsIgnoreCase("snv") || variantType.equalsIgnoreCase("snp")){
-                        snvAndSnps=snvAndSnps+rs.getInt("tot");
                     }
 
-                    if(variantType.equalsIgnoreCase("ins"))
-                        vc.setIns(rs.getString("tot"));
-                    if(variantType.equalsIgnoreCase("del"))
-                        vc.setDel(rs.getString("tot"));
+                        String variantType = rs.getString("variant_type");
 
-                    totalVariants=totalVariants+rs.getInt("tot");
-                 //     System.out.println(rs.getString("variant_type")+ " || "+ rs.getString("tot"));
-                }
-                vc.setSnv(String.valueOf(snvAndSnps));
-                variantCounts.add(vc);
+                        if (variantType.equalsIgnoreCase("snv") || variantType.equalsIgnoreCase("snp")) {
+                            int snvOrSnpCount = 0;
+                            if (vc.getSnv() != null)
+                                snvOrSnpCount += Integer.parseInt(vc.getSnv());
+                            if (vc.getSnp() != null)
+                                snvOrSnpCount += Integer.parseInt(vc.getSnp());
+                            snvOrSnpCount += rs.getInt("tot");
+                            vc.setSnv(String.valueOf(snvOrSnpCount));
+                        }
+
+                        if (variantType.equalsIgnoreCase("insertion"))
+                            vc.setIns(rs.getString("tot"));
+                        if (variantType.equalsIgnoreCase("deletion"))
+                            vc.setDel(rs.getString("tot"));
+
+                        totalVariants = totalVariants + rs.getInt("tot");
+                        vc.setTotalVariants(String.valueOf(totalVariants));
+                        countsMap.put(sampleId, vc);
+                       // variantCounts.add(vc);
+                    }
+
+
                 rs.close();
 
-            }
         }catch (Exception e){
             e.printStackTrace();
         }
-
+        for(Map.Entry entry:countsMap.entrySet()){
+            variantCounts.add((VariantCounts) entry.getValue());
+        }
 
         return variantCounts;
     }
-public static void main(String[] args) throws Exception {
-    StrainVariants s= new StrainVariants();
-    s.getStrainVariants(360, null);
-    System.out.println("DONE");
-}
+
 }

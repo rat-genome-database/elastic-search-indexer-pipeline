@@ -6,6 +6,7 @@
         <property name="threadCount" value="10"/>
         <property name="admin" ref="admin"/>
         <property name="rgdIndex" ref="rgdIndex"/>
+        <property name="ontologySynonyms" ref="ontologySynonyms"/>
         <property name="envrionments">
             <list>
                 <value>dev</value>
@@ -17,17 +18,17 @@
         </property>
 
      </bean>
-    <bean id="client" class="edu.mcw.rgd.services.ClientInit" init-method="init" destroy-method="destroy"/>
+    <bean id="clientInit" class="edu.mcw.rgd.services.ClientInit" init-method="init" destroy-method="destroy"/>
     <bean id="rdao" class="edu.mcw.rgd.indexer.dao.IndexDAO">
     </bean>
-<!--    <bean id="ontologySynonyms" class="edu.mcw.rgd.indexer.OntologySynonyms" init-method="init">-->
-
-<!--    </bean>-->
 
     <bean id="admin" class="edu.mcw.rgd.services.IndexAdmin">
-            <property name="rgdIndex" ref="rgdIndex"/>
+<!--            <property name="rgdIndex" ref="rgdIndex"/>-->
     </bean>
-    <bean id="rgdIndex" class="edu.mcw.rgd.datamodel.RgdIndex">
+    <bean id="rgdIndex" class="edu.mcw.rgd.datamodel.RgdIndex"/>
+    <bean id="ontologySynonyms" class="edu.mcw.rgd.indexer.OntologySynonyms"/>
+    <bean id="bulkIndexProcessor" class="edu.mcw.rgd.indexer.dao.variants.BulkIndexProcessor" init-method="init" destroy-method="destroy"/>
 
-    </bean>
+
 </beans>
+

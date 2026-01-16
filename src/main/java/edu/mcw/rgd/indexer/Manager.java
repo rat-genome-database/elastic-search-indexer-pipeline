@@ -14,12 +14,16 @@ import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
 import edu.mcw.rgd.indexer.dao.*;
 
 import edu.mcw.rgd.indexer.dao.findModels.FullAnnotDao;
-import edu.mcw.rgd.indexer.dao.phenominer.PhenominerNormalizedThread;
-import edu.mcw.rgd.indexer.dao.variants.*;
+import edu.mcw.rgd.indexer.indexers.phenominerIndexer.PhenominerNormalizedThread;
 
-import edu.mcw.rgd.indexer.model.findModels.ModelIndexObject;
+
+import edu.mcw.rgd.indexer.indexers.expressionIndexer.ExpressionDataIndexer;
+import edu.mcw.rgd.indexer.indexers.genomeInfoIndexer.ChromosomeMapDataThread;
+import edu.mcw.rgd.indexer.indexers.genomeInfoIndexer.GenomeInfoThread;
+import edu.mcw.rgd.indexer.indexers.modelsIndexer.FindModels;
 
 import edu.mcw.rgd.process.Utils;
+import edu.mcw.rgd.indexer.dao.variants.BulkIndexProcessor;
 import edu.mcw.rgd.services.ClientInit;
 import edu.mcw.rgd.services.IndexAdmin;
 import org.apache.commons.lang.ArrayUtils;
@@ -57,10 +61,14 @@ public class Manager {
     private static List<String> envrionments;
     private IndexAdmin admin;
     private RgdIndex rgdIndex;
+    private OntologySynonyms ontologySynonyms;
     private boolean reindex;
-    BulkIndexProcessor bulkIndexProcessor;
+
+    private BulkIndexProcessor bulkIndexProcessor;
+
+   private ClientInit clientInit;
     IndexDAO indexDAO=new IndexDAO();
-    private final Logger log = LogManager.getLogger("main");
+    private final Logger log = LogManager.getLogger(Manager.class);
 
     public static void main(String[] args) throws Exception {
 
@@ -70,8 +78,10 @@ public class Manager {
         Manager manager = (Manager) bf.getBean("manager");
         manager.log.info(manager.getVersion());
         RgdIndex rgdIndex= (RgdIndex) bf.getBean("rgdIndex");
-        manager.bulkIndexProcessor=BulkIndexProcessor.getInstance();
+        OntologySynonyms synonyms= (OntologySynonyms) bf.getBean("ontologySynonyms");
 
+        manager.bulkIndexProcessor=  bf.getBean("bulkIndexProcessor", BulkIndexProcessor.class);
+        manager.clientInit= bf.getBean("clientInit", ClientInit.class);
 
         try {
             List<String> indices= new ArrayList<>();
@@ -81,17 +91,19 @@ public class Manager {
                 indices.add(args[2]+"_index" + "_" + args[1] + "2");
                 rgdIndex.setIndices(indices);
             }
-
-            manager.run(args);
+            synonyms.setIndexCategory(RgdIndex.getIndex());
+            synonyms.init();
+     manager.run(args);
         } catch (Exception e) {
-            manager.bulkIndexProcessor.destroy();
+            BulkIndexProcessor.destroy();
             ClientInit.destroy();
             manager.printUsage();
 
             Utils.printStackTrace(e, manager.log);
         }
-        manager.bulkIndexProcessor.destroy();
+        BulkIndexProcessor.destroy();
         ClientInit.destroy();
+
 
     }
     private void run(String[] args) throws Exception {
@@ -113,24 +125,24 @@ public class Manager {
             }
             args= (String[]) ArrayUtils.remove(args, 0);
         }
-
+        ExecutorService executor=null;
         args= (String[]) ArrayUtils.remove(args, 0);
 
-        ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
             boolean searchIndexCreated=false;
+            boolean expressionSearchIndexCreated=false;
             for (String arg : args) {
                 Runnable workerThread;
                 switch (arg) {
                     case "Qtls",
-                     "Strains" ,
-                     "Genes",
-                     "Sslps",
-                     "GenomicElements",
-                     "Annotations" , // all public ontologies
-                     "Reference",
-                     "Variants" ,// these are only ClinVar variants
-                     "Expression",
-                        "ExpressionStudy"-> {
+                        "Strains" ,
+                        "Genes",
+                        "Sslps",
+                        "GenomicElements",
+                        "Annotations" , // all public ontologies
+                        "Reference",
+                        "Variants",// these are only ClinVar variants
+                           "AlleleVariants" // these are RGD allele variants
+                            -> {
                         System.out.println("Running Object Search Indexer ....");
                         if (!searchIndexCreated) {
                             admin.createIndex("search_mappings", "search");
@@ -139,17 +151,18 @@ public class Manager {
 
                             System.out.println("Indexing ..."+ arg);
                             indexDAO.getClass().getMethod("get" + arg).invoke(indexDAO);
-
+                            System.out.println("Indexing ..."+ arg +" DONE");
                     }
                     case "Chromosomes" -> {
+                         executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+
                         System.out.println("Running Chromosome Indexer ....");
                         admin.createIndex("chromosome_mappings", "chromosome");
                         MapDAO mapDAO = new MapDAO();
                         log.info("INDEXING Chromosomes...");
                         for (int key : SpeciesType.getSpeciesTypeKeys()) {
-                            if (SpeciesType.isSearchable(key)) {
-                                if (key != 0) {
-                                    List<Map> maps = null;
+                            if (key != 0 && SpeciesType.isSearchable(key)) {
+                                List<Map> maps = null;
                                     try {
                                         maps = mapDAO.getMaps(key, "bp");
                                     } catch (Exception e) {
@@ -159,18 +172,21 @@ public class Manager {
                                         workerThread = new ChromosomeMapDataThread(key, m);
                                         executor.execute(workerThread);
                                     }
-                                }
+
                             }
                         }
                     }
                     case "GenomeInfo" -> {
+                         executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+
                         System.out.println("Running Genome Info Indexer ....");
                         admin.createIndex("genome_mappings", "genome");
                         System.out.println("INDEXING GENOMEINFO...");
                         for (int key : SpeciesType.getSpeciesTypeKeys()) {
+//                        int key=3;
                             if (SpeciesType.isSearchable(key)) {
                                 if (key != 0) {
-                                    workerThread = new GenomeInfoThread(key, RgdIndex.getNewAlias(), log);
+                                    workerThread = new GenomeInfoThread(key, RgdIndex.getNewAlias());
                                     executor.execute(workerThread);
                                 }
                             }
@@ -188,8 +204,10 @@ public class Manager {
                         admin.createIndex("models", "models");
                         FullAnnotDao dao = new FullAnnotDao();
                         List<String> aspects = new ArrayList<>(Arrays.asList("D", "B", "N"));
-                        List<ModelIndexObject> models = dao.getAnnotationsBySpeciesNObjectKey(3, 5);
-                        dao.indexModels(models);
+//                        List<ModelIndexObject> models = dao.getAnnotationsBySpeciesNObjectKey(3, 5);
+//                        dao.indexModels(models);
+                        FindModels models=new FindModels();
+                        models.getModelIndexObjects(3, 5);
                         System.out.println("Indexing models is DONE!!");
                     }
                     case "Variant" -> { // all species variants
@@ -198,6 +216,8 @@ public class Manager {
                         indexDAO.indexVariantsFromCarpenovoNewTableStructure();
                     }
                     case "AITermMappings" -> { // all species variants
+                         executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+
                         System.out.println("Running AI Term - Ontology Term Mapper Indexer ....");
                         admin.createIndex("ai_mappings", "ai_mappings");
                         OntologyXDAO ontologyXDAO = new OntologyXDAO();
@@ -210,11 +230,25 @@ public class Manager {
 
                         }
                     }
-                    case "ExpressionData"-> {// all species variants
+                    case "ExpressionGene",
+                            "ExpressionStudy"-> { // for general search
+                        System.out.println("Running "+arg+" Indexer ....");
+                        if (!expressionSearchIndexCreated) {
+                            admin.createIndex("search_mappings", "expression");
+                            expressionSearchIndexCreated = true;
+                        }
+
+                        System.out.println("Indexing ..."+ arg);
+                        indexDAO.getClass().getMethod("get" + arg).invoke(indexDAO);
+
+                    }
+                    case "ExpressionData"-> { // for plotting the data in standalone expression UI tool
+                         executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+
                         System.out.println("Running Expression General Search Indexer ....");
                         admin.createIndex(null, null);
                         GeneDAO geneDAO = new GeneDAO();
-                        List<Gene> genes = geneDAO.getAllActiveGenes();
+                        List<Gene> genes = geneDAO.getActiveGenes(3);
                         for (Gene gene : genes) {
                             workerThread = new ExpressionDataIndexer(gene);
                             executor.execute(workerThread);
@@ -227,10 +261,14 @@ public class Manager {
                     }
                 }
             }
-           executor.shutdown();
-            while (!executor.isTerminated()) {}
-            System.out.println("Finished all threads: " + new Date());
-            log.info("Finished all threads: " + new Date());
+            if(executor!=null) {
+                executor.shutdown();
+                while (!executor.isTerminated()) {
+                }
+                System.out.println("Finished all threads: " + new Date());
+                log.info("Finished all threads: " + new Date());
+            }
+
 
             String clusterStatus = this.getClusterHealth(RgdIndex.getNewAlias());
             if (!clusterStatus.equalsIgnoreCase("ok")) {
@@ -250,7 +288,7 @@ public class Manager {
             System.out.println("CLIENT IS CLOSED");
         }
 
-    public boolean switchAlias() throws Exception {
+    public void switchAlias() throws Exception {
         System.out.println("NEEW ALIAS: " + RgdIndex.getNewAlias() + " || OLD ALIAS:" + RgdIndex.getOldAlias());
         IndicesAliasesRequest request = new IndicesAliasesRequest();
 
@@ -260,11 +298,11 @@ public class Manager {
             IndicesAliasesRequest.AliasActions removeAliasAction =
                     new IndicesAliasesRequest.AliasActions(IndicesAliasesRequest.AliasActions.Type.REMOVE)
                             .index(RgdIndex.getOldAlias())
-                            .alias(rgdIndex.getIndex());
+                            .alias(RgdIndex.getIndex());
             IndicesAliasesRequest.AliasActions addAliasAction =
                     new IndicesAliasesRequest.AliasActions(IndicesAliasesRequest.AliasActions.Type.ADD)
                             .index(RgdIndex.getNewAlias())
-                            .alias(rgdIndex.getIndex());
+                            .alias(RgdIndex.getIndex());
             request.addAliasAction(removeAliasAction);
             request.addAliasAction(addAliasAction);
             log.info("Switched from " + RgdIndex.getOldAlias() + " to  " + RgdIndex.getNewAlias());
@@ -273,13 +311,12 @@ public class Manager {
             IndicesAliasesRequest.AliasActions addAliasAction =
                     new IndicesAliasesRequest.AliasActions(IndicesAliasesRequest.AliasActions.Type.ADD)
                             .index(RgdIndex.getNewAlias())
-                            .alias(rgdIndex.getIndex());
+                            .alias(RgdIndex.getIndex());
             request.addAliasAction(addAliasAction);
-            log.info(rgdIndex.getIndex() + " pointed to " + RgdIndex.getNewAlias());
+            log.info(RgdIndex.getIndex() + " pointed to " + RgdIndex.getNewAlias());
         }
         AcknowledgedResponse indicesAliasesResponse =
                 ClientInit.getClient().indices().updateAliases(request, RequestOptions.DEFAULT);
-        return  true;
 
     }
     public void printUsage(){
@@ -346,7 +383,7 @@ public class Manager {
 }
 
     public void setEnvrionments(List<String> envrionments) {
-        this.envrionments = envrionments;
+        Manager.envrionments = envrionments;
     }
 
     public boolean isReindex() {
@@ -357,5 +394,27 @@ public class Manager {
         this.reindex = reindex;
     }
 
+    public OntologySynonyms getOntologySynonyms() {
+        return ontologySynonyms;
+    }
 
+    public void setOntologySynonyms(OntologySynonyms ontologySynonyms) {
+        this.ontologySynonyms = ontologySynonyms;
+    }
+
+    public BulkIndexProcessor getBulkIndexProcessor() {
+        return bulkIndexProcessor;
+    }
+
+    public void setBulkIndexProcessor(BulkIndexProcessor bulkIndexProcessor) {
+        this.bulkIndexProcessor = bulkIndexProcessor;
+    }
+
+    public ClientInit getClientInit() {
+        return clientInit;
+    }
+
+    public void setClientInit(ClientInit clientInit) {
+        this.clientInit = clientInit;
+    }
 }
