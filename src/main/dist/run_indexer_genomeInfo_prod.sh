@@ -1,0 +1,1 @@
+/home/rgddata/pipelines/ESIndexer/run_indexer_genomeInfo.sh prod
