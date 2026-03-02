@@ -199,12 +199,12 @@ public class IndexDAO extends AbstractDAO {
         Gson gson=new Gson();
         GeneExpressionDAO geneExpressionDAO=new GeneExpressionDAO();
 
-        List<Study> studies= geneExpressionDAO.getGeneExpressionStudies();
-        System.out.println("TOTAL STUDIES:"+ studies.size());
+        List<Integer> studyIds= geneExpressionDAO.getGeneExpressionStudiesIds();
         ExecutorService executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
-        for(Study study: studies) {
-//        Study study=geneExpressionDAO.getStudy(3522);
-            List<GeneExpression> records=  expressionDAO.getExpressionMetaDataByStudyId(study.getId());
+        for(int studyId: studyIds) {
+
+          Study study=geneExpressionDAO.getStudy(studyId);
+            List<GeneExpression> records=  expressionDAO.getExpressionMetaDataByStudyId(studyId);
 //        List<GeneExpression> records=  expressionDAO.getGeneExpressionByStudyId(3522, "TPM");
  //       System.out.println("STUDY ID:"+ study.getId()+"\t"+gson.toJson(records));
             Runnable workerThread= new IndexExpressionStudy(study, records);
