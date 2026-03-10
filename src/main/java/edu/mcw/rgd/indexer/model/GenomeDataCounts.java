@@ -1,6 +1,7 @@
 package edu.mcw.rgd.indexer.model;
 
 import edu.mcw.rgd.dao.impl.OrthologDAO;
+import edu.mcw.rgd.dao.impl.XdbIdDAO;
 import edu.mcw.rgd.datamodel.*;
 import edu.mcw.rgd.datamodel.ontologyx.Ontology;
 import edu.mcw.rgd.datamodel.ontologyx.TermWithStats;
@@ -89,6 +90,13 @@ public class GenomeDataCounts extends GenomeDAO {
             obj.setGapLength(chromosome.getGapLength());
             obj.setGapCount(chromosome.getGapCount());
             obj.setContigCount(chromosome.getContigCount());
+        }
+    }
+    public void mapXRefs() throws Exception {
+        XdbIdDAO xdbIdDAO=new XdbIdDAO();
+        List<XdbId> xdbIds=  xdbIdDAO.getAllXdbIdsByRgdId(map.getRgdId());
+        if(xdbIds!=null && xdbIds.size()>0){
+            obj.setXdbIds(xdbIds);
         }
     }
     public void mapGeneTypeCounts(){
@@ -292,6 +300,7 @@ public class GenomeDataCounts extends GenomeDAO {
         mapOrthologCounts();
         mapObjectCounts();
         mapVariants();
+        mapXRefs();
         if(chromosome!=null){
             mapDiseaseGenes();
             addDiseaseGeneChartData();

@@ -1,6 +1,9 @@
 package edu.mcw.rgd.indexer.model.genomeInfo;
 
+import edu.mcw.rgd.datamodel.XdbId;
+
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by jthota on 10/23/2017.
@@ -59,7 +62,7 @@ public class GenomeIndexObject {
 
     private List<String> refs;
 
-
+    private List<XdbId> xdbIds;
     private String[][] variantsMatrix;
     private int proteinsCount;
 
@@ -549,5 +552,13 @@ public class GenomeIndexObject {
 
     public void setTranscripts(long transcripts) {
         this.transcripts = transcripts;
+    }
+
+    public List<XdbId> getXdbIds() {
+        return xdbIds;
+    }
+
+    public void setXdbIds(List<XdbId> xdbIds) {
+        this.xdbIds = xdbIds;
     }
 }
