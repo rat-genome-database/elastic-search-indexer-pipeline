@@ -28,7 +28,7 @@ public class GeneDetails extends ObjectDetails<Gene> {
         String name = t.getName();
         String htmlStrippedSymbol = Jsoup.parse(symbol).text();
         String description = null;
-        if(obj.getCategory().equalsIgnoreCase("Gene")) {
+        if(obj.getCategory().equalsIgnoreCase("Gene") || obj.getCategory().equalsIgnoreCase("Expressed Gene")) {
             try {
                 description = Utils.getGeneDescription(t);
             } catch (Exception e) {
