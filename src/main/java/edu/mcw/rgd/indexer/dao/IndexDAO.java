@@ -21,6 +21,7 @@ import edu.mcw.rgd.indexer.OntologySynonyms;
 import edu.mcw.rgd.indexer.dao.variants.VariantDao;
 import edu.mcw.rgd.indexer.dao.variants.VariantIndexingThread;
 import edu.mcw.rgd.indexer.dao.variants.VariantProcessingThread;
+import edu.mcw.rgd.indexer.indexers.gviewerIndexer.GViewerIndexer;
 import edu.mcw.rgd.indexer.indexers.objectSearchIndexer.*;
 import edu.mcw.rgd.indexer.model.*;
 
@@ -680,6 +681,20 @@ public class IndexDAO extends AbstractDAO {
         }
         executor.shutdown();
         while (!executor.isTerminated()){}
+    }
+
+    public void getGViewer() throws Exception {
+        int mapKey = 380;
+        List<String> ontIds = Arrays.asList(
+                "CC", "MF", "BP", "RDO", "PW", "NBO",
+                "MP", "CMO", "MMO", "XCO", "VT", "CHEBI", "RS");
+
+        ExecutorService executor = new MyThreadPoolExecutor(10, 10, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+        for (String ontId : ontIds) {
+            executor.execute(new GViewerIndexer(ontId, mapKey, this.getDataSource()));
+        }
+        executor.shutdown();
+        while (!executor.isTerminated()) {}
     }
     public void indexVariantsFromCarpenovoNewTableStructure() throws Exception{
         VariantDao variantDao=new VariantDao();

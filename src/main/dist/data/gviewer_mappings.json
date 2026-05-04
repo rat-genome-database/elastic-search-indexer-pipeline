@@ -1,0 +1,38 @@
+{
+  "properties": {
+    "annotatedObjectRgdId": {
+      "type": "integer"
+    },
+    "objectSymbol": {
+      "type": "text",
+      "fields": {
+        "keyword": {
+          "type": "keyword"
+        }
+      }
+    },
+    "chromosome": {
+      "type": "keyword"
+    },
+    "startPos": {
+      "type": "integer"
+    },
+    "stopPos": {
+      "type": "integer"
+    },
+    "objectType": {
+      "type": "keyword"
+    },
+    "term": {
+      "type": "text",
+      "fields": {
+        "keyword": {
+          "type": "keyword"
+        }
+      }
+    },
+    "termAcc": {
+      "type": "keyword"
+    }
+  }
+}

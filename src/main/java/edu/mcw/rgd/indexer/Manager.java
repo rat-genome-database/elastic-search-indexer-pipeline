@@ -242,6 +242,13 @@ public class Manager {
                         indexDAO.getClass().getMethod("get" + arg).invoke(indexDAO);
 
                     }
+                    case "GViewer" -> { // for genome viewer annotation tracks
+                        System.out.println("Running GViewer Indexer ....");
+                        admin.createIndex("gviewer_mappings", "gviewer");
+                        System.out.println("Indexing ..." + arg);
+                        indexDAO.getGViewer();
+                        System.out.println("Indexing ..." + arg + " DONE");
+                    }
                     case "ExpressionData"-> { // for plotting the data in standalone expression UI tool
                          executor= new MyThreadPoolExecutor(10,10,0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
 
@@ -329,7 +336,7 @@ public class Manager {
                   "\n\t\tINDEX_NAME                           -    for example: search or chromosome etc" +
                   "\n\t\tENV_OPT                              -   dev/test/cur only one" +
                   "\n\t\tOPTIONS                              -   options must be SPACE seperated and must provide atleast ONE OPTION from below OPTIONS List and case sensitive" +
-                  "\n\t\tOPTIONS LIST                         -   [ObjectSearch, Chromosomes, Models, Variants, GenomeInfo, Phenominer]";
+                  "\n\t\tOPTIONS LIST                         -   [ObjectSearch, Chromosomes, Models, Variants, GenomeInfo, Phenominer, GViewer]";
     }
     public String getClusterHealth(String index) throws Exception {
 
