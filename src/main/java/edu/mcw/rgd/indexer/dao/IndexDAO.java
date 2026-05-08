@@ -20,18 +20,15 @@ import edu.mcw.rgd.indexer.MyThreadPoolExecutor;
 import edu.mcw.rgd.indexer.OntologySynonyms;
 import edu.mcw.rgd.indexer.dao.variants.VariantDao;
 import edu.mcw.rgd.indexer.dao.variants.VariantIndexingThread;
-import edu.mcw.rgd.indexer.dao.variants.VariantProcessingThread;
 import edu.mcw.rgd.indexer.indexers.gviewerIndexer.GViewerIndexer;
 import edu.mcw.rgd.indexer.indexers.objectSearchIndexer.*;
 import edu.mcw.rgd.indexer.model.*;
 
-import edu.mcw.rgd.indexer.model.variants.VariantIndex;
 import edu.mcw.rgd.process.AnnotationFormatter;
 import edu.mcw.rgd.process.Utils;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.elasticsearch.common.recycler.Recycler;
 
 
 import java.sql.Connection;
@@ -41,7 +38,6 @@ import java.sql.Statement;
 import java.util.*;
 import java.util.Map;
 import java.util.concurrent.*;
-import java.util.stream.Collectors;
 
 /**
  * Created by jthota on 3/23/2017.
@@ -684,14 +680,22 @@ public class IndexDAO extends AbstractDAO {
     }
 
     public void getGViewer() throws Exception {
-        int mapKey = 380;
+
         List<String> ontIds = Arrays.asList(
                 "CC", "MF", "BP", "RDO", "PW", "NBO",
                 "MP", "CMO", "MMO", "XCO", "VT", "CHEBI", "RS");
+        List<Integer> speciesTypeKeys=Arrays.asList(3,2,1);
 
         ExecutorService executor = new MyThreadPoolExecutor(10, 10, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
-        for (String ontId : ontIds) {
-            executor.execute(new GViewerIndexer(ontId, mapKey, this.getDataSource()));
+        for(int speciesTypeKey:speciesTypeKeys) {
+
+            List<edu.mcw.rgd.datamodel.Map> maps=mapDAO.getActiveMaps(speciesTypeKey, "NCBI");
+            for(edu.mcw.rgd.datamodel.Map map:maps) {
+                int mapKey = map.getKey();
+                for (String ontId : ontIds) {
+                    executor.execute(new GViewerIndexer(ontId, mapKey, speciesTypeKey, this.getDataSource()));
+                }
+            }
         }
         executor.shutdown();
         while (!executor.isTerminated()) {}

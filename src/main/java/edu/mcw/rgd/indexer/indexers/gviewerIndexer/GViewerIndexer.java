@@ -40,12 +40,14 @@ public class GViewerIndexer implements Runnable {
 
     private final String ontId;
     private final int mapKey;
+    private final int speciesTypeKey;
     private final DataSource dataSource;
     private final Logger log = LogManager.getLogger("gviewer");
 
-    public GViewerIndexer(String ontId, int mapKey, DataSource dataSource) {
+    public GViewerIndexer(String ontId, int mapKey, int speciesTypeKey,  DataSource dataSource) {
         this.ontId = ontId;
         this.mapKey = mapKey;
+        this.speciesTypeKey = speciesTypeKey;
         this.dataSource = dataSource;
     }
 
@@ -64,6 +66,7 @@ public class GViewerIndexer implements Runnable {
                 while (rs.next()) {
                     GViewerIndex idx = new GViewerIndex();
                     idx.setMapKey(mapKey);
+                    idx.setSpeciesTypeKey(speciesTypeKey);
                     idx.setChromosome(rs.getString("chromosome"));
                     idx.setAnnotatedObjectRgdId(rs.getInt("rgd_id"));
                     idx.setStartPos(rs.getInt("start_pos"));
