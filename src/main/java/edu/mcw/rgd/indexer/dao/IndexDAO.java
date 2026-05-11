@@ -680,11 +680,9 @@ public class IndexDAO extends AbstractDAO {
     }
 
     public void getGViewer() throws Exception {
-
-        List<String> ontIds = Arrays.asList(
-                "CC", "MF", "BP", "RDO", "PW", "NBO",
-                "MP", "CMO", "MMO", "XCO", "VT", "CHEBI", "RS");
         List<Integer> speciesTypeKeys=Arrays.asList(3,2,1);
+        List<String> ontIds = Arrays.asList("CC", "MF", "BP", "RDO", "PW", "NBO", "MP", "CMO", "MMO", "XCO", "VT", "CHEBI", "RS");
+
 
         ExecutorService executor = new MyThreadPoolExecutor(10, 10, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
         for(int speciesTypeKey:speciesTypeKeys) {
