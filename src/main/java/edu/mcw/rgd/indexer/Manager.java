@@ -30,12 +30,8 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import org.elasticsearch.action.admin.cluster.health.ClusterHealthRequest;
-import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
-
-import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest;
-import org.elasticsearch.action.support.master.AcknowledgedResponse;
-import org.elasticsearch.client.RequestOptions;
+import co.elastic.clients.elasticsearch.cluster.HealthResponse;
+import co.elastic.clients.elasticsearch.indices.UpdateAliasesResponse;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.FileSystemResource;
@@ -297,34 +293,23 @@ public class Manager {
 
     public void switchAlias() throws Exception {
         System.out.println("NEEW ALIAS: " + RgdIndex.getNewAlias() + " || OLD ALIAS:" + RgdIndex.getOldAlias());
-        IndicesAliasesRequest request = new IndicesAliasesRequest();
+        final String aliasName = RgdIndex.getIndex();
+        final String newIndex = RgdIndex.getNewAlias();
+        final String oldIndex = RgdIndex.getOldAlias();
 
+        UpdateAliasesResponse response = ClientInit.getClient().indices().updateAliases(u -> {
+            if (oldIndex != null) {
+                u.actions(a -> a.remove(r -> r.index(oldIndex).alias(aliasName)));
+            }
+            u.actions(a -> a.add(ad -> ad.index(newIndex).alias(aliasName)));
+            return u;
+        });
 
-        if (RgdIndex.getOldAlias() != null) {
-
-            IndicesAliasesRequest.AliasActions removeAliasAction =
-                    new IndicesAliasesRequest.AliasActions(IndicesAliasesRequest.AliasActions.Type.REMOVE)
-                            .index(RgdIndex.getOldAlias())
-                            .alias(RgdIndex.getIndex());
-            IndicesAliasesRequest.AliasActions addAliasAction =
-                    new IndicesAliasesRequest.AliasActions(IndicesAliasesRequest.AliasActions.Type.ADD)
-                            .index(RgdIndex.getNewAlias())
-                            .alias(RgdIndex.getIndex());
-            request.addAliasAction(removeAliasAction);
-            request.addAliasAction(addAliasAction);
-            log.info("Switched from " + RgdIndex.getOldAlias() + " to  " + RgdIndex.getNewAlias());
-
-        }else{
-            IndicesAliasesRequest.AliasActions addAliasAction =
-                    new IndicesAliasesRequest.AliasActions(IndicesAliasesRequest.AliasActions.Type.ADD)
-                            .index(RgdIndex.getNewAlias())
-                            .alias(RgdIndex.getIndex());
-            request.addAliasAction(addAliasAction);
-            log.info(RgdIndex.getIndex() + " pointed to " + RgdIndex.getNewAlias());
+        if (oldIndex != null) {
+            log.info("Switched from " + oldIndex + " to  " + newIndex);
+        } else {
+            log.info(aliasName + " pointed to " + newIndex);
         }
-        AcknowledgedResponse indicesAliasesResponse =
-                ClientInit.getClient().indices().updateAliases(request, RequestOptions.DEFAULT);
-
     }
     public void printUsage(){
         log.info(usageInfo());
@@ -340,13 +325,12 @@ public class Manager {
     }
     public String getClusterHealth(String index) throws Exception {
 
-        ClusterHealthRequest request = new ClusterHealthRequest(index);
-        ClusterHealthResponse response = ClientInit.getClient().cluster().health(request, RequestOptions.DEFAULT);
-      /*  ClusterHealthResponse response = ESClient.getClient().admin().cluster().prepareHealth(index).execute().actionGet();*/
-        System.out.println(response.getStatus().name());
-        log.info("CLUSTER STATE: " + response.getStatus().name());
-        if (response.isTimedOut()) {
-            return   "cluster state is " + response.getStatus().name();
+        HealthResponse response = ClientInit.getClient().cluster().health(h -> h.index(index));
+        String status = response.status().name();
+        System.out.println(status);
+        log.info("CLUSTER STATE: " + status);
+        if (response.timedOut()) {
+            return "cluster state is " + status;
         }
 
         return "OK";

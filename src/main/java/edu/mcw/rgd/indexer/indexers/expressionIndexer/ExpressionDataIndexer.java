@@ -14,10 +14,6 @@ import edu.mcw.rgd.indexer.dao.variants.BulkIndexProcessor;
 
 import edu.mcw.rgd.indexer.model.ExpressionDataIndexObject;
 import edu.mcw.rgd.indexer.model.IndexDocument;
-import edu.mcw.rgd.indexer.model.JacksonConfiguration;
-import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.search.DocValueFormat;
-import org.elasticsearch.xcontent.XContentType;
 
 import java.text.DecimalFormat;
 import java.util.*;
