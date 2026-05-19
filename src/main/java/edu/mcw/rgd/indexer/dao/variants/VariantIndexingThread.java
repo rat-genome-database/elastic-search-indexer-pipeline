@@ -5,6 +5,7 @@ import edu.mcw.rgd.indexer.model.IndexDocument;
 import edu.mcw.rgd.indexer.model.variants.VariantIndex;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class VariantIndexingThread extends VariantDao implements Runnable {
     private final List<Integer> batch;
@@ -27,30 +28,26 @@ public class VariantIndexingThread extends VariantDao implements Runnable {
         }
     }
     public void sortVariants(List<VariantIndex> indexList ) throws Exception {
+        Map<Integer, List<VariantIndex>> rowsByVariantId = indexList.stream()
+                .collect(Collectors.groupingBy(v -> (int) v.getVariant_id()));
+        Set<Integer> indexed = new HashSet<>();
         for(int variantId:batch) {
-            VariantIndex indexDoc = indexList.stream().findFirst().orElseThrow(() -> new RuntimeException("Variant ID " + variantId + " not found"));
+            if (!indexed.add(variantId)) continue;
+            List<VariantIndex> rows = rowsByVariantId.get(variantId);
+            if (rows == null || rows.isEmpty()) continue;
+
+            VariantIndex indexDoc = rows.get(0);
             indexDoc.setMapDataList(this.getMapData(indexDoc));
             if (mapKey == 38 || mapKey == 17) {
                 mapClinicalSignificance(indexDoc);
             }
-            // Merge transcript IDs
+
             Set<Long> transcriptIds = new LinkedHashSet<>();
-            if (indexDoc.getTranscriptRgdId() != null) {
-                transcriptIds.addAll(indexDoc.getTranscriptRgdId());
-            }
-
-            // Merge analysis names
             Set<String> analysisNames = new LinkedHashSet<>();
-            if (indexDoc.getAnalysisName() != null) {
-                analysisNames.addAll(indexDoc.getAnalysisName());
-            }
-            for (VariantIndex variant : indexList) {
-                if (variantId != variant.getVariant_id()) continue;
-
+            for (VariantIndex variant : rows) {
                 if (variant.getTranscriptRgdId() != null) {
                     transcriptIds.addAll(variant.getTranscriptRgdId());
                 }
-
                 if (variant.getAnalysisName() != null) {
                     analysisNames.addAll(variant.getAnalysisName());
                 }
@@ -59,7 +56,6 @@ public class VariantIndexingThread extends VariantDao implements Runnable {
             indexDoc.setTranscriptRgdId(new ArrayList<>(transcriptIds));
             indexDoc.setAnalysisName(new ArrayList<>(analysisNames));
             IndexDocument.index(indexDoc);
-            //  }
 
 //        Set<Long> variantIdsWithoutTranscripts = new HashSet<>();
 //        if (uniqueVariantIds.size() > variantIdsWithTrancripts.size()) {
