@@ -21,6 +21,7 @@ public class VariantIndexingThread extends VariantDao implements Runnable {
     @Override
     public void run() {
         try {
+            if (batch == null || batch.isEmpty()) return;
             List<VariantIndex> indexList = variantDao.getVariantsNewTbaleStructure(mapKey, batch);
             sortVariants(indexList);
         } catch (Exception e) {

@@ -836,12 +836,9 @@ public class IndexDAO extends AbstractDAO {
     /*************************************************************************************************/
 
     public List<List<Integer>> split(List<Integer> objs, int size) throws Exception{
-        int numOfBatches=(objs.size()/size)+1;
         List<List<Integer>> batches= new ArrayList<>();
-        for(int index=0; index<numOfBatches; index++){
-            int count=index+1;
-            int fromIndex=Math.max(((count-1)*size),0);
-            int toIndex=Math.min((count*size), objs.size());
+        for(int fromIndex=0; fromIndex<objs.size(); fromIndex+=size){
+            int toIndex=Math.min(fromIndex+size, objs.size());
             batches.add( objs.subList(fromIndex, toIndex));
         }
         return batches;
