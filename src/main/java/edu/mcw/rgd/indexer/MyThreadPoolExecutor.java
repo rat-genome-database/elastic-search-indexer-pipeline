@@ -6,7 +6,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
-import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.concurrent.*;
 
@@ -37,13 +36,8 @@ public class MyThreadPoolExecutor extends ThreadPoolExecutor {
         if(t!=null){
             log.error("Uncaught exception! "+t +" STACKTRACE:"+ Arrays.toString(t.getStackTrace()));
             try {
-                if(ClientInit.getClient()!=null)
-                    try {
-                        ClientInit.getClient().close();
-                    } catch (IOException e) {
-                        Utils.printStackTrace(e, log);
-                    }
-            } catch (UnknownHostException e) {
+                ClientInit.destroy();
+            } catch (IOException e) {
                 Utils.printStackTrace(e, log);
             }
             System.exit(1);

@@ -1,21 +1,19 @@
 package edu.mcw.rgd.indexer.model;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import co.elastic.clients.elasticsearch.core.bulk.BulkOperation;
 import edu.mcw.rgd.datamodel.RgdIndex;
 import edu.mcw.rgd.indexer.dao.variants.BulkIndexProcessor;
-import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.xcontent.XContentType;
 
 public class IndexDocument {
-    public static<T> void index(T document) {
-        byte[] json = new byte[0];
+    public static <T> void index(T document) {
         try {
-            json = JacksonConfiguration.MAPPER.writeValueAsBytes(document);
-            BulkIndexProcessor.bulkProcessor.add(new IndexRequest(RgdIndex.getNewAlias()).source(json, XContentType.JSON));
-        } catch (JsonProcessingException e) {
+            BulkOperation op = BulkOperation.of(b -> b
+                    .index(i -> i
+                            .index(RgdIndex.getNewAlias())
+                            .document(document)));
+            BulkIndexProcessor.bulkProcessor.add(op);
+        } catch (Exception e) {
             e.printStackTrace();
         }
-
-
     }
 }

@@ -14,10 +14,6 @@
         ]
       },
       "ngram_filter" : {
-        "token_chars" : [
-          "letter",
-          "digit"
-        ],
         "min_gram" : "2",
         "type" : "edge_ngram",
         "max_gram" : "15"
@@ -31,10 +27,6 @@
         "tokenizer" : "my_tokenizer"
       },
       "english_analyzer" : {
-        "filter" : [
-          "lowercase",
-          "stemmer_filter"
-        ],
         "type" : "standard",
         "stopwords" : "_english_"
       },
