@@ -32,7 +32,8 @@ public class GViewerIndexer implements Runnable {
                   SELECT child_term_acc FROM ont_dag
                   START WITH child_term_acc IN (
                     SELECT term_acc FROM ont_terms t WHERE t.ont_id = ?
-                  ) CONNECT BY PRIOR child_term_acc = parent_term_acc
+                  ) CONNECT BY PRIOR child_term_acc = parent_term_acc UNION
+                                                                      SELECT ? FROM dual
                 )
             ) z
             WHERE z.rgd_id = m.rgd_id AND m.map_key = ?
@@ -61,7 +62,8 @@ public class GViewerIndexer implements Runnable {
                      ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)) {
             ps.setFetchSize(1000);
             ps.setString(1, ontId);
-            ps.setInt(2, mapKey);
+            ps.setString(2, ontId);
+            ps.setInt(3, mapKey);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     GViewerIndex idx = new GViewerIndex();
