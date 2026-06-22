@@ -1,16 +1,12 @@
 package edu.mcw.rgd.indexer.indexers.expressionIndexer;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import edu.mcw.rgd.dao.impl.GeneExpressionDAO;
 import edu.mcw.rgd.dao.impl.OntologyXDAO;
 import edu.mcw.rgd.datamodel.Gene;
 import edu.mcw.rgd.datamodel.GeneExpression;
-import edu.mcw.rgd.datamodel.RgdIndex;
 import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
-import edu.mcw.rgd.datamodel.pheno.GeneExpressionRecord;
 import edu.mcw.rgd.indexer.dao.IndexDAO;
-import edu.mcw.rgd.indexer.dao.variants.BulkIndexProcessor;
 
 import edu.mcw.rgd.indexer.model.ExpressionDataIndexObject;
 import edu.mcw.rgd.indexer.model.IndexDocument;
@@ -120,10 +116,11 @@ public class ExpressionDataIndexer implements Runnable{
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-
+                object.setTraitOntId(record.getGeneExpressionRecord().getTraitOntId());
 
                 try {
-                    object.setTraitTerm(record.getGeneExpressionRecord().getTraitTerm());
+                    if(object.getTraitOntId()!=null && !object.getTraitOntId().equals(""))
+                        object.setTraitTerm(record.getGeneExpressionRecord().getTraitTerm());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
