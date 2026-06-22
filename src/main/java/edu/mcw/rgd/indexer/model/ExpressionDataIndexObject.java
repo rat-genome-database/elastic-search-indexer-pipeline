@@ -16,6 +16,57 @@ public class ExpressionDataIndexObject {
    private List<Double> expressionValue;
    private double valueMean;
    private double logValue;
+   private String studyId;
+   private String geoSeriesAcc;
+   private String traitOntId;
+   private String traitTerm;
+   private String expressionUnit;
+   private Set<String> expressionLevel;
+   private String species;
+   private String condition;
+    private String conditionAcc;
+    private List<MapInfo> mapDataList;
+   private Map<String, String> metaData;
+
+    public String getConditionAcc() {
+        return conditionAcc;
+    }
+
+    public void setConditionAcc(String conditionAcc) {
+        this.conditionAcc = conditionAcc;
+    }
+
+    public String getStudyId() {
+        return studyId;
+    }
+
+    public void setStudyId(String studyId) {
+        this.studyId = studyId;
+    }
+
+    public String getGeoSeriesAcc() {
+        return geoSeriesAcc;
+    }
+
+    public void setGeoSeriesAcc(String geoSeriesAcc) {
+        this.geoSeriesAcc = geoSeriesAcc;
+    }
+
+    public String getTraitOntId() {
+        return traitOntId;
+    }
+
+    public void setTraitOntId(String traitOntId) {
+        this.traitOntId = traitOntId;
+    }
+
+    public String getTraitTerm() {
+        return traitTerm;
+    }
+
+    public void setTraitTerm(String traitTerm) {
+        this.traitTerm = traitTerm;
+    }
 
     public double getLogValue() {
         return logValue;
@@ -24,14 +75,6 @@ public class ExpressionDataIndexObject {
     public void setLogValue(double logValue) {
         this.logValue = logValue;
     }
-
-    private String expressionUnit;
-   private Set<String> expressionLevel;
-   private String species;
-   private String condition;
-    private List<MapInfo> mapDataList;
-   private Map<String, String> metaData;
-
     public String getGeneSymbolWithRgdId() {
         return geneSymbolWithRgdId;
     }

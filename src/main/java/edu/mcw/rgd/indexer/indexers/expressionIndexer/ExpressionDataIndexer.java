@@ -94,11 +94,13 @@ public class ExpressionDataIndexer implements Runnable{
         //    DecimalFormat df=new DecimalFormat("#.####");
             for(GeneExpression record:records) {
                 ExpressionDataIndexObject object = new ExpressionDataIndexObject();
+                object.setGeoSeriesAcc(record.getGeoSeriesAcc());
+                object.setStudyId(record.getStudyId().toString());
                 object.setSpecies(species);
                 object.setStrainAcc(record.getSample().getStrainAccId());
                 try {
                     if (object.getStrainAcc() != null && !object.getStrainAcc().equals(""))
-                        object.setStrainTerm(getTerm(object.getStrainAcc()));
+                        object.setStrainTerm(record.getSample().getStrainTerm());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -106,7 +108,22 @@ public class ExpressionDataIndexer implements Runnable{
 
                 try {
                     if (object.getTissueAcc() != null && !object.getTissueAcc().equals(""))
-                        object.setTissueTerm(getTerm(object.getTissueAcc()));
+                        object.setTissueTerm(record.getSample().getTissueTerm());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                object.setCondition(record.getGeneExpressionRecord().getConditionAccId());
+
+                try {
+                    if (object.getConditionAcc() != null && !object.getConditionAcc().equals(""))
+                        object.setCondition(record.getGeneExpressionRecord().getExperimentCondition());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+
+                try {
+                    object.setTraitTerm(record.getGeneExpressionRecord().getTraitTerm());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -117,7 +134,8 @@ public class ExpressionDataIndexer implements Runnable{
 
 
             }
-                }
+
+        }
     }
     void indexNormalised(){
         if(records!=null && records.size()>0) {
