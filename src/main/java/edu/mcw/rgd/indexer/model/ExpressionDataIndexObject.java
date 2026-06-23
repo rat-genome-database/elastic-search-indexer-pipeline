@@ -6,14 +6,14 @@ import java.util.Set;
 
 public class ExpressionDataIndexObject {
    private String geneSymbol;
-   private String geneRgdId;
+   private int geneRgdId;
     private String geneSymbolWithRgdId;
    private String sampleId;
    private String strainAcc;
    private String strainTerm;
    private String tissueAcc;
    private String tissueTerm;
-   private List<Double> expressionValue;
+   private double expressionValue;
    private double valueMean;
    private double logValue;
    private String studyId;
@@ -21,7 +21,7 @@ public class ExpressionDataIndexObject {
    private String traitOntId;
    private String traitTerm;
    private String expressionUnit;
-   private Set<String> expressionLevel;
+   private String expressionLevel;
    private String species;
    private String condition;
     private String conditionAcc;
@@ -153,19 +153,13 @@ public class ExpressionDataIndexObject {
         this.mapDataList = mapDataList;
     }
 
-    public List<Double> getExpressionValue() {
-        return expressionValue;
-    }
 
-    public void setExpressionValue(List<Double> expressionValue) {
-        this.expressionValue = expressionValue;
-    }
 
-    public Set<String> getExpressionLevel() {
+    public String getExpressionLevel() {
         return expressionLevel;
     }
 
-    public void setExpressionLevel(Set<String> expressionLevel) {
+    public void setExpressionLevel(String expressionLevel) {
         this.expressionLevel = expressionLevel;
     }
 
@@ -177,12 +171,20 @@ public class ExpressionDataIndexObject {
         this.geneSymbol = geneSymbol;
     }
 
-    public String getGeneRgdId() {
+    public int getGeneRgdId() {
         return geneRgdId;
     }
 
-    public void setGeneRgdId(String geneRgdId) {
+    public void setGeneRgdId(int geneRgdId) {
         this.geneRgdId = geneRgdId;
+    }
+
+    public double getExpressionValue() {
+        return expressionValue;
+    }
+
+    public void setExpressionValue(double expressionValue) {
+        this.expressionValue = expressionValue;
     }
 
     public String getSampleId() {

@@ -45,7 +45,7 @@ public class ExpressionDataIndexer implements Runnable{
         }
     }
     public void mapGene(ExpressionDataIndexObject object){
-        object.setGeneRgdId(String.valueOf(gene.getRgdId()));
+        object.setGeneRgdId(gene.getRgdId());
         object.setGeneSymbol(gene.getSymbol());
         object.setGeneSymbolWithRgdId(gene.getSymbol()+"-RGD:"+gene.getRgdId());
         try {
@@ -125,8 +125,8 @@ public class ExpressionDataIndexer implements Runnable{
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                object.setExpressionLevel(new HashSet<>(Collections.singleton(record.getGeneExpressionRecordValue().getExpressionLevel())));
-                object.setExpressionValue(new ArrayList<>(Collections.singleton(record.getGeneExpressionRecordValue().getExpressionValue())));
+                object.setExpressionLevel(record.getGeneExpressionRecordValue().getExpressionLevel());
+                object.setExpressionValue(record.getGeneExpressionRecordValue().getExpressionValue());
                 mapGene(object);
                 IndexDocument.index(object);
 
@@ -152,8 +152,8 @@ public class ExpressionDataIndexer implements Runnable{
                 object.setBioSampleId(record.getSample().getBioSampleId());
                 object.setCondition(record.getGeneExpressionRecord().getConditionAccId());
                 object.setTraitOntId(record.getGeneExpressionRecord().getTraitOntId());
-                object.setExpressionLevel(new HashSet<>(Collections.singleton(record.getGeneExpressionRecordValue().getExpressionLevel())));
-                object.setExpressionValue(new ArrayList<>(Collections.singleton(record.getGeneExpressionRecordValue().getExpressionValue())));
+                object.setExpressionLevel(record.getGeneExpressionRecordValue().getExpressionLevel());
+                object.setExpressionValue(record.getGeneExpressionRecordValue().getExpressionValue());
                 object.setExpressionUnit(record.getGeneExpressionRecordValue().getExpressionUnit());
                 mapGene(object);
                 IndexDocument.index(object);
@@ -198,8 +198,8 @@ public class ExpressionDataIndexer implements Runnable{
 
                         }
                         double valueMean= Double.parseDouble(df.format(valueSum / filteredRecords.size()));
-                        object.setExpressionLevel(level);
-                        object.setExpressionValue(values);
+                        object.setExpressionLevel(level.toString());
+                        object.setExpressionValue(values.get(0));
                         object.setValueMean(valueMean);
                         if(valueMean>0){
                            object.setLogValue(Math.log(valueMean));
