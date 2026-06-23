@@ -83,7 +83,8 @@ public class ExpressionDataIndexer implements Runnable{
     }
     void index() throws Exception {
 //       indexNormalised();
-       indexDenormalized();
+    //   indexDenormalized();
+        indexDenormalizedForExpressionTool();
     }
     void indexDenormalized(){
         if(records!=null && records.size()>0) {
@@ -126,6 +127,34 @@ public class ExpressionDataIndexer implements Runnable{
                 }
                 object.setExpressionLevel(new HashSet<>(Collections.singleton(record.getGeneExpressionRecordValue().getExpressionLevel())));
                 object.setExpressionValue(new ArrayList<>(Collections.singleton(record.getGeneExpressionRecordValue().getExpressionValue())));
+                mapGene(object);
+                IndexDocument.index(object);
+
+
+            }
+
+        }
+    }
+    void indexDenormalizedForExpressionTool(){
+        if(records!=null && records.size()>0) {
+            //    DecimalFormat df=new DecimalFormat("#.####");
+            for(GeneExpression record:records) {
+                ExpressionDataIndexObject object = new ExpressionDataIndexObject();
+                object.setGeoSeriesAcc(record.getGeoSeriesAcc());
+                object.setStudyId(record.getStudyId().toString());
+                object.setSpecies(species);
+                object.setStrainAcc(record.getSample().getStrainAccId());
+                object.setTissueAcc(record.getSample().getTissueAccId());
+                object.setLifeStage(record.getSample().getLifeStage());
+                object.setSex(record.getSample().getSex());
+                object.setComputedSex(record.getSample().getComputedSex());
+                object.setGeoSampleAcc(record.getSample().getGeoSampleAcc());
+                object.setBioSampleId(record.getSample().getBioSampleId());
+                object.setCondition(record.getGeneExpressionRecord().getConditionAccId());
+                object.setTraitOntId(record.getGeneExpressionRecord().getTraitOntId());
+                object.setExpressionLevel(new HashSet<>(Collections.singleton(record.getGeneExpressionRecordValue().getExpressionLevel())));
+                object.setExpressionValue(new ArrayList<>(Collections.singleton(record.getGeneExpressionRecordValue().getExpressionValue())));
+                object.setExpressionUnit(record.getGeneExpressionRecordValue().getExpressionUnit());
                 mapGene(object);
                 IndexDocument.index(object);
 

@@ -26,7 +26,61 @@ public class ExpressionDataIndexObject {
    private String condition;
     private String conditionAcc;
     private List<MapInfo> mapDataList;
+    private String lifeStage;
+    private String computedSex;
+    private String sex;
+    private String unit;
+    private String bioSampleId;
+    private String geoSampleAcc;
    private Map<String, String> metaData;
+
+    public String getSex() {
+        return sex;
+    }
+
+    public void setSex(String sex) {
+        this.sex = sex;
+    }
+
+    public String getLifeStage() {
+        return lifeStage;
+    }
+
+    public void setLifeStage(String lifeStage) {
+        this.lifeStage = lifeStage;
+    }
+
+    public String getComputedSex() {
+        return computedSex;
+    }
+
+    public void setComputedSex(String computedSex) {
+        this.computedSex = computedSex;
+    }
+
+    public String getUnit() {
+        return unit;
+    }
+
+    public void setUnit(String unit) {
+        this.unit = unit;
+    }
+
+    public String getBioSampleId() {
+        return bioSampleId;
+    }
+
+    public void setBioSampleId(String bioSampleId) {
+        this.bioSampleId = bioSampleId;
+    }
+
+    public String getGeoSampleAcc() {
+        return geoSampleAcc;
+    }
+
+    public void setGeoSampleAcc(String geoSampleAcc) {
+        this.geoSampleAcc = geoSampleAcc;
+    }
 
     public String getConditionAcc() {
         return conditionAcc;
