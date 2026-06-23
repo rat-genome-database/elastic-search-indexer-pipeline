@@ -911,6 +911,7 @@ public class IndexDAO extends AbstractDAO {
             map.setStopPos(m.getStopPos());
             map.setMap(this.getMapofMapkey(m.getMapKey()));
             map.setRank(this.getMapRank(m.getMapKey()));
+            map.setMapKey(m.getMapKey());
             mapList.add(map);
         }
         return mapList;

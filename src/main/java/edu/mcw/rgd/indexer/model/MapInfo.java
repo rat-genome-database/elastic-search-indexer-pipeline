@@ -9,6 +9,15 @@ public class MapInfo {
     private long startPos;
     private long stopPos;
     private int rank;
+    private int mapKey;
+
+    public int getMapKey() {
+        return mapKey;
+    }
+
+    public void setMapKey(int mapKey) {
+        this.mapKey = mapKey;
+    }
 
     public int getRank() {
         return rank;
