@@ -35,6 +35,7 @@ public class GViewerIndexer implements Runnable {
                   ) CONNECT BY PRIOR child_term_acc = parent_term_acc UNION
                                                                       SELECT ? FROM dual
                 )
+                AND a.annotated_object_rgd_id in (select rgd_id from rgd_ids where object_status='ACTIVE')
             ) z
             WHERE z.rgd_id = m.rgd_id AND m.map_key = ?
             """;
