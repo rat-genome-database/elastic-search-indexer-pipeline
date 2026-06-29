@@ -5,8 +5,8 @@ import edu.mcw.rgd.dao.DataSourceFactory;
 import edu.mcw.rgd.dao.impl.*;
 import edu.mcw.rgd.dao.spring.IntListQuery;
 import edu.mcw.rgd.datamodel.*;
+import edu.mcw.rgd.datamodel.search.elasticsearch.MapInfo;
 import edu.mcw.rgd.datamodel.variants.SampleManager;
-import edu.mcw.rgd.indexer.model.MapInfo;
 import edu.mcw.rgd.indexer.model.variants.VariantIndex;
 
 import java.math.BigDecimal;

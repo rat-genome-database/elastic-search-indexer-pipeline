@@ -5,10 +5,10 @@ import edu.mcw.rgd.dao.impl.OntologyXDAO;
 import edu.mcw.rgd.datamodel.Gene;
 import edu.mcw.rgd.datamodel.GeneExpression;
 import edu.mcw.rgd.datamodel.SpeciesType;
+import edu.mcw.rgd.datamodel.expression.ExpressionDataIndexObject;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.indexer.dao.IndexDAO;
 
-import edu.mcw.rgd.indexer.model.ExpressionDataIndexObject;
 import edu.mcw.rgd.indexer.model.IndexDocument;
 
 import java.text.DecimalFormat;
@@ -48,11 +48,11 @@ public class ExpressionDataIndexer implements Runnable{
         object.setGeneRgdId(gene.getRgdId());
         object.setGeneSymbol(gene.getSymbol());
         object.setGeneSymbolWithRgdId(gene.getSymbol()+"-RGD:"+gene.getRgdId());
-        try {
-            object.setMapDataList(indexDAO.getMapData(gene.getRgdId()));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        try {
+//            object.setMapDataList(indexDAO.getMapData(gene.getRgdId()));
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
     }
     void setExpressionRecords()  {
         try {
@@ -109,22 +109,20 @@ public class ExpressionDataIndexer implements Runnable{
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                object.setCondition(record.getGeneExpressionRecord().getConditionAccId());
 
                 try {
-                    if (object.getConditionAcc() != null && !object.getConditionAcc().equals(""))
                         object.setCondition(record.getGeneExpressionRecord().getExperimentCondition());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
                 object.setTraitOntId(record.getGeneExpressionRecord().getTraitOntId());
 
-                try {
-                    if(object.getTraitOntId()!=null && !object.getTraitOntId().equals(""))
-                        object.setTraitTerm(record.getGeneExpressionRecord().getTraitTerm());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+//                try {
+//                    if(object.getTraitOntId()!=null && !object.getTraitOntId().equals(""))
+//                        object.setTraitTerm(record.getGeneExpressionRecord().getTraitTerm());
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
                 object.setExpressionLevel(record.getGeneExpressionRecordValue().getExpressionLevel());
                 object.setExpressionValue(record.getGeneExpressionRecordValue().getExpressionValue());
                 mapGene(object);

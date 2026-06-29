@@ -16,6 +16,7 @@ import edu.mcw.rgd.datamodel.ontologyx.TermSynonym;
 import edu.mcw.rgd.datamodel.ontologyx.TermWithStats;
 
 import edu.mcw.rgd.datamodel.pheno.Study;
+import edu.mcw.rgd.datamodel.search.elasticsearch.MapInfo;
 import edu.mcw.rgd.indexer.MyThreadPoolExecutor;
 import edu.mcw.rgd.indexer.OntologySynonyms;
 import edu.mcw.rgd.indexer.dao.variants.VariantDao;

@@ -1,6 +1,7 @@
 package edu.mcw.rgd.indexer.model;
 
 import edu.mcw.rgd.datamodel.Association;
+import edu.mcw.rgd.datamodel.search.elasticsearch.MapInfo;
 import edu.mcw.rgd.indexer.model.expression.ExpressionIndexObject;
 
 import java.util.List;
