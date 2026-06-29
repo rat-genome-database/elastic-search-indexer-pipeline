@@ -94,6 +94,8 @@ public class ExpressionDataIndexer implements Runnable{
                 object.setGeoSeriesAcc(record.getGeoSeriesAcc());
                 object.setStudyId(record.getStudyId().toString());
                 object.setSpecies(species);
+                System.out.println("MAPKEY:"+ record.getGeneExpressionRecordValue().getMapKey());
+                object.setMapKey(record.getGeneExpressionRecordValue().getMapKey());
                 object.setStrainAcc(record.getSample().getStrainAccId());
                 try {
                     if (object.getStrainAcc() != null && !object.getStrainAcc().equals(""))
@@ -153,6 +155,7 @@ public class ExpressionDataIndexer implements Runnable{
                 object.setExpressionLevel(record.getGeneExpressionRecordValue().getExpressionLevel());
                 object.setExpressionValue(record.getGeneExpressionRecordValue().getExpressionValue());
                 object.setExpressionUnit(record.getGeneExpressionRecordValue().getExpressionUnit());
+                object.setMapKey(record.getGeneExpressionRecordValue().getMapKey());
                 mapGene(object);
                 IndexDocument.index(object);
 
