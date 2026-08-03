@@ -86,55 +86,55 @@ public class ExpressionDataIndexer implements Runnable{
     //   indexDenormalized();
         indexDenormalizedForExpressionTool();
     }
-    void indexDenormalized(){
-        if(records!=null && records.size()>0) {
-        //    DecimalFormat df=new DecimalFormat("#.####");
-            for(GeneExpression record:records) {
-                ExpressionDataIndexObject object = new ExpressionDataIndexObject();
-                object.setGeoSeriesAcc(record.getGeoSeriesAcc());
-                object.setStudyId(record.getStudyId().toString());
-                object.setSpecies(species);
-                System.out.println("MAPKEY:"+ record.getGeneExpressionRecordValue().getMapKey());
-                object.setMapKey(record.getGeneExpressionRecordValue().getMapKey());
-                object.setStrainAcc(record.getSample().getStrainAccId());
-                try {
-                    if (object.getStrainAcc() != null && !object.getStrainAcc().equals(""))
-                        object.setStrainTerm(record.getSample().getStrainTerm());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                object.setTissueAcc(record.getSample().getTissueAccId());
-
-                try {
-                    if (object.getTissueAcc() != null && !object.getTissueAcc().equals(""))
-                        object.setTissueTerm(record.getSample().getTissueTerm());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-                try {
-                        object.setCondition(record.getGeneExpressionRecord().getExperimentCondition());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                object.setTraitOntId(record.getGeneExpressionRecord().getTraitOntId());
-
+//    void indexDenormalized(){
+//        if(records!=null && records.size()>0) {
+//        //    DecimalFormat df=new DecimalFormat("#.####");
+//            for(GeneExpression record:records) {
+//                ExpressionDataIndexObject object = new ExpressionDataIndexObject();
+//                object.setGeoSeriesAcc(record.getGeoSeriesAcc());
+//                object.setStudyId(record.getStudyId().toString());
+//                object.setSpecies(species);
+//                System.out.println("MAPKEY:"+ record.getGeneExpressionRecordValue().getMapKey());
+//                object.setMapKey(record.getGeneExpressionRecordValue().getMapKey());
+//                object.setStrainAcc(record.getSample().getStrainAccId());
 //                try {
-//                    if(object.getTraitOntId()!=null && !object.getTraitOntId().equals(""))
-//                        object.setTraitTerm(record.getGeneExpressionRecord().getTraitTerm());
+//                    if (object.getStrainAcc() != null && !object.getStrainAcc().equals(""))
+//                        object.setStrainTerm(record.getSample().getStrainTerm());
 //                } catch (Exception e) {
 //                    e.printStackTrace();
 //                }
-                object.setExpressionLevel(record.getGeneExpressionRecordValue().getExpressionLevel());
-                object.setExpressionValue(record.getGeneExpressionRecordValue().getExpressionValue());
-                mapGene(object);
-                IndexDocument.index(object);
-
-
-            }
-
-        }
-    }
+//                object.setTissueAcc(record.getSample().getTissueAccId());
+//
+//                try {
+//                    if (object.getTissueAcc() != null && !object.getTissueAcc().equals(""))
+//                        object.setTissueTerm(record.getSample().getTissueTerm());
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//
+//                try {
+//                        object.setCondition(record.getGeneExpressionRecord().getExperimentCondition());
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//                object.setTraitOntId(record.getGeneExpressionRecord().getTraitOntId());
+//
+////                try {
+////                    if(object.getTraitOntId()!=null && !object.getTraitOntId().equals(""))
+////                        object.setTraitTerm(record.getGeneExpressionRecord().getTraitTerm());
+////                } catch (Exception e) {
+////                    e.printStackTrace();
+////                }
+//                object.setExpressionLevel(record.getGeneExpressionRecordValue().getExpressionLevel());
+//                object.setExpressionValue(record.getGeneExpressionRecordValue().getExpressionValue());
+//                mapGene(object);
+//                IndexDocument.index(object);
+//
+//
+//            }
+//
+//        }
+//    }
     void indexDenormalizedForExpressionTool(){
         if(records!=null && records.size()>0) {
             //    DecimalFormat df=new DecimalFormat("#.####");
@@ -142,16 +142,22 @@ public class ExpressionDataIndexer implements Runnable{
                 ExpressionDataIndexObject object = new ExpressionDataIndexObject();
                 object.setGeoSeriesAcc(record.getGeoSeriesAcc());
                 object.setStudyId(record.getStudyId().toString());
+                object.setRecordId(record.getGeneExpressionRecord().getId());
+                object.setSampleId(String.valueOf(record.getSample().getId()));
                 object.setSpecies(species);
                 object.setStrainAcc(record.getSample().getStrainAccId());
+                object.setStrainAcc(record.getSample().getStrainTerm());
                 object.setTissueAcc(record.getSample().getTissueAccId());
+                object.setTissueAcc(record.getSample().getTissueTerm());
                 object.setLifeStage(record.getSample().getLifeStage());
                 object.setSex(record.getSample().getSex());
                 object.setComputedSex(record.getSample().getComputedSex());
                 object.setGeoSampleAcc(record.getSample().getGeoSampleAcc());
                 object.setBioSampleId(record.getSample().getBioSampleId());
                 object.setCondition(record.getGeneExpressionRecord().getConditionAccId());
+                object.setCondition(record.getGeneExpressionRecord().getExperimentCondition());
                 object.setTraitOntId(record.getGeneExpressionRecord().getTraitOntId());
+                object.setTraitTerm(record.getGeneExpressionRecord().getTraitTerm());
                 object.setExpressionLevel(record.getGeneExpressionRecordValue().getExpressionLevel());
                 object.setExpressionValue(record.getGeneExpressionRecordValue().getExpressionValue());
                 object.setExpressionUnit(record.getGeneExpressionRecordValue().getExpressionUnit());
@@ -164,54 +170,54 @@ public class ExpressionDataIndexer implements Runnable{
 
         }
     }
-    void indexNormalised(){
-        if(records!=null && records.size()>0) {
-            DecimalFormat df=new DecimalFormat("#.####");
-            for(String sampleId:getStrainAccIds()){
-                for(String tissueId:getTissueAccIds()){
-                    List<GeneExpression> filteredRecords=getFilteredRecords(sampleId, tissueId);
-                    if(filteredRecords.size()>0){
-                        ExpressionDataIndexObject object = new ExpressionDataIndexObject();
-                        object.setSpecies(species);
-                        object.setStrainAcc(sampleId);
-                        try {
-                            if (object.getStrainAcc() != null && !object.getStrainAcc().equals(""))
-                                object.setStrainTerm(getTerm(object.getStrainAcc()));
-                        }catch (Exception e){
-                            e.printStackTrace();
-                        }
-                        object.setTissueAcc(tissueId);
-
-                        try {
-                            if (object.getTissueAcc() != null && !object.getTissueAcc().equals(""))
-                                object.setTissueTerm(getTerm(object.getTissueAcc()));
-                        }catch (Exception e){
-                            e.printStackTrace();
-                        }
-                        List<Double> values=new ArrayList<>();
-                        Set<String> level=new HashSet<>();
-                        double valueSum=0;
-                        for (GeneExpression record:filteredRecords) {
-                            Double val=record.getGeneExpressionRecordValue().getExpressionValue();
-                            valueSum+=val;
-                            values.add(val);
-                            level.add(record.getGeneExpressionRecordValue().getExpressionLevel());
-
-                        }
-                        double valueMean= Double.parseDouble(df.format(valueSum / filteredRecords.size()));
-                        object.setExpressionLevel(level.toString());
-                        object.setExpressionValue(values.get(0));
-                        object.setValueMean(valueMean);
-                        if(valueMean>0){
-                           object.setLogValue(Math.log(valueMean));
-                        }
-                        mapGene(object);
-                        IndexDocument.index(object);
-                    }
-
-
-                }}}
-    }
+//    void indexNormalised(){
+//        if(records!=null && records.size()>0) {
+//            DecimalFormat df=new DecimalFormat("#.####");
+//            for(String sampleId:getStrainAccIds()){
+//                for(String tissueId:getTissueAccIds()){
+//                    List<GeneExpression> filteredRecords=getFilteredRecords(sampleId, tissueId);
+//                    if(filteredRecords.size()>0){
+//                        ExpressionDataIndexObject object = new ExpressionDataIndexObject();
+//                        object.setSpecies(species);
+//                        object.setStrainAcc(sampleId);
+//                        try {
+//                            if (object.getStrainAcc() != null && !object.getStrainAcc().equals(""))
+//                                object.setStrainTerm(getTerm(object.getStrainAcc()));
+//                        }catch (Exception e){
+//                            e.printStackTrace();
+//                        }
+//                        object.setTissueAcc(tissueId);
+//
+//                        try {
+//                            if (object.getTissueAcc() != null && !object.getTissueAcc().equals(""))
+//                                object.setTissueTerm(getTerm(object.getTissueAcc()));
+//                        }catch (Exception e){
+//                            e.printStackTrace();
+//                        }
+//                        List<Double> values=new ArrayList<>();
+//                        Set<String> level=new HashSet<>();
+//                        double valueSum=0;
+//                        for (GeneExpression record:filteredRecords) {
+//                            Double val=record.getGeneExpressionRecordValue().getExpressionValue();
+//                            valueSum+=val;
+//                            values.add(val);
+//                            level.add(record.getGeneExpressionRecordValue().getExpressionLevel());
+//
+//                        }
+//                        double valueMean= Double.parseDouble(df.format(valueSum / filteredRecords.size()));
+//                        object.setExpressionLevel(level.toString());
+//                        object.setExpressionValue(values.get(0));
+//                        object.setValueMean(valueMean);
+//                        if(valueMean>0){
+//                           object.setLogValue(Math.log(valueMean));
+//                        }
+//                        mapGene(object);
+//                        IndexDocument.index(object);
+//                    }
+//
+//
+//                }}}
+//    }
 //    void index(ExpressionDataIndexObject object){
 //        try {
 //            byte[] json = JacksonConfiguration.MAPPER.writeValueAsBytes(object);
