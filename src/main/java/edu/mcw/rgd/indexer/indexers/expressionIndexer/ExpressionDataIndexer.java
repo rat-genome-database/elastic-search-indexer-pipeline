@@ -1,5 +1,6 @@
 package edu.mcw.rgd.indexer.indexers.expressionIndexer;
 
+import com.google.gson.Gson;
 import edu.mcw.rgd.dao.impl.GeneExpressionDAO;
 import edu.mcw.rgd.dao.impl.OntologyXDAO;
 import edu.mcw.rgd.datamodel.Gene;
@@ -7,6 +8,7 @@ import edu.mcw.rgd.datamodel.GeneExpression;
 import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.datamodel.expression.ExpressionDataIndexObject;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
+import edu.mcw.rgd.datamodel.ontologyx.TermDagEdge;
 import edu.mcw.rgd.indexer.dao.IndexDAO;
 
 import edu.mcw.rgd.indexer.model.IndexDocument;
@@ -20,7 +22,7 @@ public class ExpressionDataIndexer implements Runnable{
     private Gene gene;
     private  String species;
     private List<GeneExpression> records;
-    IndexDAO indexDAO=new IndexDAO();
+    private Map<String, Set<String>> parentAccIds;
 
     GeneExpressionDAO geneExpressionDAO=new GeneExpressionDAO();
     OntologyXDAO xdao=new OntologyXDAO();
@@ -38,8 +40,11 @@ public class ExpressionDataIndexer implements Runnable{
         setExpressionRecords();
 
         try {
-            if(records.size()>0)
-            index();
+            if(records.size()>0){
+                this.parentAccIds=getParentEdges();
+                index();
+            }
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -64,6 +69,29 @@ public class ExpressionDataIndexer implements Runnable{
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+    Map<String, Set<String>> getParentEdges(){
+        Map<String, Set<String>> parentAccIds=new HashMap<>();
+        for(String id:getTissueAccIds()){
+            try {
+                List<TermDagEdge> parentTermEdges = xdao.getAllParentEdges(id);
+
+                Set<String> parentTermAccIds = parentTermEdges.stream().map(TermDagEdge::getParentTermAcc).collect(Collectors.toSet());
+                parentAccIds.put(id, parentTermAccIds);
+            }catch (Exception ignored){}
+        }
+        for(String id:getStrainAccIds()){
+            try {
+                List<TermDagEdge> parentTermEdges = xdao.getAllParentEdges(id);
+
+                Set<String> strainParentTermAccIds = parentTermEdges.stream().map(TermDagEdge::getParentTermAcc).collect(Collectors.toSet());
+                System.out.println(id+ "\tStrain Parent Edges Size:"+ parentTermEdges.size() +"\tsorted set:"+strainParentTermAccIds.size());
+                parentAccIds.put(id, strainParentTermAccIds);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+         return parentAccIds;
     }
     Set<String> getStrainAccIds(){
        return records.stream().map(r->r.getSample().getStrainAccId()).collect(Collectors.toSet());
@@ -135,7 +163,7 @@ public class ExpressionDataIndexer implements Runnable{
 //
 //        }
 //    }
-    void indexDenormalizedForExpressionTool(){
+    void indexDenormalizedForExpressionTool() throws Exception {
         if(records!=null && records.size()>0) {
             //    DecimalFormat df=new DecimalFormat("#.####");
             for(GeneExpression record:records) {
@@ -162,6 +190,16 @@ public class ExpressionDataIndexer implements Runnable{
                 object.setExpressionValue(record.getGeneExpressionRecordValue().getExpressionValue());
                 object.setExpressionUnit(record.getGeneExpressionRecordValue().getExpressionUnit());
                 object.setMapKey(record.getGeneExpressionRecordValue().getMapKey());
+
+                Set<String> parentTermAccIds=new HashSet<>();
+                Set<String> tissueParentTermAccIds=parentAccIds.get(record.getSample().getTissueAccId());
+                if(tissueParentTermAccIds!=null && tissueParentTermAccIds.size()>0)
+                    parentTermAccIds.addAll(tissueParentTermAccIds);
+
+                Set<String> strainParentTermAccIds=parentAccIds.get(record.getSample().getStrainAccId());
+                if(strainParentTermAccIds!=null && strainParentTermAccIds.size()>0)
+                    parentTermAccIds.addAll(strainParentTermAccIds);
+                object.setParentTermAccIds(parentTermAccIds);
                 mapGene(object);
                 IndexDocument.index(object);
 
