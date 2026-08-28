@@ -73,31 +73,36 @@ public class ExpressionDataIndexer implements Runnable{
     Map<String, Set<String>> getParentEdges(){
         Map<String, Set<String>> parentAccIds=new HashMap<>();
         for(String id:getTissueAccIds()){
-            try {
-                List<TermDagEdge> parentTermEdges = xdao.getAllParentEdges(id);
-
-                Set<String> parentTermAccIds = parentTermEdges.stream().map(TermDagEdge::getParentTermAcc).collect(Collectors.toSet());
-                parentAccIds.put(id, parentTermAccIds);
-            }catch (Exception ignored){}
+          getParentEdges(parentAccIds, id);
         }
         for(String id:getStrainAccIds()){
-            try {
-                List<TermDagEdge> parentTermEdges = xdao.getAllParentEdges(id);
-
-                Set<String> strainParentTermAccIds = parentTermEdges.stream().map(TermDagEdge::getParentTermAcc).collect(Collectors.toSet());
-                System.out.println(id+ "\tStrain Parent Edges Size:"+ parentTermEdges.size() +"\tsorted set:"+strainParentTermAccIds.size());
-                parentAccIds.put(id, strainParentTermAccIds);
-            }catch (Exception e){
-                e.printStackTrace();
-            }
+            getParentEdges(parentAccIds, id);
+        }
+        for(String id:getConditionAccIds()){
+            getParentEdges(parentAccIds, id);
         }
          return parentAccIds;
     }
+
+    private void getParentEdges(Map<String, Set<String>> parentAccIds, String id) {
+        try {
+            List<TermDagEdge> parentTermEdges = xdao.getAllParentEdges(id);
+
+            Set<String> parentTermAccIds = parentTermEdges.stream().map(TermDagEdge::getParentTermAcc).collect(Collectors.toSet());
+            parentAccIds.put(id, parentTermAccIds);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
     Set<String> getStrainAccIds(){
        return records.stream().map(r->r.getSample().getStrainAccId()).collect(Collectors.toSet());
     }
     Set<String> getTissueAccIds(){
         return records.stream().map(r->r.getSample().getTissueAccId()).collect(Collectors.toSet());
+    }
+    Set<String> getConditionAccIds(){
+        return records.stream().map(r->r.getGeneExpressionRecord().getConditionAccId()).collect(Collectors.toSet());
     }
     List<GeneExpression> getFilteredRecords(String strainAccId, String tissueAccId){
         List<GeneExpression> filteredRecs=new ArrayList<>();
@@ -199,6 +204,9 @@ public class ExpressionDataIndexer implements Runnable{
                 Set<String> strainParentTermAccIds=parentAccIds.get(record.getSample().getStrainAccId());
                 if(strainParentTermAccIds!=null && strainParentTermAccIds.size()>0)
                     parentTermAccIds.addAll(strainParentTermAccIds);
+                Set<String> conditionParentTermAccIds=parentAccIds.get(record.getGeneExpressionRecord().getConditionAccId());
+                if(conditionParentTermAccIds!=null && conditionParentTermAccIds.size()>0)
+                    parentTermAccIds.addAll(conditionParentTermAccIds);
                 object.setParentTermAccIds(parentTermAccIds);
                 mapGene(object);
                 IndexDocument.index(object);
