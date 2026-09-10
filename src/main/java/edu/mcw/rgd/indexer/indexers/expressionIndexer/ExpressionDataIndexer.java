@@ -171,7 +171,10 @@ public class ExpressionDataIndexer implements Runnable{
     void indexDenormalizedForExpressionTool() throws Exception {
         if(records!=null && records.size()>0) {
             //    DecimalFormat df=new DecimalFormat("#.####");
-            for(GeneExpression record:records) {
+            // the query joins experiment_condition, so the same expression value comes back once per condition;
+            // group by the expression value id to get one document per value holding all of its conditions
+            for(List<GeneExpression> groupedRecords: groupRecordsByValueId().values()) {
+                GeneExpression record=groupedRecords.get(0);
                 ExpressionDataIndexObject object = new ExpressionDataIndexObject();
                 object.setGeoSeriesAcc(record.getGeoSeriesAcc());
                 object.setStudyId(record.getStudyId().toString());
@@ -187,8 +190,20 @@ public class ExpressionDataIndexer implements Runnable{
                 object.setComputedSex(record.getSample().getComputedSex());
                 object.setGeoSampleAcc(record.getSample().getGeoSampleAcc());
                 object.setBioSampleId(record.getSample().getBioSampleId());
-                object.setCondition(record.getGeneExpressionRecord().getConditionAccId());
-                object.setConditionTerm(record.getGeneExpressionRecord().getExperimentCondition());
+
+                Set<String> conditionAccIds=new HashSet<>();
+                Set<String> conditionTerms=new HashSet<>();
+                for(GeneExpression rec:groupedRecords){
+                    String conditionAccId=rec.getGeneExpressionRecord().getConditionAccId();
+                    if(conditionAccId!=null && !conditionAccId.equals(""))
+                        conditionAccIds.add(conditionAccId);
+                    String conditionTerm=rec.getGeneExpressionRecord().getExperimentCondition();
+                    if(conditionTerm!=null && !conditionTerm.equals(""))
+                        conditionTerms.add(conditionTerm);
+                }
+                object.setCondition(conditionAccIds);
+                object.setConditionTerm(conditionTerms);
+
                 object.setTraitOntId(record.getGeneExpressionRecord().getTraitOntId());
                 object.setTraitTerm(record.getGeneExpressionRecord().getTraitTerm());
                 object.setExpressionLevel(record.getGeneExpressionRecordValue().getExpressionLevel());
@@ -204,9 +219,11 @@ public class ExpressionDataIndexer implements Runnable{
                 Set<String> strainParentTermAccIds=parentAccIds.get(record.getSample().getStrainAccId());
                 if(strainParentTermAccIds!=null && strainParentTermAccIds.size()>0)
                     parentTermAccIds.addAll(strainParentTermAccIds);
-                Set<String> conditionParentTermAccIds=parentAccIds.get(record.getGeneExpressionRecord().getConditionAccId());
-                if(conditionParentTermAccIds!=null && conditionParentTermAccIds.size()>0)
-                    parentTermAccIds.addAll(conditionParentTermAccIds);
+                for(String conditionAccId:conditionAccIds){
+                    Set<String> conditionParentTermAccIds=parentAccIds.get(conditionAccId);
+                    if(conditionParentTermAccIds!=null && conditionParentTermAccIds.size()>0)
+                        parentTermAccIds.addAll(conditionParentTermAccIds);
+                }
                 object.setParentTermAccIds(parentTermAccIds);
                 mapGene(object);
                 IndexDocument.index(object);
@@ -215,6 +232,13 @@ public class ExpressionDataIndexer implements Runnable{
             }
 
         }
+    }
+    Map<Integer, List<GeneExpression>> groupRecordsByValueId(){
+        Map<Integer, List<GeneExpression>> groupedRecords=new LinkedHashMap<>();
+        for(GeneExpression record:records){
+            groupedRecords.computeIfAbsent(record.getGeneExpressionRecordValue().getId(), k->new ArrayList<>()).add(record);
+        }
+        return groupedRecords;
     }
 //    void indexNormalised(){
 //        if(records!=null && records.size()>0) {
