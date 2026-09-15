@@ -191,18 +191,19 @@ public class ExpressionDataIndexer implements Runnable{
                 object.setGeoSampleAcc(record.getSample().getGeoSampleAcc());
                 object.setBioSampleId(record.getSample().getBioSampleId());
 
-                Set<String> conditionAccIds=new HashSet<>();
-                Set<String> conditionTerms=new HashSet<>();
+                List<Term> conditions=new ArrayList<>();
                 for(GeneExpression rec:groupedRecords){
                     String conditionAccId=rec.getGeneExpressionRecord().getConditionAccId();
+                    Term condition=new Term();
                     if(conditionAccId!=null && !conditionAccId.equals(""))
-                        conditionAccIds.add(conditionAccId);
+                       condition.setAccId(conditionAccId);
                     String conditionTerm=rec.getGeneExpressionRecord().getExperimentCondition();
                     if(conditionTerm!=null && !conditionTerm.equals(""))
-                        conditionTerms.add(conditionTerm);
+                        condition.setTerm(conditionTerm);
+                    conditions.add(condition);
                 }
-                object.setCondition(conditionAccIds);
-                object.setConditionTerm(conditionTerms);
+                object.setConditions(conditions);
+
 
                 object.setTraitOntId(record.getGeneExpressionRecord().getTraitOntId());
                 object.setTraitTerm(record.getGeneExpressionRecord().getTraitTerm());
@@ -219,8 +220,8 @@ public class ExpressionDataIndexer implements Runnable{
                 Set<String> strainParentTermAccIds=parentAccIds.get(record.getSample().getStrainAccId());
                 if(strainParentTermAccIds!=null && strainParentTermAccIds.size()>0)
                     parentTermAccIds.addAll(strainParentTermAccIds);
-                for(String conditionAccId:conditionAccIds){
-                    Set<String> conditionParentTermAccIds=parentAccIds.get(conditionAccId);
+                for(Term condition:conditions){
+                    Set<String> conditionParentTermAccIds=parentAccIds.get(condition.getAccId());
                     if(conditionParentTermAccIds!=null && conditionParentTermAccIds.size()>0)
                         parentTermAccIds.addAll(conditionParentTermAccIds);
                 }
