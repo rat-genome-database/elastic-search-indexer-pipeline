@@ -60,20 +60,24 @@ public class GenomeDataCounts extends GenomeDAO {
     }
     public void mapAssembly() throws Exception {
         if(chromosome==null) {
+            // null when the map has no assembly accession at all: index the map without NCBI stats
+            // instead of failing, because an exception here aborts the whole species thread
             AssemblyInfo info = getAssemblyInfo(map);
-            obj.setBasePairs(info.getBasePairs());
-            obj.setTotalSeqLength(info.getTotalSeqLength());
-            obj.setTotalUngappedLength(info.getTotalUngappedLength());
-            obj.setGapBetweenScaffolds(info.getGapBetweenScaffolds());
-            obj.setScaffolds(info.getScaffolds());
-            obj.setScaffoldN50(info.getScaffoldN50());
-            obj.setScaffoldL50(info.getScaffoldL50());
-            obj.setContigs(info.getContigs());
-            obj.setContigN50(info.getContigN50());
-            obj.setContigL50(info.getContigL50());
-            obj.setChromosomes(info.getChromosome());
-            obj.setNcbiLink(info.getNcbiLink());
-            obj.setRefSeqAssemblyAccession(info.getRefSeqAssemblyAccession());
+            if( info!=null ) {
+                obj.setBasePairs(info.getBasePairs());
+                obj.setTotalSeqLength(info.getTotalSeqLength());
+                obj.setTotalUngappedLength(info.getTotalUngappedLength());
+                obj.setGapBetweenScaffolds(info.getGapBetweenScaffolds());
+                obj.setScaffolds(info.getScaffolds());
+                obj.setScaffoldN50(info.getScaffoldN50());
+                obj.setScaffoldL50(info.getScaffoldL50());
+                obj.setContigs(info.getContigs());
+                obj.setContigN50(info.getContigN50());
+                obj.setContigL50(info.getContigL50());
+                obj.setChromosomes(info.getChromosome());
+                obj.setNcbiLink(info.getNcbiLink());
+                obj.setRefSeqAssemblyAccession(info.getRefSeqAssemblyAccession());
+            }
             obj.setMapKey(map.getKey());
             if (map.isPrimaryRefAssembly())
                 obj.setPrimaryAssembly("Y");

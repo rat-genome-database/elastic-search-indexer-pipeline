@@ -2,7 +2,7 @@
 
 <beans>
     <bean id="manager" class="edu.mcw.rgd.indexer.Manager" >
-        <property name="version" value="Elastic Search Indexer  build Feb 06, 2023" />
+        <property name="version" value="ESIndexer  -- build Sep 16, 2026" />
         <property name="threadCount" value="10"/>
         <property name="admin" ref="admin"/>
         <property name="rgdIndex" ref="rgdIndex"/>

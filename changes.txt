@@ -1,0 +1,3 @@
+Sep 16, 2026
+  GenomeInfo indexer: fall back to the GenBank assembly accession when a map has no RefSeq accession
+    (GenBank-only strain assemblies aborted the species thread and dropped all later maps)
