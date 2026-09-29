@@ -9,6 +9,8 @@ import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.datamodel.expression.ExpressionDataIndexObject;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.ontologyx.TermDagEdge;
+import edu.mcw.rgd.datamodel.pheno.Condition;
+import edu.mcw.rgd.datamodel.pheno.MeasurementMethod;
 import edu.mcw.rgd.indexer.dao.IndexDAO;
 
 import edu.mcw.rgd.indexer.model.IndexDocument;
@@ -61,7 +63,7 @@ public class ExpressionDataIndexer implements Runnable{
     }
     void setExpressionRecords()  {
         try {
-            this.records= geneExpressionDAO.getGeneExpressionObjectsByRgdIdUnit(gene.getRgdId(), "TPM")
+            this.records= geneExpressionDAO.getGeneExpressionObjectsByRgdId(gene.getRgdId())
                     .stream().filter(r->r.getGeneExpressionRecordValue().getExpressionLevel()!=null).filter(r->
                             ( r.getGeneExpressionRecordValue().getExpressionLevel().equalsIgnoreCase("high") ||
                                     r.getGeneExpressionRecordValue().getExpressionLevel().equalsIgnoreCase("low") ||
@@ -78,9 +80,9 @@ public class ExpressionDataIndexer implements Runnable{
         for(String id:getStrainAccIds()){
             getParentEdges(parentAccIds, id);
         }
-        for(String id:getConditionAccIds()){
-            getParentEdges(parentAccIds, id);
-        }
+//        for(String id:getConditionAccIds()){
+//            getParentEdges(parentAccIds, id);
+//        }
          return parentAccIds;
     }
 
@@ -101,9 +103,10 @@ public class ExpressionDataIndexer implements Runnable{
     Set<String> getTissueAccIds(){
         return records.stream().map(r->r.getSample().getTissueAccId()).collect(Collectors.toSet());
     }
-    Set<String> getConditionAccIds(){
-        return records.stream().map(r->r.getGeneExpressionRecord().getConditionAccId()).collect(Collectors.toSet());
-    }
+//    Set<String> getConditionAccIds(){
+//        return records.stream().map(r->r.getGeneExpressionRecord().getConditionAccId()).collect(Collectors.toSet());
+//    }
+
     List<GeneExpression> getFilteredRecords(String strainAccId, String tissueAccId){
         List<GeneExpression> filteredRecs=new ArrayList<>();
         for(GeneExpression rec:records){
@@ -173,8 +176,7 @@ public class ExpressionDataIndexer implements Runnable{
             //    DecimalFormat df=new DecimalFormat("#.####");
             // the query joins experiment_condition, so the same expression value comes back once per condition;
             // group by the expression value id to get one document per value holding all of its conditions
-            for(List<GeneExpression> groupedRecords: groupRecordsByValueId().values()) {
-                GeneExpression record=groupedRecords.get(0);
+            for(GeneExpression record: records) {
                 ExpressionDataIndexObject object = new ExpressionDataIndexObject();
                 object.setGeoSeriesAcc(record.getGeoSeriesAcc());
                 object.setStudyId(record.getStudyId().toString());
@@ -190,28 +192,16 @@ public class ExpressionDataIndexer implements Runnable{
                 object.setComputedSex(record.getSample().getComputedSex());
                 object.setGeoSampleAcc(record.getSample().getGeoSampleAcc());
                 object.setBioSampleId(record.getSample().getBioSampleId());
-
-                List<Term> conditions=new ArrayList<>();
-                for(GeneExpression rec:groupedRecords){
-                    String conditionAccId=rec.getGeneExpressionRecord().getConditionAccId();
-                    Term condition=new Term();
-                    if(conditionAccId!=null && !conditionAccId.equals(""))
-                       condition.setAccId(conditionAccId);
-                    String conditionTerm=rec.getGeneExpressionRecord().getExperimentCondition();
-                    if(conditionTerm!=null && !conditionTerm.equals(""))
-                        condition.setTerm(conditionTerm);
-                    conditions.add(condition);
-                }
-                object.setConditions(conditions);
-
-
                 object.setTraitOntId(record.getGeneExpressionRecord().getTraitOntId());
                 object.setTraitTerm(record.getGeneExpressionRecord().getTraitTerm());
                 object.setExpressionLevel(record.getGeneExpressionRecordValue().getExpressionLevel());
                 object.setExpressionValue(record.getGeneExpressionRecordValue().getExpressionValue());
                 object.setExpressionUnit(record.getGeneExpressionRecordValue().getExpressionUnit());
                 object.setMapKey(record.getGeneExpressionRecordValue().getMapKey());
-
+                List<Condition> conditions=getConditions(record);
+                object.setConditions(conditions);
+                List<MeasurementMethod> measurementMethods=getMeasurements(record);
+                object.setMeasurementMethods(measurementMethods);
                 Set<String> parentTermAccIds=new HashSet<>();
                 Set<String> tissueParentTermAccIds=parentAccIds.get(record.getSample().getTissueAccId());
                 if(tissueParentTermAccIds!=null && tissueParentTermAccIds.size()>0)
@@ -220,10 +210,14 @@ public class ExpressionDataIndexer implements Runnable{
                 Set<String> strainParentTermAccIds=parentAccIds.get(record.getSample().getStrainAccId());
                 if(strainParentTermAccIds!=null && strainParentTermAccIds.size()>0)
                     parentTermAccIds.addAll(strainParentTermAccIds);
-                for(Term condition:conditions){
-                    Set<String> conditionParentTermAccIds=parentAccIds.get(condition.getAccId());
-                    if(conditionParentTermAccIds!=null && conditionParentTermAccIds.size()>0)
-                        parentTermAccIds.addAll(conditionParentTermAccIds);
+                if(object.getConditions()!=null)
+                for(Condition condition:object.getConditions()){
+                    if(parentAccIds.get(condition.getOntologyId())==null) {
+                        getParentEdges(parentAccIds, condition.getOntologyId());
+                    }
+                    Set<String> conditionParentTermAccIds=parentAccIds.get(condition.getOntologyId());
+                    parentTermAccIds.addAll(conditionParentTermAccIds);
+
                 }
                 object.setParentTermAccIds(parentTermAccIds);
                 mapGene(object);
@@ -234,13 +228,32 @@ public class ExpressionDataIndexer implements Runnable{
 
         }
     }
-    Map<Integer, List<GeneExpression>> groupRecordsByValueId(){
-        Map<Integer, List<GeneExpression>> groupedRecords=new LinkedHashMap<>();
-        for(GeneExpression record:records){
-            groupedRecords.computeIfAbsent(record.getGeneExpressionRecordValue().getId(), k->new ArrayList<>()).add(record);
+    synchronized List<Condition>  getConditions(GeneExpression record) {
+        List<Condition> conditions= null;
+        try {
+            conditions = geneExpressionDAO.getConditions(record.getGeneExpressionRecord().getId());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        return groupedRecords;
+        System.out.println(gene.getRgdId()+"\trecord Id:"+record.getGeneExpressionRecord().getId() +"\tconditions size:"+ conditions.size());
+        return conditions;
     }
+    synchronized List<MeasurementMethod> getMeasurements(GeneExpression record)  {
+        List<MeasurementMethod> methods= null;
+        try {
+            methods = geneExpressionDAO.getMeasurementMethods(record.getGeneExpressionRecord().getId());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return methods;
+    }
+//    Map<Integer, List<GeneExpression>> groupRecordsByValueId(){
+//        Map<Integer, List<GeneExpression>> groupedRecords=new LinkedHashMap<>();
+//        for(GeneExpression record:records){
+//            groupedRecords.computeIfAbsent(record.getGeneExpressionRecordValue().getId(), k->new ArrayList<>()).add(record);
+//        }
+//        return groupedRecords;
+//    }
 //    void indexNormalised(){
 //        if(records!=null && records.size()>0) {
 //            DecimalFormat df=new DecimalFormat("#.####");
