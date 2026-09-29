@@ -17,6 +17,7 @@ import edu.mcw.rgd.indexer.model.IndexDocument;
 
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class ExpressionDataIndexer implements Runnable{
@@ -24,7 +25,9 @@ public class ExpressionDataIndexer implements Runnable{
     private Gene gene;
     private  String species;
     private List<GeneExpression> records;
-    private Map<String, Set<String>> parentAccIds;
+
+    /** tissue, strain and condition terms repeat across genes, so their parent edges are cached for the whole run */
+    private static final Map<String, Set<String>> parentAccIds=new ConcurrentHashMap<>();
 
     GeneExpressionDAO geneExpressionDAO=new GeneExpressionDAO();
     OntologyXDAO xdao=new OntologyXDAO();
@@ -43,7 +46,6 @@ public class ExpressionDataIndexer implements Runnable{
 
         try {
             if(records.size()>0){
-                this.parentAccIds=getParentEdges();
                 index();
             }
 
@@ -72,28 +74,21 @@ public class ExpressionDataIndexer implements Runnable{
             throw new RuntimeException(e);
         }
     }
-    Map<String, Set<String>> getParentEdges(){
-        Map<String, Set<String>> parentAccIds=new HashMap<>();
-        for(String id:getTissueAccIds()){
-          getParentEdges(parentAccIds, id);
-        }
-        for(String id:getStrainAccIds()){
-            getParentEdges(parentAccIds, id);
-        }
-//        for(String id:getConditionAccIds()){
-//            getParentEdges(parentAccIds, id);
-//        }
-         return parentAccIds;
+    /** parents of a tissue, strain or condition term; queried once per term and then served from the cache */
+    Set<String> getParentEdges(String accId){
+        if(accId==null || accId.equals("")) return Collections.emptySet();
+        return parentAccIds.computeIfAbsent(accId, this::loadParentEdges);
     }
 
-    private void getParentEdges(Map<String, Set<String>> parentAccIds, String id) {
+    private Set<String> loadParentEdges(String id) {
         try {
             List<TermDagEdge> parentTermEdges = xdao.getAllParentEdges(id);
 
-            Set<String> parentTermAccIds = parentTermEdges.stream().map(TermDagEdge::getParentTermAcc).collect(Collectors.toSet());
-            parentAccIds.put(id, parentTermAccIds);
+            return parentTermEdges.stream().map(TermDagEdge::getParentTermAcc).collect(Collectors.toSet());
         }catch (Exception e){
             e.printStackTrace();
+            // cached as empty so a term that cannot be resolved is not looked up again for every record
+            return Collections.emptySet();
         }
     }
 
@@ -174,8 +169,9 @@ public class ExpressionDataIndexer implements Runnable{
     void indexDenormalizedForExpressionTool() throws Exception {
         if(records!=null && records.size()>0) {
             //    DecimalFormat df=new DecimalFormat("#.####");
-            // the query joins experiment_condition, so the same expression value comes back once per condition;
-            // group by the expression value id to get one document per value holding all of its conditions
+            // the query returns one row per expression value; conditions and measurement methods belong to the
+            // record the value sits on and are added here from the cache shared by all gene threads
+            ExpressionRecordCache recordCache=ExpressionRecordCache.getInstance();
             for(GeneExpression record: records) {
                 ExpressionDataIndexObject object = new ExpressionDataIndexObject();
                 object.setGeoSeriesAcc(record.getGeoSeriesAcc());
@@ -198,26 +194,16 @@ public class ExpressionDataIndexer implements Runnable{
                 object.setExpressionValue(record.getGeneExpressionRecordValue().getExpressionValue());
                 object.setExpressionUnit(record.getGeneExpressionRecordValue().getExpressionUnit());
                 object.setMapKey(record.getGeneExpressionRecordValue().getMapKey());
-                List<Condition> conditions=getConditions(record);
+                int recordId=record.getGeneExpressionRecord().getId();
+                List<Condition> conditions=recordCache.getConditions(recordId);
                 object.setConditions(conditions);
-                List<MeasurementMethod> measurementMethods=getMeasurements(record);
-                object.setMeasurementMethods(measurementMethods);
+                object.setMeasurementMethods(recordCache.getMeasurementMethods(recordId));
+
                 Set<String> parentTermAccIds=new HashSet<>();
-                Set<String> tissueParentTermAccIds=parentAccIds.get(record.getSample().getTissueAccId());
-                if(tissueParentTermAccIds!=null && tissueParentTermAccIds.size()>0)
-                    parentTermAccIds.addAll(tissueParentTermAccIds);
-
-                Set<String> strainParentTermAccIds=parentAccIds.get(record.getSample().getStrainAccId());
-                if(strainParentTermAccIds!=null && strainParentTermAccIds.size()>0)
-                    parentTermAccIds.addAll(strainParentTermAccIds);
-                if(object.getConditions()!=null)
-                for(Condition condition:object.getConditions()){
-                    if(parentAccIds.get(condition.getOntologyId())==null) {
-                        getParentEdges(parentAccIds, condition.getOntologyId());
-                    }
-                    Set<String> conditionParentTermAccIds=parentAccIds.get(condition.getOntologyId());
-                    parentTermAccIds.addAll(conditionParentTermAccIds);
-
+                parentTermAccIds.addAll(getParentEdges(record.getSample().getTissueAccId()));
+                parentTermAccIds.addAll(getParentEdges(record.getSample().getStrainAccId()));
+                for(Condition condition:conditions){
+                    parentTermAccIds.addAll(getParentEdges(condition.getOntologyId()));
                 }
                 object.setParentTermAccIds(parentTermAccIds);
                 mapGene(object);
@@ -227,25 +213,6 @@ public class ExpressionDataIndexer implements Runnable{
             }
 
         }
-    }
-    synchronized List<Condition>  getConditions(GeneExpression record) {
-        List<Condition> conditions= null;
-        try {
-            conditions = geneExpressionDAO.getConditions(record.getGeneExpressionRecord().getId());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        System.out.println(gene.getRgdId()+"\trecord Id:"+record.getGeneExpressionRecord().getId() +"\tconditions size:"+ conditions.size());
-        return conditions;
-    }
-    synchronized List<MeasurementMethod> getMeasurements(GeneExpression record)  {
-        List<MeasurementMethod> methods= null;
-        try {
-            methods = geneExpressionDAO.getMeasurementMethods(record.getGeneExpressionRecord().getId());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        return methods;
     }
 //    Map<Integer, List<GeneExpression>> groupRecordsByValueId(){
 //        Map<Integer, List<GeneExpression>> groupedRecords=new LinkedHashMap<>();
