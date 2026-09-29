@@ -197,13 +197,17 @@ public class ExpressionDataIndexer implements Runnable{
                 int recordId=record.getGeneExpressionRecord().getId();
                 List<Condition> conditions=recordCache.getConditions(recordId);
                 object.setConditions(conditions);
-                object.setMeasurementMethods(recordCache.getMeasurementMethods(recordId));
+                List<MeasurementMethod> methods=recordCache.getMeasurementMethods(recordId);
+                object.setMeasurementMethods(methods);
 
                 Set<String> parentTermAccIds=new HashSet<>();
                 parentTermAccIds.addAll(getParentEdges(record.getSample().getTissueAccId()));
                 parentTermAccIds.addAll(getParentEdges(record.getSample().getStrainAccId()));
                 for(Condition condition:conditions){
                     parentTermAccIds.addAll(getParentEdges(condition.getOntologyId()));
+                }
+                for(MeasurementMethod method:methods){
+                    parentTermAccIds.addAll(getParentEdges(method.getAccId()));
                 }
                 object.setParentTermAccIds(parentTermAccIds);
                 mapGene(object);
