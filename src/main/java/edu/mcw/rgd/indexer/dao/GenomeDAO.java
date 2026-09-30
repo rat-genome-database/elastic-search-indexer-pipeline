@@ -9,6 +9,9 @@ import edu.mcw.rgd.datamodel.*;
 
 
 import edu.mcw.rgd.indexer.model.genomeInfo.*;
+import edu.mcw.rgd.process.Utils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -28,6 +31,7 @@ import java.util.Map;
  * Created by jthota on 10/23/2017.
  */
 public class GenomeDAO extends AbstractDAO{
+    private static final Logger log = LogManager.getLogger("genome");
    public MapDAO mapDAO=new MapDAO();
 
   public   GeneDAO geneDAO=new GeneDAO();
@@ -86,8 +90,23 @@ public class GenomeDAO extends AbstractDAO{
 
         return stats;
     }
+    /**
+     * accession used for the NCBI datasets lookup and the NCBI assembly link:
+     * RefSeq (GCF_) when available, otherwise GenBank (GCA_) -- de novo strain assemblies often have only a GenBank accession
+     * @return trimmed accession, or null when the map has neither
+     */
+    public static String getAssemblyAccession(edu.mcw.rgd.datamodel.Map map) {
+        String acc = map.getRefSeqAssemblyAcc();
+        if( Utils.isStringEmpty(acc) ) {
+            acc = map.getGenBankAssemblyAcc();
+        }
+        return Utils.isStringEmpty(acc) ? null : acc.trim();
+    }
+
        public AssemblyInfo getAssemblyInfo(edu.mcw.rgd.datamodel.Map map) throws Exception {
-        if(map.getRefSeqAssemblyAcc()==null || Objects.equals(map.getRefSeqAssemblyAcc(), "")){
+        String acc = getAssemblyAccession(map);
+        if( acc==null ) {
+            log.warn("map " + map.getKey() + " (" + map.getName() + ") has neither a RefSeq nor a GenBank assembly accession; assembly stats skipped");
             return null;
         }
         AssemblyInfo info= new AssemblyInfo();
@@ -97,7 +116,7 @@ public class GenomeDAO extends AbstractDAO{
             if(stats!=null){
                 mapDAO.deleteAssemblyStats(mapKey);
             }
-            stats=loadAssemblyStats(map.getRefSeqAssemblyAcc());
+            stats=loadAssemblyStats(acc);
             stats.setMapKey(mapKey);
             if(stats.getTotalSequenceLength()!=null)
             mapDAO.insertAssemblyStats(stats);
@@ -112,8 +131,8 @@ public class GenomeDAO extends AbstractDAO{
         info.setContigN50(stats.getContigN50());
         info.setContigL50(stats.getContigL50());
         info.setChromosome(String.valueOf(stats.getTotalNumberOfChromosome()));
-        info.setNcbiLink("https://www.ncbi.nlm.nih.gov/assembly/"+map.getRefSeqAssemblyAcc()+"/");
-        info.setRefSeqAssemblyAccession(map.getRefSeqAssemblyAcc());
+        info.setNcbiLink("https://www.ncbi.nlm.nih.gov/assembly/"+acc+"/");
+        info.setRefSeqAssemblyAccession(acc);
 
         return info;
     }
