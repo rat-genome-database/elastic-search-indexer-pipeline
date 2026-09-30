@@ -1,11 +1,14 @@
 package edu.mcw.rgd.indexer.indexers.expressionIndexer;
 
 import edu.mcw.rgd.dao.AbstractDAO;
-import edu.mcw.rgd.dao.spring.ConditionQuery;
 import edu.mcw.rgd.dao.spring.MeasurementMethodQuery;
-import edu.mcw.rgd.datamodel.pheno.Condition;
+import edu.mcw.rgd.datamodel.expression.ExpressionCondition;
 import edu.mcw.rgd.datamodel.pheno.MeasurementMethod;
+import org.springframework.jdbc.object.MappingSqlQuery;
 
+import javax.sql.DataSource;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -18,7 +21,7 @@ public class ExpressionRecordCache extends AbstractDAO {
 
     private static ExpressionRecordCache instance;
 
-    private final Map<Integer, List<Condition>> conditionsByRecordId;
+    private final Map<Integer, List<ExpressionCondition>> conditionsByRecordId;
     private final Map<Integer, List<MeasurementMethod>> measurementMethodsByRecordId;
 
     private ExpressionRecordCache() throws Exception {
@@ -35,8 +38,8 @@ public class ExpressionRecordCache extends AbstractDAO {
         return instance;
     }
 
-    public List<Condition> getConditions(int geneExpressionRecordId) {
-        List<Condition> conditions = conditionsByRecordId.get(geneExpressionRecordId);
+    public List<ExpressionCondition> getConditions(int geneExpressionRecordId) {
+        List<ExpressionCondition> conditions = conditionsByRecordId.get(geneExpressionRecordId);
         return conditions != null ? conditions : Collections.emptyList();
     }
 
@@ -45,45 +48,20 @@ public class ExpressionRecordCache extends AbstractDAO {
         return methods != null ? methods : Collections.emptyList();
     }
 
-    private Map<Integer, List<Condition>> loadConditions() throws Exception {
-        // same ordering as GeneExpressionDAO.getConditions(), so the indexed lists keep curator ordinality
-        String query = "SELECT * FROM experiment_condition WHERE gene_expression_exp_record_id IS NOT NULL " +
-                "ORDER BY exp_cond_ordinality, experiment_condition_id";
-        Map<Integer, List<Condition>> map = new HashMap<>();
-        List<Condition> conditions = new ArrayList<>();
-        for (Object row : this.execute(new ConditionQuery(this.getDataSource(), query))) {
-            Condition condition = (Condition) row;
-            conditions.add(condition);
-            map.computeIfAbsent(condition.getGeneExpressionRecordId(), k -> new ArrayList<>()).add(condition);
+    private Map<Integer, List<ExpressionCondition>> loadConditions() throws Exception {
+        // the term is joined in, so no ontology lookup is needed while documents are being built; ordering
+        // matches GeneExpressionDAO.getConditions() so the indexed lists keep curator ordinality
+        String query = "SELECT c.gene_expression_exp_record_id, c.exp_cond_ont_id, c.exp_cond_ordinality," +
+                " t.term, t.is_obsolete FROM experiment_condition c" +
+                " LEFT JOIN ont_terms t ON t.term_acc = c.exp_cond_ont_id" +
+                " WHERE c.gene_expression_exp_record_id IS NOT NULL" +
+                " ORDER BY c.exp_cond_ordinality, c.experiment_condition_id";
+        Map<Integer, List<ExpressionCondition>> map = new HashMap<>();
+        for (Object row : this.execute(new ExpressionConditionQuery(this.getDataSource(), query))) {
+            ConditionRow conditionRow = (ConditionRow) row;
+            map.computeIfAbsent(conditionRow.recordId, k -> new ArrayList<>()).add(conditionRow.condition);
         }
-        generateDescriptions(conditions);
         return freeze(map);
-    }
-
-    /**
-     * Condition.getConditionDescription2() fills in conditionDescription the first time it is called, with an
-     * ont_terms lookup, so leaving it to serialization would race the gene threads against each other: whichever
-     * document reaches the bulk processor first goes out without the field. The descriptions are generated here
-     * instead, before any thread sees the conditions, and only once per distinct description.
-     */
-    private void generateDescriptions(List<Condition> conditions) {
-        Map<String, String> descriptionsByKey = new HashMap<>();
-        for (Condition condition : conditions) {
-            // the values the description is built from: ontology term, value with its units, and duration
-            String key = condition.getOntologyId() + "|" + condition.getValue() + "|" + condition.getUnits()
-                    + "|" + condition.getDurationLowerBound() + "|" + condition.getDurationUpperBound();
-            String description = descriptionsByKey.get(key);
-            try {
-                if (description == null) {
-                    descriptionsByKey.put(key, condition.getConditionDescription2());
-                } else {
-                    condition.setConditionDescription(description);
-                }
-            } catch (Exception e) {
-                // an ontology id that no longer resolves; the condition is still indexed, just without a description
-                System.out.println("Cannot describe condition " + condition.getId() + ": " + e.getMessage());
-            }
-        }
     }
 
     private Map<Integer, List<MeasurementMethod>> loadMeasurementMethods() throws Exception {
@@ -94,6 +72,36 @@ public class ExpressionRecordCache extends AbstractDAO {
             map.computeIfAbsent(method.getGeneExpressionRecordId(), k -> new ArrayList<>()).add(method);
         }
         return freeze(map);
+    }
+
+    /** the record id is only needed to group the conditions, so it is kept out of the indexed object */
+    private static class ConditionRow {
+        int recordId;
+        ExpressionCondition condition;
+    }
+
+    private static class ExpressionConditionQuery extends MappingSqlQuery<ConditionRow> {
+
+        ExpressionConditionQuery(DataSource ds, String query) {
+            super(ds, query);
+        }
+
+        @Override
+        protected ConditionRow mapRow(ResultSet rs, int rowNum) throws SQLException {
+            ExpressionCondition condition = new ExpressionCondition();
+            condition.setAccId(rs.getString("exp_cond_ont_id"));
+            condition.setTerm(rs.getString("term"));
+            condition.setObsolete(rs.getInt("is_obsolete"));
+            condition.setOrdinality(rs.getInt("exp_cond_ordinality"));
+            if (rs.wasNull()) {
+                condition.setOrdinality(null);
+            }
+
+            ConditionRow row = new ConditionRow();
+            row.recordId = rs.getInt("gene_expression_exp_record_id");
+            row.condition = condition;
+            return row;
+        }
     }
 
     /** the lists are handed to every thread that indexes a record, so nothing may modify them afterwards */

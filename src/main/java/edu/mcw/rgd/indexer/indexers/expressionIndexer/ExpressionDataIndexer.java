@@ -9,7 +9,7 @@ import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.datamodel.expression.ExpressionDataIndexObject;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
 import edu.mcw.rgd.datamodel.ontologyx.TermDagEdge;
-import edu.mcw.rgd.datamodel.pheno.Condition;
+import edu.mcw.rgd.datamodel.expression.ExpressionCondition;
 import edu.mcw.rgd.datamodel.pheno.MeasurementMethod;
 import edu.mcw.rgd.indexer.dao.IndexDAO;
 
@@ -195,7 +195,7 @@ public class ExpressionDataIndexer implements Runnable{
                 object.setExpressionUnit(record.getGeneExpressionRecordValue().getExpressionUnit());
                 object.setMapKey(record.getGeneExpressionRecordValue().getMapKey());
                 int recordId=record.getGeneExpressionRecord().getId();
-                List<Condition> conditions=recordCache.getConditions(recordId);
+                List<ExpressionCondition> conditions=recordCache.getConditions(recordId);
                 object.setConditions(conditions);
                 List<MeasurementMethod> methods=recordCache.getMeasurementMethods(recordId);
                 object.setMeasurementMethods(methods);
@@ -203,8 +203,8 @@ public class ExpressionDataIndexer implements Runnable{
                 Set<String> parentTermAccIds=new HashSet<>();
                 parentTermAccIds.addAll(getParentEdges(record.getSample().getTissueAccId()));
                 parentTermAccIds.addAll(getParentEdges(record.getSample().getStrainAccId()));
-                for(Condition condition:conditions){
-                    parentTermAccIds.addAll(getParentEdges(condition.getOntologyId()));
+                for(ExpressionCondition condition:conditions){
+                    parentTermAccIds.addAll(getParentEdges(condition.getAccId()));
                 }
                 for(MeasurementMethod method:methods){
                     parentTermAccIds.addAll(getParentEdges(method.getAccId()));
