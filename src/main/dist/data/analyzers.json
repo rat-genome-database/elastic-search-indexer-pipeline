@@ -17,6 +17,10 @@
         "min_gram" : "2",
         "type" : "edge_ngram",
         "max_gram" : "15"
+      },
+      "truncate_filter" : {
+        "type" : "truncate",
+        "length" : "15"
       }
     },
     "analyzer" : {
@@ -41,11 +45,18 @@
       "autocomplete_analyzer" : {
         "filter" : [
           "lowercase",
-          "ngram_filter",
-          "stop"
+          "ngram_filter"
         ],
         "type" : "custom",
         "tokenizer" : "whitespace"
+      },
+      "autocomplete_search_analyzer" : {
+        "filter" : [
+          "lowercase",
+          "truncate_filter"
+        ],
+        "type" : "custom",
+        "tokenizer" : "standard"
       },
       "symbol_analyzer" : {
         "filter" : [
