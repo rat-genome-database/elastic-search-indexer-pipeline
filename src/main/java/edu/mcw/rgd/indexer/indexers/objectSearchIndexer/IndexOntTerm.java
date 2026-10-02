@@ -1,5 +1,6 @@
 package edu.mcw.rgd.indexer.indexers.objectSearchIndexer;
 
+import com.google.gson.Gson;
 import edu.mcw.rgd.dao.impl.AliasDAO;
 import edu.mcw.rgd.dao.impl.OntologyXDAO;
 import edu.mcw.rgd.dao.impl.RGDManagementDAO;
@@ -94,21 +95,27 @@ public class IndexOntTerm implements Runnable {
         try {
 
             for (TermSynonym s : this.synonyms) {
-                if (s.getTermAcc().equalsIgnoreCase(t.getAccId())) {
-                    termSynonyms.add(s.getName());
-                    if(s.getName().contains("RGD ID")){
-                        String[] tokens=  s.getName().split(":");
-                        int rgdId= Integer.parseInt(tokens[1].trim());
+                if (!t.getAccId().equalsIgnoreCase(s.getTermAcc())) {
+                    continue;
+                }
+                addSynonym(termSynonyms, s.getName());
+                if (s.getName() != null && s.getName().contains("RGD ID")) {
+                    // one unparseable synonym must not cost the term all of its other synonyms
+                    try {
+                        String[] tokens = s.getName().split(":");
+                        int rgdId = Integer.parseInt(tokens[1].trim());
                         RgdId id = rgdManagementDAO.getRgdId(rgdId);
-                        if(id.getObjectKey()==5){
-                            List<Strain> strain= strainDAO.getStrains(Arrays.asList(rgdId));
-                            termSynonyms.add(strain.get(0).getName());
-                            for(Alias alias:aliasDAO.getAliases(strain.get(0).getRgdId())){
-                                termSynonyms.add(alias.getValue());
+                        if (id != null && id.getObjectKey() == 5) {
+                            for (Strain strain : strainDAO.getStrains(Arrays.asList(rgdId))) {
+                                addSynonym(termSynonyms, strain.getSymbol());
+                                addSynonym(termSynonyms, strain.getName());
+                                for (Alias alias : aliasDAO.getAliases(strain.getRgdId())) {
+                                    addSynonym(termSynonyms, alias.getValue());
+                                }
                             }
-
                         }
-
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                 }
             }
@@ -124,6 +131,13 @@ public class IndexOntTerm implements Runnable {
         else {
             obj.setSubcat(ontId);
             indexDAO.indexAITermMappingDocument(obj);
+        }
+    }
+
+    /** a null or blank synonym ends up in the suggest input and makes elasticsearch reject the whole document */
+    private void addSynonym(List<String> termSynonyms, String value) {
+        if (value != null && !value.trim().isEmpty()) {
+            termSynonyms.add(value);
         }
     }
 }

@@ -164,16 +164,16 @@ public class IndexDAO extends AbstractDAO {
         List<Ontology> ontologies = ontologyXDAO.getPublicOntologies();
         for (Ontology o : ontologies) {
             String ont_id = o.getId();
-            try {
-                List<TermSynonym> termSynonyms = (List<TermSynonym>) OntologySynonyms.ontSynonyms.get(ont_id);
+                try {
+                    List<TermSynonym> termSynonyms = (List<TermSynonym>) OntologySynonyms.ontSynonyms.get(ont_id);
 
 
-             Runnable   workerThread = new IndexerDAO(ont_id, o.getName(), RgdIndex.getNewAlias(), termSynonyms, false);
-                executor.execute(workerThread);
-            } catch (Exception exception) {
-                System.out.println("ONT_ID:" + ont_id);
-                exception.printStackTrace();
-            }
+                    Runnable workerThread = new IndexerDAO(ont_id, o.getName(), RgdIndex.getNewAlias(), termSynonyms, false);
+                    executor.execute(workerThread);
+                } catch (Exception exception) {
+                    System.out.println("ONT_ID:" + ont_id);
+                    exception.printStackTrace();
+                }
         }
         executor.shutdown();
         while (!executor.isTerminated()) {}
@@ -506,6 +506,10 @@ public class IndexDAO extends AbstractDAO {
 
 
 
+
+        // the completion suggester rejects a null or blank entry in 'input' and elasticsearch then
+        // drops the entire document, so never let one through
+        input.removeIf(value -> value == null || value.trim().isEmpty());
 
         Map<String, Set<String>> suggestions=new HashMap<>();
         if(input.size()>0) {

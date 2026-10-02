@@ -49,9 +49,8 @@ public class IndexObject extends ExpressionIndexObject {
     private List<String>  analysisName;
     private String varNuc;
     private String refNuc;
-    private Set<String> lifeStage;
-    private Set<String> sex;
-    private Set<String> expressionLevel;
+    // lifeStage, sex and expressionLevel are inherited from ExpressionIndexObject - redeclaring them here
+    // shadowed the superclass fields and gson refuses a class with two JSON fields of the same name
     private Set<String>expressionUnit;
     private Set<Integer> refRgdId;
     private Set<String> traitTerms;
@@ -70,30 +69,6 @@ public class IndexObject extends ExpressionIndexObject {
 
     public void setRefRgdId(Set<Integer> refRgdId) {
         this.refRgdId = refRgdId;
-    }
-
-    public Set<String> getLifeStage() {
-        return lifeStage;
-    }
-
-    public void setLifeStage(Set<String> lifeStage) {
-        this.lifeStage = lifeStage;
-    }
-
-    public Set<String> getSex() {
-        return sex;
-    }
-
-    public void setSex(Set<String> sex) {
-        this.sex = sex;
-    }
-
-    public Set<String> getExpressionLevel() {
-        return expressionLevel;
-    }
-
-    public void setExpressionLevel(Set<String> expressionLevel) {
-        this.expressionLevel = expressionLevel;
     }
 
     public Set<String> getExpressionUnit() {
