@@ -149,14 +149,24 @@ public class BulkIndexProcessor {
         return json.length() > MAX_DOC_CHARS ? json.substring(0, MAX_DOC_CHARS) + "...[truncated]" : json;
     }
 
+    /**
+     * Sends everything still buffered and waits for the responses. Call this once indexing is done and
+     * before anything verifies the index or switches an alias onto it - closing the ingester is what
+     * awaits the in-flight bulk requests, {@link BulkIngester#flush()} alone does not.
+     */
+    public static synchronized void flush() {
+        destroy();
+    }
+
     public static synchronized void destroy() {
-        if (bulkProcessor != null) {
-            try {
-                bulkProcessor.close();
-            } finally {
-                bulkProcessor = null;
-                bulkIndexProcessor = null;
-            }
+        if (bulkProcessor == null) {
+            return; // already flushed and closed
+        }
+        try {
+            bulkProcessor.close();
+        } finally {
+            bulkProcessor = null;
+            bulkIndexProcessor = null;
         }
         long rejected = rejectedDocs.get();
         if (rejected > 0) {
