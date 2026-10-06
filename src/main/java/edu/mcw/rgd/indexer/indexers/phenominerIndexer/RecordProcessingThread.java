@@ -12,6 +12,7 @@ import edu.mcw.rgd.datamodel.pheno.PhenominerUnitTable;
 import edu.mcw.rgd.datamodel.pheno.Record;
 import edu.mcw.rgd.indexer.model.IndexDocument;
 import edu.mcw.rgd.indexer.model.phenominer.PhenominerIndexObject;
+import edu.mcw.rgd.indexer.model.phenominer.VtTrait;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -115,6 +116,18 @@ public class RecordProcessingThread implements Runnable{
                 e.printStackTrace();
             }
         }
+
+        // The same traits again as a list, so a consumer does not have to know how many scalar
+        // slots there are - see VtTrait. Built from what the three blocks above already resolved
+        // rather than asking the ontology DAO a fourth time, which also means it can never
+        // disagree with the scalar fields. Emitted in slot order, which is not the order the
+        // blocks above happen to set them in.
+        List<VtTrait> vtTraits = new ArrayList<>();
+        addVtTrait(vtTraits, object.getVtTermAcc(),  object.getVtTerm());
+        addVtTrait(vtTraits, object.getVtTerm2Acc(), object.getVtTerm2());
+        addVtTrait(vtTraits, object.getVtTerm3Acc(), object.getVtTerm3());
+        object.setVtTraits(vtTraits);
+
         Set<String> xcoAccId = new HashSet<>();
         Set<String> xcoTerm = new HashSet<>();
 
@@ -286,4 +299,14 @@ public class RecordProcessingThread implements Runnable{
 //        }
 //        BulkIndexProcessor.bulkProcessor.add(new IndexRequest(RgdIndex.getNewAlias()).source(json, XContentType.JSON));
 //    }
+
+    /** Adds one trait to the list, skipping an empty slot. An accession with no term name is
+     *  still worth indexing - the name lookup above can fail and only logs - because the
+     *  accession is what a filter matches on. */
+    private static void addVtTrait(List<VtTrait> traits, String termAcc, String term) {
+        if (termAcc == null || termAcc.trim().isEmpty()) {
+            return;
+        }
+        traits.add(new VtTrait(termAcc, term));
+    }
 }

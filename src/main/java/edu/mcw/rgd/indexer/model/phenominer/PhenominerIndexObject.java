@@ -85,6 +85,21 @@ public class PhenominerIndexObject {
 
     private List<String> vtTerms;
 
+    /** Every vertebrate trait on the record, in slot order, so a consumer does not have to know
+     *  that there are three scalar slots above. See {@link VtTrait}.
+     *
+     *  Not to be confused with vtTerms right above: that one is the VT terms-and-synonyms
+     *  expansion used for free-text search, the same as rsTerms / cmoTerms / mmoTerms / xcoTerms. */
+    private List<VtTrait> vtTraits;
+
+    public List<VtTrait> getVtTraits() {
+        return vtTraits;
+    }
+
+    public void setVtTraits(List<VtTrait> vtTraits) {
+        this.vtTraits = vtTraits;
+    }
+
     private LinkedHashMap<String, String > rsHierarchyMap;
     private LinkedHashMap<String, String > cmoHierarchyMap;
     private LinkedHashMap<String, String > mmoHierarchyMap;
