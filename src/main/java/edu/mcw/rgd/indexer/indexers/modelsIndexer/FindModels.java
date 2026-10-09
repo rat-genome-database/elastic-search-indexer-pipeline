@@ -81,10 +81,13 @@ public class FindModels extends FullAnnotDao {
     }
     public void addReference(Annotation annotation,ModelIndexObject modelIndexObject){
 
-      List<Integer>  refRgdIds = modelIndexObject.getRefRgdIds();
-        if (refRgdIds!=null && !refRgdIds.contains(annotation.getRefRgdId())) {
-            refRgdIds.add(annotation.getRefRgdId());
-
+        List<Integer>  refRgdIds = modelIndexObject.getRefRgdIds();
+        if (refRgdIds == null) {
+            refRgdIds = new ArrayList<>();
+        }
+        Integer refRgdId = annotation.getRefRgdId();
+        if (refRgdId != null && refRgdId > 0 && !refRgdIds.contains(refRgdId)) {
+            refRgdIds.add(refRgdId);
         }
         modelIndexObject.setRefRgdIds(refRgdIds);
     }
