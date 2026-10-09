@@ -21,6 +21,18 @@
       "truncate_filter" : {
         "type" : "truncate",
         "length" : "15"
+      },
+      "symbol_word_delimiter" : {
+        "type" : "word_delimiter_graph",
+        "split_on_case_change" : true,
+        "split_on_numerics" : true,
+        "generate_word_parts" : true,
+        "generate_number_parts" : true,
+        "catenate_words" : true,
+        "catenate_numbers" : false,
+        "catenate_all" : false,
+        "preserve_original" : true,
+        "stem_english_possessive" : false
       }
     },
     "analyzer" : {
@@ -64,6 +76,16 @@
         ],
         "type":"custom",
         "tokenizer" : "keyword"
+      },
+      "symbol_parts_analyzer" : {
+        "filter" : [
+          "symbol_word_delimiter",
+          "flatten_graph",
+          "lowercase",
+          "ngram_filter"
+        ],
+        "type" : "custom",
+        "tokenizer" : "whitespace"
       }
     },
     "tokenizer" : {
