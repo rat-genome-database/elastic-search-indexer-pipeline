@@ -143,7 +143,7 @@ public class GenomeDAO extends AbstractDAO{
         if(chr!=null){
             sql=sql+" and m.chromosome=?";
         }
-        sql=sql+"GROUP BY ro.object_name ORDER BY ro.object_name";
+        sql=sql+" GROUP BY ro.object_name ORDER BY ro.object_name";
         int count = 0;
       try(Connection conn=this.getConnection();
         PreparedStatement preparedStatement= conn.prepareStatement(sql);) {
@@ -176,7 +176,7 @@ public class GenomeDAO extends AbstractDAO{
        if(chr!=null){
            sql=sql+" and m.chromosome=?";
        }
-        sql=sql+"GROUP BY ro.object_name ORDER BY ro.object_name";
+        sql=sql+" GROUP BY ro.object_name ORDER BY ro.object_name";
        try( Connection conn=this.getConnection();
         PreparedStatement preparedStatement= conn.prepareStatement(sql);) {
            preparedStatement.setInt(1, mapKey);

@@ -18,8 +18,8 @@ public class GViewerIndexer implements Runnable {
             SELECT m.chromosome, m.start_pos, m.stop_pos, z.rgd_id, z.object_symbol, z.object_type, z.term, z.term_acc
             FROM maps_data m, (
               SELECT annotated_object_rgd_id rgd_id,
-                     NVL(object_symbol, object_name) object_symbol,
-                     DECODE(rgd_object_key, 1, 'gene', 6, 'qtl', 'strain') object_type,
+                     COALESCE(object_symbol, object_name) object_symbol,
+                     CASE rgd_object_key WHEN 1 THEN 'gene' WHEN 6 THEN 'qtl' ELSE 'strain' END object_type,
                      t.term, t.term_acc
               FROM full_annot a, ont_terms t
               WHERE rgd_object_key IN (1, 5, 6)
@@ -29,11 +29,13 @@ public class GViewerIndexer implements Runnable {
                               AND stat_name = 'annotated_object_count'
                               AND with_children > 0)
                 AND a.term_acc IN (
-                  SELECT child_term_acc FROM ont_dag
-                  START WITH child_term_acc IN (
-                    SELECT term_acc FROM ont_terms t WHERE t.ont_id = ?
-                  ) CONNECT BY PRIOR child_term_acc = parent_term_acc UNION
-                                                                      SELECT ? FROM dual
+                  WITH RECURSIVE d(acc) AS (
+                    SELECT child_term_acc FROM ont_dag
+                    WHERE child_term_acc IN (SELECT term_acc FROM ont_terms WHERE ont_id = ?)
+                    UNION
+                    SELECT o.child_term_acc FROM ont_dag o JOIN d ON o.parent_term_acc = d.acc
+                  ) SELECT acc FROM d
+                  UNION SELECT CAST(? AS VARCHAR)
                 )
                 AND a.annotated_object_rgd_id in (select rgd_id from rgd_ids where object_status='ACTIVE')
             ) z
