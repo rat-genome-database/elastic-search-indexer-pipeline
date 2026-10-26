@@ -176,6 +176,7 @@ public class ExpressionDataIndexer implements Runnable{
                 ExpressionDataIndexObject object = new ExpressionDataIndexObject();
                 object.setGeoSeriesAcc(record.getGeoSeriesAcc());
                 object.setStudyId(record.getStudyId().toString());
+                object.setReferenceRgdId(record.getRefRgdId());
                 object.setRecordId(record.getGeneExpressionRecord().getId());
                 object.setSampleId(String.valueOf(record.getSample().getId()));
                 object.setSpecies(species);
