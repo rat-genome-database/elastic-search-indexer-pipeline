@@ -185,6 +185,13 @@ public class ExpressionDataIndexer implements Runnable{
                 object.setTissueAcc(record.getSample().getTissueAccId());
                 object.setTissueTerm(record.getSample().getTissueTerm());
                 object.setLifeStage(record.getSample().getLifeStage());
+                Double ageLowBound= record.getSample().getAgeDaysFromLowBound();
+                Double ageHighBound=record.getSample().getAgeDaysFromHighBound();
+                // the index object stores the age bounds as whole days
+                if(ageLowBound!=null)
+                    object.setAgeDaysFromDobLowBound(ageLowBound.intValue());
+                if(ageHighBound!=null)
+                    object.setAgeDaysFromDobHighBound(ageHighBound.intValue());
                 object.setSex(record.getSample().getSex());
                 object.setComputedSex(record.getSample().getComputedSex());
                 object.setGeoSampleAcc(record.getSample().getGeoSampleAcc());
