@@ -16,6 +16,8 @@ import edu.mcw.rgd.datamodel.pheno.MeasurementMethod;
 import edu.mcw.rgd.indexer.dao.IndexDAO;
 
 import edu.mcw.rgd.indexer.model.IndexDocument;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.text.DecimalFormat;
 import java.util.*;
@@ -28,9 +30,13 @@ public class ExpressionDataIndexer implements Runnable{
     private  String species;
     private List<GeneExpression> records;
 
+    private static final Logger log=LogManager.getLogger("main");
+
     /** tissue, strain and condition terms repeat across genes, so their parent edges are cached for the whole run */
     private static final Map<String, Set<String>> parentAccIds=new ConcurrentHashMap<>();
     private static final Map<Integer, Set<Integer>> studyReferenceIds=new ConcurrentHashMap<>();
+    /** studies already reported as carrying a legacy STUDY.REF_RGD_ID that STUDY_REFERENCES does not list */
+    private static final Set<Integer> reportedLegacyReferences=ConcurrentHashMap.newKeySet();
 
     GeneExpressionDAO geneExpressionDAO=new GeneExpressionDAO();
     OntologyXDAO xdao=new OntologyXDAO();
@@ -94,16 +100,41 @@ public class ExpressionDataIndexer implements Runnable{
             return Collections.emptySet();
         }
     }
-    private Set<Integer> getStudyReferences(int studyId){
-        if(studyId==0 || studyId<0) return Collections.emptySet();
+    /**
+     * The references a study is curated against. STUDY_REFERENCES is authoritative; STUDY.REF_RGD_ID is the legacy
+     * single-reference column it replaced, so it is only used for studies that have no STUDY_REFERENCES rows at all.
+     * Unioning the two put references on a document that the study no longer cites whenever the legacy column was
+     * left behind pointing at an older paper.
+     */
+    Set<Integer> getReferences(Integer studyId, Integer legacyRefRgdId){
+        Set<Integer> references=getStudyReferences(studyId);
+        if(!references.isEmpty()){
+            if(legacyRefRgdId!=null && legacyRefRgdId>0 && !references.contains(legacyRefRgdId)){
+                // the two sources disagree; log it once per study rather than indexing both
+                if(reportedLegacyReferences.add(studyId)){
+                    log.warn("study "+studyId+": STUDY.REF_RGD_ID="+legacyRefRgdId
+                            +" is not in STUDY_REFERENCES "+references+", indexing STUDY_REFERENCES only");
+                }
+            }
+            return references;
+        }
+        if(legacyRefRgdId!=null && legacyRefRgdId>0) return Collections.singleton(legacyRefRgdId);
+        return Collections.emptySet();
+    }
+    private Set<Integer> getStudyReferences(Integer studyId){
+        if(studyId==null || studyId<=0) return Collections.emptySet();
         return studyReferenceIds.computeIfAbsent(studyId, this::loadStudyReferences);
     }
     private Set<Integer> loadStudyReferences(int studyId) {
         PhenominerDAO dao=new PhenominerDAO();
         try {
             List<Integer> references =dao.getStudyReferences(studyId);
-
-            return new HashSet<>(references);
+            // the cached set is handed to every document built for the study, so nothing may modify it afterwards
+            Set<Integer> refRgdIds=new LinkedHashSet<>();
+            for(Integer refRgdId:references){
+                if(refRgdId!=null && refRgdId>0) refRgdIds.add(refRgdId);
+            }
+            return Collections.unmodifiableSet(refRgdIds);
         }catch (Exception e){
             e.printStackTrace();
             // cached as empty so a term that cannot be resolved is not looked up again for every record
@@ -195,13 +226,15 @@ public class ExpressionDataIndexer implements Runnable{
                 ExpressionDataIndexObject object = new ExpressionDataIndexObject();
                 object.setGeoSeriesAcc(record.getGeoSeriesAcc());
 
-                object.setStudyId(record.getStudyId().toString());
-                Set<Integer> studyReferences=new HashSet<>();
-                if(record.getRefRgdId()>0){
-                    studyReferences.add(record.getRefRgdId());
+                Integer studyId=record.getStudyId();
+                // an expression value whose record has no study maps to 0, which must not be indexed as "0"
+                if(studyId!=null && studyId>0){
+                    object.setStudyId(studyId.toString());
+                }else{
+                    log.warn("gene "+gene.getRgdId()+" expression record "+record.getGeneExpressionRecord().getId()
+                            +" has no study, indexed without a studyId or referenceRgdId");
                 }
-                studyReferences.addAll(getStudyReferences(record.getStudyId()));
-                object.setReferenceRgdId(studyReferences);
+                object.setReferenceRgdId(getReferences(studyId, record.getRefRgdId()));
                 object.setRecordId(record.getGeneExpressionRecord().getId());
                 object.setSampleId(String.valueOf(record.getSample().getId()));
                 object.setSpecies(species);
