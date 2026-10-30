@@ -3,8 +3,10 @@ package edu.mcw.rgd.indexer.indexers.expressionIndexer;
 import com.google.gson.Gson;
 import edu.mcw.rgd.dao.impl.GeneExpressionDAO;
 import edu.mcw.rgd.dao.impl.OntologyXDAO;
+import edu.mcw.rgd.dao.impl.PhenominerDAO;
 import edu.mcw.rgd.datamodel.Gene;
 import edu.mcw.rgd.datamodel.GeneExpression;
+import edu.mcw.rgd.datamodel.Reference;
 import edu.mcw.rgd.datamodel.SpeciesType;
 import edu.mcw.rgd.datamodel.expression.ExpressionDataIndexObject;
 import edu.mcw.rgd.datamodel.ontologyx.Term;
@@ -28,6 +30,7 @@ public class ExpressionDataIndexer implements Runnable{
 
     /** tissue, strain and condition terms repeat across genes, so their parent edges are cached for the whole run */
     private static final Map<String, Set<String>> parentAccIds=new ConcurrentHashMap<>();
+    private static final Map<Integer, Set<Integer>> studyReferenceIds=new ConcurrentHashMap<>();
 
     GeneExpressionDAO geneExpressionDAO=new GeneExpressionDAO();
     OntologyXDAO xdao=new OntologyXDAO();
@@ -85,6 +88,22 @@ public class ExpressionDataIndexer implements Runnable{
             List<TermDagEdge> parentTermEdges = xdao.getAllParentEdges(id);
 
             return parentTermEdges.stream().map(TermDagEdge::getParentTermAcc).collect(Collectors.toSet());
+        }catch (Exception e){
+            e.printStackTrace();
+            // cached as empty so a term that cannot be resolved is not looked up again for every record
+            return Collections.emptySet();
+        }
+    }
+    private Set<Integer> getStudyReferences(int studyId){
+        if(studyId==0 || studyId<0) return Collections.emptySet();
+        return studyReferenceIds.computeIfAbsent(studyId, this::loadStudyReferences);
+    }
+    private Set<Integer> loadStudyReferences(int studyId) {
+        PhenominerDAO dao=new PhenominerDAO();
+        try {
+            List<Integer> references =dao.getStudyReferences(studyId);
+
+            return new HashSet<>(references);
         }catch (Exception e){
             e.printStackTrace();
             // cached as empty so a term that cannot be resolved is not looked up again for every record
@@ -175,8 +194,14 @@ public class ExpressionDataIndexer implements Runnable{
             for(GeneExpression record: records) {
                 ExpressionDataIndexObject object = new ExpressionDataIndexObject();
                 object.setGeoSeriesAcc(record.getGeoSeriesAcc());
+
                 object.setStudyId(record.getStudyId().toString());
-                object.setReferenceRgdId(record.getRefRgdId());
+                Set<Integer> studyReferences=new HashSet<>();
+                if(record.getRefRgdId()>0){
+                    studyReferences.add(record.getRefRgdId());
+                }
+                studyReferences.addAll(getStudyReferences(record.getStudyId()));
+                object.setReferenceRgdId(studyReferences);
                 object.setRecordId(record.getGeneExpressionRecord().getId());
                 object.setSampleId(String.valueOf(record.getSample().getId()));
                 object.setSpecies(species);
